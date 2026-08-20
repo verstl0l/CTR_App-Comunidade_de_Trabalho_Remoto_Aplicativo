@@ -27,7 +27,7 @@ O objetivo principal é oferecer uma solução digital que reduza a dispersão d
 *   **Banco de Dados**: MySQL
 *   **Plataforma**: Android
 
-[CTR_Web-Comunidade_de_Trabalho_Remoto_Web(https://github.com/verstl0l/CTR_Web-Comunidade_de_Trabalho_Remoto_Web.git)]
+[CTR_Web-Comunidade_de_Trabalho_Remoto_Web](https://github.com/verstl0l/CTR_Web-Comunidade_de_Trabalho_Remoto_Web.git)
 
 Este é o repositório do aplicativo mobile desenvolvido em Kotlin e Android Studio.
 
