@@ -31,9 +31,3 @@ O objetivo principal é oferecer uma solução digital que reduza a dispersão d
 *Este projeto foi desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento de software.*
 """
 
-# Write the content to a file named README.md
-with open("README.md", "w", encoding="utf-8") as f:
-    f.write(readme_content)
-
-print("README.md created successfully.")# CTR-Comunidade_de_Trabalho_Remoto
-Comunidade de Trabalho Remoto
