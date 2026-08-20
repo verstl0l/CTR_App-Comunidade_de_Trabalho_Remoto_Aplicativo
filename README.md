@@ -34,10 +34,6 @@ Este é o repositório do aplicativo mobile desenvolvido em Kotlin e Android Stu
 Procurando a versão para Web? Acesse o repositório [CTR_Web-Comunidade_de_Trabalho_Remoto_Web](https://github.com/verstl0l/CTR_Web-Comunidade_de_Trabalho_Remoto_Web.git).
 
 
-Este é o repositório do aplicativo mobile desenvolvido em Kotlin e Android Studio.
-
-Procurando a versão para Web? Acesse o repositório CTR_Web-Comunidade_de_Trabalho_Remoto_Web.
-
 ---
 *Este projeto foi desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento de software.*
 
