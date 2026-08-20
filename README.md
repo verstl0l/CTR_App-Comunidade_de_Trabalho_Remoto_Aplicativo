@@ -1,2 +1,53 @@
-# CTR-Comunidade_de_Trabalho_Remoto
+# Create the README.md content as a string
+readme_content = """# CTR-Comunidade_de_Trabalho_Remoto
+
+## Descrição do Projeto
+A **Plataforma Colaborativa de Trabalho Remoto** é um aplicativo mobile focado em apoiar a organização, distribuição e acompanhamento de tarefas para equipes que operam em regime de trabalho remoto. O projeto visa centralizar as informações de fluxo de trabalho, facilitando a gestão de projetos e o monitoramento de atividades em tempo real.
+
+O sistema está sendo desenvolvido para a plataforma **Android**, utilizando **Kotlin** no **Android Studio**, com integração robusta a um banco de dados **MySQL**.
+
+## Objetivo
+O objetivo principal é oferecer uma solução digital que reduza a dispersão de informações, organizando equipes, tarefas, prazos e prioridades, além de proporcionar a aplicação prática de conhecimentos em desenvolvimento mobile e gerenciamento de banco de dados.
+
+## Funcionalidades Principais (Requisitos Funcionais)
+*   **RF01**: Cadastro e autenticação de usuários.
+*   **RF02**: Criação e gerenciamento de equipes e projetos.
+*   **RF03**: Criação, edição, consulta e exclusão (CRUD) de tarefas.
+*   **RF04**: Atribuição de tarefas aos integrantes da equipe.
+*   **RF05**: Acompanhamento do status das atividades.
+*   **RF06**: Registro de prazos e definição de prioridades.
+*   **RF07**: Visualização das atividades de cada equipe.
+*   **RF08**: Atualização dos dados do projeto.
+*   **RF09**: Consulta do histórico ou situação das atividades.
+*   **RF10**: Persistência de dados utilizando MySQL.
+
+## Tecnologias Utilizadas
+*   **Linguagem**: Kotlin
+*   **IDE**: Android Studio
+*   **Banco de Dados**: MySQL
+*   **Plataforma**: Android
+
+## Cronograma de Desenvolvimento
+O desenvolvimento segue um modelo incremental:
+
+1.  **Levantamento e Planejamento**: 24/07/2026 – 07/08/2026
+2.  **Modelagem e Prototipação**: 10/08/2026 – 28/08/2026
+3.  **Desenvolvimento Parcial (3º Bimestre)**: 31/08/2026 – 02/10/2026
+4.  **Desenvolvimento Final (4º Bimestre)**: 05/10/2026 – 27/11/2026
+5.  **Entrega e Apresentação Final**: 30/11/2026 – 18/12/2026
+
+## Riscos e Mitigação
+*   **Atrasos no desenvolvimento**: Mitigado por divisão de tarefas em etapas e acompanhamento semanal.
+*   **Falhas na integração (Kotlin/MySQL)**: Mitigado por testes de integração contínuos.
+*   **Mudanças de escopo**: Mitigado pelo registro rigoroso de requisitos e alterações.
+
+---
+*Este projeto foi desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento de software.*
+"""
+
+# Write the content to a file named README.md
+with open("README.md", "w", encoding="utf-8") as f:
+    f.write(readme_content)
+
+print("README.md created successfully.")# CTR-Comunidade_de_Trabalho_Remoto
 Comunidade de Trabalho Remoto
