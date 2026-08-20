@@ -28,7 +28,7 @@ O objetivo principal é oferecer uma solução digital que reduza a dispersão d
 *   **Plataforma**: Android
 
 
-CTR-Comunidade_de_Trabalho_Remoto (Mobile)
+# CTR-Comunidade_de_Trabalho_Remoto (Mobile)
 Este é o repositório do aplicativo mobile desenvolvido em Kotlin e Android Studio.
 
 Procurando a versão para Web? Acesse o repositório [CTR_Web-Comunidade_de_Trabalho_Remoto_Web](https://github.com/verstl0l/CTR_Web-Comunidade_de_Trabalho_Remoto_Web.git).
