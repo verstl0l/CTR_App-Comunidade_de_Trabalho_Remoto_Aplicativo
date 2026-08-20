@@ -29,5 +29,5 @@ O objetivo principal é oferecer uma solução digital que reduza a dispersão d
 
 ---
 *Este projeto foi desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento de software.*
-"""
+
 
