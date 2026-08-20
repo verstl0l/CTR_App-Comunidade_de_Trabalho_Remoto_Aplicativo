@@ -1,5 +1,5 @@
-# Create the README.md content as a string
-readme_content = """# CTR-Comunidade_de_Trabalho_Remoto
+# CTR-Comunidade_de_Trabalho_Remoto
+ 
 
 ## Descrição do Projeto
 A **Plataforma Colaborativa de Trabalho Remoto** é um aplicativo mobile focado em apoiar a organização, distribuição e acompanhamento de tarefas para equipes que operam em regime de trabalho remoto. O projeto visa centralizar as informações de fluxo de trabalho, facilitando a gestão de projetos e o monitoramento de atividades em tempo real.
