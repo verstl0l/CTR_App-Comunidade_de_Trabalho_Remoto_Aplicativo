@@ -1,4 +1,4 @@
-# CTR-Comunidade_de_Trabalho_Remoto
+# CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo
  
 
 ## Descrição do Projeto
