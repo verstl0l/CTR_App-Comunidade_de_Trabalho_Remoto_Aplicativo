@@ -27,20 +27,6 @@ O objetivo principal é oferecer uma solução digital que reduza a dispersão d
 *   **Banco de Dados**: MySQL
 *   **Plataforma**: Android
 
-## Cronograma de Desenvolvimento
-O desenvolvimento segue um modelo incremental:
-
-1.  **Levantamento e Planejamento**: 24/07/2026 – 07/08/2026
-2.  **Modelagem e Prototipação**: 10/08/2026 – 28/08/2026
-3.  **Desenvolvimento Parcial (3º Bimestre)**: 31/08/2026 – 02/10/2026
-4.  **Desenvolvimento Final (4º Bimestre)**: 05/10/2026 – 27/11/2026
-5.  **Entrega e Apresentação Final**: 30/11/2026 – 18/12/2026
-
-## Riscos e Mitigação
-*   **Atrasos no desenvolvimento**: Mitigado por divisão de tarefas em etapas e acompanhamento semanal.
-*   **Falhas na integração (Kotlin/MySQL)**: Mitigado por testes de integração contínuos.
-*   **Mudanças de escopo**: Mitigado pelo registro rigoroso de requisitos e alterações.
-
 ---
 *Este projeto foi desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento de software.*
 """
