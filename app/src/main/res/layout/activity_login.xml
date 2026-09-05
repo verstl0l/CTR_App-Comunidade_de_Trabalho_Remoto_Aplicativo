@@ -1,47 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="#1C1C1C"
     android:padding="24dp"
-    android:gravity="center">
+    tools:context=".ui.activity.LoginActivity">
 
     <TextView
+        android:id="@+id/txtTituloLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
         android:text="Plataforma Remota"
-        android:textSize="28sp"
+        android:textColor="@android:color/white"
+        android:textSize="32sp"
         android:textStyle="bold"
-        android:layout_marginBottom="30dp"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtSubtitulo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Faça login para continuar"
+        android:textColor="#888888"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtTituloLogin" />
 
     <EditText
         android:id="@+id/edtEmail"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:backgroundTint="@android:color/white"
         android:hint="E-mail"
-        android:inputType="textEmailAddress"/>
+        android:inputType="textEmailAddress"
+        android:textColor="@android:color/white"
+        android:textColorHint="#888888"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtSubtitulo" />
 
     <EditText
         android:id="@+id/edtSenha"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@android:color/white"
         android:hint="Senha"
         android:inputType="textPassword"
-        android:layout_marginTop="12dp"/>
+        android:textColor="@android:color/white"
+        android:textColorHint="#888888"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edtEmail" />
 
     <Button
         android:id="@+id/btnEntrar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="58dp"
+        android:layout_marginTop="40dp"
+        android:backgroundTint="#3D2B27"
         android:text="ENTRAR"
-        android:layout_marginTop="20dp"/>
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edtSenha" />
 
-    <Button
-        android:id="@+id/btnCadastrar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="CRIAR CONTA"/>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
