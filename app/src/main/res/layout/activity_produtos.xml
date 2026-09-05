@@ -4,38 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1311"
-    tools:context=".ui.activity.ProdutosActivity">
+    android:background="#1C1311">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#2E1A16"
-        app:itemIconTint="@android:color/white"
-        app:itemTextColor="@android:color/white"
-        app:labelVisibilityMode="labeled"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu" />
-
-    <androidx.core.widget.NestedScrollView
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="20dp"
+            android:paddingBottom="20dp">
 
-            <!-- Header -->
-            <RelativeLayout
+            <!-- Header com Nome da Equipe e Criador -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/logoCard"
@@ -43,25 +34,24 @@
                     android:layout_height="56dp"
                     app:cardBackgroundColor="#F5E6D0"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp">
+                    app:cardElevation="0dp">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
                         android:text="DP"
                         android:textColor="#1C1311"
                         android:textSize="20sp"
                         android:textStyle="bold" />
+
                 </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
+                    android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:layout_toEndOf="@id/logoCard"
                     android:orientation="vertical">
 
                     <TextView
@@ -69,7 +59,7 @@
                         android:layout_height="wrap_content"
                         android:text="Design &amp; Produto"
                         android:textColor="@android:color/white"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -78,21 +68,22 @@
                         android:text="Criador da Equipe"
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
+
                 </LinearLayout>
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
                     android:src="@android:drawable/ic_menu_manage"
                     app:tint="#9E9E9E" />
-            </RelativeLayout>
+
+            </LinearLayout>
 
             <!-- Participantes -->
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_marginTop="24dp">
 
                 <TextView
@@ -100,18 +91,24 @@
                     android:layout_height="wrap_content"
                     android:text="Participantes"
                     android:textColor="@android:color/white"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:text="Gerenciar (5)"
                     android:textColor="#9E9E9E"
                     android:textSize="14sp" />
-            </RelativeLayout>
 
+            </LinearLayout>
+
+            <!-- Avatares dos Participantes -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -125,14 +122,11 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <com.google.android.material.imageview.ShapeableImageView
+                    <View
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded"
-                        app:strokeColor="#9E9E9E"
-                        app:strokeWidth="1dp" />
+                        android:background="@drawable/ic_launcher_foreground"
+                        android:backgroundTint="#F5E6D0" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -141,6 +135,7 @@
                         android:text="Sua Foto"
                         android:textColor="#9E9E9E"
                         android:textSize="10sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -150,12 +145,11 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <com.google.android.material.imageview.ShapeableImageView
+                    <View
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
+                        android:background="@drawable/ic_launcher_foreground"
+                        android:backgroundTint="#3D2B27" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -164,6 +158,7 @@
                         android:text="Julia L."
                         android:textColor="#9E9E9E"
                         android:textSize="10sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -173,12 +168,11 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <com.google.android.material.imageview.ShapeableImageView
+                    <View
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
+                        android:background="@drawable/ic_launcher_foreground"
+                        android:backgroundTint="#3D2B27" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -187,6 +181,7 @@
                         android:text="Bruno K."
                         android:textColor="#9E9E9E"
                         android:textSize="10sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -196,12 +191,11 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <com.google.android.material.imageview.ShapeableImageView
+                    <View
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
+                        android:background="@drawable/ic_launcher_foreground"
+                        android:backgroundTint="#3D2B27" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -210,6 +204,7 @@
                         android:text="Mariana R."
                         android:textColor="#9E9E9E"
                         android:textSize="10sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -219,32 +214,32 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <com.google.android.material.imageview.ShapeableImageView
+                    <View
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
+                        android:background="@drawable/ic_launcher_foreground"
+                        android:backgroundTint="#3D2B27" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="Lucas F."
+                        android:text="Lucas T."
                         android:textColor="#9E9E9E"
                         android:textSize="10sp" />
+
                 </LinearLayout>
+
             </LinearLayout>
 
-            <!-- Delegar Tarefa Card -->
+            <!-- Delegar Tarefa -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 app:cardBackgroundColor="#2B1F1C"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -268,18 +263,19 @@
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
 
-                    <com.google.android.material.button.MaterialButton
+                    <Button
+                        android:id="@+id/btnCriarTrabalho"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:layout_marginTop="20dp"
-                        android:text="Criar Trabalho"
-                        android:textAllCaps="false"
+                        android:backgroundTint="#F5E6D0"
+                        android:text="CRIAR TRABALHO"
                         android:textColor="#1C1311"
                         android:textSize="16sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="#F5E6D0"
-                        app:cornerRadius="12dp" />
+                        android:textStyle="bold" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Trabalhos Recentes -->
@@ -289,276 +285,184 @@
                 android:layout_marginTop="24dp"
                 android:text="Trabalhos Recentes"
                 android:textColor="@android:color/white"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <!-- Task Item 1 -->
+            <!-- Trabalho 1 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 app:cardBackgroundColor="#2B1F1C"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="0dp">
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
                     <LinearLayout
-                        android:id="@+id/textContainer1"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="Mockup de Alta Fidelidade"
                             android:textColor="@android:color/white"
-                            android:textSize="15sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Entrega: 18 Out"
-                            android:textColor="#9E9E9E"
-                            android:textSize="12sp" />
+                            android:background="#3D2B27"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:text="Em Progresso"
+                            android:textColor="#F5E6D0"
+                            android:textSize="11sp" />
+
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:background="@android:drawable/editbox_background_normal"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="4dp"
-                        android:text="Em Progresso"
-                        android:textColor="#F5E6D0"
-                        android:textSize="10sp"
-                        app:tint="#F5E6D0" />
+                        android:layout_marginTop="8dp"
+                        android:text="Entrega: 18 Out"
+                        android:textColor="#9E9E9E"
+                        android:textSize="14sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/textContainer1"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                </LinearLayout>
 
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="-8dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="-8dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/ic_media_play"
-                            app:tint="#9E9E9E" />
-                    </LinearLayout>
-                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Task Item 2 -->
+            <!-- Trabalho 2 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 app:cardBackgroundColor="#2B1F1C"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="0dp">
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
                     <LinearLayout
-                        android:id="@+id/textContainer2"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="Review de Feedback UX"
                             android:textColor="@android:color/white"
-                            android:textSize="15sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Entrega: 20 Out"
+                            android:background="#3D2B27"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:text="Pendente"
                             android:textColor="#9E9E9E"
-                            android:textSize="12sp" />
+                            android:textSize="11sp" />
+
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:background="@android:drawable/editbox_background_normal"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="4dp"
-                        android:text="Pendente"
+                        android:layout_marginTop="8dp"
+                        android:text="Entrega: 20 Out"
                         android:textColor="#9E9E9E"
-                        android:textSize="10sp" />
+                        android:textSize="14sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/textContainer2"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                </LinearLayout>
 
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="-8dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/ic_media_play"
-                            app:tint="#9E9E9E" />
-                    </LinearLayout>
-                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Task Item 3 -->
+            <!-- Trabalho 3 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="#2B1F1C"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="0dp">
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
                     <LinearLayout
-                        android:id="@+id/textContainer3"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="Configuração do Style Guide"
                             android:textColor="@android:color/white"
-                            android:textSize="15sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Concluído em 12 Out"
-                            android:textColor="#9E9E9E"
-                            android:textSize="12sp" />
+                            android:background="#3D2B27"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:text="Concluído"
+                            android:textColor="#4CAF50"
+                            android:textSize="11sp" />
+
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:background="@android:drawable/editbox_background_normal"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="4dp"
-                        android:text="Concluído"
-                        android:textColor="#4CAF50"
-                        android:textSize="10sp" />
+                        android:layout_marginTop="8dp"
+                        android:text="Concluído em 12 Out"
+                        android:textColor="#9E9E9E"
+                        android:textSize="14sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/textContainer3"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                </LinearLayout>
 
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="-8dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="-8dp"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:shapeAppearanceOverlay="@style/Widget.Material3.ShapeAppearance.FullyRounded" />
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/ic_media_play"
-                            app:tint="#9E9E9E" />
-                    </LinearLayout>
-                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation -->
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Bottom Navigation - FORA do ScrollView -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2E1A16"
+        app:itemIconTint="@android:color/white"
+        app:itemTextColor="@android:color/white"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

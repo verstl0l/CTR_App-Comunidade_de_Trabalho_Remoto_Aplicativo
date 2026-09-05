@@ -19,10 +19,13 @@ class LoginActivity : AppCompatActivity() {
         val btnCadastrar = findViewById<Button>(R.id.btnCadastrar)
 
         btnEntrar.setOnClickListener {
-            if (edtEmail.text.toString().trim().isEmpty() || edtSenha.text.toString().trim().isEmpty()) {
+            val email = edtEmail.text.toString().trim()
+            val senha = edtSenha.text.toString().trim()
+
+            if (email.isEmpty() || senha.isEmpty()) {
                 Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "✅ Login realizado!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Login realizado!", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             }

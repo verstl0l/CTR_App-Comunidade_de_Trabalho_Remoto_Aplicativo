@@ -1,9 +1,30 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.PlataformaRemota" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema principal do app -->
+    <style name="Theme.CTR" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Cores principais -->
+        <item name="colorPrimary">#3D2B27</item>
+        <item name="colorPrimaryVariant">#2E1A16</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        <!-- Cores secundárias -->
+        <item name="colorSecondary">#F5E6D0</item>
+        <item name="colorSecondaryVariant">#3D2B27</item>
+        <item name="colorOnSecondary">#241614</item>
+
+        <!-- Background -->
+        <item name="android:windowBackground">#1C1C1C</item>
+        <item name="android:statusBarColor">#1C1C1C</item>
+        <item name="android:navigationBarColor">#1C1C1C</item>
+
+        <!-- Cores de texto -->
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="Theme.PlataformaRemota" parent="Base.Theme.PlataformaRemota" />
+    <!-- Tema para a Tela de Splash -->
+    <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:statusBarColor">#1C1C1C</item>
+        <item name="android:navigationBarColor">#1C1C1C</item>
+    </style>
 </resources>

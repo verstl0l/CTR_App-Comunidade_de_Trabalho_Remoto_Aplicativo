@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#1C1C1C"
     android:padding="24dp"
-    tools:context=".ui.activity.LoginActivity">
+    tools:context=".LoginActivity">
 
     <TextView
         android:id="@+id/txtTituloLogin"
@@ -74,5 +74,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtSenha" />
+
+    <Button
+        android:id="@+id/btnCadastrar"
+        android:layout_width="0dp"
+        android:layout_height="58dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#1C1C1C"
+        android:text="CRIAR CONTA"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnEntrar"
+        app:strokeColor="#3D2B27"
+        app:strokeWidth="1dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

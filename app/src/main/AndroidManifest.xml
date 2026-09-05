@@ -10,48 +10,36 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PlataformaRemota">
+        android:theme="@style/Theme.CTR"
+        tools:targetApi="31">
+
+        <!-- SPLASH ACTIVITY (LAUNCHER) -->
         <activity
-            android:name=".inicial"
-            android:exported="true">
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".TrabalhoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CadastroActivity"
-            android:exported="false" />
+
+        <!-- MAIN ACTIVITY -->
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="true" />
-        <activity
-            android:name=".equipe"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".participantes"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".produtos"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".notificacao"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".perfil"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:theme="@style/Theme.CTR" />
+
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".CadastroActivity" />
+        <activity android:name=".inicial" />
+        <activity android:name=".equipe" />
+        <activity android:name=".participantes" />
+        <activity android:name=".produtos" />
+        <activity android:name=".TrabalhoActivity" />
+        <activity android:name=".notificacao" />
+        <activity android:name=".perfil" />
+
     </application>
 
 </manifest>

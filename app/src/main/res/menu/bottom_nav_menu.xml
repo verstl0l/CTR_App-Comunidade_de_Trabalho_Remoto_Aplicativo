@@ -5,7 +5,7 @@
         android:icon="@drawable/ic_home"
         android:title="Início" />
     <item
-        android:id="@+id/nav_teams"
+        android:id="@+id/nav_groups"
         android:icon="@drawable/ic_groups"
         android:title="Equipes" />
     <item
