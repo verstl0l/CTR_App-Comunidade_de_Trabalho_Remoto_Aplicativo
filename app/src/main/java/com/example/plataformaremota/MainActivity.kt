@@ -1,9 +1,9 @@
 package com.example.plataformaremota
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -13,44 +13,59 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_inicial)
 
-        try {
-            val btnCadastrar = findViewById<Button>(R.id.button3)
-            val btnEntrarEquipe = findViewById<Button>(R.id.button)
-            val btnCriarEquipe = findViewById<Button>(R.id.button5)
+        val btnCadastrar = findViewById<Button>(R.id.button3)
+        val btnEntrarEquipe = findViewById<Button>(R.id.button)
+        val btnCriarEquipe = findViewById<Button>(R.id.button5)
 
-            btnCadastrar.setOnClickListener {
-                startActivity(Intent(this, CadastroActivity::class.java))
-            }
+        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+        val logado = prefs.getBoolean("logado", false)
+        val email = prefs.getString("emailUsuario", "") ?: ""
 
-            btnEntrarEquipe.setOnClickListener {
-                startActivity(Intent(this, participantes::class.java))
-            }
+        // ✅ Verifica se ESTE usuário tem equipe
+        val temEquipe = prefs.getBoolean("temEquipe_$email", false)
 
-            btnCriarEquipe.setOnClickListener {
-                startActivity(Intent(this, equipe::class.java))
-            }
+        if (logado) {
+            btnCadastrar.visibility = android.view.View.GONE
+        } else {
+            btnCadastrar.visibility = android.view.View.VISIBLE
+        }
 
-            val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-            bottomNav.setOnItemSelectedListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.nav_home -> true
-                    R.id.nav_groups -> {
-                        startActivity(Intent(this, produtos::class.java))
-                        true
-                    }
-                    R.id.nav_notifications -> {
-                        startActivity(Intent(this, notificacao::class.java))
-                        true
-                    }
-                    R.id.nav_profile -> {
-                        startActivity(Intent(this, participantes::class.java))
-                        true
-                    }
-                    else -> false
+        if (temEquipe) {
+            btnCriarEquipe.visibility = android.view.View.GONE
+        } else {
+            btnCriarEquipe.visibility = android.view.View.VISIBLE
+        }
+
+        btnCadastrar.setOnClickListener {
+            startActivity(Intent(this, CadastroActivity::class.java))
+        }
+
+        btnEntrarEquipe.setOnClickListener {
+            startActivity(Intent(this, participantes::class.java))
+        }
+
+        btnCriarEquipe.setOnClickListener {
+            startActivity(Intent(this, equipe::class.java))
+        }
+
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNav.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> true
+                R.id.nav_groups -> {
+                    startActivity(Intent(this, produtos::class.java))
+                    true
                 }
+                R.id.nav_notifications -> {
+                    startActivity(Intent(this, notificacao::class.java))
+                    true
+                }
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, participantes::class.java))
+                    true
+                }
+                else -> false
             }
-        } catch (e: Exception) {
-            Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 }

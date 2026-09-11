@@ -2,29 +2,22 @@
 <resources>
     <!-- Tema principal do app -->
     <style name="Theme.CTR" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Cores principais -->
         <item name="colorPrimary">#3D2B27</item>
         <item name="colorPrimaryVariant">#2E1A16</item>
         <item name="colorOnPrimary">@android:color/white</item>
-
-        <!-- Cores secundárias -->
         <item name="colorSecondary">#F5E6D0</item>
         <item name="colorSecondaryVariant">#3D2B27</item>
         <item name="colorOnSecondary">#241614</item>
-
-        <!-- Background -->
         <item name="android:windowBackground">#1C1C1C</item>
         <item name="android:statusBarColor">#1C1C1C</item>
         <item name="android:navigationBarColor">#1C1C1C</item>
-
-        <!-- Cores de texto -->
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <!-- Tema para a Tela de Splash -->
-    <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">#1C1C1C</item>
-        <item name="android:navigationBarColor">#1C1C1C</item>
+    <!-- Tema para a Tela de Splash (Android 12+) -->
+    <style name="Theme.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#1C1C1C</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_ctr</item>
+        <item name="postSplashScreenTheme">@style/Theme.CTR</item>
     </style>
 </resources>

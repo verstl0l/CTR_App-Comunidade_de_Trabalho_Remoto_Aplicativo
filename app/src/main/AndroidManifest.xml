@@ -12,26 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CTR"
         tools:targetApi="31">
-
-        <!-- SPLASH ACTIVITY (LAUNCHER) -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- MAIN ACTIVITY -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.CTR" />
-
         <activity android:name=".LoginActivity" />
         <activity android:name=".CadastroActivity" />
+        <activity android:name=".MainActivity" />
         <activity android:name=".inicial" />
         <activity android:name=".equipe" />
         <activity android:name=".participantes" />
@@ -39,7 +32,10 @@
         <activity android:name=".TrabalhoActivity" />
         <activity android:name=".notificacao" />
         <activity android:name=".perfil" />
-
+        <activity
+            android:name=".produtos_vazio"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

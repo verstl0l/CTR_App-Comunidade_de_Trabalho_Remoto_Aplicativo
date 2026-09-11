@@ -1,5 +1,6 @@
 package com.example.plataformaremota
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -20,6 +21,13 @@ class perfil : AppCompatActivity() {
 
         val btnSair = findViewById<Button>(R.id.btnSair)
         btnSair.setOnClickListener {
+            // ✅ LIMPA O ESTADO DE LOGADO E O EMAIL DO USUÁRIO
+            val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+            prefs.edit()
+                .putBoolean("logado", false)
+                .remove("emailUsuario")  // Remove o email do usuário logado
+                .apply()
+
             Toast.makeText(this, "Saindo da conta...", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this, LoginActivity::class.java))
             finishAffinity()
