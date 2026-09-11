@@ -80,3 +80,4 @@ class equipe : AppCompatActivity() {
         return null
     }
 }
+

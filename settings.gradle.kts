@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "CTR"
 include(":app")
+
