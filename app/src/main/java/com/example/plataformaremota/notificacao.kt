@@ -1,5 +1,6 @@
 package com.example.plataformaremota
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -37,15 +38,26 @@ class notificacao : AppCompatActivity() {
                 when (menuItem.itemId) {
                     R.id.nav_home -> {
                         startActivity(Intent(this, MainActivity::class.java))
+                        finish()
                         true
                     }
                     R.id.nav_groups -> {
-                        startActivity(Intent(this, produtos::class.java))
+                        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+                        val email = prefs.getString("emailUsuario", "") ?: ""
+                        val temEquipe = prefs.getBoolean("temEquipe_$email", false)
+
+                        if (temEquipe) {
+                            startActivity(Intent(this, produtos::class.java))
+                        } else {
+                            startActivity(Intent(this, CriarEquipeActivity::class.java))
+                        }
+                        finish()
                         true
                     }
                     R.id.nav_notifications -> true
                     R.id.nav_profile -> {
-                        startActivity(Intent(this, participantes::class.java))
+                        startActivity(Intent(this, perfil::class.java))
+                        finish()
                         true
                     }
                     else -> false
@@ -56,4 +68,3 @@ class notificacao : AppCompatActivity() {
         }
     }
 }
-

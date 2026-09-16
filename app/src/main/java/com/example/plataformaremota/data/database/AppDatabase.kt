@@ -4,20 +4,27 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.plataformaremota.data.dao.UsuarioDao
-import com.example.plataformaremota.data.dao.TrabalhoDao
-import com.example.plataformaremota.data.entity.Usuario
-import com.example.plataformaremota.data.entity.Trabalho
+import com.example.plataformaremota.data.dao.*
+import com.example.plataformaremota.data.entity.*
 
 @Database(
-    entities = [Usuario::class, Trabalho::class],
-    version = 2,
+    entities = [
+        Equipe::class,
+        Trabalho::class,
+        ConviteTrabalho::class,
+        PedidoEntrada::class,
+        Usuario::class
+    ],
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun usuarioDao(): UsuarioDao
+    abstract fun equipeDao(): EquipeDao
     abstract fun trabalhoDao(): TrabalhoDao
+    abstract fun conviteTrabalhoDao(): ConviteTrabalhoDao
+    abstract fun pedidoEntradaDao(): PedidoEntradaDao
+    abstract fun usuarioDao(): UsuarioDao   // ← ESTE MÉTODO ESTAVA FALTANDO
 
     companion object {
         @Volatile

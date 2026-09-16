@@ -22,21 +22,42 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".CadastroActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".CadastroActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".CriarEquipeActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".data.entity.CriarTrabalhoActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".GerenciarEquipeActivity"
+            android:windowSoftInputMode="adjustPan" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".inicial" />
-        <activity android:name=".equipe" />
         <activity android:name=".participantes" />
         <activity android:name=".produtos" />
-        <activity android:name=".TrabalhoActivity" />
         <activity android:name=".notificacao" />
         <activity android:name=".perfil" />
         <activity
-            android:name=".produtos_vazio"
+            android:name=".data.entity.ConviteTrabalho"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".data.entity.PedidoEntrada"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ConvidarTrabalhoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".PedirEntradaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
-

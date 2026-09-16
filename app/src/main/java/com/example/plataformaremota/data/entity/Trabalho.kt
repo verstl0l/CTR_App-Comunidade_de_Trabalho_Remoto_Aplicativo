@@ -5,17 +5,12 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "trabalhos")
 data class Trabalho(
-
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-
     val titulo: String,
-
     val descricao: String,
-
     val categoria: String,
-
     val prazo: String,
-
-    val criadorId: Int
+    val criadorId: Int,
+    val equipeId: Int = 0 // Vínculo com a equipe
 )

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1C1C1C">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <Button
+                android:id="@+id/btnVoltarCriarTrabalho"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← VOLTAR"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:text="Criar Trabalho"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtTituloTrabalho"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#9E9E9E"
+                android:hint="Título do trabalho"
+                android:padding="10dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <EditText
+                android:id="@+id/edtDescricaoTrabalho"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#9E9E9E"
+                android:hint="Descrição do trabalho"
+                android:padding="10dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <EditText
+                android:id="@+id/edtCategoriaTrabalho"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#9E9E9E"
+                android:hint="Categoria"
+                android:padding="10dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <EditText
+                android:id="@+id/edtPrazoTrabalho"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:backgroundTint="#9E9E9E"
+                android:hint="Prazo"
+                android:padding="10dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <Button
+                android:id="@+id/btnPublicarTrabalho"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="#3D2B27"
+                android:text="PUBLICAR TRABALHO"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2E1A16"
+        app:itemIconTint="@android:color/white"
+        app:itemTextColor="@android:color/white"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

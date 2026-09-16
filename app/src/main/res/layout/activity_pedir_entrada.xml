@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1C1C1C">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <Button
+                android:id="@+id/btnVoltarPedir"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← VOLTAR"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"
+                android:text="Pedir para Entrar"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtNomeEquipePedido"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Equipe: ..."
+                android:textColor="#F5E6D0"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtNomeSolicitante"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#3D2B27"
+                android:hint="Seu nome"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <EditText
+                android:id="@+id/edtMotivos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#3D2B27"
+                android:gravity="top"
+                android:hint="Por que quer entrar? (motivos)"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <EditText
+                android:id="@+id/edtEspecialidades"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:backgroundTint="#3D2B27"
+                android:gravity="top"
+                android:hint="Suas especialidades"
+                android:inputType="textMultiLine"
+                android:minLines="2"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <Button
+                android:id="@+id/btnEnviarPedido"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="#F5E6D0"
+                android:text="ENVIAR PEDIDO"
+                android:textColor="#1C1311"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2E1A16"
+        app:itemIconTint="@android:color/white"
+        app:itemTextColor="@android:color/white"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

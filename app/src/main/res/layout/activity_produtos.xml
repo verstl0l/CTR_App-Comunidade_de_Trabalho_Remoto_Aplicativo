@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1C1311">
@@ -37,10 +36,11 @@
                     app:cardElevation="0dp">
 
                     <TextView
+                        android:id="@+id/txtLogoEquipe"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="DP"
+                        android:text="EQ"
                         android:textColor="#1C1311"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -55,182 +55,70 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/txtNomeEquipeDashboard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Design &amp; Produto"
+                        android:text="Nome da Equipe"
                         android:textColor="@android:color/white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/txtCriadorEquipeDashboard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Criador da Equipe"
+                        android:text="Criado por"
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
 
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/btnConfigEquipe"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_manage"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Configurações da equipe"
                     app:tint="#9E9E9E" />
 
             </LinearLayout>
 
-            <!-- Participantes -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Participantes"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gerenciar (5)"
-                    android:textColor="#9E9E9E"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-            <!-- Avatares dos Participantes -->
-            <LinearLayout
+            <!-- Card Descrição da Equipe -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:orientation="horizontal">
+                app:cardBackgroundColor="#2B1F1C"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <View
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/ic_launcher_foreground"
-                        android:backgroundTint="#F5E6D0" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Sua Foto"
+                        android:text="Descrição"
                         android:textColor="#9E9E9E"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <View
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/ic_launcher_foreground"
-                        android:backgroundTint="#3D2B27" />
+                        android:textSize="12sp" />
 
                     <TextView
+                        android:id="@+id/txtDescricaoEquipeDashboard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Julia L."
-                        android:textColor="#9E9E9E"
-                        android:textSize="10sp" />
+                        android:layout_marginTop="4dp"
+                        android:text="Nenhuma descrição"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <View
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/ic_launcher_foreground"
-                        android:backgroundTint="#3D2B27" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Bruno K."
-                        android:textColor="#9E9E9E"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <View
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/ic_launcher_foreground"
-                        android:backgroundTint="#3D2B27" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Mariana R."
-                        android:textColor="#9E9E9E"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <View
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/ic_launcher_foreground"
-                        android:backgroundTint="#3D2B27" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Lucas T."
-                        android:textColor="#9E9E9E"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Delegar Tarefa -->
             <com.google.android.material.card.MaterialCardView
@@ -288,170 +176,17 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <!-- Trabalho 1 -->
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
+                android:id="@+id/containerTrabalhosRecentes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="#2B1F1C"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Mockup de Alta Fidelidade"
-                            android:textColor="@android:color/white"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#3D2B27"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:text="Em Progresso"
-                            android:textColor="#F5E6D0"
-                            android:textSize="11sp" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Entrega: 18 Out"
-                        android:textColor="#9E9E9E"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Trabalho 2 -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="#2B1F1C"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Review de Feedback UX"
-                            android:textColor="@android:color/white"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#3D2B27"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:text="Pendente"
-                            android:textColor="#9E9E9E"
-                            android:textSize="11sp" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Entrega: 20 Out"
-                        android:textColor="#9E9E9E"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Trabalho 3 -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="#2B1F1C"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Configuração do Style Guide"
-                            android:textColor="@android:color/white"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#3D2B27"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:text="Concluído"
-                            android:textColor="#4CAF50"
-                            android:textSize="11sp" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Concluído em 12 Out"
-                        android:textColor="#9E9E9E"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
+                android:orientation="vertical"
+                android:layout_marginTop="16dp" />
 
         </LinearLayout>
 
     </ScrollView>
 
-    <!-- Bottom Navigation - FORA do ScrollView -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
@@ -466,4 +201,3 @@
         app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

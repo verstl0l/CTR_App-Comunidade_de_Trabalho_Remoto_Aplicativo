@@ -1,6 +1,5 @@
 package com.example.plataformaremota
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -17,12 +16,12 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        val database = AppDatabase.getDatabase(this)
+
         val edtEmail = findViewById<EditText>(R.id.edtEmail)
         val edtSenha = findViewById<EditText>(R.id.edtSenha)
         val btnEntrar = findViewById<Button>(R.id.btnEntrar)
         val btnCadastrar = findViewById<Button>(R.id.btnCadastrar)
-
-        val database = AppDatabase.getDatabase(this)
 
         btnEntrar.setOnClickListener {
             val email = edtEmail.text.toString().trim()
@@ -37,17 +36,20 @@ class LoginActivity : AppCompatActivity() {
                 val usuario = database.usuarioDao().login(email, senha)
 
                 if (usuario != null) {
-                    val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+                    // Salva os dados do usuário logado
+                    val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
                     prefs.edit()
+                        .putString("emailUsuario", usuario.email)
+                        .putString("nomeUsuario", usuario.nome)
+                        .putString("profissaoUsuario", usuario.profissao)
                         .putBoolean("logado", true)
-                        .putString("emailUsuario", email)  // ✅ SALVA O EMAIL
                         .apply()
 
                     Toast.makeText(this@LoginActivity, "✅ Login realizado!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this@LoginActivity, "Usuário ou Senha incorreto", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, "Email ou senha incorretos", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -57,4 +59,3 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 }
-

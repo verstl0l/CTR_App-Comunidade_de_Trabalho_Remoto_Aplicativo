@@ -33,26 +33,23 @@ class CadastroActivity : AppCompatActivity() {
             val confSenha = edtConfSenha.text.toString().trim()
             val profissao = edtProfissao.text.toString().trim()
 
-            // Validação 1: Campos vazios
             if (nome.isEmpty() || email.isEmpty() || senha.isEmpty() || confSenha.isEmpty() || profissao.isEmpty()) {
                 Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Validação 2: Senhas diferentes
             if (senha != confSenha) {
                 Toast.makeText(this, "As senhas não coincidem", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Validação 3: Email já cadastrado (consulta no banco)
             lifecycleScope.launch {
+                // ✅ CORRIGIDO: usuarioDao() com "u" minúsculo
                 val emailJaExiste = database.usuarioDao().buscarPorEmail(email)
 
                 if (emailJaExiste != null) {
                     Toast.makeText(this@CadastroActivity, "Email já cadastrado", Toast.LENGTH_SHORT).show()
                 } else {
-                    // Cadastra o usuário
                     val novoUsuario = Usuario(
                         nome = nome,
                         email = email,
@@ -61,7 +58,7 @@ class CadastroActivity : AppCompatActivity() {
                     )
                     database.usuarioDao().inserir(novoUsuario)
 
-                    Toast.makeText(this@CadastroActivity, "✅ Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@CadastroActivity, "✅ Cadastro realizado!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@CadastroActivity, LoginActivity::class.java))
                     finish()
                 }
@@ -69,4 +66,3 @@ class CadastroActivity : AppCompatActivity() {
         }
     }
 }
-

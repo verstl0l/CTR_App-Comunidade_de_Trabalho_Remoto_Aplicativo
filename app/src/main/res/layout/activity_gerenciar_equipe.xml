@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1C1C1C">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Button
+                android:id="@+id/btnVoltarGerenciar"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← VOLTAR"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"
+                android:text="Gerenciar Equipe"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <!-- Edição da Equipe -->
+            <EditText
+                android:id="@+id/edtGerenciarNomeEquipe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#3D2B27"
+                android:hint="Nome da Equipe"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtGerenciarDescEquipe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#3D2B27"
+                android:hint="Descrição da Equipe"
+                android:textColor="#9E9E9E"
+                android:textColorHint="#555555"
+                android:textSize="14sp" />
+
+            <!-- Switch Equipe Privada -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Equipe Privada"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <Switch
+                    android:id="@+id/switchEquipePrivada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Equipes privadas não recebem pedidos de entrada"
+                android:textColor="#9E9E9E"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnSalvarAlteracoesEquipe"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="SALVAR DADOS DA EQUIPE"
+                android:textSize="12sp"
+                app:backgroundTint="#3D2B27" />
+
+            <!-- BOTÃO EXCLUIR EQUIPE -->
+            <Button
+                android:id="@+id/btnExcluirEquipe"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="32dp"
+                android:text="EXCLUIR EQUIPE"
+                android:textColor="#FF6B6B"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:backgroundTint="#2B1F1C"
+                app:strokeColor="#FF6B6B"
+                app:strokeWidth="1dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="24dp"
+                android:background="#33FFFFFF" />
+
+            <!-- Pedidos de Entrada -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Pedidos de Entrada"
+                android:textColor="#9E9E9E"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/containerPedidos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="24dp"
+                android:background="#33FFFFFF" />
+
+            <!-- Lista de Trabalhos -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Trabalhos Publicados"
+                android:textColor="#9E9E9E"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/containerTrabalhos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2E1A16"
+        app:itemIconTint="@android:color/white"
+        app:itemTextColor="@android:color/white"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
