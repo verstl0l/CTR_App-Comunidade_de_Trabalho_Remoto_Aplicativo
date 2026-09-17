@@ -2,20 +2,25 @@ package com.example.plataformaremota
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
-import com.example.plataformaremota.data.entity.Usuario
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class CadastroActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cadastro)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         val edtNome = findViewById<EditText>(R.id.edtNome)
         val edtEmail = findViewById<EditText>(R.id.edtEmail)
@@ -23,8 +28,6 @@ class CadastroActivity : AppCompatActivity() {
         val edtConfSenha = findViewById<EditText>(R.id.edtConfSenha)
         val edtProfissao = findViewById<EditText>(R.id.edtProfissao)
         val btnSalvar = findViewById<Button>(R.id.btnSalvar)
-
-        val database = AppDatabase.getDatabase(this)
 
         btnSalvar.setOnClickListener {
             val nome = edtNome.text.toString().trim()
@@ -38,31 +41,68 @@ class CadastroActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (senha.length < 6) {
+                Toast.makeText(this, "A senha deve ter pelo menos 6 caracteres", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             if (senha != confSenha) {
                 Toast.makeText(this, "As senhas não coincidem", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            lifecycleScope.launch {
-                // ✅ CORRIGIDO: usuarioDao() com "u" minúsculo
-                val emailJaExiste = database.usuarioDao().buscarPorEmail(email)
+            btnSalvar.isEnabled = false
+            btnSalvar.text = "CADASTRANDO..."
 
-                if (emailJaExiste != null) {
-                    Toast.makeText(this@CadastroActivity, "Email já cadastrado", Toast.LENGTH_SHORT).show()
-                } else {
-                    val novoUsuario = Usuario(
-                        nome = nome,
-                        email = email,
-                        senha = senha,
-                        profissao = profissao
-                    )
-                    database.usuarioDao().inserir(novoUsuario)
+            // 1. Cria o usuário no Firebase Auth
+            auth.createUserWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // 2. Salva os dados extras no Firestore
+                        val usuario = hashMapOf(
+                            "email" to email,
+                            "nome" to nome,
+                            "profissao" to profissao,
+                            "criadoEm" to System.currentTimeMillis()
+                        )
 
-                    Toast.makeText(this@CadastroActivity, "✅ Cadastro realizado!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@CadastroActivity, LoginActivity::class.java))
-                    finish()
+                        db.collection("usuarios").document(email)
+                            .set(usuario)
+                            .addOnSuccessListener {
+                                Log.d("CADASTRO", "✅ Usuário salvo no Firestore")
+
+                                val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
+                                prefs.edit()
+                                    .putString("emailUsuario", email)
+                                    .putString("nomeUsuario", nome)
+                                    .putString("profissaoUsuario", profissao)
+                                    .putBoolean("logado", true)
+                                    .apply()
+
+                                Toast.makeText(this, "✅ Cadastro realizado!", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, MainActivity::class.java))
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("CADASTRO", "❌ Erro ao salvar no Firestore: ${e.message}")
+                                Toast.makeText(
+                                    this,
+                                    "Cadastro criado, mas erro ao salvar dados: ${e.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                btnSalvar.isEnabled = true
+                                btnSalvar.text = "SALVAR"
+                            }
+                    } else {
+                        Toast.makeText(
+                            this,
+                            "Erro: ${task.exception?.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        btnSalvar.isEnabled = true
+                        btnSalvar.text = "SALVAR"
+                    }
                 }
-            }
         }
     }
 }

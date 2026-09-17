@@ -2,33 +2,35 @@ package com.example.plataformaremota
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
-import com.example.plataformaremota.data.entity.Equipe
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.DocumentSnapshot
 
 class CriarEquipeActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_criar_equipe)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
+        val email = auth.currentUser?.email ?: ""
 
         val edtNome = findViewById<EditText>(R.id.edtNomeEquipe)
         val edtDescricao = findViewById<EditText>(R.id.edtDescricaoEquipe)
         val btnSalvar = findViewById<Button>(R.id.btnSalvarEquipe)
         val btnVoltar = findViewById<Button>(R.id.btnVoltarCriar)
 
-        val database = AppDatabase.getDatabase(this)
-        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        val email = prefs.getString("emailUsuario", "") ?: ""
-
-        btnVoltar.setOnClickListener {
-            finish()
-        }
+        btnVoltar.setOnClickListener { finish() }
 
         btnSalvar.setOnClickListener {
             val nome = edtNome.text.toString().trim()
@@ -39,30 +41,51 @@ class CriarEquipeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            lifecycleScope.launch {
-                val novaEquipe = Equipe(
-                    nome = nome,
-                    descricao = descricao,
-                    criadorEmail = email
-                )
+            btnSalvar.isEnabled = false
+            btnSalvar.text = "CRIANDO..."
 
-                database.equipeDao().inserir(novaEquipe)
+            val equipe = hashMapOf(
+                "nome" to nome,
+                "descricao" to descricao,
+                "criadorEmail" to email,
+                "privada" to false,
+                "criadaEm" to System.currentTimeMillis()
+            )
 
-                prefs.edit()
-                    .putBoolean("temEquipe_$email", true)
-                    .putString("nomeEquipe_$email", nome)
-                    .apply()
+            db.collection("equipes")
+                .add(equipe)
+                .addOnSuccessListener { documentReference ->
+                    Log.d("CRIAR_EQUIPE", "✅ Equipe criada! ID: ${documentReference.id}")
 
-                Toast.makeText(
-                    this@CriarEquipeActivity,
-                    "✅ Equipe criada com sucesso!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    // Adiciona o criador como administrador na coleção de membros
+                    val membro = hashMapOf(
+                        "equipeId" to documentReference.id,
+                        "email" to email,
+                        "nome" to (auth.currentUser?.displayName ?: email),
+                        "funcao" to "administrador",
+                        "entrouEm" to System.currentTimeMillis()
+                    )
 
-                // ✅ Volta para produtos (que agora mostra o dashboard)
-                startActivity(Intent(this@CriarEquipeActivity, produtos::class.java))
-                finish()
-            }
+                    db.collection("membros_equipe")
+                        .add(membro)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "✅ Equipe criada com sucesso!", Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(this, produtos::class.java))
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("CRIAR_EQUIPE", "Erro ao adicionar membro: ${e.message}")
+                            Toast.makeText(this, "Equipe criada, mas erro ao adicionar membro", Toast.LENGTH_LONG).show()
+                            startActivity(Intent(this, produtos::class.java))
+                            finish()
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("CRIAR_EQUIPE", "❌ Erro: ${e.message}")
+                    Toast.makeText(this, "Erro ao criar equipe: ${e.message}", Toast.LENGTH_LONG).show()
+                    btnSalvar.isEnabled = true
+                    btnSalvar.text = "SALVAR"
+                }
         }
     }
 }

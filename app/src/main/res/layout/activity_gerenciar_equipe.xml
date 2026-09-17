@@ -106,7 +106,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="12dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="24dp"
                 android:text="EXCLUIR EQUIPE"
                 android:textColor="#FF6B6B"
                 android:textSize="12sp"
@@ -114,6 +114,44 @@
                 app:backgroundTint="#2B1F1C"
                 app:strokeColor="#FF6B6B"
                 app:strokeWidth="1dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="24dp"
+                android:background="#33FFFFFF" />
+
+            <!-- ========== CONVIDAR POR EMAIL ========== -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Convidar por Email"
+                android:textColor="#9E9E9E"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtEmailConviteEquipe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#3D2B27"
+                android:hint="Email do usuário"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/white"
+                android:textColorHint="#9E9E9E" />
+
+            <Button
+                android:id="@+id/btnEnviarConviteEquipe"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="24dp"
+                android:text="ENVIAR CONVITE"
+                android:textColor="#1C1311"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:backgroundTint="#F5E6D0" />
 
             <View
                 android:layout_width="match_parent"
@@ -133,6 +171,29 @@
 
             <LinearLayout
                 android:id="@+id/containerPedidos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="24dp"
+                android:background="#33FFFFFF" />
+
+            <!-- Membros -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Membros da Equipe"
+                android:textColor="#9E9E9E"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/containerMembros"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"

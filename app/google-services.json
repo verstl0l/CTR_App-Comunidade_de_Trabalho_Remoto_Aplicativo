@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "690064604666",
+    "project_id": "ctr-app-848bd",
+    "storage_bucket": "ctr-app-848bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690064604666:android:987005e1eaeca29469f843",
+        "android_client_info": {
+          "package_name": "com.example.plataformaremota"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBswJRatbvNyfd_VZNGUz1XWfMDy87dza0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

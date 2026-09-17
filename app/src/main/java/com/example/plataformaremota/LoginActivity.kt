@@ -2,21 +2,25 @@ package com.example.plataformaremota
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val database = AppDatabase.getDatabase(this)
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         val edtEmail = findViewById<EditText>(R.id.edtEmail)
         val edtSenha = findViewById<EditText>(R.id.edtSenha)
@@ -32,26 +36,46 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            lifecycleScope.launch {
-                val usuario = database.usuarioDao().login(email, senha)
+            btnEntrar.isEnabled = false
+            btnEntrar.text = "ENTRANDO..."
 
-                if (usuario != null) {
-                    // Salva os dados do usuário logado
-                    val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-                    prefs.edit()
-                        .putString("emailUsuario", usuario.email)
-                        .putString("nomeUsuario", usuario.nome)
-                        .putString("profissaoUsuario", usuario.profissao)
-                        .putBoolean("logado", true)
-                        .apply()
+            auth.signInWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Busca os dados do usuário no Firestore
+                        db.collection("usuarios").document(email).get()
+                            .addOnSuccessListener { document ->
+                                val nome = document.getString("nome") ?: "Usuário"
+                                val profissao = document.getString("profissao") ?: "Profissão"
 
-                    Toast.makeText(this@LoginActivity, "✅ Login realizado!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this@LoginActivity, "Email ou senha incorretos", Toast.LENGTH_SHORT).show()
+                                val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
+                                prefs.edit()
+                                    .putString("emailUsuario", email)
+                                    .putString("nomeUsuario", nome)
+                                    .putString("profissaoUsuario", profissao)
+                                    .putBoolean("logado", true)
+                                    .apply()
+
+                                Toast.makeText(this, "✅ Login realizado!", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, MainActivity::class.java))
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("LOGIN", "Erro ao buscar usuário: ${e.message}")
+                                Toast.makeText(this, "Erro ao carregar dados do usuário", Toast.LENGTH_SHORT).show()
+                                btnEntrar.isEnabled = true
+                                btnEntrar.text = "ENTRAR"
+                            }
+                    } else {
+                        Toast.makeText(
+                            this,
+                            "Erro: ${task.exception?.message ?: "Email ou senha incorretos"}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        btnEntrar.isEnabled = true
+                        btnEntrar.text = "ENTRAR"
+                    }
                 }
-            }
         }
 
         btnCadastrar.setOnClickListener {

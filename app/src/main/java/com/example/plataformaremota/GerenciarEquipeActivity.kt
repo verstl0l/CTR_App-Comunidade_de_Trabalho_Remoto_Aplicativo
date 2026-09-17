@@ -2,31 +2,39 @@ package com.example.plataformaremota
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
-import com.example.plataformaremota.data.entity.Equipe
-import com.example.plataformaremota.data.entity.PedidoEntrada
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class GerenciarEquipeActivity : AppCompatActivity() {
 
-    private lateinit var database: AppDatabase
-    private var equipeAtual: Equipe? = null
-    private lateinit var prefs: android.content.SharedPreferences
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
+    private var equipeId: String? = null
+    private var nomeEquipe: String = ""
+    private var descricaoEquipe: String = ""
+    private var equipePrivada: Boolean = false
+
     private var email: String = ""
+    private var nomeUsuario: String = "Usuário"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gerenciar_equipe)
 
-        database = AppDatabase.getDatabase(this)
-        prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        email = prefs.getString("emailUsuario", "") ?: ""
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+        email = auth.currentUser?.email ?: ""
+        nomeUsuario = auth.currentUser?.displayName ?: "Usuário"
 
         val edtNomeEquipe = findViewById<EditText>(R.id.edtGerenciarNomeEquipe)
         val edtDescEquipe = findViewById<EditText>(R.id.edtGerenciarDescEquipe)
@@ -35,21 +43,42 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         val btnExcluirEquipe = findViewById<Button>(R.id.btnExcluirEquipe)
         val btnVoltar = findViewById<Button>(R.id.btnVoltarGerenciar)
 
+        val edtEmailConvite = findViewById<EditText>(R.id.edtEmailConviteEquipe)
+        val btnEnviarConvite = findViewById<Button>(R.id.btnEnviarConviteEquipe)
+
         btnVoltar.setOnClickListener { finish() }
 
-        // Carrega dados da equipe
+        // ========== CARREGA DADOS DA EQUIPE ==========
         lifecycleScope.launch {
-            equipeAtual = database.equipeDao().buscarPorCriador(email)
-            equipeAtual?.let {
-                edtNomeEquipe.setText(it.nome)
-                edtDescEquipe.setText(it.descricao)
-                switchPrivada.isChecked = it.privada
-                carregarTrabalhos(it.id)
-                carregarPedidos(it.id)
+            try {
+                val result = db.collection("equipes")
+                    .whereEqualTo("criadorEmail", email)
+                    .limit(1)
+                    .get()
+                    .await()
+
+                if (!result.isEmpty) {
+                    val doc = result.documents[0]
+                    equipeId = doc.id
+                    nomeEquipe = doc.getString("nome") ?: ""
+                    descricaoEquipe = doc.getString("descricao") ?: ""
+                    equipePrivada = doc.getBoolean("privada") ?: false
+
+                    edtNomeEquipe.setText(nomeEquipe)
+                    edtDescEquipe.setText(descricaoEquipe)
+                    switchPrivada.isChecked = equipePrivada
+
+                    carregarTrabalhos(equipeId!!)
+                    carregarPedidos(equipeId!!)
+                    carregarMembros(equipeId!!)
+                }
+            } catch (e: Exception) {
+                Log.e("GERENCIAR", "Erro ao carregar equipe: ${e.message}")
+                Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
 
-        // Salvar alterações na equipe
+        // ========== SALVAR ALTERAÇÕES ==========
         btnSalvarEquipe.setOnClickListener {
             val novoNome = edtNomeEquipe.text.toString().trim()
             val novaDesc = edtDescEquipe.text.toString().trim()
@@ -60,59 +89,182 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            equipeAtual?.let { equipe ->
+            equipeId?.let { id ->
                 lifecycleScope.launch {
-                    val equipeAtualizada = equipe.copy(
-                        nome = novoNome,
-                        descricao = novaDesc,
-                        privada = privada
-                    )
-                    database.equipeDao().atualizar(equipeAtualizada)
-                    equipeAtual = equipeAtualizada
+                    try {
+                        db.collection("equipes").document(id)
+                            .update(
+                                mapOf(
+                                    "nome" to novoNome,
+                                    "descricao" to novaDesc,
+                                    "privada" to privada
+                                )
+                            )
+                            .await()
 
-                    prefs.edit().putString("nomeEquipe_$email", novoNome).apply()
-                    Toast.makeText(
-                        this@GerenciarEquipeActivity,
-                        "Dados da equipe atualizados!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        nomeEquipe = novoNome
+                        descricaoEquipe = novaDesc
+                        equipePrivada = privada
+
+                        Toast.makeText(this@GerenciarEquipeActivity, "Dados atualizados!", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
 
-        // Botão Excluir Equipe
+        // ========== ENVIAR CONVITE ==========
+        btnEnviarConvite.setOnClickListener {
+            val emailConvidado = edtEmailConvite.text.toString().trim().lowercase()
+
+            if (emailConvidado.isEmpty()) {
+                Toast.makeText(this, "Digite um email", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (emailConvidado == email.lowercase()) {
+                Toast.makeText(this, "Você não pode convidar a si mesmo", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (equipeId == null) {
+                Toast.makeText(this, "Equipe não carregada ainda", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            btnEnviarConvite.isEnabled = false
+            btnEnviarConvite.text = "ENVIANDO..."
+
+            lifecycleScope.launch {
+                try {
+                    // 1. Verifica se o usuário existe
+                    val usuarioExiste = db.collection("usuarios")
+                        .document(emailConvidado)
+                        .get()
+                        .await()
+
+                    if (!usuarioExiste.exists()) {
+                        Toast.makeText(
+                            this@GerenciarEquipeActivity,
+                            "Este email não está cadastrado no app",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        btnEnviarConvite.isEnabled = true
+                        btnEnviarConvite.text = "ENVIAR CONVITE"
+                        return@launch
+                    }
+
+                    // 2. Verifica se já existe convite pendente
+                    val todosConvites = db.collection("convites_equipe")
+                        .whereEqualTo("emailConvidado", emailConvidado)
+                        .get()
+                        .await()
+
+                    val convitesPendentes = todosConvites.documents.filter {
+                        it.getString("status") == "pendente" &&
+                                it.getString("equipeId") == equipeId
+                    }
+
+                    if (convitesPendentes.isNotEmpty()) {
+                        Toast.makeText(
+                            this@GerenciarEquipeActivity,
+                            "Este usuário já foi convidado",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        btnEnviarConvite.isEnabled = true
+                        btnEnviarConvite.text = "ENVIAR CONVITE"
+                        return@launch
+                    }
+
+                    // 3. Cria o convite
+                    val convite = hashMapOf(
+                        "equipeId" to equipeId,
+                        "nomeEquipe" to nomeEquipe,
+                        "descricaoEquipe" to descricaoEquipe,
+                        "emailConvidado" to emailConvidado,
+                        "emailRemetente" to email,
+                        "nomeRemetente" to nomeUsuario,
+                        "status" to "pendente",
+                        "criadoEm" to System.currentTimeMillis()
+                    )
+
+                    db.collection("convites_equipe")
+                        .add(convite)
+                        .await()
+
+                    Toast.makeText(
+                        this@GerenciarEquipeActivity,
+                        "✅ Convite enviado para $emailConvidado",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    edtEmailConvite.text.clear()
+                    btnEnviarConvite.isEnabled = true
+                    btnEnviarConvite.text = "ENVIAR CONVITE"
+
+                } catch (e: Exception) {
+                    Log.e("CONVITE", "❌ Erro: ${e.message}")
+                    Toast.makeText(
+                        this@GerenciarEquipeActivity,
+                        "Erro: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    btnEnviarConvite.isEnabled = true
+                    btnEnviarConvite.text = "ENVIAR CONVITE"
+                }
+            }
+        }
+
+        // ========== EXCLUIR EQUIPE ==========
         btnExcluirEquipe.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Excluir Equipe")
                 .setMessage("Tem certeza? Todos os trabalhos serão removidos permanentemente.")
                 .setPositiveButton("Sim, excluir") { _, _ ->
-                    equipeAtual?.let { equipe ->
+                    equipeId?.let { id ->
                         lifecycleScope.launch {
                             try {
-                                val trabalhos = database.trabalhoDao().listarPorEquipe(equipe.id)
-                                trabalhos.forEach { database.trabalhoDao().deletar(it) }
+                                val trabalhos = db.collection("trabalhos")
+                                    .whereEqualTo("equipeId", id)
+                                    .get()
+                                    .await()
+                                trabalhos.documents.forEach { doc ->
+                                    db.collection("trabalhos").document(doc.id).delete().await()
+                                }
 
-                                database.equipeDao().deletar(equipe)
+                                val membros = db.collection("membros_equipe")
+                                    .whereEqualTo("equipeId", id)
+                                    .get()
+                                    .await()
+                                membros.documents.forEach { doc ->
+                                    db.collection("membros_equipe").document(doc.id).delete().await()
+                                }
 
-                                prefs.edit()
-                                    .remove("temEquipe_$email")
-                                    .remove("nomeEquipe_$email")
-                                    .apply()
+                                val convites = db.collection("convites_equipe")
+                                    .whereEqualTo("equipeId", id)
+                                    .get()
+                                    .await()
+                                convites.documents.forEach { doc ->
+                                    db.collection("convites_equipe").document(doc.id).delete().await()
+                                }
 
-                                Toast.makeText(
-                                    this@GerenciarEquipeActivity,
-                                    "🗑️ Equipe excluída!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                val pedidos = db.collection("pedidos_entrada")
+                                    .whereEqualTo("equipeId", id)
+                                    .get()
+                                    .await()
+                                pedidos.documents.forEach { doc ->
+                                    db.collection("pedidos_entrada").document(doc.id).delete().await()
+                                }
 
+                                db.collection("equipes").document(id).delete().await()
+
+                                Toast.makeText(this@GerenciarEquipeActivity, "🗑️ Equipe excluída!", Toast.LENGTH_SHORT).show()
                                 startActivity(Intent(this@GerenciarEquipeActivity, produtos::class.java))
                                 finish()
+
                             } catch (e: Exception) {
-                                Toast.makeText(
-                                    this@GerenciarEquipeActivity,
-                                    "Erro: ${e.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -121,7 +273,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                 .show()
         }
 
-        // Bottom Navigation
+        // ========== BOTTOM NAVIGATION ==========
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -150,125 +302,246 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         }
     }
 
-    private fun carregarPedidos(equipeId: Int) {
-        val container = findViewById<LinearLayout>(R.id.containerPedidos)
+    // ========== CARREGAR MEMBROS ==========
+    private fun carregarMembros(equipeId: String) {
+        val container = findViewById<LinearLayout>(R.id.containerMembros)
         container.removeAllViews()
 
         lifecycleScope.launch {
-            val pedidos = database.pedidoEntradaDao().listarPendentesPorEquipe(equipeId)
-            val inflater = LayoutInflater.from(this@GerenciarEquipeActivity)
+            try {
+                val membros = db.collection("membros_equipe")
+                    .whereEqualTo("equipeId", equipeId)
+                    .get()
+                    .await()
 
-            if (pedidos.isEmpty()) {
-                val txtVazio = TextView(this@GerenciarEquipeActivity).apply {
-                    text = "Nenhum pedido pendente"
-                    setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
-                    textSize = 14f
-                    setPadding(0, 16, 0, 16)
-                }
-                container.addView(txtVazio)
-                return@launch
-            }
+                val inflater = LayoutInflater.from(this@GerenciarEquipeActivity)
 
-            pedidos.forEach { pedido ->
-                val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
-                val text1 = view.findViewById<TextView>(android.R.id.text1)
-                val text2 = view.findViewById<TextView>(android.R.id.text2)
-
-                text1.text = "${pedido.nomeSolicitante} (${pedido.emailSolicitante})"
-                text1.setTextColor(android.graphics.Color.WHITE)
-                text2.text = "Motivos: ${pedido.motivos}\nEspecialidades: ${pedido.especialidades}"
-                text2.setTextColor(android.graphics.Color.GRAY)
-
-                view.setPadding(0, 16, 0, 16)
-
-                view.setOnClickListener {
-                    AlertDialog.Builder(this@GerenciarEquipeActivity)
-                        .setTitle("Pedido de ${pedido.nomeSolicitante}")
-                        .setMessage("Motivos: ${pedido.motivos}\n\nEspecialidades: ${pedido.especialidades}")
-                        .setPositiveButton("Aceitar") { _, _ ->
-                            lifecycleScope.launch {
-                                database.pedidoEntradaDao().atualizar(pedido.copy(status = "aceito"))
-                                carregarPedidos(equipeId)
-                                Toast.makeText(
-                                    this@GerenciarEquipeActivity,
-                                    "✅ Pedido aceito!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                        .setNegativeButton("Recusar") { _, _ ->
-                            lifecycleScope.launch {
-                                database.pedidoEntradaDao().atualizar(pedido.copy(status = "recusado"))
-                                carregarPedidos(equipeId)
-                                Toast.makeText(
-                                    this@GerenciarEquipeActivity,
-                                    "❌ Pedido recusado",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                        .show()
+                if (membros.isEmpty) {
+                    val txtVazio = TextView(this@GerenciarEquipeActivity).apply {
+                        text = "Nenhum membro ainda"
+                        setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+                        textSize = 14f
+                        setPadding(0, 16, 0, 16)
+                    }
+                    container.addView(txtVazio)
+                    return@launch
                 }
 
-                container.addView(view)
+                membros.documents.forEach { doc ->
+                    val membroId = doc.id
+                    val nome = doc.getString("nome") ?: "Usuário"
+                    val emailMembro = doc.getString("email") ?: ""
+                    val funcao = doc.getString("funcao") ?: "membro"
+
+                    val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
+                    val t1 = view.findViewById<TextView>(android.R.id.text1)
+                    val t2 = view.findViewById<TextView>(android.R.id.text2)
+
+                    t1.text = "$nome ($funcao)"
+                    t1.setTextColor(android.graphics.Color.WHITE)
+                    t2.text = emailMembro
+                    t2.setTextColor(android.graphics.Color.GRAY)
+                    view.setPadding(0, 24, 0, 24)
+
+                    // ========== CLIQUE NO MEMBRO ==========
+                    view.setOnClickListener {
+                        if (emailMembro == email) {
+                            // ✅ É o próprio dono → vai para o Perfil
+                            startActivity(Intent(this@GerenciarEquipeActivity, perfil::class.java))
+                        } else {
+                            // Outro membro → menu de promover/remover
+                            AlertDialog.Builder(this@GerenciarEquipeActivity)
+                                .setTitle(nome)
+                                .setItems(arrayOf("Promover a Administrador", "Remover da Equipe")) { _, which ->
+                                    lifecycleScope.launch {
+                                        try {
+                                            when (which) {
+                                                0 -> {
+                                                    db.collection("membros_equipe").document(membroId)
+                                                        .update("funcao", "administrador").await()
+                                                    Toast.makeText(this@GerenciarEquipeActivity, "Promovido!", Toast.LENGTH_SHORT).show()
+                                                }
+                                                1 -> {
+                                                    db.collection("membros_equipe").document(membroId).delete().await()
+                                                    Toast.makeText(this@GerenciarEquipeActivity, "Removido!", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                            carregarMembros(equipeId)
+                                        } catch (e: Exception) {
+                                            Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }
+                                .show()
+                        }
+                    }
+
+                    container.addView(view)
+                }
+            } catch (e: Exception) {
+                Log.e("GERENCIAR", "Erro membros: ${e.message}")
             }
         }
     }
 
-    private fun carregarTrabalhos(equipeId: Int) {
+    // ========== CARREGAR PEDIDOS ==========
+    private fun carregarPedidos(equipeId: String) {
+        val container = findViewById<LinearLayout>(R.id.containerPedidos)
+        container.removeAllViews()
+
+        lifecycleScope.launch {
+            try {
+                val pedidos = db.collection("pedidos_entrada")
+                    .whereEqualTo("equipeId", equipeId)
+                    .whereEqualTo("status", "pendente")
+                    .get()
+                    .await()
+
+                val inflater = LayoutInflater.from(this@GerenciarEquipeActivity)
+
+                if (pedidos.isEmpty) {
+                    val txtVazio = TextView(this@GerenciarEquipeActivity).apply {
+                        text = "Nenhum pedido pendente"
+                        setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+                        textSize = 14f
+                        setPadding(0, 16, 0, 16)
+                    }
+                    container.addView(txtVazio)
+                    return@launch
+                }
+
+                pedidos.documents.forEach { doc ->
+                    val pedidoId = doc.id
+                    val nome = doc.getString("nomeSolicitante") ?: "Usuário"
+                    val emailSol = doc.getString("emailSolicitante") ?: ""
+                    val motivos = doc.getString("motivos") ?: ""
+                    val especialidades = doc.getString("especialidades") ?: ""
+
+                    val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
+                    val t1 = view.findViewById<TextView>(android.R.id.text1)
+                    val t2 = view.findViewById<TextView>(android.R.id.text2)
+
+                    t1.text = "$nome ($emailSol)"
+                    t1.setTextColor(android.graphics.Color.WHITE)
+                    t2.text = "Motivos: $motivos\nEspecialidades: $especialidades"
+                    t2.setTextColor(android.graphics.Color.GRAY)
+                    view.setPadding(0, 24, 0, 24)
+
+                    view.setOnClickListener {
+                        AlertDialog.Builder(this@GerenciarEquipeActivity)
+                            .setTitle("Pedido de $nome")
+                            .setMessage("Motivos: $motivos\n\nEspecialidades: $especialidades")
+                            .setPositiveButton("Aceitar") { _, _ ->
+                                lifecycleScope.launch {
+                                    try {
+                                        db.collection("pedidos_entrada").document(pedidoId)
+                                            .update("status", "aceito").await()
+
+                                        val membro = hashMapOf(
+                                            "equipeId" to equipeId,
+                                            "email" to emailSol,
+                                            "nome" to nome,
+                                            "funcao" to "membro",
+                                            "entrouEm" to System.currentTimeMillis()
+                                        )
+                                        db.collection("membros_equipe").add(membro).await()
+
+                                        Toast.makeText(this@GerenciarEquipeActivity, "✅ Pedido aceito!", Toast.LENGTH_SHORT).show()
+                                        carregarPedidos(equipeId)
+                                        carregarMembros(equipeId)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                            .setNegativeButton("Recusar") { _, _ ->
+                                lifecycleScope.launch {
+                                    try {
+                                        db.collection("pedidos_entrada").document(pedidoId)
+                                            .update("status", "recusado").await()
+                                        Toast.makeText(this@GerenciarEquipeActivity, "❌ Pedido recusado", Toast.LENGTH_SHORT).show()
+                                        carregarPedidos(equipeId)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                            .show()
+                    }
+
+                    container.addView(view)
+                }
+            } catch (e: Exception) {
+                Log.e("GERENCIAR", "Erro pedidos: ${e.message}")
+            }
+        }
+    }
+
+    // ========== CARREGAR TRABALHOS ==========
+    private fun carregarTrabalhos(equipeId: String) {
         val container = findViewById<LinearLayout>(R.id.containerTrabalhos)
         container.removeAllViews()
 
         lifecycleScope.launch {
-            val trabalhos = database.trabalhoDao().listarPorEquipe(equipeId)
-            val inflater = LayoutInflater.from(this@GerenciarEquipeActivity)
+            try {
+                val trabalhos = db.collection("trabalhos")
+                    .whereEqualTo("equipeId", equipeId)
+                    .get()
+                    .await()
 
-            if (trabalhos.isEmpty()) {
-                val txtVazio = TextView(this@GerenciarEquipeActivity).apply {
-                    text = "Nenhum trabalho publicado ainda"
-                    setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
-                    textSize = 14f
-                    setPadding(0, 16, 0, 16)
-                }
-                container.addView(txtVazio)
-                return@launch
-            }
+                val inflater = LayoutInflater.from(this@GerenciarEquipeActivity)
 
-            trabalhos.forEach { trabalho ->
-                val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
-                val text1 = view.findViewById<TextView>(android.R.id.text1)
-                val text2 = view.findViewById<TextView>(android.R.id.text2)
-
-                text1.text = trabalho.titulo
-                text1.setTextColor(android.graphics.Color.WHITE)
-                text2.text = "${trabalho.categoria} - ${trabalho.prazo}"
-                text2.setTextColor(android.graphics.Color.GRAY)
-
-                view.setPadding(0, 16, 0, 16)
-
-                // Clique curto → Convidar para trabalho
-                view.setOnClickListener {
-                    val intent = Intent(this@GerenciarEquipeActivity, ConvidarTrabalhoActivity::class.java)
-                    intent.putExtra("trabalhoId", trabalho.id)
-                    intent.putExtra("tituloTrabalho", trabalho.titulo)
-                    startActivity(intent)
-                }
-
-                // Clique longo → Excluir trabalho
-                view.setOnLongClickListener {
-                    lifecycleScope.launch {
-                        database.trabalhoDao().deletar(trabalho)
-                        carregarTrabalhos(equipeId)
-                        Toast.makeText(
-                            this@GerenciarEquipeActivity,
-                            "Trabalho removido!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                if (trabalhos.isEmpty) {
+                    val txtVazio = TextView(this@GerenciarEquipeActivity).apply {
+                        text = "Nenhum trabalho publicado ainda"
+                        setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+                        textSize = 14f
+                        setPadding(0, 16, 0, 16)
                     }
-                    true
+                    container.addView(txtVazio)
+                    return@launch
                 }
 
-                container.addView(view)
+                trabalhos.documents.forEach { doc ->
+                    val trabalhoId = doc.id
+                    val titulo = doc.getString("titulo") ?: ""
+                    val categoria = doc.getString("categoria") ?: ""
+                    val prazo = doc.getString("prazo") ?: ""
+
+                    val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
+                    val t1 = view.findViewById<TextView>(android.R.id.text1)
+                    val t2 = view.findViewById<TextView>(android.R.id.text2)
+
+                    t1.text = titulo
+                    t1.setTextColor(android.graphics.Color.WHITE)
+                    t2.text = "$categoria - $prazo"
+                    t2.setTextColor(android.graphics.Color.GRAY)
+                    view.setPadding(0, 24, 0, 24)
+
+                    view.setOnClickListener {
+                        val intent = Intent(this@GerenciarEquipeActivity, ConvidarTrabalhoActivity::class.java)
+                        intent.putExtra("trabalhoId", trabalhoId)
+                        intent.putExtra("tituloTrabalho", titulo)
+                        startActivity(intent)
+                    }
+
+                    view.setOnLongClickListener {
+                        lifecycleScope.launch {
+                            try {
+                                db.collection("trabalhos").document(trabalhoId).delete().await()
+                                carregarTrabalhos(equipeId)
+                                Toast.makeText(this@GerenciarEquipeActivity, "Trabalho removido!", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        true
+                    }
+
+                    container.addView(view)
+                }
+            } catch (e: Exception) {
+                Log.e("GERENCIAR", "Erro trabalhos: ${e.message}")
             }
         }
     }

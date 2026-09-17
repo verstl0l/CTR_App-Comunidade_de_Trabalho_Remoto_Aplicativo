@@ -13,9 +13,11 @@ import com.example.plataformaremota.data.entity.*
         Trabalho::class,
         ConviteTrabalho::class,
         PedidoEntrada::class,
-        Usuario::class
+        Usuario::class,
+        ConviteEquipe::class,   // ← NOVO
+        MembroEquipe::class     // ← NOVO
     ],
-    version = 4,
+    version = 5,   // ← AUMENTOU PARA 5
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -24,7 +26,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun trabalhoDao(): TrabalhoDao
     abstract fun conviteTrabalhoDao(): ConviteTrabalhoDao
     abstract fun pedidoEntradaDao(): PedidoEntradaDao
-    abstract fun usuarioDao(): UsuarioDao   // ← ESTE MÉTODO ESTAVA FALTANDO
+    abstract fun usuarioDao(): UsuarioDao
+    abstract fun conviteEquipeDao(): ConviteEquipeDao   // ← NOVO
+    abstract fun membroEquipeDao(): MembroEquipeDao     // ← NOVO
 
     companion object {
         @Volatile

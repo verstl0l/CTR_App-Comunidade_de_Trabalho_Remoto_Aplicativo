@@ -12,16 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CTR"
         tools:targetApi="31">
+
+        <!-- SPLASH (LAUNCHER) -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- TELAS COM TECLADO (adjustPan) -->
         <activity
             android:name=".LoginActivity"
             android:windowSoftInputMode="adjustPan" />
@@ -32,32 +35,33 @@
             android:name=".CriarEquipeActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".data.entity.CriarTrabalhoActivity"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
             android:name=".GerenciarEquipeActivity"
             android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".CriarTrabalhoActivity"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!-- TELAS SEM TECLADO -->
         <activity android:name=".MainActivity" />
         <activity android:name=".participantes" />
         <activity android:name=".produtos" />
         <activity android:name=".notificacao" />
         <activity android:name=".perfil" />
-        <activity
-            android:name=".data.entity.ConviteTrabalho"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".data.entity.PedidoEntrada"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+
+        <!-- OUTRAS TELAS -->
         <activity
             android:name=".ConvidarTrabalhoActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".PedirEntradaActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".EntregarTrabalhoActivity"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>

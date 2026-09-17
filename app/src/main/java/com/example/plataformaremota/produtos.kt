@@ -1,63 +1,82 @@
 package com.example.plataformaremota
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
-import com.example.plataformaremota.data.entity.CriarTrabalhoActivity
-import com.example.plataformaremota.data.entity.Trabalho
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.DocumentSnapshot
 
 class produtos : AppCompatActivity() {
 
-    private lateinit var database: AppDatabase
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+    private var equipeIdAtual: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        database = AppDatabase.getDatabase(this)
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+        val email = auth.currentUser?.email ?: ""
 
-        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
-        val email = prefs.getString("emailUsuario", "") ?: ""
-
-        // ✅ VERIFICA DIRETO NO BANCO DE DADOS
         lifecycleScope.launch {
-            val equipe = database.equipeDao().buscarPorCriador(email)
+            try {
+                // 1. Verifica se é CRIADOR
+                val equipeCriador = db.collection("equipes")
+                    .whereEqualTo("criadorEmail", email)
+                    .limit(1)
+                    .get()
+                    .await()
 
-            if (equipe != null) {
-                setContentView(R.layout.activity_produtos)
-                configurarDashboard(email)
-            } else {
+                if (!equipeCriador.isEmpty) {
+                    // É CRIADOR → dashboard
+                    equipeIdAtual = equipeCriador.documents[0].id
+                    setContentView(R.layout.activity_produtos)
+                    configurarDashboard(email)
+                    configurarBottomNavigation()
+                    return@launch
+                }
+
+                // 2. Verifica se é MEMBRO
+                val membro = db.collection("membros_equipe")
+                    .whereEqualTo("email", email)
+                    .limit(1)
+                    .get()
+                    .await()
+
+                if (!membro.isEmpty) {
+                    // É MEMBRO → tela de entregar trabalho
+                    startActivity(Intent(this@produtos, EntregarTrabalhoActivity::class.java))
+                    finish()
+                    return@launch
+                }
+
+                // 3. Não é nem criador nem membro
                 setContentView(R.layout.activity_produtos_vazio)
                 configurarTelaVazia()
+                configurarBottomNavigation()
+
+            } catch (e: Exception) {
+                Log.e("PRODUTOS", "Erro: ${e.message}")
+                Toast.makeText(this@produtos, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
-
-            configurarBottomNavigation()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
-        val email = prefs.getString("emailUsuario", "") ?: ""
-
-        // Se já tem dashboard carregado, atualiza
-        if (findViewById<TextView>(R.id.txtNomeEquipeDashboard) != null) {
-            configurarDashboard(email)
         }
     }
 
     private fun configurarDashboard(email: String) {
-        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
         val nomeUsuario = prefs.getString("nomeUsuario", "Usuário") ?: "Usuário"
 
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeDashboard)
@@ -71,19 +90,31 @@ class produtos : AppCompatActivity() {
         txtCriador.text = "Criado por $nomeUsuario"
 
         lifecycleScope.launch {
-            val equipe = database.equipeDao().buscarPorCriador(email)
-            equipe?.let {
-                txtNomeEquipe.text = it.nome
-                txtDescricao.text = it.descricao.ifEmpty { "Nenhuma descrição" }
+            try {
+                val equipeDoc = db.collection("equipes").document(equipeIdAtual!!).get().await()
+                val nome = equipeDoc.getString("nome") ?: "Equipe"
+                val descricao = equipeDoc.getString("descricao") ?: ""
 
-                val iniciais = it.nome.split(" ")
+                txtNomeEquipe.text = nome
+                txtDescricao.text = descricao.ifEmpty { "Nenhuma descrição" }
+
+                // Iniciais
+                val iniciais = nome.split(" ")
                     .take(2)
                     .map { palavra -> palavra.firstOrNull()?.uppercase() ?: "" }
                     .joinToString("")
                 txtLogo.text = iniciais.ifEmpty { "EQ" }
 
-                val trabalhos = database.trabalhoDao().listarPorEquipe(it.id)
-                carregarTrabalhosNoLayout(trabalhos, containerTrabalhos)
+                // Busca trabalhos
+                val trabalhos = db.collection("trabalhos")
+                    .whereEqualTo("equipeId", equipeIdAtual)
+                    .get()
+                    .await()
+
+                carregarTrabalhosNoLayout(trabalhos.documents, containerTrabalhos)
+
+            } catch (e: Exception) {
+                Log.e("PRODUTOS", "Erro ao carregar equipe: ${e.message}")
             }
         }
 
@@ -99,12 +130,14 @@ class produtos : AppCompatActivity() {
     private fun configurarTelaVazia() {
         val btnCriarEquipeVazio = findViewById<Button>(R.id.btnCriarEquipeVazio)
         btnCriarEquipeVazio.setOnClickListener {
-            // ✅ Vai para a tela de CRIAR EQUIPE (formulário)
             startActivity(Intent(this, CriarEquipeActivity::class.java))
         }
     }
 
-    private fun carregarTrabalhosNoLayout(trabalhos: List<Trabalho>, container: LinearLayout) {
+    private fun carregarTrabalhosNoLayout(
+        trabalhos: List<com.google.firebase.firestore.DocumentSnapshot>,
+        container: LinearLayout
+    ) {
         container.removeAllViews()
         val inflater = LayoutInflater.from(this)
 
@@ -119,16 +152,16 @@ class produtos : AppCompatActivity() {
             return
         }
 
-        trabalhos.forEach { trabalho ->
+        trabalhos.forEach { doc ->
             val itemView = inflater.inflate(R.layout.item_trabalho_dashboard, container, false)
 
             val txtTitulo = itemView.findViewById<TextView>(R.id.txtTituloItem)
             val txtStatus = itemView.findViewById<TextView>(R.id.txtStatusItem)
             val txtPrazo = itemView.findViewById<TextView>(R.id.txtPrazoItem)
 
-            txtTitulo.text = trabalho.titulo
+            txtTitulo.text = doc.getString("titulo") ?: "Sem título"
             txtStatus.text = "Pendente"
-            txtPrazo.text = "Entrega: ${trabalho.prazo}"
+            txtPrazo.text = "Entrega: ${doc.getString("prazo") ?: "Sem prazo"}"
 
             container.addView(itemView)
         }

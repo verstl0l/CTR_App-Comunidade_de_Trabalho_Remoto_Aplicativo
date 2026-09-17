@@ -11,6 +11,7 @@ import com.example.plataformaremota.data.database.AppDatabase
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var btnCadastrar: Button
