@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "690064604666",
-    "project_id": "ctr-app-848bd",
-    "storage_bucket": "ctr-app-848bd.firebasestorage.app"
+    "project_number": "SEU_PROJECT_NUMBER",
+    "project_id": "SEU_PROJECT_ID",
+    "storage_bucket": "SEU_PROJECT_ID.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:690064604666:android:987005e1eaeca29469f843",
+        "mobilesdk_app_id": "SEU_MOBILESDK_APP_ID",
         "android_client_info": {
           "package_name": "com.example.plataformaremota"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBswJRatbvNyfd_VZNGUz1XWfMDy87dza0"
+          "current_key": "SUA_API_KEY"
         }
       ],
       "services": {

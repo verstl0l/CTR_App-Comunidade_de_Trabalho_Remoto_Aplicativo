@@ -1,15 +1,100 @@
+# ============================================
+# Android
+# ============================================
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Build
+build/
+app/build/
+out/
+bin/
+gen/
+release/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# ============================================
+# Firebase (NÃO subir)
+# ============================================
+app/google-services.json
+
+# ============================================
+# Android Studio / IntelliJ
+# ============================================
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+*.iws
+*.ipr
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+.idea/navEditor.xml
+.idea/compiler.xml
+.idea/misc.xml
+
+# ============================================
+# Kotlin
+# ============================================
+.kotlin/
+
+# ============================================
+# Logs e temporários
+# ============================================
+*.log
+*.tmp
+*.swp
+*~
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+Thumbs.db
+
+# ============================================
+# Capturas e exports
+# ============================================
+captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+.artifacts/
+
+# ============================================
+# Keystore (NUNCA subir)
+# ============================================
+*.jks
+*.keystore
+keystore.properties
+
+# ============================================
+# Configurações locais
+# ============================================
 local.properties
+.settings/
+.project
+.classpath
+
+# ============================================
+# Node (se usar algum script)
+# ============================================
+node_modules/
+package-lock.json
+yarn.lock
+
+# ============================================
+# Python (se usar algum script)
+# ============================================
+__pycache__/
+*.py[cod]
+.venv/
+venv/
