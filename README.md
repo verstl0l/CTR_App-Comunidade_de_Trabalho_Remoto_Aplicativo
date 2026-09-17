@@ -85,3 +85,29 @@ O arquivo `app/google-services.json.example` é apenas um modelo.
 ## Como Rodar o Projeto
 
 1. Clone o repositório:
+   git clone https://github.com/verstl0l/CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo.git
+
+2. Abra no Android Studio.
+
+3. Configure o Firebase (veja [FIREBASE_SETUP.md](FIREBASE_SETUP.md)).
+
+4. Sincronize o Gradle.
+
+5. Execute o app em um dispositivo Android (Android 7.0+) ou emulador.
+
+---
+
+## Versão Web
+
+Procurando a versão para Web? Acesse o repositório [CTR_Web-Comunidade_de_Trabalho_Remoto_Web](https://github.com/verstl0l/CTR_Web-Comunidade_de_Trabalho_Remoto_Web.git).
+
+---
+
+## Status do Projeto
+
+- Em desenvolvimento (versão parcial funcional — 3º bimestre)
+- Próximas etapas: pedidos de entrada, melhorias de UI, testes finais
+
+---
+
+*Este projeto foi desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento de software.*
