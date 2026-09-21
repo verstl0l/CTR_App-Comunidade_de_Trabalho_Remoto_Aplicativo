@@ -15,9 +15,9 @@
 
         <!-- SPLASH (LAUNCHER) -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".Splash"
             android:exported="true"
-            android:theme="@style/Theme.Splash">
+            android:theme="@style/Theme.CTR">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
