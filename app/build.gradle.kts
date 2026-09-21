@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
     id("com.google.gms.google-services")
 }
 
@@ -52,15 +51,16 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Room (mantenha por enquanto)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
     // ========== FIREBASE ==========
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+
+    // Cloudinary
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
+
+    // Glide (para carregar imagens)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     // Testes
     testImplementation(libs.junit)

@@ -1,29 +1,35 @@
 package com.example.plataformaremota
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.tasks.await
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var btnCadastrar: Button
     private lateinit var btnEntrarEquipe: Button
     private lateinit var btnCriarEquipe: Button
-    private lateinit var database: AppDatabase
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_inicial)
 
-        database = AppDatabase.getDatabase(this)
+        // ✅ Inicializa o Cloudinary
+        CloudinaryConfig.init(this)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         btnCadastrar = findViewById(R.id.button3)
         btnEntrarEquipe = findViewById(R.id.button)
@@ -38,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnCriarEquipe.setOnClickListener {
-            // Sempre vai para produtos, que decide se mostra vazio ou dashboard
             startActivity(Intent(this, produtos::class.java))
         }
 
@@ -51,20 +56,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun atualizarBotoes() {
-        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
         val logado = prefs.getBoolean("logado", false)
-        val email = prefs.getString("emailUsuario", "") ?: ""
+        val email = auth.currentUser?.email ?: ""
 
-        // Verifica direto no banco se tem equipe
         lifecycleScope.launch {
-            val equipe = database.equipeDao().buscarPorCriador(email)
-            val temEquipe = equipe != null
+            try {
+                val equipe = db.collection("equipes")
+                    .whereEqualTo("criadorEmail", email)
+                    .limit(1)
+                    .get()
+                    .await()
 
-            // Botão "Cadastrar-se" só aparece se NÃO estiver logado
-            btnCadastrar.visibility = if (logado) View.GONE else View.VISIBLE
+                val temEquipe = !equipe.isEmpty
 
-            // Botão "Criar Equipe" só aparece se NÃO tiver equipe
-            btnCriarEquipe.visibility = if (temEquipe) View.GONE else View.VISIBLE
+                btnCadastrar.visibility = if (logado) View.GONE else View.VISIBLE
+                btnCriarEquipe.visibility = if (temEquipe) View.GONE else View.VISIBLE
+
+            } catch (e: Exception) {
+                btnCadastrar.visibility = if (logado) View.GONE else View.VISIBLE
+                btnCriarEquipe.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -75,8 +87,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home -> true
 
                 R.id.nav_groups -> {
-                    // ✅ SEMPRE vai para produtos
-                    // O produtos.kt decide se mostra vazio ou dashboard
                     startActivity(Intent(this@MainActivity, produtos::class.java))
                     true
                 }

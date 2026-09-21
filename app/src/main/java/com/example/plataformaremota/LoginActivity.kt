@@ -28,6 +28,16 @@ class LoginActivity : AppCompatActivity() {
         val btnCadastrar = findViewById<Button>(R.id.btnCadastrar)
 
         btnEntrar.setOnClickListener {
+            // ✅ VERIFICA CONEXÃO ANTES DE TENTAR LOGAR
+            if (!NetworkUtils.isOnline(this)) {
+                Toast.makeText(
+                    this,
+                    "⚠️ Sem conexão com a internet. Verifique sua rede e tente novamente.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
+            }
+
             val email = edtEmail.text.toString().trim()
             val senha = edtSenha.text.toString().trim()
 
@@ -42,7 +52,6 @@ class LoginActivity : AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, senha)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        // Busca os dados do usuário no Firestore
                         db.collection("usuarios").document(email).get()
                             .addOnSuccessListener { document ->
                                 val nome = document.getString("nome") ?: "Usuário"
@@ -79,6 +88,16 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnCadastrar.setOnClickListener {
+            // ✅ VERIFICA CONEXÃO ANTES DE IR PARA O CADASTRO
+            if (!NetworkUtils.isOnline(this)) {
+                Toast.makeText(
+                    this,
+                    "⚠️ Sem conexão com a internet. Verifique sua rede e tente novamente.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
+            }
+
             startActivity(Intent(this, CadastroActivity::class.java))
         }
     }

@@ -2,28 +2,33 @@ package com.example.plataformaremota
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
-import com.example.plataformaremota.data.entity.ConviteTrabalho
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class ConvidarTrabalhoActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_convidar_trabalho)
 
-        val database = AppDatabase.getDatabase(this)
-        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        val emailRemetente = prefs.getString("emailUsuario", "") ?: ""
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+        val emailRemetente = auth.currentUser?.email ?: ""
 
-        val trabalhoId = intent.getIntExtra("trabalhoId", -1)
+        val trabalhoId = intent.getStringExtra("trabalhoId") ?: ""
         val tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: ""
 
         val txtTitulo = findViewById<TextView>(R.id.txtTituloTrabalhoConvite)
@@ -36,38 +41,60 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
         btnVoltar.setOnClickListener { finish() }
 
         btnEnviar.setOnClickListener {
-            val emailConvidado = edtEmail.text.toString().trim()
+            val emailConvidado = edtEmail.text.toString().trim().lowercase()
 
             if (emailConvidado.isEmpty()) {
                 Toast.makeText(this, "Digite um email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            btnEnviar.isEnabled = false
+            btnEnviar.text = "ENVIANDO..."
+
             lifecycleScope.launch {
-                val equipe = database.equipeDao().buscarPorCriador(emailRemetente)
-                val nomeEquipe = equipe?.nome ?: "Equipe"
+                try {
+                    // Busca a equipe do remetente
+                    val equipe = db.collection("equipes")
+                        .whereEqualTo("criadorEmail", emailRemetente)
+                        .limit(1)
+                        .get()
+                        .await()
 
-                val convite = ConviteTrabalho(
-                    trabalhoId = trabalhoId,
-                    tituloTrabalho = tituloTrabalho,
-                    emailConvidado = emailConvidado,
-                    emailRemetente = emailRemetente,
-                    nomeEquipe = nomeEquipe
-                )
+                    val nomeEquipe = if (!equipe.isEmpty) {
+                        equipe.documents[0].getString("nome") ?: "Equipe"
+                    } else "Equipe"
 
-                database.conviteTrabalhoDao().inserir(convite)
+                    val convite = hashMapOf(
+                        "trabalhoId" to trabalhoId,
+                        "tituloTrabalho" to tituloTrabalho,
+                        "emailConvidado" to emailConvidado,
+                        "emailRemetente" to emailRemetente,
+                        "nomeEquipe" to nomeEquipe,
+                        "status" to "pendente",
+                        "criadoEm" to System.currentTimeMillis()
+                    )
 
-                Toast.makeText(
-                    this@ConvidarTrabalhoActivity,
-                    "✅ Convite enviado para $emailConvidado",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    db.collection("convites_trabalho").add(convite).await()
 
-                finish()
+                    Log.d("CONVITE_TRABALHO", "✅ Convite enviado para $emailConvidado")
+                    Toast.makeText(
+                        this@ConvidarTrabalhoActivity,
+                        "✅ Convite enviado para $emailConvidado",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    finish()
+
+                } catch (e: Exception) {
+                    Log.e("CONVITE_TRABALHO", "Erro: ${e.message}")
+                    Toast.makeText(this@ConvidarTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                    btnEnviar.isEnabled = true
+                    btnEnviar.text = "ENVIAR CONVITE"
+                }
             }
         }
 
-        // Bottom Navigation
+        // ========== BOTTOM NAVIGATION ==========
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {

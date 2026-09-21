@@ -30,6 +30,16 @@ class CadastroActivity : AppCompatActivity() {
         val btnSalvar = findViewById<Button>(R.id.btnSalvar)
 
         btnSalvar.setOnClickListener {
+            // ✅ VERIFICA CONEXÃO ANTES DE CADASTRAR
+            if (!NetworkUtils.isOnline(this)) {
+                Toast.makeText(
+                    this,
+                    "⚠️ Sem conexão com a internet. Verifique sua rede e tente novamente.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
+            }
+
             val nome = edtNome.text.toString().trim()
             val email = edtEmail.text.toString().trim()
             val senha = edtSenha.text.toString().trim()
@@ -54,11 +64,9 @@ class CadastroActivity : AppCompatActivity() {
             btnSalvar.isEnabled = false
             btnSalvar.text = "CADASTRANDO..."
 
-            // 1. Cria o usuário no Firebase Auth
             auth.createUserWithEmailAndPassword(email, senha)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        // 2. Salva os dados extras no Firestore
                         val usuario = hashMapOf(
                             "email" to email,
                             "nome" to nome,

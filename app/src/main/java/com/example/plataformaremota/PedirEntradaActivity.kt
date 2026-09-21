@@ -2,28 +2,33 @@ package com.example.plataformaremota
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
-import com.example.plataformaremota.data.entity.PedidoEntrada
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class PedirEntradaActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pedir_entrada)
 
-        val database = AppDatabase.getDatabase(this)
-        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        val emailSolicitante = prefs.getString("emailUsuario", "") ?: ""
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+        val emailSolicitante = auth.currentUser?.email ?: ""
 
-        val equipeId = intent.getIntExtra("equipeId", -1)
+        val equipeId = intent.getStringExtra("equipeId") ?: ""
         val nomeEquipe = intent.getStringExtra("nomeEquipe") ?: ""
 
         val txtEquipe = findViewById<TextView>(R.id.txtNomeEquipePedido)
@@ -47,29 +52,43 @@ class PedirEntradaActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            btnEnviar.isEnabled = false
+            btnEnviar.text = "ENVIANDO..."
+
             lifecycleScope.launch {
-                val pedido = PedidoEntrada(
-                    equipeId = equipeId,
-                    nomeEquipe = nomeEquipe,
-                    emailSolicitante = emailSolicitante,
-                    nomeSolicitante = nome,
-                    motivos = motivos,
-                    especialidades = especialidades
-                )
+                try {
+                    val pedido = hashMapOf(
+                        "equipeId" to equipeId,
+                        "nomeEquipe" to nomeEquipe,
+                        "emailSolicitante" to emailSolicitante,
+                        "nomeSolicitante" to nome,
+                        "motivos" to motivos,
+                        "especialidades" to especialidades,
+                        "status" to "pendente",
+                        "criadoEm" to System.currentTimeMillis()
+                    )
 
-                database.pedidoEntradaDao().inserir(pedido)
+                    db.collection("pedidos_entrada").add(pedido).await()
 
-                Toast.makeText(
-                    this@PedirEntradaActivity,
-                    "✅ Pedido enviado! Aguarde aprovação.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    Log.d("PEDIR_ENTRADA", "✅ Pedido enviado!")
+                    Toast.makeText(
+                        this@PedirEntradaActivity,
+                        "✅ Pedido enviado! Aguarde aprovação.",
+                        Toast.LENGTH_SHORT
+                    ).show()
 
-                finish()
+                    finish()
+
+                } catch (e: Exception) {
+                    Log.e("PEDIR_ENTRADA", "Erro: ${e.message}")
+                    Toast.makeText(this@PedirEntradaActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                    btnEnviar.isEnabled = true
+                    btnEnviar.text = "ENVIAR PEDIDO"
+                }
             }
         }
 
-        // Bottom Navigation
+        // ========== BOTTOM NAVIGATION ==========
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {

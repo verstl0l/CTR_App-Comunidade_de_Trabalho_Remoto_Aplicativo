@@ -2,6 +2,7 @@ package com.example.plataformaremota
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.LinearLayout
@@ -9,75 +10,95 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.plataformaremota.data.database.AppDatabase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class EntregarTrabalhoActivity : AppCompatActivity() {
 
-    private lateinit var database: AppDatabase
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entregar_trabalho)
 
-        database = AppDatabase.getDatabase(this)
-        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        val email = prefs.getString("emailUsuario", "") ?: ""
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+        val email = auth.currentUser?.email ?: ""
 
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeMembro)
         val containerTrabalhos = findViewById<LinearLayout>(R.id.containerTrabalhosMembro)
 
         lifecycleScope.launch {
-            // Busca o membro
-            val membro = database.membroEquipeDao().buscarPorEmail(email)
-            if (membro == null) {
-                Toast.makeText(
-                    this@EntregarTrabalhoActivity,
-                    "Você não é membro de nenhuma equipe",
-                    Toast.LENGTH_SHORT
-                ).show()
-                finish()
-                return@launch
-            }
+            try {
+                // Busca o membro
+                val membro = db.collection("membros_equipe")
+                    .whereEqualTo("email", email)
+                    .limit(1)
+                    .get()
+                    .await()
 
-            // Busca a equipe
-            val equipe = database.equipeDao().buscarPorId(membro.equipeId)
-            txtNomeEquipe.text = equipe?.nome ?: "Equipe"
-
-            // Busca os trabalhos da equipe
-            val trabalhos = database.trabalhoDao().listarPorEquipe(membro.equipeId)
-            val inflater = LayoutInflater.from(this@EntregarTrabalhoActivity)
-
-            if (trabalhos.isEmpty()) {
-                val txtVazio = TextView(this@EntregarTrabalhoActivity).apply {
-                    text = "Nenhum trabalho atribuído ainda"
-                    setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
-                    textSize = 14f
-                    setPadding(0, 60, 0, 60)
-                    gravity = android.view.Gravity.CENTER
-                }
-                containerTrabalhos.addView(txtVazio)
-                return@launch
-            }
-
-            trabalhos.forEach { trabalho ->
-                val view = inflater.inflate(R.layout.item_trabalho_membro, containerTrabalhos, false)
-
-                view.findViewById<TextView>(R.id.txtTituloTrabalhoMembro).text = trabalho.titulo
-                view.findViewById<TextView>(R.id.txtDescricaoTrabalhoMembro).text = trabalho.descricao
-                view.findViewById<TextView>(R.id.txtPrazoTrabalhoMembro).text = "Entrega: ${trabalho.prazo}"
-                view.findViewById<TextView>(R.id.txtStatusTrabalhoMembro).text = "Em Progresso"
-
-                view.findViewById<Button>(R.id.btnEntregarTrabalho).setOnClickListener {
+                if (membro.isEmpty) {
                     Toast.makeText(
                         this@EntregarTrabalhoActivity,
-                        "✅ Trabalho '${trabalho.titulo}' iniciado!",
+                        "Você não é membro de nenhuma equipe",
                         Toast.LENGTH_SHORT
                     ).show()
+                    finish()
+                    return@launch
                 }
 
-                containerTrabalhos.addView(view)
+                val equipeId = membro.documents[0].getString("equipeId") ?: ""
+
+                // Busca a equipe
+                val equipeDoc = db.collection("equipes").document(equipeId).get().await()
+                txtNomeEquipe.text = equipeDoc.getString("nome") ?: "Equipe"
+
+                // Busca os trabalhos da equipe
+                val trabalhos = db.collection("trabalhos")
+                    .whereEqualTo("equipeId", equipeId)
+                    .get()
+                    .await()
+
+                val inflater = LayoutInflater.from(this@EntregarTrabalhoActivity)
+
+                if (trabalhos.isEmpty) {
+                    val txtVazio = TextView(this@EntregarTrabalhoActivity).apply {
+                        text = "Nenhum trabalho atribuído ainda"
+                        setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+                        textSize = 14f
+                        setPadding(0, 60, 0, 60)
+                        gravity = android.view.Gravity.CENTER
+                    }
+                    containerTrabalhos.addView(txtVazio)
+                    return@launch
+                }
+
+                trabalhos.documents.forEach { doc ->
+                    val view = inflater.inflate(R.layout.item_trabalho_membro, containerTrabalhos, false)
+
+                    view.findViewById<TextView>(R.id.txtTituloTrabalhoMembro).text = doc.getString("titulo") ?: ""
+                    view.findViewById<TextView>(R.id.txtDescricaoTrabalhoMembro).text = doc.getString("descricao") ?: ""
+                    view.findViewById<TextView>(R.id.txtPrazoTrabalhoMembro).text = "Entrega: ${doc.getString("prazo") ?: ""}"
+                    view.findViewById<TextView>(R.id.txtStatusTrabalhoMembro).text = "Em Progresso"
+
+                    view.findViewById<Button>(R.id.btnEntregarTrabalho).setOnClickListener {
+                        Toast.makeText(
+                            this@EntregarTrabalhoActivity,
+                            "✅ Trabalho '${doc.getString("titulo")}' iniciado!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    containerTrabalhos.addView(view)
+                }
+
+            } catch (e: Exception) {
+                Log.e("ENTREGAR_TRABALHO", "Erro: ${e.message}")
+                Toast.makeText(this@EntregarTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
 
