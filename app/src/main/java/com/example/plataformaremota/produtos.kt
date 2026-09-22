@@ -16,7 +16,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import com.google.firebase.firestore.DocumentSnapshot
 
 class produtos : AppCompatActivity() {
 
@@ -33,7 +32,6 @@ class produtos : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // 1. Verifica se é CRIADOR
                 val equipeCriador = db.collection("equipes")
                     .whereEqualTo("criadorEmail", email)
                     .limit(1)
@@ -41,7 +39,6 @@ class produtos : AppCompatActivity() {
                     .await()
 
                 if (!equipeCriador.isEmpty) {
-                    // É CRIADOR → dashboard
                     equipeIdAtual = equipeCriador.documents[0].id
                     setContentView(R.layout.activity_produtos)
                     configurarDashboard(email)
@@ -49,7 +46,6 @@ class produtos : AppCompatActivity() {
                     return@launch
                 }
 
-                // 2. Verifica se é MEMBRO
                 val membro = db.collection("membros_equipe")
                     .whereEqualTo("email", email)
                     .limit(1)
@@ -57,13 +53,11 @@ class produtos : AppCompatActivity() {
                     .await()
 
                 if (!membro.isEmpty) {
-                    // É MEMBRO → tela de entregar trabalho
                     startActivity(Intent(this@produtos, EntregarTrabalhoActivity::class.java))
                     finish()
                     return@launch
                 }
 
-                // 3. Não é nem criador nem membro
                 setContentView(R.layout.activity_produtos_vazio)
                 configurarTelaVazia()
                 configurarBottomNavigation()
@@ -87,6 +81,13 @@ class produtos : AppCompatActivity() {
         val btnCriarTrabalho = findViewById<Button>(R.id.btnCriarTrabalho)
         val containerTrabalhos = findViewById<LinearLayout>(R.id.containerTrabalhosRecentes)
 
+        val btnChatEquipe = findViewById<Button>(R.id.btnChatEquipe)
+        btnChatEquipe.setOnClickListener {
+            val intent = Intent(this, ChatEquipeActivity::class.java)
+            intent.putExtra("equipeId", equipeIdAtual)
+            startActivity(intent)
+        }
+
         txtCriador.text = "Criado por $nomeUsuario"
 
         lifecycleScope.launch {
@@ -98,14 +99,12 @@ class produtos : AppCompatActivity() {
                 txtNomeEquipe.text = nome
                 txtDescricao.text = descricao.ifEmpty { "Nenhuma descrição" }
 
-                // Iniciais
                 val iniciais = nome.split(" ")
                     .take(2)
                     .map { palavra -> palavra.firstOrNull()?.uppercase() ?: "" }
                     .joinToString("")
                 txtLogo.text = iniciais.ifEmpty { "EQ" }
 
-                // Busca trabalhos
                 val trabalhos = db.collection("trabalhos")
                     .whereEqualTo("equipeId", equipeIdAtual)
                     .get()
@@ -173,6 +172,11 @@ class produtos : AppCompatActivity() {
             when (menuItem.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_chat -> {
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }

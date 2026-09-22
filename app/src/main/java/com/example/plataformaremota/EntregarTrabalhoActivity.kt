@@ -34,7 +34,6 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // Busca o membro
                 val membro = db.collection("membros_equipe")
                     .whereEqualTo("email", email)
                     .limit(1)
@@ -42,22 +41,16 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                     .await()
 
                 if (membro.isEmpty) {
-                    Toast.makeText(
-                        this@EntregarTrabalhoActivity,
-                        "Você não é membro de nenhuma equipe",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@EntregarTrabalhoActivity, "Você não é membro de nenhuma equipe", Toast.LENGTH_SHORT).show()
                     finish()
                     return@launch
                 }
 
                 val equipeId = membro.documents[0].getString("equipeId") ?: ""
 
-                // Busca a equipe
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                 txtNomeEquipe.text = equipeDoc.getString("nome") ?: "Equipe"
 
-                // Busca os trabalhos da equipe
                 val trabalhos = db.collection("trabalhos")
                     .whereEqualTo("equipeId", equipeId)
                     .get()
@@ -86,11 +79,7 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                     view.findViewById<TextView>(R.id.txtStatusTrabalhoMembro).text = "Em Progresso"
 
                     view.findViewById<Button>(R.id.btnEntregarTrabalho).setOnClickListener {
-                        Toast.makeText(
-                            this@EntregarTrabalhoActivity,
-                            "✅ Trabalho '${doc.getString("titulo")}' iniciado!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@EntregarTrabalhoActivity, "✅ Trabalho '${doc.getString("titulo")}' iniciado!", Toast.LENGTH_SHORT).show()
                     }
 
                     containerTrabalhos.addView(view)
@@ -98,11 +87,13 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 Log.e("ENTREGAR_TRABALHO", "Erro: ${e.message}")
-                Toast.makeText(this@EntregarTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
 
-        // ========== BOTTOM NAVIGATION ==========
+        configurarBottomNavigation()
+    }
+
+    private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -111,7 +102,16 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_groups -> true
+                R.id.nav_chat -> {
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_groups -> {
+                    startActivity(Intent(this, produtos::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_notifications -> {
                     startActivity(Intent(this, notificacao::class.java))
                     finish()

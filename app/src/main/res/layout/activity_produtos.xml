@@ -162,6 +162,16 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
+                    <Button
+                        android:id="@+id/btnChatEquipe"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:backgroundTint="#3D2B27"
+                        android:text="CHAT DA EQUIPE"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold" />
+
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

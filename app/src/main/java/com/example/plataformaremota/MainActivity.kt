@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import android.widget.ImageView
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,11 +41,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnEntrarEquipe.setOnClickListener {
-            startActivity(Intent(this, participantes::class.java))
+            startActivity(Intent(this, BuscarEquipesActivity::class.java))
         }
 
         btnCriarEquipe.setOnClickListener {
             startActivity(Intent(this, produtos::class.java))
+        }
+
+        //  Botão de chat no canto superior direito
+        val btnChatTopo = findViewById<ImageView>(R.id.btnChatTopo)
+        btnChatTopo.setOnClickListener {
+            startActivity(Intent(this, ListaConversasActivity::class.java))
         }
 
         configurarBottomNavigation()
@@ -76,6 +83,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 btnCadastrar.visibility = if (logado) View.GONE else View.VISIBLE
                 btnCriarEquipe.visibility = View.VISIBLE
+
             }
         }
     }
@@ -86,17 +94,26 @@ class MainActivity : AppCompatActivity() {
             when (menuItem.itemId) {
                 R.id.nav_home -> true
 
+                R.id.nav_chat -> {
+                    startActivity(Intent(this@MainActivity, ListaConversasActivity::class.java))
+                    finish()
+                    true
+                }
+
                 R.id.nav_groups -> {
                     startActivity(Intent(this@MainActivity, produtos::class.java))
+                    finish()
                     true
                 }
 
                 R.id.nav_notifications -> {
                     startActivity(Intent(this, notificacao::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_profile -> {
                     startActivity(Intent(this, perfil::class.java))
+                    finish()
                     true
                 }
                 else -> false

@@ -31,27 +31,21 @@ class notificacao : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
 
-        Log.d("NOTIFICACAO_DEBUG", "===== onCreate =====")
-        Log.d("NOTIFICACAO_DEBUG", "Email do usuário: '$emailUsuario'")
-
         lifecycleScope.launch {
             try {
                 val userDoc = db.collection("usuarios").document(emailUsuario).get().await()
                 nomeUsuario = userDoc.getString("nome") ?: "Usuário"
-                Log.d("NOTIFICACAO_DEBUG", "Nome do usuário: '$nomeUsuario'")
             } catch (e: Exception) {
                 nomeUsuario = "Usuário"
             }
         }
 
-        // ✅ NÃO chama carregarConvites() aqui
         configurarBottomNavigation()
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d("NOTIFICACAO_DEBUG", "===== onResume =====")
-        carregarConvites()  // ✅ Só aqui
+        carregarConvites()
     }
 
     private fun carregarConvites() {
@@ -68,14 +62,6 @@ class notificacao : AppCompatActivity() {
                     .whereEqualTo("status", "pendente")
                     .get()
                     .await()
-
-                Log.d("NOTIFICACAO_DEBUG", "Total de convites encontrados: ${convites.size()}")
-                convites.documents.forEachIndexed { index, doc ->
-                    Log.d("NOTIFICACAO_DEBUG", "Convite [$index] ID: ${doc.id}")
-                    Log.d("NOTIFICACAO_DEBUG", "   → emailConvidado: ${doc.getString("emailConvidado")}")
-                    Log.d("NOTIFICACAO_DEBUG", "   → nomeEquipe: ${doc.getString("nomeEquipe")}")
-                    Log.d("NOTIFICACAO_DEBUG", "   → status: ${doc.getString("status")}")
-                }
 
                 val inflater = LayoutInflater.from(this@notificacao)
 
@@ -135,8 +121,7 @@ class notificacao : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("NOTIFICACAO", "Erro: ${e.message}", e)
-                Toast.makeText(this@notificacao, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("NOTIFICACAO", "Erro: ${e.message}")
             }
         }
     }
@@ -161,7 +146,6 @@ class notificacao : AppCompatActivity() {
                 carregarConvites()
 
             } catch (e: Exception) {
-                Log.e("NOTIFICACAO", "Erro ao aceitar: ${e.message}")
                 Toast.makeText(this@notificacao, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -188,6 +172,11 @@ class notificacao : AppCompatActivity() {
             when (menuItem.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_chat -> {
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }

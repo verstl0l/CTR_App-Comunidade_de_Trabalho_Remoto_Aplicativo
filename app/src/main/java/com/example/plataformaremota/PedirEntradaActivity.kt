@@ -32,7 +32,6 @@ class PedirEntradaActivity : AppCompatActivity() {
         val nomeEquipe = intent.getStringExtra("nomeEquipe") ?: ""
 
         val txtEquipe = findViewById<TextView>(R.id.txtNomeEquipePedido)
-        val edtNome = findViewById<EditText>(R.id.edtNomeSolicitante)
         val edtMotivos = findViewById<EditText>(R.id.edtMotivos)
         val edtEspecialidades = findViewById<EditText>(R.id.edtEspecialidades)
         val btnEnviar = findViewById<Button>(R.id.btnEnviarPedido)
@@ -43,11 +42,10 @@ class PedirEntradaActivity : AppCompatActivity() {
         btnVoltar.setOnClickListener { finish() }
 
         btnEnviar.setOnClickListener {
-            val nome = edtNome.text.toString().trim()
             val motivos = edtMotivos.text.toString().trim()
             val especialidades = edtEspecialidades.text.toString().trim()
 
-            if (nome.isEmpty() || motivos.isEmpty() || especialidades.isEmpty()) {
+            if (motivos.isEmpty() || especialidades.isEmpty()) {
                 Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -57,11 +55,15 @@ class PedirEntradaActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
+                    // ✅ Busca o nome do usuário automaticamente
+                    val usuarioDoc = db.collection("usuarios").document(emailSolicitante).get().await()
+                    val nomeSolicitante = usuarioDoc.getString("nome") ?: "Usuário"
+
                     val pedido = hashMapOf(
                         "equipeId" to equipeId,
                         "nomeEquipe" to nomeEquipe,
                         "emailSolicitante" to emailSolicitante,
-                        "nomeSolicitante" to nome,
+                        "nomeSolicitante" to nomeSolicitante,  // ← Automático!
                         "motivos" to motivos,
                         "especialidades" to especialidades,
                         "status" to "pendente",

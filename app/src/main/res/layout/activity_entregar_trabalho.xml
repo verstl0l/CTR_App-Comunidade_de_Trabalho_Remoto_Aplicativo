@@ -69,9 +69,20 @@
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
 
+
                 </LinearLayout>
 
             </LinearLayout>
+
+            <Button
+                android:id="@+id/btnChatEquipeMembro"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#F5E6D0"
+                android:text="CHAT DA EQUIPE"
+                android:textColor="#1C1311"
+                android:textStyle="bold" />
 
             <!-- ========== "Meus Trabalhos" + "Filtrar ativos" ========== -->
             <LinearLayout

@@ -48,7 +48,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
-        // ========== CARREGA DADOS DA EQUIPE ==========
         lifecycleScope.launch {
             try {
                 val result = db.collection("equipes")
@@ -74,11 +73,9 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e("GERENCIAR", "Erro ao carregar equipe: ${e.message}")
-                Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
 
-        // ========== SALVAR ALTERAÇÕES ==========
         btnSalvarEquipe.setOnClickListener {
             val novoNome = edtNomeEquipe.text.toString().trim()
             val novaDesc = edtDescEquipe.text.toString().trim()
@@ -114,7 +111,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
             }
         }
 
-        // ========== ENVIAR CONVITE ==========
         btnEnviarConvite.setOnClickListener {
             val emailConvidado = edtEmailConvite.text.toString().trim().lowercase()
 
@@ -133,29 +129,18 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            btnEnviarConvite.isEnabled = false
-            btnEnviarConvite.text = "ENVIANDO..."
-
             lifecycleScope.launch {
                 try {
-                    // 1. Verifica se o usuário existe
                     val usuarioExiste = db.collection("usuarios")
                         .document(emailConvidado)
                         .get()
                         .await()
 
                     if (!usuarioExiste.exists()) {
-                        Toast.makeText(
-                            this@GerenciarEquipeActivity,
-                            "Este email não está cadastrado no app",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        btnEnviarConvite.isEnabled = true
-                        btnEnviarConvite.text = "ENVIAR CONVITE"
+                        Toast.makeText(this@GerenciarEquipeActivity, "Este email não está cadastrado", Toast.LENGTH_LONG).show()
                         return@launch
                     }
 
-                    // 2. Verifica se já existe convite pendente
                     val todosConvites = db.collection("convites_equipe")
                         .whereEqualTo("emailConvidado", emailConvidado)
                         .get()
@@ -167,17 +152,10 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     }
 
                     if (convitesPendentes.isNotEmpty()) {
-                        Toast.makeText(
-                            this@GerenciarEquipeActivity,
-                            "Este usuário já foi convidado",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        btnEnviarConvite.isEnabled = true
-                        btnEnviarConvite.text = "ENVIAR CONVITE"
+                        Toast.makeText(this@GerenciarEquipeActivity, "Este usuário já foi convidado", Toast.LENGTH_SHORT).show()
                         return@launch
                     }
 
-                    // 3. Cria o convite
                     val convite = hashMapOf(
                         "equipeId" to equipeId,
                         "nomeEquipe" to nomeEquipe,
@@ -189,34 +167,17 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         "criadoEm" to System.currentTimeMillis()
                     )
 
-                    db.collection("convites_equipe")
-                        .add(convite)
-                        .await()
+                    db.collection("convites_equipe").add(convite).await()
 
-                    Toast.makeText(
-                        this@GerenciarEquipeActivity,
-                        "✅ Convite enviado para $emailConvidado",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                    Toast.makeText(this@GerenciarEquipeActivity, "✅ Convite enviado!", Toast.LENGTH_SHORT).show()
                     edtEmailConvite.text.clear()
-                    btnEnviarConvite.isEnabled = true
-                    btnEnviarConvite.text = "ENVIAR CONVITE"
 
                 } catch (e: Exception) {
-                    Log.e("CONVITE", "❌ Erro: ${e.message}")
-                    Toast.makeText(
-                        this@GerenciarEquipeActivity,
-                        "Erro: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    btnEnviarConvite.isEnabled = true
-                    btnEnviarConvite.text = "ENVIAR CONVITE"
+                    Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
 
-        // ========== EXCLUIR EQUIPE ==========
         btnExcluirEquipe.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Excluir Equipe")
@@ -226,35 +187,27 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         lifecycleScope.launch {
                             try {
                                 val trabalhos = db.collection("trabalhos")
-                                    .whereEqualTo("equipeId", id)
-                                    .get()
-                                    .await()
-                                trabalhos.documents.forEach { doc ->
-                                    db.collection("trabalhos").document(doc.id).delete().await()
+                                    .whereEqualTo("equipeId", id).get().await()
+                                trabalhos.documents.forEach {
+                                    db.collection("trabalhos").document(it.id).delete().await()
                                 }
 
                                 val membros = db.collection("membros_equipe")
-                                    .whereEqualTo("equipeId", id)
-                                    .get()
-                                    .await()
-                                membros.documents.forEach { doc ->
-                                    db.collection("membros_equipe").document(doc.id).delete().await()
+                                    .whereEqualTo("equipeId", id).get().await()
+                                membros.documents.forEach {
+                                    db.collection("membros_equipe").document(it.id).delete().await()
                                 }
 
                                 val convites = db.collection("convites_equipe")
-                                    .whereEqualTo("equipeId", id)
-                                    .get()
-                                    .await()
-                                convites.documents.forEach { doc ->
-                                    db.collection("convites_equipe").document(doc.id).delete().await()
+                                    .whereEqualTo("equipeId", id).get().await()
+                                convites.documents.forEach {
+                                    db.collection("convites_equipe").document(it.id).delete().await()
                                 }
 
                                 val pedidos = db.collection("pedidos_entrada")
-                                    .whereEqualTo("equipeId", id)
-                                    .get()
-                                    .await()
-                                pedidos.documents.forEach { doc ->
-                                    db.collection("pedidos_entrada").document(doc.id).delete().await()
+                                    .whereEqualTo("equipeId", id).get().await()
+                                pedidos.documents.forEach {
+                                    db.collection("pedidos_entrada").document(it.id).delete().await()
                                 }
 
                                 db.collection("equipes").document(id).delete().await()
@@ -273,12 +226,20 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                 .show()
         }
 
-        // ========== BOTTOM NAVIGATION ==========
+        configurarBottomNavigation()
+    }
+
+    private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_chat -> {
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }
@@ -302,7 +263,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         }
     }
 
-    // ========== CARREGAR MEMBROS ==========
     private fun carregarMembros(equipeId: String) {
         val container = findViewById<LinearLayout>(R.id.containerMembros)
         container.removeAllViews()
@@ -343,37 +303,37 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     t2.setTextColor(android.graphics.Color.GRAY)
                     view.setPadding(0, 24, 0, 24)
 
-                    // ========== CLIQUE NO MEMBRO ==========
                     view.setOnClickListener {
-                        if (emailMembro == email) {
-                            // ✅ É o próprio dono → vai para o Perfil
-                            startActivity(Intent(this@GerenciarEquipeActivity, perfil::class.java))
-                        } else {
-                            // Outro membro → menu de promover/remover
-                            AlertDialog.Builder(this@GerenciarEquipeActivity)
-                                .setTitle(nome)
-                                .setItems(arrayOf("Promover a Administrador", "Remover da Equipe")) { _, which ->
-                                    lifecycleScope.launch {
-                                        try {
-                                            when (which) {
-                                                0 -> {
-                                                    db.collection("membros_equipe").document(membroId)
-                                                        .update("funcao", "administrador").await()
-                                                    Toast.makeText(this@GerenciarEquipeActivity, "Promovido!", Toast.LENGTH_SHORT).show()
-                                                }
-                                                1 -> {
-                                                    db.collection("membros_equipe").document(membroId).delete().await()
-                                                    Toast.makeText(this@GerenciarEquipeActivity, "Removido!", Toast.LENGTH_SHORT).show()
-                                                }
+                        val intent = Intent(this@GerenciarEquipeActivity, PerfilUsuarioActivity::class.java)
+                        intent.putExtra("emailOutro", emailMembro)
+                        startActivity(intent)
+                    }
+
+                    view.setOnLongClickListener {
+                        AlertDialog.Builder(this@GerenciarEquipeActivity)
+                            .setTitle(nome)
+                            .setItems(arrayOf("Promover a Administrador", "Remover da Equipe")) { _, which ->
+                                lifecycleScope.launch {
+                                    try {
+                                        when (which) {
+                                            0 -> {
+                                                db.collection("membros_equipe").document(membroId)
+                                                    .update("funcao", "administrador").await()
+                                                Toast.makeText(this@GerenciarEquipeActivity, "Promovido!", Toast.LENGTH_SHORT).show()
                                             }
-                                            carregarMembros(equipeId)
-                                        } catch (e: Exception) {
-                                            Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                            1 -> {
+                                                db.collection("membros_equipe").document(membroId).delete().await()
+                                                Toast.makeText(this@GerenciarEquipeActivity, "Removido!", Toast.LENGTH_SHORT).show()
+                                            }
                                         }
+                                        carregarMembros(equipeId)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                                     }
                                 }
-                                .show()
-                        }
+                            }
+                            .show()
+                        true
                     }
 
                     container.addView(view)
@@ -384,7 +344,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         }
     }
 
-    // ========== CARREGAR PEDIDOS ==========
     private fun carregarPedidos(equipeId: String) {
         val container = findViewById<LinearLayout>(R.id.containerPedidos)
         container.removeAllViews()
@@ -477,7 +436,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         }
     }
 
-    // ========== CARREGAR TRABALHOS ==========
     private fun carregarTrabalhos(equipeId: String) {
         val container = findViewById<LinearLayout>(R.id.containerTrabalhos)
         container.removeAllViews()

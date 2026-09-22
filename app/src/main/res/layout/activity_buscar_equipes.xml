@@ -16,10 +16,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="20dp">
 
             <Button
-                android:id="@+id/btnVoltarPedir"
+                android:id="@+id/btnVoltarBusca"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -29,58 +29,31 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
                 android:gravity="center"
-                android:text="Pedir para Entrar"
+                android:text="Buscar Equipes"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/txtNomeEquipePedido"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="Equipe: ..."
-                android:textColor="#F5E6D0"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
+            <!-- Campo de busca -->
             <EditText
-                android:id="@+id/edtMotivos"
+                android:id="@+id/edtBuscarEquipe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="20dp"
                 android:backgroundTint="#3D2B27"
-                android:gravity="top"
-                android:hint="Por que quer entrar? (motivos)"
-                android:inputType="textMultiLine"
-                android:minLines="3"
+                android:hint="Buscar por nome..."
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
 
-            <EditText
-                android:id="@+id/edtEspecialidades"
+            <!-- Container das equipes -->
+            <LinearLayout
+                android:id="@+id/containerEquipes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:backgroundTint="#3D2B27"
-                android:gravity="top"
-                android:hint="Suas especialidades"
-                android:inputType="textMultiLine"
-                android:minLines="2"
-                android:textColor="@android:color/white"
-                android:textColorHint="#9E9E9E" />
-
-            <Button
-                android:id="@+id/btnEnviarPedido"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:backgroundTint="#F5E6D0"
-                android:text="ENVIAR PEDIDO"
-                android:textColor="#1C1311"
-                android:textStyle="bold" />
+                android:orientation="vertical" />
 
         </LinearLayout>
     </ScrollView>

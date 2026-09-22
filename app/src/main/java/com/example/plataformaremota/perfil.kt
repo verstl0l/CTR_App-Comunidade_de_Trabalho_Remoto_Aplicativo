@@ -109,11 +109,21 @@ class perfil : AppCompatActivity() {
             finishAffinity()
         }
 
+        configurarBottomNavigation()
+    }
+
+    // ========== BOTTOM NAVIGATION ==========
+    private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_chat -> {
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }
@@ -127,7 +137,7 @@ class perfil : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_profile -> true
+                R.id.nav_profile -> true  // Já estamos aqui
                 else -> false
             }
         }

@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home"
         android:title="Início" />
+
+    <item
+        android:id="@+id/nav_chat"
+        android:icon="@drawable/ic_chat"
+        android:title="Chat" />
+
     <item
         android:id="@+id/nav_groups"
         android:icon="@drawable/ic_groups"
         android:title="Equipes" />
+
     <item
         android:id="@+id/nav_notifications"
         android:icon="@drawable/ic_notifications"
         android:title="Notificações" />
+
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_person"
         android:title="Perfil" />
-</menu>
 
+</menu>
