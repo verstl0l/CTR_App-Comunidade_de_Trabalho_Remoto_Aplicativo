@@ -88,15 +88,19 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
+            <!-- ✅ BOTÃO SAIR DA EQUIPE (membro/admin) -->
             <Button
                 android:id="@+id/btnSairEquipeInfo"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
                 android:backgroundTint="#FF6B6B"
                 android:text="SAIR DA EQUIPE"
                 android:textColor="@android:color/white"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
+            <!-- ✅ BOTÃO EXCLUIR EQUIPE (dono) -->
             <Button
                 android:id="@+id/btnExcluirEquipeInfo"
                 android:layout_width="match_parent"

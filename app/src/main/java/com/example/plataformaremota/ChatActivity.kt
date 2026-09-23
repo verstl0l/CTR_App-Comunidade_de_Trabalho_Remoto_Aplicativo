@@ -46,6 +46,36 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        marcarMensagensComoLidas()
+    }
+
+    private fun marcarMensagensComoLidas() {
+        if (chatId.isEmpty()) return
+
+        lifecycleScope.launch {
+            try {
+                val mensagens = db.collection("chats").document(chatId)
+                    .collection("mensagens")
+                    .whereEqualTo("lida", false)
+                    .get()
+                    .await()
+
+                mensagens.documents.forEach { doc ->
+                    val remetente = doc.getString("remetente") ?: ""
+                    if (remetente != emailUsuario) {
+                        db.collection("chats").document(chatId)
+                            .collection("mensagens").document(doc.id)
+                            .update("lida", true).await()
+                    }
+                }
+            } catch (e: Exception) {
+                // Silencioso
+            }
+        }
+    }
+
     private fun configurarUI() {
         val btnVoltar = findViewById<Button>(R.id.btnVoltarChat)
         val btnVerPerfil = findViewById<Button>(R.id.btnVerPerfil)
@@ -143,7 +173,8 @@ class ChatActivity : AppCompatActivity() {
                 val mensagem = hashMapOf(
                     "remetente" to emailUsuario,
                     "texto" to texto,
-                    "timestamp" to System.currentTimeMillis()
+                    "timestamp" to System.currentTimeMillis(),
+                    "lida" to false  // ✅ NOVO
                 )
 
                 db.collection("chats").document(chatId)

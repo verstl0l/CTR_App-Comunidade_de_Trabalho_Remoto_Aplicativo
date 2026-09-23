@@ -22,6 +22,7 @@ class produtos : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var equipeIdAtual: String? = null
+    private var filtroAtual: String = "todos"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +31,18 @@ class produtos : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         val email = auth.currentUser?.email ?: ""
 
+        val equipeIdIntent = intent.getStringExtra("equipeId")
+
         lifecycleScope.launch {
             try {
+                if (equipeIdIntent != null) {
+                    equipeIdAtual = equipeIdIntent
+                    setContentView(R.layout.activity_produtos)
+                    configurarDashboard(email)
+                    configurarBottomNavigation()
+                    return@launch
+                }
+
                 val equipeCriador = db.collection("equipes")
                     .whereEqualTo("criadorEmail", email)
                     .limit(1)
@@ -43,18 +54,6 @@ class produtos : AppCompatActivity() {
                     setContentView(R.layout.activity_produtos)
                     configurarDashboard(email)
                     configurarBottomNavigation()
-                    return@launch
-                }
-
-                val membro = db.collection("membros_equipe")
-                    .whereEqualTo("email", email)
-                    .limit(1)
-                    .get()
-                    .await()
-
-                if (!membro.isEmpty) {
-                    startActivity(Intent(this@produtos, EntregarTrabalhoActivity::class.java))
-                    finish()
                     return@launch
                 }
 
@@ -88,6 +87,32 @@ class produtos : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val btnFiltroTodos = findViewById<TextView>(R.id.btnFiltroTodos)
+        val btnFiltroPendente = findViewById<TextView>(R.id.btnFiltroPendente)
+        val btnFiltroProgresso = findViewById<TextView>(R.id.btnFiltroProgresso)
+        val btnFiltroConcluido = findViewById<TextView>(R.id.btnFiltroConcluido)
+
+        btnFiltroTodos.setOnClickListener {
+            filtroAtual = "todos"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+        btnFiltroPendente.setOnClickListener {
+            filtroAtual = "pendente"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+        btnFiltroProgresso.setOnClickListener {
+            filtroAtual = "em_progresso"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+        btnFiltroConcluido.setOnClickListener {
+            filtroAtual = "concluido"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+
         txtCriador.text = "Criado por $nomeUsuario"
 
         lifecycleScope.launch {
@@ -105,12 +130,7 @@ class produtos : AppCompatActivity() {
                     .joinToString("")
                 txtLogo.text = iniciais.ifEmpty { "EQ" }
 
-                val trabalhos = db.collection("trabalhos")
-                    .whereEqualTo("equipeId", equipeIdAtual)
-                    .get()
-                    .await()
-
-                carregarTrabalhosNoLayout(trabalhos.documents, containerTrabalhos)
+                carregarTrabalhosFiltrados(containerTrabalhos)
 
             } catch (e: Exception) {
                 Log.e("PRODUTOS", "Erro ao carregar equipe: ${e.message}")
@@ -118,11 +138,74 @@ class produtos : AppCompatActivity() {
         }
 
         btnConfig.setOnClickListener {
-            startActivity(Intent(this, GerenciarEquipeActivity::class.java))
+            val intent = Intent(this, GerenciarEquipeActivity::class.java)
+            intent.putExtra("equipeId", equipeIdAtual)
+            startActivity(intent)
         }
 
         btnCriarTrabalho.setOnClickListener {
-            startActivity(Intent(this, CriarTrabalhoActivity::class.java))
+            val intent = Intent(this, CriarTrabalhoActivity::class.java)
+            intent.putExtra("equipeId", equipeIdAtual)
+            startActivity(intent)
+        }
+    }
+
+    private fun atualizarBotoesFiltro(
+        btnTodos: TextView,
+        btnPendente: TextView,
+        btnProgresso: TextView,
+        btnConcluido: TextView
+    ) {
+        btnTodos.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnTodos.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+        btnPendente.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnPendente.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+        btnProgresso.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnProgresso.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+        btnConcluido.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnConcluido.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+
+        when (filtroAtual) {
+            "todos" -> {
+                btnTodos.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnTodos.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+            "pendente" -> {
+                btnPendente.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnPendente.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+            "em_progresso" -> {
+                btnProgresso.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnProgresso.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+            "concluido" -> {
+                btnConcluido.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnConcluido.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+        }
+    }
+
+    private fun carregarTrabalhosFiltrados(container: LinearLayout) {
+        lifecycleScope.launch {
+            try {
+                val trabalhos = db.collection("trabalhos")
+                    .whereEqualTo("equipeId", equipeIdAtual)
+                    .get()
+                    .await()
+
+                val filtrados = if (filtroAtual == "todos") {
+                    trabalhos.documents
+                } else {
+                    trabalhos.documents.filter {
+                        it.getString("status") == filtroAtual
+                    }
+                }
+
+                carregarTrabalhosNoLayout(filtrados, container)
+
+            } catch (e: Exception) {
+                Log.e("PRODUTOS", "Erro filtro: ${e.message}")
+            }
         }
     }
 
@@ -142,7 +225,7 @@ class produtos : AppCompatActivity() {
 
         if (trabalhos.isEmpty()) {
             val txtVazio = TextView(this).apply {
-                text = "Nenhum trabalho publicado ainda"
+                text = "Nenhum trabalho encontrado"
                 setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
                 textSize = 14f
                 setPadding(0, 16, 0, 16)
@@ -159,8 +242,23 @@ class produtos : AppCompatActivity() {
             val txtPrazo = itemView.findViewById<TextView>(R.id.txtPrazoItem)
 
             txtTitulo.text = doc.getString("titulo") ?: "Sem título"
-            txtStatus.text = "Pendente"
             txtPrazo.text = "Entrega: ${doc.getString("prazo") ?: "Sem prazo"}"
+
+            val status = doc.getString("status") ?: "pendente"
+            when (status) {
+                "pendente" -> {
+                    txtStatus.text = "Pendente"
+                    txtStatus.setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+                }
+                "em_progresso" -> {
+                    txtStatus.text = "Em Progresso"
+                    txtStatus.setTextColor(android.graphics.Color.parseColor("#F5E6D0"))
+                }
+                "concluido" -> {
+                    txtStatus.text = "Concluído"
+                    txtStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+                }
+            }
 
             container.addView(itemView)
         }
@@ -180,7 +278,11 @@ class produtos : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_groups -> true
+                R.id.nav_groups -> {
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_notifications -> {
                     startActivity(Intent(this, notificacao::class.java))
                     finish()
@@ -193,6 +295,10 @@ class produtos : AppCompatActivity() {
                 }
                 else -> false
             }
+        }
+
+        lifecycleScope.launch {
+            BadgeHelper.atualizarBadgeChat(this@produtos, bottomNav)
         }
     }
 }

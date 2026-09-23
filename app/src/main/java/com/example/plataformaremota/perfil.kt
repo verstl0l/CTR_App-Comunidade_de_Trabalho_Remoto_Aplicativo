@@ -112,6 +112,14 @@ class perfil : AppCompatActivity() {
         configurarBottomNavigation()
     }
 
+    override fun onResume() {
+        super.onResume()
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        lifecycleScope.launch {
+            BadgeHelper.atualizarBadgeChat(this@perfil, bottomNav)
+        }
+    }
+
     // ========== BOTTOM NAVIGATION ==========
     private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
@@ -128,7 +136,7 @@ class perfil : AppCompatActivity() {
                     true
                 }
                 R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }

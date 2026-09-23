@@ -46,6 +46,14 @@ class notificacao : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         carregarConvites()
+        atualizarBadge()
+    }
+
+    private fun atualizarBadge() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        lifecycleScope.launch {
+            BadgeHelper.atualizarBadgeChat(this@notificacao, bottomNav)
+        }
     }
 
     private fun carregarConvites() {
@@ -181,7 +189,7 @@ class notificacao : AppCompatActivity() {
                     true
                 }
                 R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }

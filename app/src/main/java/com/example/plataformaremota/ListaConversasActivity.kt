@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -15,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -41,6 +43,14 @@ class ListaConversasActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         carregarConversas()
+        atualizarBadgeMenu()
+    }
+
+    private fun atualizarBadgeMenu() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        lifecycleScope.launch {
+            BadgeHelper.atualizarBadgeChat(this@ListaConversasActivity, bottomNav)
+        }
     }
 
     private fun carregarConversas() {
@@ -49,10 +59,9 @@ class ListaConversasActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // Lista de itens: (tipo, nome, ultimaMsg, id, outroEmail)
                 val itens = mutableListOf<ConversaItem>()
 
-                // 1. Busca conversas PV
+                // 1. Chats PV
                 val chatsPV = db.collection("chats")
                     .whereArrayContains("participantes", emailUsuario)
                     .get()
@@ -65,6 +74,16 @@ class ListaConversasActivity : AppCompatActivity() {
                     val ultimaMsg = chat.getString("ultimaMensagem") ?: "Sem mensagens"
                     val atualizadoEm = chat.getLong("atualizadoEm") ?: 0L
 
+                    // Conta não lidas
+                    val naoLidas = chat.reference.collection("mensagens")
+                        .whereEqualTo("lida", false)
+                        .get()
+                        .await()
+
+                    val countNaoLidas = naoLidas.documents.count {
+                        it.getString("remetente") != emailUsuario
+                    }
+
                     val outroUsuario = db.collection("usuarios").document(outroEmail).get().await()
                     val nomeOutro = outroUsuario.getString("nome") ?: outroEmail
 
@@ -75,12 +94,13 @@ class ListaConversasActivity : AppCompatActivity() {
                             ultimaMsg = ultimaMsg,
                             id = chatId,
                             outroEmail = outroEmail,
-                            atualizadoEm = atualizadoEm
+                            atualizadoEm = atualizadoEm,
+                            naoLidas = countNaoLidas
                         )
                     )
                 }
 
-                // 2. Busca conversas de GRUPO que o usuário participa
+                // 2. Grupos
                 val grupos = db.collection("grupos")
                     .whereArrayContains("membros", emailUsuario)
                     .get()
@@ -90,9 +110,7 @@ class ListaConversasActivity : AppCompatActivity() {
                     val grupoId = grupo.id
                     val nomeGrupo = grupo.getString("nomeGrupo") ?: "Grupo"
 
-                    // Busca a última mensagem do grupo
-                    val ultimaMsgDoc = db.collection("grupos").document(grupoId)
-                        .collection("mensagens")
+                    val ultimaMsgDoc = grupo.reference.collection("mensagens")
                         .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
                         .limit(1)
                         .get()
@@ -104,11 +122,19 @@ class ListaConversasActivity : AppCompatActivity() {
                         val texto = doc.getString("texto") ?: ""
                         val tipo = doc.getString("tipo") ?: "texto"
                         if (tipo == "foto") "$nome: 📷 Foto" else "$nome: $texto"
-                    } else {
-                        "Nenhuma mensagem ainda"
-                    }
+                    } else "Nenhuma mensagem ainda"
 
                     val timestamp = ultimaMsgDoc.documents.firstOrNull()?.getLong("timestamp") ?: 0L
+
+                    // Conta não lidas
+                    val naoLidas = grupo.reference.collection("mensagens")
+                        .whereEqualTo("lida", false)
+                        .get()
+                        .await()
+
+                    val countNaoLidas = naoLidas.documents.count {
+                        it.getString("remetente") != emailUsuario
+                    }
 
                     itens.add(
                         ConversaItem(
@@ -117,15 +143,16 @@ class ListaConversasActivity : AppCompatActivity() {
                             ultimaMsg = ultimaMsg,
                             id = grupoId,
                             outroEmail = "",
-                            atualizadoEm = timestamp
+                            atualizadoEm = timestamp,
+                            naoLidas = countNaoLidas
                         )
                     )
                 }
 
-                // 3. Ordena por atualizadoEm (mais recente primeiro)
+                // 3. Ordena
                 val itensOrdenados = itens.sortedByDescending { it.atualizadoEm }
 
-                // 4. Mostra na tela
+                // 4. Mostra
                 if (itensOrdenados.isEmpty()) {
                     val txtVazio = TextView(this@ListaConversasActivity).apply {
                         text = "Nenhuma conversa ainda"
@@ -143,24 +170,33 @@ class ListaConversasActivity : AppCompatActivity() {
                 itensOrdenados.forEach { item ->
                     val view = inflater.inflate(R.layout.item_conversa, container, false)
 
-                    val cardIcone = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconeConversa)
+                    val cardIcone = view.findViewById<MaterialCardView>(R.id.cardIconeConversa)
                     val txtIcone = view.findViewById<TextView>(R.id.txtIconeConversa)
                     val txtNome = view.findViewById<TextView>(R.id.txtNomeConversa)
                     val txtUltima = view.findViewById<TextView>(R.id.txtUltimaMensagem)
+                    val txtBadge = view.findViewById<TextView>(R.id.txtBadgeConversa)
 
                     txtNome.text = item.nome
                     txtUltima.text = item.ultimaMsg
 
+                    // Ícone
                     if (item.tipo == "grupo") {
-                        // Grupo: ícone 👥 e cor azul
                         txtIcone.text = "👥"
                         cardIcone.setCardBackgroundColor(android.graphics.Color.parseColor("#0A66C2"))
                     } else {
-                        // PV: ícone 👤 e cor marrom
                         txtIcone.text = "👤"
                         cardIcone.setCardBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
                     }
 
+                    // ✅ Badge de não lidas
+                    if (item.naoLidas > 0) {
+                        txtBadge.text = if (item.naoLidas > 99) "99+" else item.naoLidas.toString()
+                        txtBadge.visibility = View.VISIBLE
+                    } else {
+                        txtBadge.visibility = View.GONE
+                    }
+
+                    // Clique
                     view.setOnClickListener {
                         if (item.tipo == "grupo") {
                             val intent = Intent(this@ListaConversasActivity, ChatGrupoActivity::class.java)
@@ -175,7 +211,7 @@ class ListaConversasActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Long press: só para PV (apagar conversa)
+                    // Long press (só PV)
                     if (item.tipo == "pv") {
                         view.setOnLongClickListener {
                             AlertDialog.Builder(this@ListaConversasActivity)
@@ -322,13 +358,13 @@ class ListaConversasActivity : AppCompatActivity() {
         }
     }
 
-    // Classe auxiliar
     data class ConversaItem(
-        val tipo: String,        // "pv" ou "grupo"
+        val tipo: String,
         val nome: String,
         val ultimaMsg: String,
         val id: String,
         val outroEmail: String,
-        val atualizadoEm: Long
+        val atualizadoEm: Long,
+        val naoLidas: Int
     )
 }

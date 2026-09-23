@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -11,7 +12,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -26,6 +26,7 @@ class InfoEquipeActivity : AppCompatActivity() {
     private var nomeEquipe: String = ""
     private var criadorEmail: String = ""
     private var ehDono: Boolean = false
+    private var ehAdmin: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,16 +86,37 @@ class InfoEquipeActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.txtDescricaoEquipeInfo).text =
                     equipeDoc.getString("descricao") ?: "Sem descrição"
 
+                // Verifica se é admin
+                val membro = db.collection("membros_equipe")
+                    .whereEqualTo("equipeId", equipeId)
+                    .whereEqualTo("email", emailUsuario)
+                    .limit(1)
+                    .get()
+                    .await()
+
+                ehAdmin = !membro.isEmpty &&
+                        membro.documents[0].getString("funcao") == "administrador"
+
                 // Mostra/esconde botões
                 val btnExcluir = findViewById<Button>(R.id.btnExcluirEquipeInfo)
                 val btnSair = findViewById<Button>(R.id.btnSairEquipeInfo)
+                val btnCriarGrupo = findViewById<Button>(R.id.btnCriarGrupoInfo)
 
                 if (ehDono) {
-                    btnExcluir.visibility = android.view.View.VISIBLE
-                    btnSair.visibility = android.view.View.GONE
+                    // Dono: exclui, não sai, cria grupo
+                    btnExcluir.visibility = View.VISIBLE
+                    btnSair.visibility = View.GONE
+                    btnCriarGrupo.visibility = View.VISIBLE
+                } else if (ehAdmin) {
+                    // Admin: sai, não exclui, cria grupo
+                    btnExcluir.visibility = View.GONE
+                    btnSair.visibility = View.VISIBLE
+                    btnCriarGrupo.visibility = View.VISIBLE
                 } else {
-                    btnExcluir.visibility = android.view.View.GONE
-                    btnSair.visibility = android.view.View.VISIBLE
+                    // Membro: sai, não exclui, não cria grupo
+                    btnExcluir.visibility = View.GONE
+                    btnSair.visibility = View.VISIBLE
+                    btnCriarGrupo.visibility = View.GONE
                 }
 
                 carregarMembros()

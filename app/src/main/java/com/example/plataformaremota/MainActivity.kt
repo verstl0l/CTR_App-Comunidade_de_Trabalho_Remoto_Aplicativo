@@ -60,6 +60,14 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         atualizarBotoes()
+        atualizarBadge()
+    }
+
+    private fun atualizarBadge() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        lifecycleScope.launch {
+            BadgeHelper.atualizarBadgeChat(this@MainActivity, bottomNav)
+        }
     }
 
     private fun atualizarBotoes() {
@@ -101,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_groups -> {
-                    startActivity(Intent(this@MainActivity, produtos::class.java))
+                    startActivity(Intent(this@MainActivity, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }

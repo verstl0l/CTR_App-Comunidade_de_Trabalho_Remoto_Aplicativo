@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
@@ -20,6 +21,8 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+    private var equipeId: String = ""
+    private var filtroAtual: String = "todos"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,58 +35,66 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeMembro)
         val containerTrabalhos = findViewById<LinearLayout>(R.id.containerTrabalhosMembro)
 
+        val btnChatEquipe = findViewById<Button>(R.id.btnChatEquipeMembro)
+
+        val btnFiltroTodos = findViewById<TextView>(R.id.btnFiltroTodosMembro)
+        val btnFiltroPendente = findViewById<TextView>(R.id.btnFiltroPendenteMembro)
+        val btnFiltroProgresso = findViewById<TextView>(R.id.btnFiltroProgressoMembro)
+        val btnFiltroConcluido = findViewById<TextView>(R.id.btnFiltroConcluidoMembro)
+
+        btnFiltroTodos.setOnClickListener {
+            filtroAtual = "todos"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+        btnFiltroPendente.setOnClickListener {
+            filtroAtual = "pendente"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+        btnFiltroProgresso.setOnClickListener {
+            filtroAtual = "em_progresso"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+        btnFiltroConcluido.setOnClickListener {
+            filtroAtual = "concluido"
+            atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
+            carregarTrabalhosFiltrados(containerTrabalhos)
+        }
+
+        val equipeIdIntent = intent.getStringExtra("equipeId")
+
         lifecycleScope.launch {
             try {
-                val membro = db.collection("membros_equipe")
-                    .whereEqualTo("email", email)
-                    .limit(1)
-                    .get()
-                    .await()
+                if (equipeIdIntent != null) {
+                    equipeId = equipeIdIntent
+                } else {
+                    val membro = db.collection("membros_equipe")
+                        .whereEqualTo("email", email)
+                        .limit(1)
+                        .get()
+                        .await()
 
-                if (membro.isEmpty) {
-                    Toast.makeText(this@EntregarTrabalhoActivity, "Você não é membro de nenhuma equipe", Toast.LENGTH_SHORT).show()
-                    finish()
-                    return@launch
+                    if (membro.isEmpty) {
+                        Toast.makeText(this@EntregarTrabalhoActivity, "Você não é membro de nenhuma equipe", Toast.LENGTH_SHORT).show()
+                        finish()
+                        return@launch
+                    }
+
+                    equipeId = membro.documents[0].getString("equipeId") ?: ""
                 }
-
-                val equipeId = membro.documents[0].getString("equipeId") ?: ""
 
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                 txtNomeEquipe.text = equipeDoc.getString("nome") ?: "Equipe"
 
-                val trabalhos = db.collection("trabalhos")
-                    .whereEqualTo("equipeId", equipeId)
-                    .get()
-                    .await()
-
-                val inflater = LayoutInflater.from(this@EntregarTrabalhoActivity)
-
-                if (trabalhos.isEmpty) {
-                    val txtVazio = TextView(this@EntregarTrabalhoActivity).apply {
-                        text = "Nenhum trabalho atribuído ainda"
-                        setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
-                        textSize = 14f
-                        setPadding(0, 60, 0, 60)
-                        gravity = android.view.Gravity.CENTER
-                    }
-                    containerTrabalhos.addView(txtVazio)
-                    return@launch
+                btnChatEquipe.setOnClickListener {
+                    val intent = Intent(this@EntregarTrabalhoActivity, ChatEquipeActivity::class.java)
+                    intent.putExtra("equipeId", equipeId)
+                    startActivity(intent)
                 }
 
-                trabalhos.documents.forEach { doc ->
-                    val view = inflater.inflate(R.layout.item_trabalho_membro, containerTrabalhos, false)
-
-                    view.findViewById<TextView>(R.id.txtTituloTrabalhoMembro).text = doc.getString("titulo") ?: ""
-                    view.findViewById<TextView>(R.id.txtDescricaoTrabalhoMembro).text = doc.getString("descricao") ?: ""
-                    view.findViewById<TextView>(R.id.txtPrazoTrabalhoMembro).text = "Entrega: ${doc.getString("prazo") ?: ""}"
-                    view.findViewById<TextView>(R.id.txtStatusTrabalhoMembro).text = "Em Progresso"
-
-                    view.findViewById<Button>(R.id.btnEntregarTrabalho).setOnClickListener {
-                        Toast.makeText(this@EntregarTrabalhoActivity, "✅ Trabalho '${doc.getString("titulo")}' iniciado!", Toast.LENGTH_SHORT).show()
-                    }
-
-                    containerTrabalhos.addView(view)
-                }
+                carregarTrabalhosFiltrados(containerTrabalhos)
 
             } catch (e: Exception) {
                 Log.e("ENTREGAR_TRABALHO", "Erro: ${e.message}")
@@ -91,6 +102,180 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
         }
 
         configurarBottomNavigation()
+    }
+
+    private fun atualizarBotoesFiltro(
+        btnTodos: TextView,
+        btnPendente: TextView,
+        btnProgresso: TextView,
+        btnConcluido: TextView
+    ) {
+        btnTodos.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnTodos.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+        btnPendente.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnPendente.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+        btnProgresso.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnProgresso.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+        btnConcluido.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+        btnConcluido.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+
+        when (filtroAtual) {
+            "todos" -> {
+                btnTodos.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnTodos.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+            "pendente" -> {
+                btnPendente.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnPendente.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+            "em_progresso" -> {
+                btnProgresso.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnProgresso.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+            "concluido" -> {
+                btnConcluido.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btnConcluido.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+        }
+    }
+
+    private fun carregarTrabalhosFiltrados(container: LinearLayout) {
+        lifecycleScope.launch {
+            try {
+                val trabalhos = db.collection("trabalhos")
+                    .whereEqualTo("equipeId", equipeId)
+                    .get()
+                    .await()
+
+                val filtrados = if (filtroAtual == "todos") {
+                    trabalhos.documents
+                } else {
+                    trabalhos.documents.filter {
+                        it.getString("status") == filtroAtual
+                    }
+                }
+
+                carregarTrabalhosNoLayout(filtrados, container)
+
+            } catch (e: Exception) {
+                Log.e("ENTREGAR_TRABALHO", "Erro filtro: ${e.message}")
+            }
+        }
+    }
+
+    private fun carregarTrabalhosNoLayout(
+        trabalhos: List<com.google.firebase.firestore.DocumentSnapshot>,
+        container: LinearLayout
+    ) {
+        container.removeAllViews()
+        val inflater = LayoutInflater.from(this)
+
+        if (trabalhos.isEmpty()) {
+            val txtVazio = TextView(this).apply {
+                text = "Nenhum trabalho encontrado"
+                setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+                textSize = 14f
+                setPadding(0, 60, 0, 60)
+                gravity = android.view.Gravity.CENTER
+            }
+            container.addView(txtVazio)
+            return
+        }
+
+        trabalhos.forEach { doc ->
+            val trabalhoId = doc.id
+            val titulo = doc.getString("titulo") ?: ""
+            val descricao = doc.getString("descricao") ?: ""
+            val prazo = doc.getString("prazo") ?: ""
+            val status = doc.getString("status") ?: "pendente"
+
+            val view = inflater.inflate(R.layout.item_trabalho_membro, container, false)
+
+            view.findViewById<TextView>(R.id.txtTituloTrabalhoMembro).text = titulo
+            view.findViewById<TextView>(R.id.txtDescricaoTrabalhoMembro).text = descricao
+            view.findViewById<TextView>(R.id.txtPrazoTrabalhoMembro).text = "Entrega: $prazo"
+
+            val txtStatus = view.findViewById<TextView>(R.id.txtStatusTrabalhoMembro)
+            atualizarStatusUI(txtStatus, status)
+
+            val btnEntregar = view.findViewById<Button>(R.id.btnEntregarTrabalho)
+            atualizarBotao(btnEntregar, status)
+
+            btnEntregar.setOnClickListener {
+                mostrarOpcoesStatus(trabalhoId, status, container)
+            }
+
+            container.addView(view)
+        }
+    }
+
+    private fun atualizarStatusUI(txtStatus: TextView, status: String) {
+        when (status) {
+            "pendente" -> {
+                txtStatus.text = "Pendente"
+                txtStatus.setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+            }
+            "em_progresso" -> {
+                txtStatus.text = "Em Progresso"
+                txtStatus.setTextColor(android.graphics.Color.parseColor("#F5E6D0"))
+            }
+            "concluido" -> {
+                txtStatus.text = "Concluído"
+                txtStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+            }
+        }
+    }
+
+    private fun atualizarBotao(btn: Button, status: String) {
+        when (status) {
+            "pendente" -> {
+                btn.text = "INICIAR"
+                btn.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
+                btn.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            }
+            "em_progresso" -> {
+                btn.text = "CONCLUIR"
+                btn.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"))
+                btn.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+            }
+            "concluido" -> {
+                btn.text = "REABRIR"
+                btn.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
+                btn.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+            }
+        }
+    }
+
+    private fun mostrarOpcoesStatus(trabalhoId: String, statusAtual: String, container: LinearLayout) {
+        val opcoes = arrayOf("Pendente", "Em Progresso", "Concluído")
+
+        AlertDialog.Builder(this)
+            .setTitle("Alterar status")
+            .setItems(opcoes) { _, which ->
+                val novoStatus = when (which) {
+                    0 -> "pendente"
+                    1 -> "em_progresso"
+                    2 -> "concluido"
+                    else -> "pendente"
+                }
+                atualizarStatus(trabalhoId, novoStatus, container)
+            }
+            .show()
+    }
+
+    private fun atualizarStatus(trabalhoId: String, novoStatus: String, container: LinearLayout) {
+        lifecycleScope.launch {
+            try {
+                db.collection("trabalhos").document(trabalhoId)
+                    .update("status", novoStatus).await()
+
+                Toast.makeText(this@EntregarTrabalhoActivity, "Status atualizado!", Toast.LENGTH_SHORT).show()
+                carregarTrabalhosFiltrados(container)
+
+            } catch (e: Exception) {
+                Toast.makeText(this@EntregarTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun configurarBottomNavigation() {
@@ -108,7 +293,7 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }
@@ -124,6 +309,10 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                 }
                 else -> false
             }
+        }
+
+        lifecycleScope.launch {
+            BadgeHelper.atualizarBadgeChat(this@EntregarTrabalhoActivity, bottomNav)
         }
     }
 }

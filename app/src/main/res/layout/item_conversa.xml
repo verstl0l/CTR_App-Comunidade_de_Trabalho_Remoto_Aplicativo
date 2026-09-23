@@ -54,4 +54,21 @@
 
     </LinearLayout>
 
+    <!-- ✅ Badge de mensagens não lidas -->
+    <TextView
+        android:id="@+id/txtBadgeConversa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/badge_background"
+        android:minWidth="24dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="#1C1311"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
 </LinearLayout>

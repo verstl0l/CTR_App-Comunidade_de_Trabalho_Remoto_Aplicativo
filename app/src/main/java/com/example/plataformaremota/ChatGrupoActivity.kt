@@ -14,6 +14,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -59,6 +60,11 @@ class ChatGrupoActivity : AppCompatActivity() {
             return
         }
 
+        val btnSairGrupo = findViewById<Button>(R.id.btnSairGrupo)
+        btnSairGrupo.setOnClickListener {
+            confirmarSairGrupo()
+        }
+
         val btnVoltar = findViewById<Button>(R.id.btnVoltarChatGrupo)
         val btnEnviar = findViewById<Button>(R.id.btnEnviarMensagemGrupo)
         val btnFoto = findViewById<Button>(R.id.btnEnviarFotoGrupo)
@@ -95,6 +101,80 @@ class ChatGrupoActivity : AppCompatActivity() {
         carregarMensagens()
     }
 
+    override fun onResume() {
+        super.onResume()
+        marcarMensagensComoLidas()
+    }
+
+    private fun marcarMensagensComoLidas() {
+        if (grupoId.isEmpty()) return
+
+        lifecycleScope.launch {
+            try {
+                val mensagens = db.collection("grupos").document(grupoId)
+                    .collection("mensagens")
+                    .whereEqualTo("lida", false)
+                    .get()
+                    .await()
+
+                mensagens.documents.forEach { doc ->
+                    val remetente = doc.getString("remetente") ?: ""
+                    if (remetente != emailUsuario) {
+                        db.collection("grupos").document(grupoId)
+                            .collection("mensagens").document(doc.id)
+                            .update("lida", true).await()
+                    }
+                }
+            } catch (e: Exception) {
+                // Silencioso
+            }
+        }
+    }
+
+    // ========== SAIR DO GRUPO ==========
+    private fun confirmarSairGrupo() {
+        lifecycleScope.launch {
+            try {
+                val grupoDoc = db.collection("grupos").document(grupoId).get().await()
+                val criadorEmail = grupoDoc.getString("criadorEmail") ?: ""
+
+                if (criadorEmail == emailUsuario) {
+                    Toast.makeText(
+                        this@ChatGrupoActivity,
+                        "Você é o criador do grupo. Só pode excluí-lo.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
+                AlertDialog.Builder(this@ChatGrupoActivity)
+                    .setTitle("Sair do grupo")
+                    .setMessage("Tem certeza que deseja sair deste grupo?")
+                    .setPositiveButton("Sair") { _, _ ->
+                        lifecycleScope.launch {
+                            try {
+                                val membros = grupoDoc.get("membros") as? List<*> ?: emptyList<Any>()
+                                val novosMembros = membros.filter { it != emailUsuario }
+
+                                db.collection("grupos").document(grupoId)
+                                    .update("membros", novosMembros).await()
+
+                                Toast.makeText(this@ChatGrupoActivity, "Você saiu do grupo", Toast.LENGTH_SHORT).show()
+                                finish()
+                            } catch (e: Exception) {
+                                Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -103,7 +183,8 @@ class ChatGrupoActivity : AppCompatActivity() {
                     "nomeRemetente" to nomeUsuario,
                     "texto" to texto,
                     "tipo" to "texto",
-                    "timestamp" to System.currentTimeMillis()
+                    "timestamp" to System.currentTimeMillis(),
+                    "lida" to false
                 )
 
                 db.collection("grupos").document(grupoId)
@@ -122,7 +203,10 @@ class ChatGrupoActivity : AppCompatActivity() {
             .unsigned("fqb729sb")
             .option("folder", "chats_grupo/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
-                override fun onStart(requestId: String?) {}
+                override fun onStart(requestId: String?) {
+                    Log.d("UPLOAD_GRUPO", "Iniciando upload...")
+                }
+
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
 
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
@@ -137,7 +221,8 @@ class ChatGrupoActivity : AppCompatActivity() {
                                         "texto" to "",
                                         "fotoUrl" to url,
                                         "tipo" to "foto",
-                                        "timestamp" to System.currentTimeMillis()
+                                        "timestamp" to System.currentTimeMillis(),
+                                        "lida" to false
                                     )
 
                                     db.collection("grupos").document(grupoId)
@@ -149,12 +234,17 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 }
                             }
                         }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@ChatGrupoActivity, "Erro: URL não encontrada", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
 
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
+                    Log.e("UPLOAD_GRUPO", "Erro: ${error?.description}")
                     runOnUiThread {
-                        Toast.makeText(this@ChatGrupoActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@ChatGrupoActivity, "Erro no upload: ${error?.description}", Toast.LENGTH_LONG).show()
                     }
                 }
 
