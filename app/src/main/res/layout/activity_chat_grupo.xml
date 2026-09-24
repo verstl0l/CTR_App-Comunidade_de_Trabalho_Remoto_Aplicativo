@@ -46,6 +46,15 @@
             android:textColor="@android:color/white"
             android:textSize="20sp" />
 
+        <Button
+            android:id="@+id/btnGerenciarMembros"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="👥"
+            android:textSize="20sp" />
+
     </LinearLayout>
 
     <ScrollView
@@ -83,13 +92,31 @@
             android:text="📷"
             android:textSize="20sp" />
 
+        <Button
+            android:id="@+id/btnEnviarVideoGrupo"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="🎥"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnEnviarArquivoGrupo"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="📎"
+            android:textSize="20sp" />
+
         <EditText
             android:id="@+id/edtMensagemGrupo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="#3D2B27"
-            android:hint="Digite uma mensagem..."
+            android:hint="Digite..."
             android:textColor="@android:color/white"
             android:textColorHint="#9E9E9E" />
 
@@ -97,7 +124,7 @@
             android:id="@+id/btnEnviarMensagemGrupo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="#F5E6D0"
             android:minWidth="0dp"
             android:text="➤"

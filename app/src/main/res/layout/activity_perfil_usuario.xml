@@ -175,14 +175,28 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnBloquear"
+                android:id="@+id/btnApagarConversa"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="12dp"
-                android:backgroundTint="#FF6B6B"
-                android:text="BLOQUEAR USUÁRIO"
+                android:backgroundTint="#3D2B27"
+                android:text="APAGAR CONVERSA"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnBloquear"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="24dp"
+                android:text="BLOQUEAR USUÁRIO"
+                android:textColor="#FF6B6B"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:backgroundTint="#2B1F1C"
+                app:strokeColor="#FF6B6B"
+                app:strokeWidth="1dp" />
 
         </LinearLayout>
     </ScrollView>

@@ -229,6 +229,85 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         configurarBottomNavigation()
     }
 
+    private fun abrirDialogEditarTrabalho(
+        trabalhoId: String,
+        tituloAtual: String,
+        descricaoAtual: String,
+        categoriaAtual: String,
+        prazoAtual: String
+    ) {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 20)
+        }
+
+        val edtTitulo = EditText(this).apply {
+            hint = "Título"
+            setText(tituloAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        val edtDescricao = EditText(this).apply {
+            hint = "Descrição"
+            setText(descricaoAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        val edtCategoria = EditText(this).apply {
+            hint = "Categoria"
+            setText(categoriaAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        val edtPrazo = EditText(this).apply {
+            hint = "Prazo"
+            setText(prazoAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        layout.addView(edtTitulo)
+        layout.addView(edtDescricao)
+        layout.addView(edtCategoria)
+        layout.addView(edtPrazo)
+
+        AlertDialog.Builder(this)
+            .setTitle("Editar Trabalho")
+            .setView(layout)
+            .setPositiveButton("Salvar") { _, _ ->
+                val novoTitulo = edtTitulo.text.toString().trim()
+                val novaDescricao = edtDescricao.text.toString().trim()
+                val novaCategoria = edtCategoria.text.toString().trim()
+                val novoPrazo = edtPrazo.text.toString().trim()
+
+                if (novoTitulo.isEmpty() || novaDescricao.isEmpty() || novaCategoria.isEmpty() || novoPrazo.isEmpty()) {
+                    Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                lifecycleScope.launch {
+                    try {
+                        db.collection("trabalhos").document(trabalhoId)
+                            .update(
+                                mapOf(
+                                    "titulo" to novoTitulo,
+                                    "descricao" to novaDescricao,
+                                    "categoria" to novaCategoria,
+                                    "prazo" to novoPrazo
+                                )
+                            ).await()
+
+                        Toast.makeText(this@GerenciarEquipeActivity, "✅ Trabalho atualizado!", Toast.LENGTH_SHORT).show()
+                        equipeId?.let { carregarTrabalhos(it) }
+
+                    } catch (e: Exception) {
+                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
     private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
@@ -463,41 +542,54 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                 trabalhos.documents.forEach { doc ->
                     val trabalhoId = doc.id
                     val titulo = doc.getString("titulo") ?: ""
+                    val descricao = doc.getString("descricao") ?: ""
                     val categoria = doc.getString("categoria") ?: ""
                     val prazo = doc.getString("prazo") ?: ""
 
-                    val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
-                    val t1 = view.findViewById<TextView>(android.R.id.text1)
-                    val t2 = view.findViewById<TextView>(android.R.id.text2)
+                    // ✅ Layout customizado com botão 📩
+                    val view = inflater.inflate(R.layout.item_trabalho_gerenciar, container, false)
 
-                    t1.text = titulo
-                    t1.setTextColor(android.graphics.Color.WHITE)
-                    t2.text = "$categoria - $prazo"
-                    t2.setTextColor(android.graphics.Color.GRAY)
-                    view.setPadding(0, 24, 0, 24)
+                    view.findViewById<TextView>(R.id.txtTituloGerenciar).text = titulo
+                    view.findViewById<TextView>(R.id.txtInfoGerenciar).text = "$categoria - $prazo"
+                    view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
 
-                    view.setOnClickListener {
+                    // 📩 → Convidar
+                    view.findViewById<Button>(R.id.btnConvidarGerenciar).setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, ConvidarTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
                         intent.putExtra("tituloTrabalho", titulo)
                         startActivity(intent)
                     }
 
+                    // Clique curto → Editar
+                    view.setOnClickListener {
+                        abrirDialogEditarTrabalho(trabalhoId, titulo, descricao, categoria, prazo)
+                    }
+
+                    // Long press → Excluir
                     view.setOnLongClickListener {
-                        lifecycleScope.launch {
-                            try {
-                                db.collection("trabalhos").document(trabalhoId).delete().await()
-                                carregarTrabalhos(equipeId)
-                                Toast.makeText(this@GerenciarEquipeActivity, "Trabalho removido!", Toast.LENGTH_SHORT).show()
-                            } catch (e: Exception) {
-                                Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        AlertDialog.Builder(this@GerenciarEquipeActivity)
+                            .setTitle("Excluir trabalho")
+                            .setMessage("Tem certeza que deseja excluir '$titulo'?")
+                            .setPositiveButton("Excluir") { _, _ ->
+                                lifecycleScope.launch {
+                                    try {
+                                        db.collection("trabalhos").document(trabalhoId).delete().await()
+                                        carregarTrabalhos(equipeId)
+                                        Toast.makeText(this@GerenciarEquipeActivity, "Trabalho removido!", Toast.LENGTH_SHORT).show()
+                                    } catch (e: Exception) {
+                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                    }
+                                }
                             }
-                        }
+                            .setNegativeButton("Cancelar", null)
+                            .show()
                         true
                     }
 
                     container.addView(view)
                 }
+
             } catch (e: Exception) {
                 Log.e("GERENCIAR", "Erro trabalhos: ${e.message}")
             }

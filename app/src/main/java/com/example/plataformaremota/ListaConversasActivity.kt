@@ -74,7 +74,6 @@ class ListaConversasActivity : AppCompatActivity() {
                     val ultimaMsg = chat.getString("ultimaMensagem") ?: "Sem mensagens"
                     val atualizadoEm = chat.getLong("atualizadoEm") ?: 0L
 
-                    // Conta não lidas
                     val naoLidas = chat.reference.collection("mensagens")
                         .whereEqualTo("lida", false)
                         .get()
@@ -126,7 +125,6 @@ class ListaConversasActivity : AppCompatActivity() {
 
                     val timestamp = ultimaMsgDoc.documents.firstOrNull()?.getLong("timestamp") ?: 0L
 
-                    // Conta não lidas
                     val naoLidas = grupo.reference.collection("mensagens")
                         .whereEqualTo("lida", false)
                         .get()
@@ -179,7 +177,6 @@ class ListaConversasActivity : AppCompatActivity() {
                     txtNome.text = item.nome
                     txtUltima.text = item.ultimaMsg
 
-                    // Ícone
                     if (item.tipo == "grupo") {
                         txtIcone.text = "👥"
                         cardIcone.setCardBackgroundColor(android.graphics.Color.parseColor("#0A66C2"))
@@ -188,7 +185,6 @@ class ListaConversasActivity : AppCompatActivity() {
                         cardIcone.setCardBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
                     }
 
-                    // ✅ Badge de não lidas
                     if (item.naoLidas > 0) {
                         txtBadge.text = if (item.naoLidas > 99) "99+" else item.naoLidas.toString()
                         txtBadge.visibility = View.VISIBLE
@@ -196,7 +192,6 @@ class ListaConversasActivity : AppCompatActivity() {
                         txtBadge.visibility = View.GONE
                     }
 
-                    // Clique
                     view.setOnClickListener {
                         if (item.tipo == "grupo") {
                             val intent = Intent(this@ListaConversasActivity, ChatGrupoActivity::class.java)
@@ -211,7 +206,6 @@ class ListaConversasActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Long press (só PV)
                     if (item.tipo == "pv") {
                         view.setOnLongClickListener {
                             AlertDialog.Builder(this@ListaConversasActivity)
@@ -239,26 +233,63 @@ class ListaConversasActivity : AppCompatActivity() {
     private fun apagarConversa(chatId: String) {
         AlertDialog.Builder(this)
             .setTitle("Apagar conversa")
-            .setMessage("Tem certeza? Todas as mensagens serão removidas.")
-            .setPositiveButton("Apagar") { _, _ ->
-                lifecycleScope.launch {
-                    try {
-                        val mensagens = db.collection("chats").document(chatId)
-                            .collection("mensagens").get().await()
-                        mensagens.documents.forEach { msg ->
-                            db.collection("chats").document(chatId)
-                                .collection("mensagens").document(msg.id).delete().await()
-                        }
-                        db.collection("chats").document(chatId).delete().await()
-                        Toast.makeText(this@ListaConversasActivity, "Conversa apagada", Toast.LENGTH_SHORT).show()
-                        carregarConversas()
-                    } catch (e: Exception) {
-                        Toast.makeText(this@ListaConversasActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
+            .setItems(arrayOf("Apagar mensagens", "Apagar conversa inteira")) { _, which ->
+                when (which) {
+                    0 -> apagarSomenteMensagens(chatId)
+                    1 -> apagarConversaInteira(chatId)
                 }
             }
             .setNegativeButton("Cancelar", null)
             .show()
+    }
+
+    private fun apagarSomenteMensagens(chatId: String) {
+        lifecycleScope.launch {
+            try {
+                val mensagens = db.collection("chats").document(chatId)
+                    .collection("mensagens").get().await()
+
+                mensagens.documents.forEach { msg ->
+                    db.collection("chats").document(chatId)
+                        .collection("mensagens").document(msg.id).delete().await()
+                }
+
+                db.collection("chats").document(chatId).update(
+                    mapOf(
+                        "ultimaMensagem" to "",
+                        "atualizadoEm" to System.currentTimeMillis()
+                    )
+                ).await()
+
+                Toast.makeText(this@ListaConversasActivity, "Mensagens apagadas", Toast.LENGTH_SHORT).show()
+                carregarConversas()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@ListaConversasActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun apagarConversaInteira(chatId: String) {
+        lifecycleScope.launch {
+            try {
+                val mensagens = db.collection("chats").document(chatId)
+                    .collection("mensagens").get().await()
+
+                mensagens.documents.forEach { msg ->
+                    db.collection("chats").document(chatId)
+                        .collection("mensagens").document(msg.id).delete().await()
+                }
+
+                db.collection("chats").document(chatId).delete().await()
+
+                Toast.makeText(this@ListaConversasActivity, "Conversa apagada", Toast.LENGTH_SHORT).show()
+                carregarConversas()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@ListaConversasActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun abrirPerfil(email: String) {
@@ -339,7 +370,7 @@ class ListaConversasActivity : AppCompatActivity() {
                 }
                 R.id.nav_chat -> true
                 R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }

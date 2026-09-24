@@ -73,13 +73,40 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
+        <Button
+            android:id="@+id/btnEnviarFoto"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="📷"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnEnviarVideo"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="🎥"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnEnviarArquivo"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="📎"
+            android:textSize="20sp" />
+
         <EditText
             android:id="@+id/edtMensagem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="#3D2B27"
-            android:hint="Digite uma mensagem..."
+            android:hint="Digite..."
             android:textColor="@android:color/white"
             android:textColorHint="#9E9E9E" />
 
@@ -87,7 +114,7 @@
             android:id="@+id/btnEnviar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="#F5E6D0"
             android:minWidth="0dp"
             android:text="➤"

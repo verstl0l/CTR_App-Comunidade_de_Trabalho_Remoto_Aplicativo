@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/txtNomeVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Usuário"
+        android:textColor="#9E9E9E"
+        android:textSize="12sp" />
+
+    <FrameLayout
+        android:layout_width="260dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="4dp"
+        android:background="#000000">
+
+        <VideoView
+            android:id="@+id/videoMensagem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+
+        <Button
+            android:id="@+id/btnPlayVideo"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:backgroundTint="#F5E6D0"
+            android:text="▶"
+            android:textColor="#1C1311"
+            android:textSize="24sp" />
+
+    </FrameLayout>
+
+</LinearLayout>

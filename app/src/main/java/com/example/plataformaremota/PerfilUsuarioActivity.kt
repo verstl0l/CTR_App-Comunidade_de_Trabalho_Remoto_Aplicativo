@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+
 class PerfilUsuarioActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -44,6 +45,7 @@ class PerfilUsuarioActivity : AppCompatActivity() {
 
         val btnConversar = findViewById<Button>(R.id.btnConversar)
         val btnBloquear = findViewById<Button>(R.id.btnBloquear)
+        val btnApagarConversa = findViewById<Button>(R.id.btnApagarConversa)
 
         carregarDados()
         verificarBloqueio()
@@ -60,6 +62,10 @@ class PerfilUsuarioActivity : AppCompatActivity() {
             } else {
                 desbloquear()
             }
+        }
+
+        btnApagarConversa.setOnClickListener {
+            abrirDialogApagarConversa()
         }
     }
 
@@ -121,6 +127,92 @@ class PerfilUsuarioActivity : AppCompatActivity() {
         }
     }
 
+    // ========== APAGAR CONVERSA ==========
+    private fun abrirDialogApagarConversa() {
+        lifecycleScope.launch {
+            try {
+                val chats = db.collection("chats")
+                    .whereArrayContains("participantes", emailUsuario)
+                    .get()
+                    .await()
+
+                val chat = chats.documents.find { doc ->
+                    val parts = doc.get("participantes") as? List<*>
+                    parts?.contains(emailOutro) == true
+                }
+
+                if (chat == null) {
+                    Toast.makeText(this@PerfilUsuarioActivity, "Nenhuma conversa encontrada", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                val chatId = chat.id
+
+                AlertDialog.Builder(this@PerfilUsuarioActivity)
+                    .setTitle("Apagar conversa")
+                    .setItems(arrayOf("Apagar mensagens", "Apagar conversa inteira")) { _, which ->
+                        when (which) {
+                            0 -> apagarSomenteMensagens(chatId)
+                            1 -> apagarConversaInteira(chatId)
+                        }
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun apagarSomenteMensagens(chatId: String) {
+        lifecycleScope.launch {
+            try {
+                val mensagens = db.collection("chats").document(chatId)
+                    .collection("mensagens").get().await()
+
+                mensagens.documents.forEach { msg ->
+                    db.collection("chats").document(chatId)
+                        .collection("mensagens").document(msg.id).delete().await()
+                }
+
+                db.collection("chats").document(chatId).update(
+                    mapOf(
+                        "ultimaMensagem" to "",
+                        "atualizadoEm" to System.currentTimeMillis()
+                    )
+                ).await()
+
+                Toast.makeText(this@PerfilUsuarioActivity, "Mensagens apagadas", Toast.LENGTH_SHORT).show()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun apagarConversaInteira(chatId: String) {
+        lifecycleScope.launch {
+            try {
+                val mensagens = db.collection("chats").document(chatId)
+                    .collection("mensagens").get().await()
+
+                mensagens.documents.forEach { msg ->
+                    db.collection("chats").document(chatId)
+                        .collection("mensagens").document(msg.id).delete().await()
+                }
+
+                db.collection("chats").document(chatId).delete().await()
+
+                Toast.makeText(this@PerfilUsuarioActivity, "Conversa apagada", Toast.LENGTH_SHORT).show()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    // ========== BLOQUEAR / DESBLOQUEAR ==========
     private fun verificarBloqueio() {
         lifecycleScope.launch {
             try {
@@ -133,10 +225,8 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                 val btnBloquear = findViewById<Button>(R.id.btnBloquear)
                 if (!bloqueio.isEmpty) {
                     btnBloquear.text = "DESBLOQUEAR USUÁRIO"
-                    btnBloquear.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"))
                 } else {
                     btnBloquear.text = "BLOQUEAR USUÁRIO"
-                    btnBloquear.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
                 }
             } catch (e: Exception) {
                 Log.e("PERFIL_USUARIO", "Erro: ${e.message}")

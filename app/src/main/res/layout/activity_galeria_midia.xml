@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- ViewPager2 (swipe entre mídias) -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPagerMidia"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Botão voltar flutuante (canto superior esquerdo) -->
+    <Button
+        android:id="@+id/btnVoltarGaleria"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:minWidth="0dp"
+        android:text="✕"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Botão baixar flutuante (canto superior direito) -->
+    <Button
+        android:id="@+id/btnBaixarGaleria"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:minWidth="0dp"
+        android:text="⬇"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
