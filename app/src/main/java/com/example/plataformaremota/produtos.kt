@@ -73,13 +73,25 @@ class produtos : AppCompatActivity() {
         val nomeUsuario = prefs.getString("nomeUsuario", "Usuário") ?: "Usuário"
 
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeDashboard)
-        val txtCriador = findViewById<TextView>(R.id.txtCriadorEquipeDashboard)
-        val txtDescricao = findViewById<TextView>(R.id.txtDescricaoEquipeDashboard)
-        val txtLogo = findViewById<TextView>(R.id.txtLogoEquipe)
-        val btnConfig = findViewById<ImageView>(R.id.btnConfigEquipe)
-        val btnCriarTrabalho = findViewById<Button>(R.id.btnCriarTrabalho)
-        val containerTrabalhos = findViewById<LinearLayout>(R.id.containerTrabalhosRecentes)
 
+        val txtCriador = findViewById<TextView>(R.id.txtCriadorEquipeDashboard)
+
+        val txtDescricao = findViewById<TextView>(R.id.txtDescricaoEquipeDashboard)
+
+        val txtLogo = findViewById<TextView>(R.id.txtLogoEquipe)
+
+        val btnConfig = findViewById<ImageView>(R.id.btnConfigEquipe)
+
+        val btnCriarTrabalho = findViewById<Button>(R.id.btnCriarTrabalho)
+
+        val containerTrabalhos = findViewById<LinearLayout>(R.id.containerTrabalhosRecentes)
+        //  Botão Produtividade
+        val btnProdutividade = findViewById<Button>(R.id.btnProdutividade)
+        btnProdutividade.setOnClickListener {
+            val intent = Intent(this, ProdutividadeActivity::class.java)
+            intent.putExtra("equipeId", equipeIdAtual)
+            startActivity(intent)
+        }
         val btnChatEquipe = findViewById<Button>(R.id.btnChatEquipe)
         btnChatEquipe.setOnClickListener {
             val intent = Intent(this, ChatEquipeActivity::class.java)

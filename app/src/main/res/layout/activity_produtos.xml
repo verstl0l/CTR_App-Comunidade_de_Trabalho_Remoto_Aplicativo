@@ -147,9 +147,21 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Crie um novo trabalho, defina o prazo e atribua aos membros."
+                        android:text="Crie um novo trabalho, defina o prazo, atribua aos membros e acompanhe a produtividade."
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnProdutividade"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:backgroundTint="#2B1F1C"
+                        android:text="📊 VER PRODUTIVIDADE"
+                        android:textColor="#F5E6D0"
+                        android:textStyle="bold"
+                        app:strokeColor="#F5E6D0"
+                        app:strokeWidth="1dp" />
 
                     <Button
                         android:id="@+id/btnCriarTrabalho"
