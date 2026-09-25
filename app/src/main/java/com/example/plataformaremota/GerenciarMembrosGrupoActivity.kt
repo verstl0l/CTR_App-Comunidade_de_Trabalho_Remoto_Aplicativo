@@ -232,8 +232,22 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                 db.collection("grupos").document(grupoId)
                     .update("membros", novosMembros).await()
 
-                // ✅ Adiciona o grupoId na lista do novo membro
+                // Adiciona o grupoId na lista do novo membro
                 adicionarGrupoIdAoUsuario(email, grupoId)
+
+                // Notifica o membro adicionado
+                val grupoDoc = db.collection("grupos").document(grupoId).get().await()
+                val nomeGrupo = grupoDoc.getString("nomeGrupo") ?: "Grupo"
+                val nomeRemetente = db.collection("usuarios").document(emailUsuario)
+                    .get().await().getString("nome") ?: emailUsuario
+
+                NotificacaoHelper.notificarMembroAdicionado(
+                    destinatario = email,
+                    remetente = emailUsuario,
+                    nomeRemetente = nomeRemetente,
+                    grupoId = grupoId,
+                    nomeGrupo = nomeGrupo
+                )
 
                 Toast.makeText(this@GerenciarMembrosGrupoActivity, "Membro adicionado", Toast.LENGTH_SHORT).show()
                 carregarMembros()

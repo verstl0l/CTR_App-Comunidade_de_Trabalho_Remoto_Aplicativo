@@ -85,19 +85,39 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                         "criadoEm" to System.currentTimeMillis()
                     )
 
-                    db.collection("trabalhos")
-                        .add(trabalho)
-                        .addOnSuccessListener {
-                            Log.d("CRIAR_TRABALHO", "✅ Trabalho publicado com responsável: $email")
-                            Toast.makeText(this@CriarTrabalhoActivity, "✅ Trabalho publicado!", Toast.LENGTH_SHORT).show()
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("CRIAR_TRABALHO", "Erro: ${e.message}")
-                            Toast.makeText(this@CriarTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-                            btnPublicar.isEnabled = true
-                            btnPublicar.text = "PUBLICAR TRABALHO"
-                        }
+                    val trabalhoId = db.collection("trabalhos").add(trabalho).await().id
+
+// Notifica todos os membros da equipe (exceto o proprio criador)
+                    val membros = db.collection("membros_equipe")
+                        .whereEqualTo("equipeId", equipeId)
+                        .get()
+                        .await()
+
+                    val emailsParaNotificar = membros.documents
+                        .mapNotNull { it.getString("email") }
+                        .filter { it != email }
+
+                    if (emailsParaNotificar.isNotEmpty()) {
+                        val nomeEquipe = db.collection("equipes").document(equipeId)
+                            .get().await().getString("nome") ?: "Equipe"
+
+                        // Busca o nome do remetente no Firestore
+                        val nomeRemetente = db.collection("usuarios").document(email)
+                            .get().await().getString("nome") ?: email
+
+                        NotificacaoHelper.notificarNovoTrabalhoParaMembros(
+                            emailsMembros = emailsParaNotificar,
+                            remetente = email,
+                            nomeRemetente = nomeRemetente,
+                            trabalhoId = trabalhoId,
+                            tituloTrabalho = titulo,
+                            nomeEquipe = nomeEquipe
+                        )
+                    }
+
+                    Log.d("CRIAR_TRABALHO", "Trabalho publicado com responsavel: $email")
+                    Toast.makeText(this@CriarTrabalhoActivity, "Trabalho publicado!", Toast.LENGTH_SHORT).show()
+                    finish()
 
                 } catch (e: Exception) {
                     Log.e("CRIAR_TRABALHO", "Erro: ${e.message}")
@@ -128,7 +148,7 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_notifications -> {
-                    startActivity(Intent(this, notificacao::class.java))
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
                     finish()
                     true
                 }

@@ -35,7 +35,7 @@ class participantes : AppCompatActivity() {
                     true
                 }
                 R.id.nav_notifications -> {
-                    startActivity(Intent(this, notificacao::class.java))
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
                     finish()
                     true
                 }

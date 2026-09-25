@@ -198,11 +198,30 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
             val txtStatus = view.findViewById<TextView>(R.id.txtStatusTrabalhoMembro)
             atualizarStatusUI(txtStatus, status)
 
+            // Botao iniciar/concluir
             val btnEntregar = view.findViewById<Button>(R.id.btnEntregarTrabalho)
             atualizarBotao(btnEntregar, status)
-
             btnEntregar.setOnClickListener {
                 mostrarOpcoesStatus(trabalhoId, status, container)
+            }
+
+            // Conta anexos deste trabalho
+            val btnAnexos = view.findViewById<Button>(R.id.btnAnexosMembro)
+            lifecycleScope.launch {
+                try {
+                    val anexos = doc.reference.collection("anexos").get().await()
+                    btnAnexos.text = anexos.size().toString()
+                } catch (e: Exception) {
+                    btnAnexos.text = "0"
+                }
+            }
+
+            // Click no botao anexos -> abre AnexosTrabalhoActivity
+            btnAnexos.setOnClickListener {
+                val intent = Intent(this@EntregarTrabalhoActivity, AnexosTrabalhoActivity::class.java)
+                intent.putExtra("trabalhoId", trabalhoId)
+                intent.putExtra("tituloTrabalho", titulo)
+                startActivity(intent)
             }
 
             container.addView(view)
@@ -298,7 +317,7 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_notifications -> {
-                    startActivity(Intent(this, notificacao::class.java))
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
                     finish()
                     true
                 }

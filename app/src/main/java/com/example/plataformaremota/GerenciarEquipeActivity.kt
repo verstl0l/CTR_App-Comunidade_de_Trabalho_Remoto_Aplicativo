@@ -34,7 +34,13 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         email = auth.currentUser?.email ?: ""
-        nomeUsuario = auth.currentUser?.displayName ?: "Usuário"
+        nomeUsuario = "Usuário"
+        lifecycleScope.launch {
+            try {
+                val userDoc = db.collection("usuarios").document(email).get().await()
+                nomeUsuario = userDoc.getString("nome") ?: "Usuário"
+            } catch (_: Exception) { }
+        }
 
         val edtNomeEquipe = findViewById<EditText>(R.id.edtGerenciarNomeEquipe)
         val edtDescEquipe = findViewById<EditText>(R.id.edtGerenciarDescEquipe)
@@ -168,6 +174,15 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     )
 
                     db.collection("convites_equipe").add(convite).await()
+
+                    // Notificacao in-app para o convidado
+                    NotificacaoHelper.notificarConviteEquipe(
+                        destinatario = emailConvidado,
+                        remetente = email,
+                        nomeRemetente = nomeUsuario,
+                        equipeId = equipeId ?: "",
+                        nomeEquipe = nomeEquipe
+                    )
 
                     Toast.makeText(this@GerenciarEquipeActivity, "✅ Convite enviado!", Toast.LENGTH_SHORT).show()
                     edtEmailConvite.text.clear()
@@ -343,7 +358,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_notifications -> {
-                    startActivity(Intent(this, notificacao::class.java))
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
                     finish()
                     true
                 }
@@ -484,12 +499,16 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         AlertDialog.Builder(this@GerenciarEquipeActivity)
                             .setTitle("Pedido de $nome")
                             .setMessage("Motivos: $motivos\n\nEspecialidades: $especialidades")
+
+                            // Botao ACEITAR
                             .setPositiveButton("Aceitar") { _, _ ->
                                 lifecycleScope.launch {
                                     try {
+                                        // 1. Atualiza o status do pedido
                                         db.collection("pedidos_entrada").document(pedidoId)
                                             .update("status", "aceito").await()
 
+                                        // 2. Adiciona como membro da equipe
                                         val membro = hashMapOf(
                                             "equipeId" to equipeId,
                                             "email" to emailSol,
@@ -499,26 +518,72 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                         )
                                         db.collection("membros_equipe").add(membro).await()
 
-                                        Toast.makeText(this@GerenciarEquipeActivity, "✅ Pedido aceito!", Toast.LENGTH_SHORT).show()
+                                        // 3. Notifica o solicitante que foi aceito
+                                        NotificacaoHelper.notificarPedidoAceito(
+                                            destinatario = emailSol,
+                                            remetente = email,
+                                            nomeRemetente = nomeUsuario,
+                                            equipeId = equipeId,
+                                            nomeEquipe = nomeEquipe
+                                        )
+
+                                        Toast.makeText(
+                                            this@GerenciarEquipeActivity,
+                                            "Pedido aceito!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         carregarPedidos(equipeId)
                                         carregarMembros(equipeId)
+
                                     } catch (e: Exception) {
-                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(
+                                            this@GerenciarEquipeActivity,
+                                            getString(R.string.erro_generico, e.message ?: ""),
+                                            Toast.LENGTH_LONG
+                                        ).show()
                                     }
                                 }
                             }
+
+                            // Botao RECUSAR
                             .setNegativeButton("Recusar") { _, _ ->
                                 lifecycleScope.launch {
                                     try {
+                                        // 1. Atualiza o status do pedido
                                         db.collection("pedidos_entrada").document(pedidoId)
                                             .update("status", "recusado").await()
-                                        Toast.makeText(this@GerenciarEquipeActivity, "❌ Pedido recusado", Toast.LENGTH_SHORT).show()
+
+                                        // 2. Notifica o solicitante que foi recusado
+                                        NotificacaoHelper.criar(
+                                            destinatario = emailSol,
+                                            tipo = "pedido_recusado",
+                                            titulo = "Pedido recusado",
+                                            mensagem = "Seu pedido para entrar em $nomeEquipe foi recusado",
+                                            referenciaId = equipeId,
+                                            referenciaTipo = "equipe",
+                                            remetente = email,
+                                            nomeRemetente = nomeUsuario
+                                        )
+
+                                        Toast.makeText(
+                                            this@GerenciarEquipeActivity,
+                                            "Pedido recusado",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         carregarPedidos(equipeId)
+
                                     } catch (e: Exception) {
-                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(
+                                            this@GerenciarEquipeActivity,
+                                            getString(R.string.erro_generico, e.message ?: ""),
+                                            Toast.LENGTH_LONG
+                                        ).show()
                                     }
                                 }
                             }
+
+                            // Botao extra (opcional): so fecha
+                            .setNeutralButton("Depois", null)
                             .show()
                     }
 
@@ -567,6 +632,26 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     view.findViewById<TextView>(R.id.txtInfoGerenciar).text = "$categoria - $prazo"
                     view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
 
+                    // Conta anexos deste trabalho
+                    val btnAnexos = view.findViewById<Button>(R.id.btnAnexosGerenciar)
+                    lifecycleScope.launch {
+                        try {
+                            val anexos = doc.reference.collection("anexos").get().await()
+                            btnAnexos.text = anexos.size().toString()
+                        } catch (e: Exception) {
+                            btnAnexos.text = "0"
+                        }
+                    }
+
+                    // Click no botao anexos -> abre AnexosTrabalhoActivity
+                    btnAnexos.setOnClickListener {
+                        val intent = Intent(this@GerenciarEquipeActivity, AnexosTrabalhoActivity::class.java)
+                        intent.putExtra("trabalhoId", trabalhoId)
+                        intent.putExtra("tituloTrabalho", titulo)
+                        startActivity(intent)
+                    }
+
+                    // Click no botao convidar
                     view.findViewById<Button>(R.id.btnConvidarGerenciar).setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, ConvidarTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
@@ -574,10 +659,12 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
+                    // Click curto no card -> editar
                     view.setOnClickListener {
                         abrirDialogEditarTrabalho(trabalhoId, titulo, descricao, categoria, prazo)
                     }
 
+                    // Long press no card -> excluir
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@GerenciarEquipeActivity)
                             .setTitle("Excluir trabalho")
@@ -585,7 +672,16 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                             .setPositiveButton("Excluir") { _, _ ->
                                 lifecycleScope.launch {
                                     try {
+                                        // Exclui anexos antes do trabalho
+                                        val anexos = db.collection("trabalhos").document(trabalhoId)
+                                            .collection("anexos").get().await()
+                                        anexos.documents.forEach {
+                                            it.reference.delete().await()
+                                        }
+
+                                        // Exclui o trabalho
                                         db.collection("trabalhos").document(trabalhoId).delete().await()
+
                                         carregarTrabalhos(equipeId)
                                         Toast.makeText(this@GerenciarEquipeActivity, "Trabalho removido!", Toast.LENGTH_SHORT).show()
                                     } catch (e: Exception) {

@@ -50,7 +50,6 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".participantes" />
         <activity android:name=".produtos" />
-        <activity android:name=".notificacao" />
         <activity android:name=".perfil" />
 
         <!-- OUTRAS TELAS -->
@@ -126,6 +125,20 @@
         <activity
             android:name=".MensagensFavoritasActivity"
             android:exported="false" />
+        <activity
+            android:name=".NotificacoesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ANEXOS DE TRABALHO -->
+        <activity
+            android:name=".AnexosTrabalhoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AceitarConviteActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

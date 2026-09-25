@@ -185,7 +185,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
                 }
                 R.id.nav_groups -> true  // Já estamos aqui
                 R.id.nav_notifications -> {
-                    startActivity(Intent(this, notificacao::class.java))
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
                     finish()
                     true
                 }

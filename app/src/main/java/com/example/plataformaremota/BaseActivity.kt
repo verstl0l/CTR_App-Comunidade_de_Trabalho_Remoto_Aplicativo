@@ -9,9 +9,9 @@ import kotlinx.coroutines.launch
 
 /**
  * Activity base que centraliza:
- * - Configuração do BottomNavigationView
- * - Navegação entre as 5 telas principais
- * - Badge de chat
+ *   - Configuracao do BottomNavigationView
+ *   - Navegacao entre as 5 telas principais
+ *   - Badge de chat e de notificacoes
  *
  * Uso: herde de BaseActivity e chame configurarBottomNavigation(R.id.nav_xxx)
  */
@@ -20,7 +20,7 @@ abstract class BaseActivity : AppCompatActivity() {
     /**
      * Configura o BottomNavigationView de forma padronizada.
      *
-     * @param currentItemId ID do item atual (fica destacado). Se null, nenhum é destacado.
+     * @param currentItemId ID do item atual (fica destacado). Se null, nenhum e destacado.
      */
     protected fun configurarBottomNavigation(currentItemId: Int? = null) {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation) ?: return
@@ -38,7 +38,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 R.id.nav_home -> MainActivity::class.java
                 R.id.nav_chat -> ListaConversasActivity::class.java
                 R.id.nav_groups -> MinhasEquipesActivity::class.java
-                R.id.nav_notifications -> notificacao::class.java
+                R.id.nav_notifications -> NotificacoesActivity::class.java
                 R.id.nav_profile -> perfil::class.java
                 else -> return@setOnItemSelectedListener false
             }
@@ -48,19 +48,19 @@ abstract class BaseActivity : AppCompatActivity() {
             true
         }
 
-        // Atualiza badge do chat
+        // Atualiza os badges (chat + notificacoes)
         lifecycleScope.launch {
-            BadgeHelper.atualizarBadgeChat(this@BaseActivity, bottomNav)
+            BadgeHelper.atualizarTodosBadges(this@BaseActivity, bottomNav)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // Reaplica badge ao voltar pra tela
+        // Reaplica os badges ao voltar para a tela
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         if (bottomNav != null) {
             lifecycleScope.launch {
-                BadgeHelper.atualizarBadgeChat(this@BaseActivity, bottomNav)
+                BadgeHelper.atualizarTodosBadges(this@BaseActivity, bottomNav)
             }
         }
     }

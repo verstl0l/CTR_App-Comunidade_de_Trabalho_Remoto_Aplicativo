@@ -4,62 +4,100 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="#2B1F1C"
+    app:cardBackgroundColor="@color/bg_surface"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Linha principal: info + botoes -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/txtTituloGerenciar"
+            <!-- Info do trabalho -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtTituloGerenciar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Titulo"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtInfoGerenciar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Categoria - Prazo"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/txtDescricaoGerenciar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="Descricao"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <!-- Botao anexos -->
+            <Button
+                android:id="@+id/btnAnexosGerenciar"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Título"
-                android:textColor="@android:color/white"
+                android:layout_gravity="center_vertical"
+                android:minWidth="0dp"
+                android:padding="8dp"
+                android:text="0"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp" />
+
+            <!-- Botao convidar -->
+            <Button
+                android:id="@+id/btnConvidarGerenciar"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:minWidth="0dp"
+                android:padding="8dp"
+                android:text="C"
+                android:textColor="@color/accent"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/txtInfoGerenciar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Categoria - Prazo"
-                android:textColor="#9E9E9E"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/txtDescricaoGerenciar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="Descrição"
-                android:textColor="#CCCCCC"
-                android:textSize="14sp" />
-
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnConvidarGerenciar"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+        <!-- Contador de anexos -->
+        <TextView
+            android:id="@+id/txtContadorAnexosGerenciar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:minWidth="0dp"
-            android:text="📩"
-            android:textSize="20sp" />
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="@color/accent"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
     </LinearLayout>
 

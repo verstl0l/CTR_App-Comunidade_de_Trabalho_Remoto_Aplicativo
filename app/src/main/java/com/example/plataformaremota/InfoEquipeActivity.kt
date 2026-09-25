@@ -275,23 +275,31 @@ class InfoEquipeActivity : AppCompatActivity() {
             .setPositiveButton("Excluir") { _, _ ->
                 lifecycleScope.launch {
                     try {
-                        // 1. Trabalhos
+                        // 1. Anexos dos trabalhos (deletar ANTES dos trabalhos)
                         val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", equipeId).get().await()
+                        for (trabalho in trabalhos.documents) {
+                            val anexos = trabalho.reference.collection("anexos").get().await()
+                            anexos.documents.forEach { anexo ->
+                                anexo.reference.delete().await()
+                            }
+                        }
+
+                        // 2. Trabalhos
                         trabalhos.documents.forEach { db.collection("trabalhos").document(it.id).delete().await() }
 
-                        // 2. Membros
+                        // 3. Membros
                         val membros = db.collection("membros_equipe").whereEqualTo("equipeId", equipeId).get().await()
                         membros.documents.forEach { db.collection("membros_equipe").document(it.id).delete().await() }
 
-                        // 3. Convites
+                        // 4. Convites
                         val convites = db.collection("convites_equipe").whereEqualTo("equipeId", equipeId).get().await()
                         convites.documents.forEach { db.collection("convites_equipe").document(it.id).delete().await() }
 
-                        // 4. Pedidos
+                        // 5. Pedidos
                         val pedidos = db.collection("pedidos_entrada").whereEqualTo("equipeId", equipeId).get().await()
                         pedidos.documents.forEach { db.collection("pedidos_entrada").document(it.id).delete().await() }
 
-                        // 5. ✅ Mensagens do chat de equipe ANTES do doc raiz
+                        // 6. Mensagens do chat de equipe ANTES do doc raiz
                         val msgsEquipe = db.collection("chats_equipe").document(equipeId)
                             .collection("mensagens").get().await()
                         msgsEquipe.documents.forEach {
@@ -299,7 +307,7 @@ class InfoEquipeActivity : AppCompatActivity() {
                                 .collection("mensagens").document(it.id).delete().await()
                         }
 
-                        // 6. ✅ Grupos + suas mensagens
+                        // 7. Grupos + suas mensagens
                         val grupos = db.collection("grupos").whereEqualTo("equipeId", equipeId).get().await()
                         grupos.documents.forEach { grupoDoc ->
                             val msgsGrupo = grupoDoc.reference.collection("mensagens").get().await()
@@ -307,10 +315,10 @@ class InfoEquipeActivity : AppCompatActivity() {
                             grupoDoc.reference.delete().await()
                         }
 
-                        // 7. ✅ Doc raiz do chat de equipe
+                        // 8. Doc raiz do chat de equipe
                         db.collection("chats_equipe").document(equipeId).delete().await()
 
-                        // 8. ✅ Equipe
+                        // 9. Equipe
                         db.collection("equipes").document(equipeId).delete().await()
 
                         Toast.makeText(this@InfoEquipeActivity, "Equipe excluída!", Toast.LENGTH_SHORT).show()
@@ -318,7 +326,11 @@ class InfoEquipeActivity : AppCompatActivity() {
                         finishAffinity()
 
                     } catch (e: Exception) {
-                        Toast.makeText(this@InfoEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@InfoEquipeActivity,
+                            getString(R.string.erro_generico, e.message ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }

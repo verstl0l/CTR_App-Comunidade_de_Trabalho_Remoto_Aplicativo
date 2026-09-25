@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    app:cardBackgroundColor="#2E1A16"
+    app:cardBackgroundColor="@color/bg_surface_light"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp">
 
@@ -14,7 +14,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Título + Status -->
+        <!-- Titulo + Status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -25,8 +25,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Título do Trabalho"
-                android:textColor="@android:color/white"
+                android:text="Titulo do Trabalho"
+                android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -34,11 +34,11 @@
                 android:id="@+id/txtStatusTrabalhoMembro"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#3D2B27"
+                android:background="@color/bg_surface_hover"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
                 android:text="Em Progresso"
-                android:textColor="#F5E6D0"
+                android:textColor="@color/accent"
                 android:textSize="11sp" />
 
         </LinearLayout>
@@ -50,29 +50,29 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Entrega: 18 Out"
-            android:textColor="#9E9E9E"
+            android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
-        <!-- Descrição -->
+        <!-- Descricao -->
         <TextView
             android:id="@+id/txtDescricaoTrabalhoMembro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Descrição do trabalho..."
-            android:textColor="#CCCCCC"
+            android:text="Descricao do trabalho..."
+            android:textColor="@color/text_tertiary"
             android:textSize="14sp" />
 
-        <!-- "Quem mais está na tarefa" -->
+        <!-- "Quem mais esta na tarefa" -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Quem mais está na tarefa"
-            android:textColor="#9E9E9E"
+            android:text="Quem mais esta na tarefa"
+            android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
-        <!-- Avatares + Botão INICIAR -->
+        <!-- Avatares + Botoes -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -80,33 +80,58 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <!-- Avatares (decorativos por enquanto) -->
             <View
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@drawable/ic_launcher_foreground"
-                android:backgroundTint="#F5E6D0" />
+                android:backgroundTint="@color/accent" />
 
             <View
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_marginStart="-8dp"
                 android:background="@drawable/ic_launcher_foreground"
-                android:backgroundTint="#3D2B27" />
+                android:backgroundTint="@color/bg_surface_hover" />
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
+            <!-- Botao anexos -->
+            <Button
+                android:id="@+id/btnAnexosMembro"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:padding="8dp"
+                android:text="0"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp" />
+
+            <!-- Botao INICIAR/CONCLUIR -->
             <Button
                 android:id="@+id/btnEntregarTrabalho"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#3D2B27"
+                android:backgroundTint="@color/bg_surface_hover"
                 android:text="INICIAR"
-                android:textColor="@android:color/white" />
+                android:textColor="@color/text_primary" />
 
         </LinearLayout>
+
+        <!-- Contador de anexos (opcional) -->
+        <TextView
+            android:id="@+id/txtContadorAnexosMembro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="@color/accent"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
     </LinearLayout>
 
