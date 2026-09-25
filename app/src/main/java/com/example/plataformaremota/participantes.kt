@@ -15,6 +15,8 @@ class participantes : AppCompatActivity() {
 
     private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNav.selectedItemId = R.id.nav_profile
+
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {
@@ -22,13 +24,13 @@ class participantes : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_chat -> {
+                R.id.nav_chat -> {                                    // ✅ CORRIGIDO: faltava
                     startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                R.id.nav_groups -> {                                  // ✅ CORRIGIDO: era produtos
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }
@@ -37,11 +39,7 @@ class participantes : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, perfil::class.java))
-                    finish()
-                    true
-                }
+                R.id.nav_profile -> true
                 else -> false
             }
         }

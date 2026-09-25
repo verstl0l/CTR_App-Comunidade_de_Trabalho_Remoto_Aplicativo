@@ -36,7 +36,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var grupoId: String = ""
     private var equipeId: String = ""
 
-    // ✅ Launcher FOTO
+    // ========== LAUNCHERS ==========
     private val selecionarImagem = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -46,7 +46,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ Launcher VÍDEO
     private val selecionarVideo = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -56,7 +55,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ Launcher ARQUIVO
     private val selecionarArquivo = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -124,21 +122,18 @@ class ChatGrupoActivity : AppCompatActivity() {
             enviarMensagem(texto)
         }
 
-        // ✅ FOTO
         btnFoto.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
             selecionarImagem.launch(intent)
         }
 
-        // ✅ VÍDEO
         btnVideo.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "video/*"
             selecionarVideo.launch(intent)
         }
 
-        // ✅ ARQUIVO
         btnArquivo.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "*/*"
@@ -154,6 +149,9 @@ class ChatGrupoActivity : AppCompatActivity() {
         marcarMensagensComoLidas()
     }
 
+    // ============================================================
+    // ✅ Marca como lidas com WriteBatch
+    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (grupoId.isEmpty()) return
 
@@ -165,18 +163,26 @@ class ChatGrupoActivity : AppCompatActivity() {
                     .get()
                     .await()
 
+                if (mensagens.isEmpty) return@launch
+
+                val batch = db.batch()
                 mensagens.documents.forEach { doc ->
                     val remetente = doc.getString("remetente") ?: ""
                     if (remetente != emailUsuario) {
-                        db.collection("grupos").document(grupoId)
-                            .collection("mensagens").document(doc.id)
-                            .update("lida", true).await()
+                        batch.update(doc.reference, "lida", true)
                     }
                 }
-            } catch (e: Exception) { }
+                batch.commit().await()
+
+            } catch (e: Exception) {
+                Log.e("CHAT_GRUPO", "Erro ao marcar como lidas: ${e.message}")
+            }
         }
     }
 
+    // ============================================================
+    // SAIR DO GRUPO
+    // ============================================================
     private fun confirmarSairGrupo() {
         lifecycleScope.launch {
             try {
@@ -200,6 +206,9 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 db.collection("grupos").document(grupoId)
                                     .update("membros", novosMembros).await()
 
+                                // ✅ Remove o grupoId da lista do usuário
+                                removerGrupoIdDoUsuario(emailUsuario, grupoId)
+
                                 Toast.makeText(this@ChatGrupoActivity, "Você saiu do grupo", Toast.LENGTH_SHORT).show()
                                 finish()
                             } catch (e: Exception) {
@@ -207,7 +216,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             }
                         }
                     }
-                    .setNegativeButton("Cancelar", null)
+                    .setNegativeButton(R.string.cancelar, null)
                     .show()
 
             } catch (e: Exception) {
@@ -216,7 +225,9 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ========== ENVIAR TEXTO ==========
+    // ============================================================
+    // ENVIAR TEXTO
+    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -231,12 +242,18 @@ class ChatGrupoActivity : AppCompatActivity() {
                 db.collection("grupos").document(grupoId)
                     .collection("mensagens").add(mensagem).await()
             } catch (e: Exception) {
-                Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-    // ========== ENVIAR FOTO ==========
+    // ============================================================
+    // ENVIAR FOTO
+    // ============================================================
     private fun enviarFoto(uri: Uri) {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
 
@@ -281,7 +298,9 @@ class ChatGrupoActivity : AppCompatActivity() {
             .dispatch()
     }
 
-    // ========== ENVIAR VÍDEO ==========
+    // ============================================================
+    // ENVIAR VÍDEO
+    // ============================================================
     private fun enviarVideo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
 
@@ -327,7 +346,9 @@ class ChatGrupoActivity : AppCompatActivity() {
             .dispatch()
     }
 
-    // ========== ENVIAR ARQUIVO ==========
+    // ============================================================
+    // ENVIAR ARQUIVO
+    // ============================================================
     private fun enviarArquivo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
 
@@ -345,7 +366,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                 }
             }
             mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
-        } catch (e: Exception) { }
+        } catch (_: Exception) { }
 
         val nomeFinal = nomeArquivo
         val tamanhoFinal = tamanhoArquivo
@@ -396,7 +417,9 @@ class ChatGrupoActivity : AppCompatActivity() {
             .dispatch()
     }
 
-    // ========== CARREGAR MENSAGENS ==========
+    // ============================================================
+    // CARREGAR MENSAGENS
+    // ============================================================
     private fun carregarMensagens() {
         val container = findViewById<LinearLayout>(R.id.containerMensagensGrupo)
         val scroll = findViewById<ScrollView>(R.id.scrollMensagensGrupo)
@@ -427,6 +450,8 @@ class ChatGrupoActivity : AppCompatActivity() {
                     val tamanhoArquivo = doc.getLong("tamanhoArquivo") ?: 0L
                     val mimeType = doc.getString("mimeType") ?: ""
 
+                    val ehRemetente = remetente == emailUsuario
+
                     when (tipo) {
                         // ========== FOTO ==========
                         "foto" -> {
@@ -434,7 +459,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val img = view.findViewById<ImageView>(R.id.imgMensagemFoto)
                             val txtNome = view.findViewById<TextView>(R.id.txtNomeFoto)
 
-                            txtNome.text = if (remetente == emailUsuario) "Você" else nomeRemetente
+                            txtNome.text = if (ehRemetente) "Você" else nomeRemetente
                             Glide.with(this).load(fotoUrl).into(img)
 
                             view.setOnClickListener {
@@ -444,15 +469,12 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 startActivity(intent)
                             }
 
-                            if (remetente == emailUsuario) {
-                                view.setOnLongClickListener {
-                                    AlertDialog.Builder(this@ChatGrupoActivity)
-                                        .setTitle("Apagar mensagem")
-                                        .setItems(arrayOf("Apagar para todos")) { _, _ -> apagarMensagem(msgId) }
-                                        .show()
-                                    true
-                                }
+                            // ✅ Long press → Favoritar
+                            view.setOnLongClickListener {
+                                mostrarMenuMidia("foto", fotoUrl, "", mimeType, msgId, ehRemetente, texto, remetente)
+                                true
                             }
+
                             container.addView(view)
                         }
 
@@ -463,7 +485,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val btnPlay = view.findViewById<Button>(R.id.btnPlayVideo)
                             val txtNome = view.findViewById<TextView>(R.id.txtNomeVideo)
 
-                            txtNome.text = if (remetente == emailUsuario) "Você" else nomeRemetente
+                            txtNome.text = if (ehRemetente) "Você" else nomeRemetente
 
                             val mediaController = MediaController(this)
                             mediaController.setAnchorView(videoView)
@@ -493,15 +515,12 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 startActivity(intent)
                             }
 
-                            if (remetente == emailUsuario) {
-                                view.setOnLongClickListener {
-                                    AlertDialog.Builder(this@ChatGrupoActivity)
-                                        .setTitle("Apagar mensagem")
-                                        .setItems(arrayOf("Apagar para todos")) { _, _ -> apagarMensagem(msgId) }
-                                        .show()
-                                    true
-                                }
+                            // ✅ Long press → Favoritar
+                            view.setOnLongClickListener {
+                                mostrarMenuMidia("video", videoUrl, "", "", msgId, ehRemetente, texto, remetente)
+                                true
                             }
+
                             container.addView(view)
                         }
 
@@ -512,7 +531,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val txtNomeArq = view.findViewById<TextView>(R.id.txtNomeArquivo)
                             val txtTamanho = view.findViewById<TextView>(R.id.txtTamanhoArquivo)
 
-                            txtNomeRem.text = if (remetente == emailUsuario) "Você" else nomeRemetente
+                            txtNomeRem.text = if (ehRemetente) "Você" else nomeRemetente
                             txtNomeArq.text = nomeArquivo
                             txtTamanho.text = formatarTamanho(tamanhoArquivo)
 
@@ -529,15 +548,12 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 }
                             }
 
-                            if (remetente == emailUsuario) {
-                                view.setOnLongClickListener {
-                                    AlertDialog.Builder(this@ChatGrupoActivity)
-                                        .setTitle("Apagar mensagem")
-                                        .setItems(arrayOf("Apagar para todos")) { _, _ -> apagarMensagem(msgId) }
-                                        .show()
-                                    true
-                                }
+                            // ✅ Long press → Favoritar
+                            view.setOnLongClickListener {
+                                mostrarMenuMidia("arquivo", arquivoUrl, nomeArquivo, mimeType, msgId, ehRemetente, texto, remetente)
+                                true
                             }
+
                             container.addView(view)
                         }
 
@@ -546,7 +562,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val view = inflater.inflate(android.R.layout.simple_list_item_1, container, false)
                             val tv = view.findViewById<TextView>(android.R.id.text1)
 
-                            if (remetente == emailUsuario) {
+                            if (ehRemetente) {
                                 tv.text = "Você: $texto"
                                 tv.setTextColor(android.graphics.Color.parseColor("#F5E6D0"))
                             } else {
@@ -556,15 +572,12 @@ class ChatGrupoActivity : AppCompatActivity() {
                             tv.textSize = 16f
                             view.setPadding(0, 12, 0, 12)
 
-                            if (remetente == emailUsuario) {
-                                view.setOnLongClickListener {
-                                    AlertDialog.Builder(this@ChatGrupoActivity)
-                                        .setTitle("Apagar mensagem")
-                                        .setItems(arrayOf("Apagar para todos")) { _, _ -> apagarMensagem(msgId) }
-                                        .show()
-                                    true
-                                }
+                            // ✅ Long press → Favoritar (todos) ou Apagar (só remetente)
+                            view.setOnLongClickListener {
+                                mostrarOpcaoMensagem(msgId, texto, remetente, ehRemetente)
+                                true
                             }
+
                             container.addView(view)
                         }
                     }
@@ -574,7 +587,169 @@ class ChatGrupoActivity : AppCompatActivity() {
             }
     }
 
-    // ========== APAGAR MENSAGEM ==========
+    // ============================================================
+    // MENU DE MENSAGEM DE TEXTO
+    // ============================================================
+    private fun mostrarOpcaoMensagem(
+        msgId: String,
+        texto: String,
+        remetente: String,
+        ehRemetente: Boolean
+    ) {
+        lifecycleScope.launch {
+            try {
+                val jaFavorito = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId)
+                    .limit(1)
+                    .get().await()
+                    .let { !it.isEmpty }
+
+                val opcoes = mutableListOf<String>()
+                opcoes.add(if (jaFavorito) getString(R.string.desfavoritar) else getString(R.string.favoritar))
+                if (ehRemetente) opcoes.add("🗑 Apagar para todos")
+
+                AlertDialog.Builder(this@ChatGrupoActivity)
+                    .setTitle(R.string.opcoes)
+                    .setItems(opcoes.toTypedArray()) { _, which ->
+                        when (opcoes[which]) {
+                            getString(R.string.favoritar) -> favoritarMensagem(msgId, texto, remetente, "texto")
+                            getString(R.string.desfavoritar) -> desfavoritarMensagem(msgId)
+                            "🗑 Apagar para todos" -> apagarMensagem(msgId)
+                        }
+                    }
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    // ============================================================
+    // MENU DE MÍDIA
+    // ============================================================
+    private fun mostrarMenuMidia(
+        tipo: String,
+        url: String,
+        nomeArquivo: String,
+        mimeType: String,
+        msgId: String,
+        ehRemetente: Boolean,
+        texto: String,
+        remetente: String
+    ) {
+        lifecycleScope.launch {
+            try {
+                val jaFavorito = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId)
+                    .limit(1)
+                    .get().await()
+                    .let { !it.isEmpty }
+
+                val opcoes = mutableListOf<String>()
+                opcoes.add(if (jaFavorito) getString(R.string.desfavoritar) else getString(R.string.favoritar))
+                opcoes.add(getString(R.string.baixar))
+                if (tipo == "arquivo") opcoes.add(getString(R.string.abrir))
+                if (ehRemetente) opcoes.add("🗑 Apagar")
+
+                AlertDialog.Builder(this@ChatGrupoActivity)
+                    .setTitle(R.string.opcoes)
+                    .setItems(opcoes.toTypedArray()) { _, which ->
+                        when (opcoes[which]) {
+                            getString(R.string.favoritar) -> favoritarMensagem(msgId, texto, remetente, tipo)
+                            getString(R.string.desfavoritar) -> desfavoritarMensagem(msgId)
+                            getString(R.string.baixar) -> Toast.makeText(this@ChatGrupoActivity, "⬇ Baixando...", Toast.LENGTH_SHORT).show()
+                            getString(R.string.abrir) -> {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                                        setDataAndType(Uri.parse(url), mimeType.ifEmpty { "*/*" })
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    startActivity(intent)
+                                } catch (e: Exception) {
+                                    Toast.makeText(this@ChatGrupoActivity, "Nenhum app para abrir", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                            "🗑 Apagar" -> apagarMensagem(msgId)
+                        }
+                    }
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    // ============================================================
+    // FAVORITAR / DESFAVORITAR
+    // ============================================================
+    private fun favoritarMensagem(msgId: String, texto: String, remetente: String, tipoMidia: String) {
+        lifecycleScope.launch {
+            try {
+                val nomeRemetente = if (remetente == emailUsuario) "Você" else {
+                    val u = db.collection("usuarios").document(remetente).get().await()
+                    u.getString("nome") ?: remetente
+                }
+
+                db.collection("favoritos").add(
+                    hashMapOf(
+                        "usuarioEmail" to emailUsuario,
+                        "mensagemId" to msgId,
+                        "chatId" to grupoId,
+                        "tipoChat" to "grupo",
+                        "texto" to texto,
+                        "remetente" to remetente,
+                        "nomeRemetente" to nomeRemetente,
+                        "tipoMidia" to tipoMidia,
+                        "criadoEm" to System.currentTimeMillis()
+                    )
+                ).await()
+
+                Toast.makeText(this@ChatGrupoActivity, "⭐ Adicionado aos favoritos", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun desfavoritarMensagem(msgId: String) {
+        lifecycleScope.launch {
+            try {
+                val favoritos = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId)
+                    .get().await()
+
+                favoritos.documents.forEach { it.reference.delete().await() }
+
+                Toast.makeText(this@ChatGrupoActivity, "Removido dos favoritos", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    // ============================================================
+    // APAGAR / HELPERS
+    // ============================================================
     private fun apagarMensagem(msgId: String) {
         lifecycleScope.launch {
             try {
@@ -585,6 +760,20 @@ class ChatGrupoActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private suspend fun removerGrupoIdDoUsuario(email: String, grupoId: String) {
+        try {
+            val userRef = db.collection("usuarios").document(email)
+            val userDoc = userRef.get().await()
+            val ids = (userDoc.get("gruposIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+
+            if (grupoId in ids) {
+                userRef.update("gruposIds", ids - grupoId).await()
+            }
+        } catch (e: Exception) {
+            Log.e("CHAT_GRUPO", "Erro ao remover grupoId: ${e.message}")
         }
     }
 

@@ -164,13 +164,13 @@ class BuscarEquipesActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_chat -> {
+                R.id.nav_chat -> {                                    // ✅ CORRIGIDO: faltava
                     startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                R.id.nav_groups -> {                                  // ✅ CORRIGIDO: era produtos
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }

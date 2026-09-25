@@ -17,19 +17,18 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class perfil : AppCompatActivity() {
+class perfil : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -37,7 +36,6 @@ class perfil : AppCompatActivity() {
     private lateinit var imgAvatar: ImageView
     private lateinit var txtIniciais: TextView
 
-    // Launcher para escolher imagem da galeria
     private val selecionarImagem = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -66,7 +64,6 @@ class perfil : AppCompatActivity() {
         val txtEquipeCard = findViewById<TextView>(R.id.txtEquipeCard)
         val btnAdicionarLink = findViewById<MaterialButton>(R.id.btnAdicionarLink)
 
-        // Avatar
         val cardAvatar = findViewById<MaterialCardView>(R.id.cardAvatar)
         val cardCamera = findViewById<MaterialCardView>(R.id.cardCamera)
         imgAvatar = findViewById(R.id.imgAvatar)
@@ -78,7 +75,6 @@ class perfil : AppCompatActivity() {
         carregarLinks()
         carregarFotoPerfil()
 
-        // Clique no avatar → abre galeria
         cardAvatar.setOnClickListener { abrirGaleria() }
         cardCamera.setOnClickListener { abrirGaleria() }
 
@@ -87,6 +83,7 @@ class perfil : AppCompatActivity() {
         }
 
         val btnVoltar = findViewById<Button>(R.id.btnVoltar)
+        btnVoltar.text = getString(R.string.voltar)
         btnVoltar.setOnClickListener { finish() }
 
         val btnMeusTrabalhos = findViewById<Button>(R.id.btnMeusTrabalhos)
@@ -94,7 +91,15 @@ class perfil : AppCompatActivity() {
             startActivity(Intent(this, participantes::class.java))
         }
 
+        // Botao de favoritos
+        val btnFavoritos = findViewById<Button>(R.id.btnMensagensFavoritas)
+        btnFavoritos.text = getString(R.string.perfil_favoritos)
+        btnFavoritos.setOnClickListener {
+            startActivity(Intent(this, MensagensFavoritasActivity::class.java))
+        }
+
         val btnSair = findViewById<Button>(R.id.btnSair)
+        btnSair.text = getString(R.string.perfil_sair)
         btnSair.setOnClickListener {
             auth.signOut()
             prefs.edit()
@@ -109,58 +114,24 @@ class perfil : AppCompatActivity() {
             finishAffinity()
         }
 
-        configurarBottomNavigation()
+        // Bottom nav em 1 linha
+        configurarBottomNavigation(R.id.nav_profile)
     }
 
-    override fun onResume() {
-        super.onResume()
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        lifecycleScope.launch {
-            BadgeHelper.atualizarBadgeChat(this@perfil, bottomNav)
-        }
-    }
-
-    // ========== BOTTOM NAVIGATION ==========
-    private fun configurarBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_chat -> {
-                    startActivity(Intent(this, ListaConversasActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_notifications -> {
-                    startActivity(Intent(this, notificacao::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_profile -> true  // Já estamos aqui
-                else -> false
-            }
-        }
-    }
-
-    // ========== ABRIR GALERIA ==========
+    // ============================================================
+    // ABRIR GALERIA
+    // ============================================================
     private fun abrirGaleria() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         selecionarImagem.launch(intent)
     }
 
-    // ========== UPLOAD DA IMAGEM (CLOUDINARY) ==========
+    // ============================================================
+    // UPLOAD DA FOTO (Cloudinary)
+    // ============================================================
     private fun fazerUploadImagem(uri: Uri) {
-        Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Enviando foto...", Toast.LENGTH_SHORT).show()
 
         MediaManager.get().upload(uri)
             .unsigned("fqb729sb")
@@ -170,19 +141,15 @@ class perfil : AppCompatActivity() {
                     Log.d("UPLOAD", "Iniciando upload...")
                 }
 
-                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
-                    // Progresso opcional
-                }
+                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
 
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) {
-                        runOnUiThread {
-                            salvarUrlNoFirestore(url)
-                        }
+                        runOnUiThread { salvarUrlNoFirestore(url) }
                     } else {
                         runOnUiThread {
-                            Toast.makeText(this@perfil, "Erro: URL não encontrada", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@perfil, "Erro: URL nao encontrada", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -194,28 +161,34 @@ class perfil : AppCompatActivity() {
                     }
                 }
 
-                override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    // Reagendado
-                }
+                override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             })
             .dispatch()
     }
 
-    // ========== SALVA URL NO FIRESTORE ==========
+    // ============================================================
+    // SALVA URL NO FIRESTORE
+    // ============================================================
     private fun salvarUrlNoFirestore(url: String) {
         lifecycleScope.launch {
             try {
                 db.collection("usuarios").document(email).update("fotoUrl", url).await()
                 Glide.with(this@perfil).load(url).circleCrop().into(imgAvatar)
                 txtIniciais.visibility = View.GONE
-                Toast.makeText(this@perfil, "✅ Foto atualizada!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@perfil, "Foto atualizada", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(this@perfil, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@perfil,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-    // ========== CARREGA FOTO DO PERFIL ==========
+    // ============================================================
+    // CARREGA FOTO DO PERFIL
+    // ============================================================
     private fun carregarFotoPerfil() {
         lifecycleScope.launch {
             try {
@@ -241,7 +214,9 @@ class perfil : AppCompatActivity() {
         }
     }
 
-    // ========== CARREGA DADOS ==========
+    // ============================================================
+    // CARREGA DADOS DO USUARIO
+    // ============================================================
     private fun carregarDados(
         txtNomePerfil: TextView,
         txtProfissaoPerfil: TextView,
@@ -288,7 +263,9 @@ class perfil : AppCompatActivity() {
         }
     }
 
-    // ========== CARREGA OS LINKS ==========
+    // ============================================================
+    // CARREGA OS LINKS (lista nova com migracao automatica)
+    // ============================================================
     private fun carregarLinks() {
         val containerLinks = findViewById<LinearLayout>(R.id.containerLinks)
         val txtSemLinks = findViewById<TextView>(R.id.txtSemLinks)
@@ -298,16 +275,35 @@ class perfil : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val usuarioDoc = db.collection("usuarios").document(email).get().await()
-                val linkedin = usuarioDoc.getString("linkedin") ?: ""
-                val github = usuarioDoc.getString("github") ?: ""
-                val portfolio = usuarioDoc.getString("portfolio") ?: ""
 
-                val links = mutableListOf<Pair<String, String>>()
-                if (linkedin.isNotEmpty()) links.add("linkedin" to linkedin)
-                if (github.isNotEmpty()) links.add("github" to github)
-                if (portfolio.isNotEmpty()) links.add("portfolio" to portfolio)
+                val links = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
+
+                // Migracao automatica dos campos antigos
+                val linkedinAntigo = usuarioDoc.getString("linkedin") ?: ""
+                val githubAntigo = usuarioDoc.getString("github") ?: ""
+                val portfolioAntigo = usuarioDoc.getString("portfolio") ?: ""
+
+                val linksMigrados = mutableListOf<Map<String, String>>()
+                linksMigrados.addAll(links)
 
                 if (links.isEmpty()) {
+                    if (linkedinAntigo.isNotEmpty()) {
+                        linksMigrados.add(hashMapOf("tipo" to "linkedin", "url" to linkedinAntigo))
+                    }
+                    if (githubAntigo.isNotEmpty()) {
+                        linksMigrados.add(hashMapOf("tipo" to "github", "url" to githubAntigo))
+                    }
+                    if (portfolioAntigo.isNotEmpty()) {
+                        linksMigrados.add(hashMapOf("tipo" to "portfolio", "url" to portfolioAntigo))
+                    }
+
+                    if (linksMigrados.isNotEmpty()) {
+                        db.collection("usuarios").document(email)
+                            .update("links", linksMigrados).await()
+                    }
+                }
+
+                if (linksMigrados.isEmpty()) {
                     txtSemLinks.visibility = View.VISIBLE
                     return@launch
                 }
@@ -316,7 +312,12 @@ class perfil : AppCompatActivity() {
 
                 val inflater = LayoutInflater.from(this@perfil)
 
-                links.forEach { (tipo, url) ->
+                linksMigrados.forEachIndexed { index, link ->
+                    val tipo = link["tipo"] ?: "outro"
+                    val url = link["url"] ?: ""
+
+                    if (url.isEmpty()) return@forEachIndexed
+
                     val view = inflater.inflate(R.layout.item_link, containerLinks, false)
 
                     val cardLogo = view.findViewById<MaterialCardView>(R.id.cardLogoLink)
@@ -345,9 +346,9 @@ class perfil : AppCompatActivity() {
                             .setTitle("Remover link")
                             .setMessage("Deseja remover este link?")
                             .setPositiveButton("Sim") { _, _ ->
-                                removerLink(tipo)
+                                removerLink(index)
                             }
-                            .setNegativeButton("Cancelar", null)
+                            .setNegativeButton(R.string.cancelar, null)
                             .show()
                     }
 
@@ -360,7 +361,9 @@ class perfil : AppCompatActivity() {
         }
     }
 
-    // ========== IDENTIFICA A LOGO PELO TIPO/URL ==========
+    // ============================================================
+    // IDENTIFICA A LOGO PELO TIPO/URL
+    // ============================================================
     private fun identificarLogo(url: String, tipo: String): Triple<String, String, String> {
         val urlLower = url.lowercase()
 
@@ -384,13 +387,15 @@ class perfil : AppCompatActivity() {
             urlLower.contains("dribbble") ->
                 Triple("Dr", "#EA4C89", "#FFFFFF")
             tipo == "portfolio" ->
-                Triple("🌐", "#3D2B27", "#F5E6D0")
+                Triple("web", "#3D2B27", "#F5E6D0")
             else ->
-                Triple("🔗", "#3D2B27", "#F5E6D0")
+                Triple("link", "#3D2B27", "#F5E6D0")
         }
     }
 
-    // ========== ENCURTA A URL ==========
+    // ============================================================
+    // ENCURTA A URL
+    // ============================================================
     private fun encurtarUrl(url: String): String {
         return try {
             val uri = Uri.parse(url)
@@ -403,7 +408,9 @@ class perfil : AppCompatActivity() {
         }
     }
 
-    // ========== DIÁLOGO PARA ADICIONAR LINK ==========
+    // ============================================================
+    // DIALOGO PARA ADICIONAR LINK
+    // ============================================================
     private fun abrirDialogAdicionarLink() {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -428,7 +435,7 @@ class perfil : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Adicionar Link")
             .setView(layout)
-            .setPositiveButton("Salvar") { _, _ ->
+            .setPositiveButton(R.string.salvar) { _, _ ->
                 val url = edtUrl.text.toString().trim()
 
                 if (url.isEmpty()) {
@@ -437,59 +444,89 @@ class perfil : AppCompatActivity() {
                 }
 
                 if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                    Toast.makeText(this, "A URL deve começar com http:// ou https://", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "A URL deve comecar com http:// ou https://", Toast.LENGTH_LONG).show()
                     return@setPositiveButton
                 }
 
                 salvarLink(url)
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(R.string.cancelar, null)
             .show()
     }
 
-    // ========== SALVA O LINK NO FIRESTORE ==========
+    // ============================================================
+    // SALVA O LINK NO FIRESTORE (lista)
+    // ============================================================
     private fun salvarLink(url: String) {
         val urlLower = url.lowercase()
 
-        val campo = when {
+        val tipo = when {
             urlLower.contains("linkedin") -> "linkedin"
             urlLower.contains("github") -> "github"
-            urlLower.contains("gitlab") -> "portfolio"
-            urlLower.contains("youtube") -> "portfolio"
-            urlLower.contains("instagram") -> "portfolio"
-            urlLower.contains("twitter") || urlLower.contains("x.com") -> "portfolio"
-            urlLower.contains("facebook") -> "portfolio"
-            urlLower.contains("behance") -> "portfolio"
-            urlLower.contains("dribbble") -> "portfolio"
+            urlLower.contains("gitlab") -> "gitlab"
+            urlLower.contains("youtube") -> "youtube"
+            urlLower.contains("youtu.be") -> "youtube"
+            urlLower.contains("instagram") -> "instagram"
+            urlLower.contains("twitter") -> "twitter"
+            urlLower.contains("x.com") -> "twitter"
+            urlLower.contains("facebook") -> "facebook"
+            urlLower.contains("behance") -> "behance"
+            urlLower.contains("dribbble") -> "dribbble"
             else -> "portfolio"
         }
 
         lifecycleScope.launch {
             try {
-                db.collection("usuarios").document(email).update(campo, url).await()
-                Toast.makeText(this@perfil, "✅ Link adicionado!", Toast.LENGTH_SHORT).show()
+                val usuarioDoc = db.collection("usuarios").document(email).get().await()
+                val linksAtuais = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
+
+                val novosLinks = linksAtuais + mapOf(
+                    "tipo" to tipo,
+                    "url" to url
+                )
+
+                db.collection("usuarios").document(email)
+                    .update("links", novosLinks).await()
+
+                Toast.makeText(this@perfil, "Link adicionado", Toast.LENGTH_SHORT).show()
                 carregarLinks()
             } catch (e: Exception) {
-                Toast.makeText(this@perfil, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@perfil,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-    // ========== REMOVE O LINK ==========
-    private fun removerLink(tipo: String) {
+    // ============================================================
+    // REMOVE O LINK POR INDICE
+    // ============================================================
+    private fun removerLink(index: Int) {
         lifecycleScope.launch {
             try {
-                val campo = when (tipo) {
-                    "linkedin" -> "linkedin"
-                    "github" -> "github"
-                    "portfolio" -> "portfolio"
-                    else -> "portfolio"
+                val usuarioDoc = db.collection("usuarios").document(email).get().await()
+                val linksAtuais = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
+
+                if (index !in linksAtuais.indices) {
+                    Toast.makeText(this@perfil, "Link nao encontrado", Toast.LENGTH_SHORT).show()
+                    return@launch
                 }
-                db.collection("usuarios").document(email).update(campo, "").await()
+
+                val novosLinks = linksAtuais.toMutableList().apply { removeAt(index) }
+
+                db.collection("usuarios").document(email)
+                    .update("links", novosLinks).await()
+
                 Toast.makeText(this@perfil, "Link removido", Toast.LENGTH_SHORT).show()
                 carregarLinks()
             } catch (e: Exception) {
-                Toast.makeText(this@perfil, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@perfil,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

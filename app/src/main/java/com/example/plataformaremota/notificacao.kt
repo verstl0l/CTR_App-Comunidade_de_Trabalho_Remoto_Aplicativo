@@ -174,8 +174,13 @@ class notificacao : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // ✅ BUG CORRIGIDO: selectedItemId + todos os nav tratados
+    // ============================================================
     private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNav.selectedItemId = R.id.nav_notifications   // ✅ ADICIONADO
+
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {

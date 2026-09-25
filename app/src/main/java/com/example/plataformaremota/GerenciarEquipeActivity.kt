@@ -178,6 +178,9 @@ class GerenciarEquipeActivity : AppCompatActivity() {
             }
         }
 
+        // ============================================================
+        // ✅ BUG CORRIGIDO: deleta subcoleções antes do doc raiz
+        // ============================================================
         btnExcluirEquipe.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Excluir Equipe")
@@ -186,35 +189,47 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     equipeId?.let { id ->
                         lifecycleScope.launch {
                             try {
-                                val trabalhos = db.collection("trabalhos")
-                                    .whereEqualTo("equipeId", id).get().await()
-                                trabalhos.documents.forEach {
-                                    db.collection("trabalhos").document(it.id).delete().await()
+                                // 1. Trabalhos
+                                val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", id).get().await()
+                                trabalhos.documents.forEach { db.collection("trabalhos").document(it.id).delete().await() }
+
+                                // 2. Membros
+                                val membros = db.collection("membros_equipe").whereEqualTo("equipeId", id).get().await()
+                                membros.documents.forEach { db.collection("membros_equipe").document(it.id).delete().await() }
+
+                                // 3. Convites
+                                val convites = db.collection("convites_equipe").whereEqualTo("equipeId", id).get().await()
+                                convites.documents.forEach { db.collection("convites_equipe").document(it.id).delete().await() }
+
+                                // 4. Pedidos
+                                val pedidos = db.collection("pedidos_entrada").whereEqualTo("equipeId", id).get().await()
+                                pedidos.documents.forEach { db.collection("pedidos_entrada").document(it.id).delete().await() }
+
+                                // 5. ✅ Mensagens do chat de equipe ANTES do doc raiz
+                                val msgsEquipe = db.collection("chats_equipe").document(id)
+                                    .collection("mensagens").get().await()
+                                msgsEquipe.documents.forEach {
+                                    db.collection("chats_equipe").document(id)
+                                        .collection("mensagens").document(it.id).delete().await()
                                 }
 
-                                val membros = db.collection("membros_equipe")
-                                    .whereEqualTo("equipeId", id).get().await()
-                                membros.documents.forEach {
-                                    db.collection("membros_equipe").document(it.id).delete().await()
+                                // 6. ✅ Grupos + suas mensagens
+                                val grupos = db.collection("grupos").whereEqualTo("equipeId", id).get().await()
+                                grupos.documents.forEach { grupoDoc ->
+                                    val msgsGrupo = grupoDoc.reference.collection("mensagens").get().await()
+                                    msgsGrupo.documents.forEach { it.reference.delete().await() }
+                                    grupoDoc.reference.delete().await()
                                 }
 
-                                val convites = db.collection("convites_equipe")
-                                    .whereEqualTo("equipeId", id).get().await()
-                                convites.documents.forEach {
-                                    db.collection("convites_equipe").document(it.id).delete().await()
-                                }
+                                // 7. ✅ Doc raiz do chat de equipe
+                                db.collection("chats_equipe").document(id).delete().await()
 
-                                val pedidos = db.collection("pedidos_entrada")
-                                    .whereEqualTo("equipeId", id).get().await()
-                                pedidos.documents.forEach {
-                                    db.collection("pedidos_entrada").document(it.id).delete().await()
-                                }
-
+                                // 8. ✅ Equipe
                                 db.collection("equipes").document(id).delete().await()
 
                                 Toast.makeText(this@GerenciarEquipeActivity, "🗑️ Equipe excluída!", Toast.LENGTH_SHORT).show()
-                                startActivity(Intent(this@GerenciarEquipeActivity, produtos::class.java))
-                                finish()
+                                startActivity(Intent(this@GerenciarEquipeActivity, MainActivity::class.java))
+                                finishAffinity()
 
                             } catch (e: Exception) {
                                 Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
@@ -323,7 +338,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }
@@ -546,14 +561,12 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     val categoria = doc.getString("categoria") ?: ""
                     val prazo = doc.getString("prazo") ?: ""
 
-                    // ✅ Layout customizado com botão 📩
                     val view = inflater.inflate(R.layout.item_trabalho_gerenciar, container, false)
 
                     view.findViewById<TextView>(R.id.txtTituloGerenciar).text = titulo
                     view.findViewById<TextView>(R.id.txtInfoGerenciar).text = "$categoria - $prazo"
                     view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
 
-                    // 📩 → Convidar
                     view.findViewById<Button>(R.id.btnConvidarGerenciar).setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, ConvidarTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
@@ -561,12 +574,10 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Clique curto → Editar
                     view.setOnClickListener {
                         abrirDialogEditarTrabalho(trabalhoId, titulo, descricao, categoria, prazo)
                     }
 
-                    // Long press → Excluir
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@GerenciarEquipeActivity)
                             .setTitle("Excluir trabalho")

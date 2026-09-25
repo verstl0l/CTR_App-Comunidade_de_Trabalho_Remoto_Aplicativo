@@ -38,6 +38,7 @@ class ChatActivity : AppCompatActivity() {
     private var outroEmail: String = ""
     private var chatId: String = ""
 
+    // ========== LAUNCHERS ==========
     private val selecionarImagem = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -90,6 +91,9 @@ class ChatActivity : AppCompatActivity() {
         marcarMensagensComoLidas()
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: usa WriteBatch (performance)
+    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (chatId.isEmpty()) return
         lifecycleScope.launch {
@@ -99,15 +103,17 @@ class ChatActivity : AppCompatActivity() {
                     .whereEqualTo("lida", false)
                     .get().await()
 
+                if (mensagens.isEmpty) return@launch
+
+                val batch = db.batch()
                 mensagens.documents.forEach { doc ->
                     val remetente = doc.getString("remetente") ?: ""
                     if (remetente != emailUsuario) {
-                        db.collection("chats").document(chatId)
-                            .collection("mensagens").document(doc.id)
-                            .update("lida", true).await()
+                        batch.update(doc.reference, "lida", true)
                     }
                 }
-            } catch (e: Exception) { }
+                batch.commit().await()
+            } catch (_: Exception) { }
         }
     }
 
@@ -208,6 +214,8 @@ class ChatActivity : AppCompatActivity() {
         }
 
         return if (chatExistente != null) {
+            // ✅ Garante que ambos têm o chatId denormalizado
+            garantirChatsIdsDenormalizados(chatExistente.id)
             chatExistente.id
         } else {
             val novoChat = hashMapOf(
@@ -216,10 +224,43 @@ class ChatActivity : AppCompatActivity() {
                 "atualizadoEm" to System.currentTimeMillis(),
                 "tipo" to "individual"
             )
-            db.collection("chats").add(novoChat).await().id
+            val novoId = db.collection("chats").add(novoChat).await().id
+
+            // ✅ Adiciona o chatId nas listas dos dois participantes
+            garantirChatsIdsDenormalizados(novoId)
+
+            novoId
         }
     }
 
+    /**
+     * ✅ Adiciona o chatId na lista `chatsIds` de ambos os participantes.
+     * Idempotente: se já existe, não faz nada.
+     */
+    private suspend fun garantirChatsIdsDenormalizados(chatId: String) {
+        try {
+            val chatDoc = db.collection("chats").document(chatId).get().await()
+            val participantes = chatDoc.get("participantes") as? List<*> ?: return
+
+            participantes.forEach { email ->
+                val emailStr = email as? String ?: return@forEach
+                val usuarioRef = db.collection("usuarios").document(emailStr)
+                val usuarioDoc = usuarioRef.get().await()
+
+                val chatsIds = (usuarioDoc.get("chatsIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+
+                if (chatId !in chatsIds) {
+                    usuarioRef.update("chatsIds", chatsIds + chatId).await()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("CHAT", "Erro ao denormalizar chatsIds: ${e.message}")
+        }
+    }
+
+    // ============================================================
+    // ENVIAR TEXTO
+    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -245,6 +286,9 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // ENVIAR FOTO
+    // ============================================================
     private fun enviarFoto(uri: Uri) {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
 
@@ -288,6 +332,9 @@ class ChatActivity : AppCompatActivity() {
             .dispatch()
     }
 
+    // ============================================================
+    // ENVIAR VÍDEO
+    // ============================================================
     private fun enviarVideo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
 
@@ -332,6 +379,9 @@ class ChatActivity : AppCompatActivity() {
             .dispatch()
     }
 
+    // ============================================================
+    // ENVIAR ARQUIVO
+    // ============================================================
     private fun enviarArquivo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
 
@@ -349,7 +399,7 @@ class ChatActivity : AppCompatActivity() {
                 }
             }
             mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
-        } catch (e: Exception) { }
+        } catch (_: Exception) { }
 
         val nomeFinal = nomeArquivo
         val tamanhoFinal = tamanhoArquivo
@@ -399,6 +449,9 @@ class ChatActivity : AppCompatActivity() {
             .dispatch()
     }
 
+    // ============================================================
+    // CARREGAR MENSAGENS
+    // ============================================================
     private fun carregarMensagens() {
         val container = findViewById<LinearLayout>(R.id.containerMensagens)
         val scroll = findViewById<ScrollView>(R.id.scrollMensagens)
@@ -460,8 +513,9 @@ class ChatActivity : AppCompatActivity() {
                                 abrirGaleria(listaMidias, posicaoNaLista)
                             }
 
+                            // ✅ Menu com Favoritar + opções de mídia
                             view.setOnLongClickListener {
-                                mostrarMenuMidia("foto", fotoUrl, "", mimeType, msgId, ehRemetente)
+                                mostrarMenuMidia("foto", fotoUrl, "", mimeType, msgId, ehRemetente, texto, remetente)
                                 true
                             }
                             container.addView(view)
@@ -504,7 +558,7 @@ class ChatActivity : AppCompatActivity() {
                             }
 
                             view.setOnLongClickListener {
-                                mostrarMenuMidia("video", videoUrl, "", "", msgId, ehRemetente)
+                                mostrarMenuMidia("video", videoUrl, "", "", msgId, ehRemetente, texto, remetente)
                                 true
                             }
                             container.addView(view)
@@ -525,7 +579,7 @@ class ChatActivity : AppCompatActivity() {
                             }
 
                             view.setOnLongClickListener {
-                                mostrarMenuMidia("arquivo", arquivoUrl, nomeArquivo, mimeType, msgId, ehRemetente)
+                                mostrarMenuMidia("arquivo", arquivoUrl, nomeArquivo, mimeType, msgId, ehRemetente, texto, remetente)
                                 true
                             }
                             container.addView(view)
@@ -545,11 +599,10 @@ class ChatActivity : AppCompatActivity() {
                             tv.textSize = 16f
                             view.setPadding(0, 12, 0, 12)
 
-                            if (ehRemetente) {
-                                view.setOnLongClickListener {
-                                    mostrarOpcaoApagar(msgId)
-                                    true
-                                }
+                            // ✅ Todo mundo pode favoritar; só o remetente pode apagar
+                            view.setOnLongClickListener {
+                                mostrarOpcaoMensagem(msgId, texto, remetente, ehRemetente)
+                                true
                             }
                             container.addView(view)
                         }
@@ -560,6 +613,154 @@ class ChatActivity : AppCompatActivity() {
             }
     }
 
+    // ============================================================
+    // MENU DE MENSAGEM (texto) — Favoritar + Apagar
+    // ============================================================
+    private fun mostrarOpcaoMensagem(
+        msgId: String,
+        texto: String,
+        remetente: String,
+        ehRemetente: Boolean
+    ) {
+        lifecycleScope.launch {
+            try {
+                val jaFavorito = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId)
+                    .limit(1)
+                    .get().await()
+                    .let { !it.isEmpty }
+
+                val opcoes = mutableListOf<String>()
+                opcoes.add(if (jaFavorito) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                if (ehRemetente) opcoes.add("🗑 Apagar para todos")
+
+                AlertDialog.Builder(this@ChatActivity)
+                    .setTitle("Opções")
+                    .setItems(opcoes.toTypedArray()) { _, which ->
+                        when (opcoes[which]) {
+                            "⭐ Favoritar" -> favoritarMensagem(msgId, texto, remetente, "texto")
+                            "⭐ Remover dos favoritos" -> desfavoritarMensagem(msgId)
+                            "🗑 Apagar para todos" -> apagarMensagem(msgId)
+                        }
+                    }
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    // ============================================================
+    // MENU DE MÍDIA — Favoritar + Baixar + Abrir + Apagar
+    // ============================================================
+    private fun mostrarMenuMidia(
+        tipo: String,
+        url: String,
+        nomeArquivo: String,
+        mimeType: String,
+        msgId: String,
+        ehRemetente: Boolean,
+        texto: String,
+        remetente: String
+    ) {
+        lifecycleScope.launch {
+            try {
+                val jaFavorito = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId)
+                    .limit(1)
+                    .get().await()
+                    .let { !it.isEmpty }
+
+                val opcoes = mutableListOf<String>()
+                opcoes.add(if (jaFavorito) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                opcoes.add("⬇ Baixar")
+                if (tipo == "arquivo") opcoes.add("📂 Abrir")
+                if (ehRemetente) opcoes.add("🗑 Apagar")
+
+                AlertDialog.Builder(this@ChatActivity)
+                    .setTitle("Opções")
+                    .setItems(opcoes.toTypedArray()) { _, which ->
+                        when (opcoes[which]) {
+                            "⭐ Favoritar" -> favoritarMensagem(msgId, texto, remetente, tipo)
+                            "⭐ Remover dos favoritos" -> desfavoritarMensagem(msgId)
+                            "⬇ Baixar" -> {
+                                val nome = when (tipo) {
+                                    "foto" -> "CTR_foto_${System.currentTimeMillis()}.jpg"
+                                    "video" -> "CTR_video_${System.currentTimeMillis()}.mp4"
+                                    else -> nomeArquivo
+                                }
+                                val pasta = when (tipo) {
+                                    "foto" -> Environment.DIRECTORY_PICTURES
+                                    "video" -> Environment.DIRECTORY_MOVIES
+                                    else -> Environment.DIRECTORY_DOWNLOADS
+                                }
+                                baixarArquivo(url, nome, pasta)
+                            }
+                            "📂 Abrir" -> abrirArquivoExterno(url, mimeType, nomeArquivo)
+                            "🗑 Apagar" -> apagarMensagem(msgId)
+                        }
+                    }
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    // ============================================================
+    // FAVORITAR / DESFAVORITAR
+    // ============================================================
+    private fun favoritarMensagem(msgId: String, texto: String, remetente: String, tipoMidia: String) {
+        lifecycleScope.launch {
+            try {
+                val nomeRemetente = if (remetente == emailUsuario) "Você" else {
+                    val u = db.collection("usuarios").document(remetente).get().await()
+                    u.getString("nome") ?: remetente
+                }
+
+                db.collection("favoritos").add(
+                    hashMapOf(
+                        "usuarioEmail" to emailUsuario,
+                        "mensagemId" to msgId,
+                        "chatId" to chatId,
+                        "tipoChat" to "pv",
+                        "texto" to texto,
+                        "remetente" to remetente,
+                        "nomeRemetente" to nomeRemetente,
+                        "tipoMidia" to tipoMidia,
+                        "criadoEm" to System.currentTimeMillis()
+                    )
+                ).await()
+
+                Toast.makeText(this@ChatActivity, "⭐ Adicionado aos favoritos", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun desfavoritarMensagem(msgId: String) {
+        lifecycleScope.launch {
+            try {
+                val favoritos = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId)
+                    .get().await()
+
+                favoritos.documents.forEach { it.reference.delete().await() }
+
+                Toast.makeText(this@ChatActivity, "Removido dos favoritos", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    // ============================================================
+    // HELPERS DE MÍDIA
+    // ============================================================
     private fun abrirGaleria(listaMidias: List<Pair<String, String>>, posicaoInicial: Int) {
         val urls = listaMidias.map { it.second }.toTypedArray()
         val tipos = listaMidias.map { it.first }.toTypedArray()
@@ -569,43 +770,6 @@ class ChatActivity : AppCompatActivity() {
         intent.putExtra("tipos", tipos)
         intent.putExtra("posicaoInicial", posicaoInicial)
         startActivity(intent)
-    }
-
-    private fun mostrarMenuMidia(
-        tipo: String,
-        url: String,
-        nomeArquivo: String,
-        mimeType: String,
-        msgId: String,
-        ehRemetente: Boolean
-    ) {
-        val opcoes = mutableListOf<String>()
-        opcoes.add("⬇ Baixar")
-        if (tipo == "arquivo") opcoes.add("📂 Abrir")
-        if (ehRemetente) opcoes.add("🗑 Apagar")
-
-        AlertDialog.Builder(this@ChatActivity)
-            .setTitle("Opções")
-            .setItems(opcoes.toTypedArray()) { _, which ->
-                when (opcoes[which]) {
-                    "⬇ Baixar" -> {
-                        val nome = when (tipo) {
-                            "foto" -> "CTR_foto_${System.currentTimeMillis()}.jpg"
-                            "video" -> "CTR_video_${System.currentTimeMillis()}.mp4"
-                            else -> nomeArquivo
-                        }
-                        val pasta = when (tipo) {
-                            "foto" -> Environment.DIRECTORY_PICTURES
-                            "video" -> Environment.DIRECTORY_MOVIES
-                            else -> Environment.DIRECTORY_DOWNLOADS
-                        }
-                        baixarArquivo(url, nome, pasta)
-                    }
-                    "📂 Abrir" -> abrirArquivoExterno(url, mimeType, nomeArquivo)
-                    "🗑 Apagar" -> apagarMensagem(msgId)
-                }
-            }
-            .show()
     }
 
     private fun abrirArquivoExterno(url: String, mimeType: String, nome: String) {
@@ -637,15 +801,6 @@ class ChatActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Toast.makeText(this, "Erro ao baixar: ${e.message}", Toast.LENGTH_LONG).show()
         }
-    }
-
-    private fun mostrarOpcaoApagar(msgId: String) {
-        AlertDialog.Builder(this@ChatActivity)
-            .setTitle("Apagar mensagem")
-            .setItems(arrayOf("Apagar para todos")) { _, _ ->
-                apagarMensagem(msgId)
-            }
-            .show()
     }
 
     private fun apagarMensagem(msgId: String) {

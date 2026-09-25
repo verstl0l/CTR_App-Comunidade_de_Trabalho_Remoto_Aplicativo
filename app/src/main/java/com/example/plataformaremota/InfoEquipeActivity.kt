@@ -86,7 +86,6 @@ class InfoEquipeActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.txtDescricaoEquipeInfo).text =
                     equipeDoc.getString("descricao") ?: "Sem descrição"
 
-                // Verifica se é admin
                 val membro = db.collection("membros_equipe")
                     .whereEqualTo("equipeId", equipeId)
                     .whereEqualTo("email", emailUsuario)
@@ -97,23 +96,19 @@ class InfoEquipeActivity : AppCompatActivity() {
                 ehAdmin = !membro.isEmpty &&
                         membro.documents[0].getString("funcao") == "administrador"
 
-                // Mostra/esconde botões
                 val btnExcluir = findViewById<Button>(R.id.btnExcluirEquipeInfo)
                 val btnSair = findViewById<Button>(R.id.btnSairEquipeInfo)
                 val btnCriarGrupo = findViewById<Button>(R.id.btnCriarGrupoInfo)
 
                 if (ehDono) {
-                    // Dono: exclui, não sai, cria grupo
                     btnExcluir.visibility = View.VISIBLE
                     btnSair.visibility = View.GONE
                     btnCriarGrupo.visibility = View.VISIBLE
                 } else if (ehAdmin) {
-                    // Admin: sai, não exclui, cria grupo
                     btnExcluir.visibility = View.GONE
                     btnSair.visibility = View.VISIBLE
                     btnCriarGrupo.visibility = View.VISIBLE
                 } else {
-                    // Membro: sai, não exclui, não cria grupo
                     btnExcluir.visibility = View.GONE
                     btnSair.visibility = View.VISIBLE
                     btnCriarGrupo.visibility = View.GONE
@@ -270,6 +265,9 @@ class InfoEquipeActivity : AppCompatActivity() {
             .show()
     }
 
+    // ============================================================
+    // ✅ BUG CORRIGIDO: deleta subcoleções antes do doc raiz
+    // ============================================================
     private fun confirmarExcluirEquipe() {
         AlertDialog.Builder(this)
             .setTitle("Excluir equipe")
@@ -277,22 +275,42 @@ class InfoEquipeActivity : AppCompatActivity() {
             .setPositiveButton("Excluir") { _, _ ->
                 lifecycleScope.launch {
                     try {
+                        // 1. Trabalhos
                         val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", equipeId).get().await()
                         trabalhos.documents.forEach { db.collection("trabalhos").document(it.id).delete().await() }
 
+                        // 2. Membros
                         val membros = db.collection("membros_equipe").whereEqualTo("equipeId", equipeId).get().await()
                         membros.documents.forEach { db.collection("membros_equipe").document(it.id).delete().await() }
 
+                        // 3. Convites
                         val convites = db.collection("convites_equipe").whereEqualTo("equipeId", equipeId).get().await()
                         convites.documents.forEach { db.collection("convites_equipe").document(it.id).delete().await() }
 
+                        // 4. Pedidos
                         val pedidos = db.collection("pedidos_entrada").whereEqualTo("equipeId", equipeId).get().await()
                         pedidos.documents.forEach { db.collection("pedidos_entrada").document(it.id).delete().await() }
 
-                        val grupos = db.collection("grupos").whereEqualTo("equipeId", equipeId).get().await()
-                        grupos.documents.forEach { db.collection("grupos").document(it.id).delete().await() }
+                        // 5. ✅ Mensagens do chat de equipe ANTES do doc raiz
+                        val msgsEquipe = db.collection("chats_equipe").document(equipeId)
+                            .collection("mensagens").get().await()
+                        msgsEquipe.documents.forEach {
+                            db.collection("chats_equipe").document(equipeId)
+                                .collection("mensagens").document(it.id).delete().await()
+                        }
 
+                        // 6. ✅ Grupos + suas mensagens
+                        val grupos = db.collection("grupos").whereEqualTo("equipeId", equipeId).get().await()
+                        grupos.documents.forEach { grupoDoc ->
+                            val msgsGrupo = grupoDoc.reference.collection("mensagens").get().await()
+                            msgsGrupo.documents.forEach { it.reference.delete().await() }
+                            grupoDoc.reference.delete().await()
+                        }
+
+                        // 7. ✅ Doc raiz do chat de equipe
                         db.collection("chats_equipe").document(equipeId).delete().await()
+
+                        // 8. ✅ Equipe
                         db.collection("equipes").document(equipeId).delete().await()
 
                         Toast.makeText(this@InfoEquipeActivity, "Equipe excluída!", Toast.LENGTH_SHORT).show()

@@ -69,4 +69,8 @@ dependencies {
 
     // PhotoView (zoom em imagens)
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
+
+    // OneSignal (notificações push)
+    implementation("com.onesignal:OneSignal:5.0.0")
+
 }

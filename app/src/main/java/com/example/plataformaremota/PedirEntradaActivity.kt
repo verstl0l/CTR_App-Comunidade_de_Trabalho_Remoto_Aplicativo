@@ -55,7 +55,6 @@ class PedirEntradaActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
-                    // ✅ Busca o nome do usuário automaticamente
                     val usuarioDoc = db.collection("usuarios").document(emailSolicitante).get().await()
                     val nomeSolicitante = usuarioDoc.getString("nome") ?: "Usuário"
 
@@ -63,7 +62,7 @@ class PedirEntradaActivity : AppCompatActivity() {
                         "equipeId" to equipeId,
                         "nomeEquipe" to nomeEquipe,
                         "emailSolicitante" to emailSolicitante,
-                        "nomeSolicitante" to nomeSolicitante,  // ← Automático!
+                        "nomeSolicitante" to nomeSolicitante,
                         "motivos" to motivos,
                         "especialidades" to especialidades,
                         "status" to "pendente",
@@ -99,8 +98,13 @@ class PedirEntradaActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                R.id.nav_chat -> {                                    // ✅ CORRIGIDO: faltava
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_groups -> {                                  // ✅ CORRIGIDO: era produtos
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }

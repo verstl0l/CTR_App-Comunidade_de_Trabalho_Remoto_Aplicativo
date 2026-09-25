@@ -51,9 +51,7 @@ class PerfilUsuarioActivity : AppCompatActivity() {
         verificarBloqueio()
 
         btnConversar.setOnClickListener {
-            val intent = Intent(this, ChatActivity::class.java)
-            intent.putExtra("outroEmail", emailOutro)
-            startActivity(intent)
+            abrirConversa()
         }
 
         btnBloquear.setOnClickListener {
@@ -69,6 +67,9 @@ class PerfilUsuarioActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // ✅ BUG CORRIGIDO: lê da lista "links" nova (com fallback)
+    // ============================================================
     private fun carregarDados() {
         lifecycleScope.launch {
             try {
@@ -77,9 +78,17 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                 val nome = usuarioDoc.getString("nome") ?: "Usuário"
                 val profissao = usuarioDoc.getString("profissao") ?: "Profissão"
                 val fotoUrl = usuarioDoc.getString("fotoUrl") ?: ""
-                val linkedin = usuarioDoc.getString("linkedin") ?: ""
-                val github = usuarioDoc.getString("github") ?: ""
-                val portfolio = usuarioDoc.getString("portfolio") ?: ""
+
+                // ✅ Lê da lista nova
+                val links = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
+
+                // 🔄 Fallback: se não tiver lista, tenta os campos antigos
+                val linkedin = links.find { it["tipo"] == "linkedin" }?.get("url")
+                    ?: usuarioDoc.getString("linkedin") ?: ""
+                val github = links.find { it["tipo"] == "github" }?.get("url")
+                    ?: usuarioDoc.getString("github") ?: ""
+                val portfolio = links.find { it["tipo"] == "portfolio" }?.get("url")
+                    ?: usuarioDoc.getString("portfolio") ?: ""
 
                 findViewById<TextView>(R.id.txtNomePerfilUsuario).text = nome
                 findViewById<TextView>(R.id.txtProfissaoPerfilUsuario).text = profissao
@@ -123,6 +132,43 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                 } catch (e: Exception) {
                     Toast.makeText(this, "Link inválido", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+    }
+
+    // ============================================================
+    // ✅ Abre/cria conversa PV corretamente (reutiliza lógica existente)
+    // ============================================================
+    private fun abrirConversa() {
+        lifecycleScope.launch {
+            try {
+                val existente = db.collection("chats")
+                    .whereArrayContains("participantes", emailUsuario)
+                    .get()
+                    .await()
+
+                val chatExistente = existente.documents.find { doc ->
+                    val parts = doc.get("participantes") as? List<*>
+                    parts?.contains(emailOutro) == true
+                }
+
+                val chatId = chatExistente?.id ?: run {
+                    val novoChat = hashMapOf(
+                        "participantes" to listOf(emailUsuario, emailOutro),
+                        "ultimaMensagem" to "",
+                        "atualizadoEm" to System.currentTimeMillis(),
+                        "tipo" to "individual"
+                    )
+                    db.collection("chats").add(novoChat).await().id
+                }
+
+                val intent = Intent(this@PerfilUsuarioActivity, ChatActivity::class.java)
+                intent.putExtra("outroEmail", emailOutro)
+                intent.putExtra("chatId", chatId)
+                startActivity(intent)
+
+            } catch (e: Exception) {
+                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

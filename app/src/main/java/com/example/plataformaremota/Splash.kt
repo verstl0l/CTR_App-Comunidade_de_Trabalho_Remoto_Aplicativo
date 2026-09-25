@@ -15,15 +15,19 @@ class Splash : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             val auth = FirebaseAuth.getInstance()
+            val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
 
-            if (auth.currentUser != null) {
-                // Já logado → vai para MainActivity
-                startActivity(Intent(this, MainActivity::class.java))
+            // ✅ BUG CORRIGIDO: checa as DUAS condições
+            val logado = auth.currentUser != null && prefs.getBoolean("logado", false)
+
+            val destino = if (logado) {
+                MainActivity::class.java
             } else {
-                // Não logado → vai para LoginActivity
-                startActivity(Intent(this, LoginActivity::class.java))
+                LoginActivity::class.java
             }
+
+            startActivity(Intent(this, destino))
             finish()
-        }, 2000) // 2 segundos
+        }, 2000)
     }
 }

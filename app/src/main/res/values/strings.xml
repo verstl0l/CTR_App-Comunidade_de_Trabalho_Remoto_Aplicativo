@@ -1,3 +1,40 @@
 <resources>
     <string name="app_name">CTR</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_home">Início</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_groups">Equipes</string>
+    <string name="nav_notifications">Notificações</string>
+    <string name="nav_profile">Perfil</string>
+
+    <string name="perfil_titulo">Meu Perfil</string>
+    <string name="perfil_links">Links</string>
+    <string name="perfil_sem_links">Nenhum link cadastrado</string>
+    <string name="perfil_meus_trabalhos">MEUS TRABALHOS</string>
+    <string name="perfil_favoritos">MENSAGENS FAVORITAS</string>
+    <string name="perfil_sair">SAIR DA CONTA</string>
+
+    <!-- Ações -->
+    <string name="voltar">← VOLTAR</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="salvar">Salvar</string>
+    <string name="excluir">Excluir</string>
+    <string name="favoritar">⭐ Favoritar</string>
+    <string name="desfavoritar">⭐ Remover dos favoritos</string>
+    <string name="apagar">🗑 Apagar</string>
+    <string name="baixar">⬇ Baixar</string>
+    <string name="abrir">📂 Abrir</string>
+    <string name="opcoes">Opções</string>
+
+    <!-- Erros -->
+    <string name="erro_generico">Erro: %1$s</string>
+    <string name="erro_campos_vazios">Preencha todos os campos</string>
+    <string name="erro_sem_conexao">⚠️ Sem conexão com a internet. Verifique sua rede e tente novamente.</string>
+
+    <!-- Favoritos -->
+    <string name="favoritos_titulo">⭐ Mensagens Favoritas</string>
+    <string name="favoritos_vazio">Nenhuma mensagem favoritada ainda</string>
+    <string name="favoritos_remover">Remover favorito</string>
+    <string name="favoritos_remover_msg">Deseja remover esta mensagem dos favoritos?</string>
 </resources>

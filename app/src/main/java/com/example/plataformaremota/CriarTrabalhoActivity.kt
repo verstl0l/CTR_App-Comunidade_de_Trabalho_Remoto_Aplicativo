@@ -13,7 +13,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import com.google.firebase.firestore.DocumentSnapshot
 
 class CriarTrabalhoActivity : AppCompatActivity() {
 
@@ -53,20 +52,26 @@ class CriarTrabalhoActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
-                    val equipe = db.collection("equipes")
-                        .whereEqualTo("criadorEmail", email)
-                        .limit(1)
-                        .get()
-                        .await()
+                    // ✅ Aceita equipeId vindo do Intent OU busca a equipe do criador
+                    val equipeIdIntent = intent.getStringExtra("equipeId")
 
-                    if (equipe.isEmpty) {
-                        Toast.makeText(this@CriarTrabalhoActivity, "Crie uma equipe primeiro", Toast.LENGTH_SHORT).show()
-                        btnPublicar.isEnabled = true
-                        btnPublicar.text = "PUBLICAR TRABALHO"
-                        return@launch
+                    val equipeId = if (equipeIdIntent != null) {
+                        equipeIdIntent
+                    } else {
+                        val equipe = db.collection("equipes")
+                            .whereEqualTo("criadorEmail", email)
+                            .limit(1)
+                            .get()
+                            .await()
+
+                        if (equipe.isEmpty) {
+                            Toast.makeText(this@CriarTrabalhoActivity, "Crie uma equipe primeiro", Toast.LENGTH_SHORT).show()
+                            btnPublicar.isEnabled = true
+                            btnPublicar.text = "PUBLICAR TRABALHO"
+                            return@launch
+                        }
+                        equipe.documents[0].id
                     }
-
-                    val equipeId = equipe.documents[0].id
 
                     val trabalho = hashMapOf(
                         "titulo" to titulo,
@@ -75,6 +80,7 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                         "prazo" to prazo,
                         "equipeId" to equipeId,
                         "criadorEmail" to email,
+                        "responsavelEmail" to email,   // ✅ BUG CORRIGIDO: dono vira responsável padrão
                         "status" to "pendente",
                         "criadoEm" to System.currentTimeMillis()
                     )
@@ -82,9 +88,8 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                     db.collection("trabalhos")
                         .add(trabalho)
                         .addOnSuccessListener {
-                            Log.d("CRIAR_TRABALHO", "✅ Trabalho publicado!")
+                            Log.d("CRIAR_TRABALHO", "✅ Trabalho publicado com responsável: $email")
                             Toast.makeText(this@CriarTrabalhoActivity, "✅ Trabalho publicado!", Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(this@CriarTrabalhoActivity, produtos::class.java))
                             finish()
                         }
                         .addOnFailureListener { e ->
@@ -112,8 +117,13 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                     finish()
                     true
                 }
+                R.id.nav_chat -> {
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }

@@ -53,7 +53,6 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
-                    // Busca a equipe do remetente
                     val equipe = db.collection("equipes")
                         .whereEqualTo("criadorEmail", emailRemetente)
                         .limit(1)
@@ -103,8 +102,13 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, produtos::class.java))
+                R.id.nav_chat -> {                                    // ✅ CORRIGIDO: faltava
+                    startActivity(Intent(this, ListaConversasActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_groups -> {                                  // ✅ CORRIGIDO: era produtos
+                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true
                 }
