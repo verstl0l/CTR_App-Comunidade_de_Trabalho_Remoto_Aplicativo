@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1C1C">
+    android:background="@color/bg_primary">
 
+    <!-- Header -->
     <LinearLayout
         android:id="@+id/headerChatGrupo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#2E1A16"
+        android:background="@color/bg_surface_light"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="12dp"
@@ -22,7 +23,7 @@
             android:layout_height="wrap_content"
             android:minWidth="0dp"
             android:text="←"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="20sp" />
 
         <TextView
@@ -32,7 +33,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="Grupo"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -43,7 +44,7 @@
             android:layout_height="wrap_content"
             android:minWidth="0dp"
             android:text="⋮"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="20sp" />
 
         <Button
@@ -57,11 +58,12 @@
 
     </LinearLayout>
 
+    <!-- Lista de mensagens -->
     <ScrollView
         android:id="@+id/scrollMensagensGrupo"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/containerInputGrupo"
+        app:layout_constraintBottom_toTopOf="@+id/containerRespondendoGrupo"
         app:layout_constraintTop_toBottomOf="@+id/headerChatGrupo">
 
         <LinearLayout
@@ -73,11 +75,70 @@
 
     </ScrollView>
 
+    <!-- Barra "Respondendo a..." (oculta por padrao) -->
+    <LinearLayout
+        android:id="@+id/containerRespondendoGrupo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_surface_hover"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/containerInputGrupo">
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:background="@color/accent" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtRespondendoAGrupo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Respondendo a..."
+                android:textColor="@color/accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtTextoRespondendoGrupo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Mensagem"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnCancelarRespostaGrupo"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:padding="8dp"
+            android:text="✕"
+            android:textColor="@color/text_secondary"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <!-- Input -->
     <LinearLayout
         android:id="@+id/containerInputGrupo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#2E1A16"
+        android:background="@color/bg_surface_light"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="8dp"
@@ -115,20 +176,20 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:backgroundTint="#3D2B27"
+            android:backgroundTint="@color/bg_surface_hover"
             android:hint="Digite..."
-            android:textColor="@android:color/white"
-            android:textColorHint="#9E9E9E" />
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary" />
 
         <Button
             android:id="@+id/btnEnviarMensagemGrupo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:backgroundTint="#F5E6D0"
+            android:backgroundTint="@color/accent"
             android:minWidth="0dp"
             android:text="➤"
-            android:textColor="#1C1311"
+            android:textColor="@color/accent_dark"
             android:textSize="18sp" />
 
     </LinearLayout>

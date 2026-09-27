@@ -9,11 +9,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.MediaController
+import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -21,6 +22,7 @@ import android.widget.VideoView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.cloudinary.android.MediaManager
@@ -38,32 +40,16 @@ class ChatActivity : AppCompatActivity() {
     private var outroEmail: String = ""
     private var chatId: String = ""
 
-    // ========== LAUNCHERS ==========
-    private val selecionarImagem = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data
-            if (uri != null) enviarFoto(uri)
-        }
-    }
+    private var respostaAtiva: RespostaInfo? = null
 
-    private val selecionarVideo = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data
-            if (uri != null) enviarVideo(uri)
-        }
+    private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
     }
-
-    private val selecionarArquivo = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data
-            if (uri != null) enviarArquivo(uri)
-        }
+    private val selecionarVideo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarVideo(it) } }
+    }
+    private val selecionarArquivo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarArquivo(it) } }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,26 +77,16 @@ class ChatActivity : AppCompatActivity() {
         marcarMensagensComoLidas()
     }
 
-    // ============================================================
-    // ✅ CORRIGIDO: usa WriteBatch (performance)
-    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (chatId.isEmpty()) return
         lifecycleScope.launch {
             try {
-                val mensagens = db.collection("chats").document(chatId)
-                    .collection("mensagens")
-                    .whereEqualTo("lida", false)
-                    .get().await()
-
-                if (mensagens.isEmpty) return@launch
-
+                val msgs = db.collection("chats").document(chatId).collection("mensagens")
+                    .whereEqualTo("lida", false).get().await()
+                if (msgs.isEmpty) return@launch
                 val batch = db.batch()
-                mensagens.documents.forEach { doc ->
-                    val remetente = doc.getString("remetente") ?: ""
-                    if (remetente != emailUsuario) {
-                        batch.update(doc.reference, "lida", true)
-                    }
+                msgs.documents.forEach { doc ->
+                    if ((doc.getString("remetente") ?: "") != emailUsuario) batch.update(doc.reference, "lida", true)
                 }
                 batch.commit().await()
             } catch (_: Exception) { }
@@ -126,22 +102,20 @@ class ChatActivity : AppCompatActivity() {
         val btnArquivo = findViewById<Button>(R.id.btnEnviarArquivo)
         val edtMensagem = findViewById<EditText>(R.id.edtMensagem)
         val txtNomeOutro = findViewById<TextView>(R.id.txtNomeOutro)
+        val btnCancelarResposta = findViewById<Button>(R.id.btnCancelarResposta)
 
         btnVoltar.setOnClickListener { finish() }
 
         btnVerPerfil.setOnClickListener {
-            val intent = Intent(this, PerfilUsuarioActivity::class.java)
-            intent.putExtra("emailOutro", outroEmail)
-            startActivity(intent)
+            val i = Intent(this, PerfilUsuarioActivity::class.java)
+            i.putExtra("emailOutro", outroEmail); startActivity(i)
         }
 
         lifecycleScope.launch {
             try {
-                val usuario = db.collection("usuarios").document(outroEmail).get().await()
-                txtNomeOutro.text = usuario.getString("nome") ?: outroEmail
-            } catch (e: Exception) {
-                txtNomeOutro.text = outroEmail
-            }
+                val u = db.collection("usuarios").document(outroEmail).get().await()
+                txtNomeOutro.text = u.getString("nome") ?: outroEmail
+            } catch (e: Exception) { txtNomeOutro.text = outroEmail }
         }
 
         verificarBloqueio(edtMensagem, btnEnviar)
@@ -149,309 +123,222 @@ class ChatActivity : AppCompatActivity() {
         btnEnviar.setOnClickListener {
             val texto = edtMensagem.text.toString().trim()
             if (texto.isEmpty()) return@setOnClickListener
-            edtMensagem.text.clear()
-            enviarMensagem(texto)
+            edtMensagem.text.clear(); enviarMensagem(texto)
         }
-
         btnFoto.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            selecionarImagem.launch(intent)
+            val i = Intent(Intent.ACTION_PICK); i.type = "image/*"; selecionarImagem.launch(i)
         }
-
         btnVideo.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "video/*"
-            selecionarVideo.launch(intent)
+            val i = Intent(Intent.ACTION_PICK); i.type = "video/*"; selecionarVideo.launch(i)
         }
-
         btnArquivo.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*"
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            selecionarArquivo.launch(intent)
+            val i = Intent(Intent.ACTION_GET_CONTENT); i.type = "*/*"
+            i.addCategory(Intent.CATEGORY_OPENABLE); selecionarArquivo.launch(i)
         }
+        btnCancelarResposta.setOnClickListener { cancelarResposta() }
 
         carregarMensagens()
     }
 
-    private fun verificarBloqueio(edtMensagem: EditText, btnEnviar: Button) {
+    private fun cancelarResposta() {
+        respostaAtiva = null
+        findViewById<LinearLayout>(R.id.containerRespondendo).visibility = View.GONE
+    }
+
+    private fun verificarBloqueio(edt: EditText, btn: Button) {
         lifecycleScope.launch {
             try {
                 val euBloqueei = db.collection("bloqueios")
                     .whereEqualTo("bloqueadorEmail", emailUsuario)
-                    .whereEqualTo("bloqueadoEmail", outroEmail)
-                    .limit(1).get().await()
-
+                    .whereEqualTo("bloqueadoEmail", outroEmail).limit(1).get().await()
                 val eleMeBloqueou = db.collection("bloqueios")
                     .whereEqualTo("bloqueadorEmail", outroEmail)
-                    .whereEqualTo("bloqueadoEmail", emailUsuario)
-                    .limit(1).get().await()
-
+                    .whereEqualTo("bloqueadoEmail", emailUsuario).limit(1).get().await()
                 if (!euBloqueei.isEmpty) {
-                    edtMensagem.isEnabled = false
-                    edtMensagem.hint = "Você bloqueou este usuário"
-                    btnEnviar.isEnabled = false
+                    edt.isEnabled = false; edt.hint = "Você bloqueou este usuário"; btn.isEnabled = false
                 } else if (!eleMeBloqueou.isEmpty) {
-                    edtMensagem.isEnabled = false
-                    edtMensagem.hint = "Você foi bloqueado por este usuário"
-                    btnEnviar.isEnabled = false
+                    edt.isEnabled = false; edt.hint = "Você foi bloqueado por este usuário"; btn.isEnabled = false
                 }
-            } catch (e: Exception) {
-                Log.e("CHAT", "Erro bloqueio: ${e.message}")
-            }
+            } catch (e: Exception) { Log.e("CHAT", "Erro bloqueio: ${e.message}") }
         }
     }
 
     private suspend fun criarOuBuscarChat(): String {
-        val existente = db.collection("chats")
-            .whereArrayContains("participantes", emailUsuario)
-            .get().await()
-
+        val existente = db.collection("chats").whereArrayContains("participantes", emailUsuario).get().await()
         val chatExistente = existente.documents.find { doc ->
-            val parts = doc.get("participantes") as? List<*>
-            parts?.contains(outroEmail) == true
+            (doc.get("participantes") as? List<*>)?.contains(outroEmail) == true
         }
-
         return if (chatExistente != null) {
-            // ✅ Garante que ambos têm o chatId denormalizado
-            garantirChatsIdsDenormalizados(chatExistente.id)
-            chatExistente.id
+            garantirChatsIdsDenormalizados(chatExistente.id); chatExistente.id
         } else {
-            val novoChat = hashMapOf(
+            val novo = hashMapOf(
                 "participantes" to listOf(emailUsuario, outroEmail),
-                "ultimaMensagem" to "",
-                "atualizadoEm" to System.currentTimeMillis(),
+                "ultimaMensagem" to "", "atualizadoEm" to System.currentTimeMillis(),
                 "tipo" to "individual"
             )
-            val novoId = db.collection("chats").add(novoChat).await().id
-
-            // ✅ Adiciona o chatId nas listas dos dois participantes
-            garantirChatsIdsDenormalizados(novoId)
-
-            novoId
+            val id = db.collection("chats").add(novo).await().id
+            garantirChatsIdsDenormalizados(id); id
         }
     }
 
-    /**
-     * ✅ Adiciona o chatId na lista `chatsIds` de ambos os participantes.
-     * Idempotente: se já existe, não faz nada.
-     */
     private suspend fun garantirChatsIdsDenormalizados(chatId: String) {
         try {
-            val chatDoc = db.collection("chats").document(chatId).get().await()
-            val participantes = chatDoc.get("participantes") as? List<*> ?: return
-
-            participantes.forEach { email ->
-                val emailStr = email as? String ?: return@forEach
-                val usuarioRef = db.collection("usuarios").document(emailStr)
-                val usuarioDoc = usuarioRef.get().await()
-
-                val chatsIds = (usuarioDoc.get("chatsIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
-
-                if (chatId !in chatsIds) {
-                    usuarioRef.update("chatsIds", chatsIds + chatId).await()
-                }
+            val doc = db.collection("chats").document(chatId).get().await()
+            val partes = doc.get("participantes") as? List<*> ?: return
+            partes.forEach { email ->
+                val e = email as? String ?: return@forEach
+                val ref = db.collection("usuarios").document(e)
+                val ud = ref.get().await()
+                val ids = (ud.get("chatsIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+                if (chatId !in ids) ref.update("chatsIds", ids + chatId).await()
             }
-        } catch (e: Exception) {
-            Log.e("CHAT", "Erro ao denormalizar chatsIds: ${e.message}")
+        } catch (e: Exception) { Log.e("CHAT", "Erro denorm: ${e.message}") }
+    }
+
+    private fun adicionarResposta(m: HashMap<String, Any>) {
+        respostaAtiva?.let { r ->
+            m["respostaPara"] = hashMapOf(
+                "msgId" to r.msgId, "texto" to r.texto, "remetente" to r.remetente,
+                "nomeRemetente" to r.nomeRemetente, "tipo" to r.tipo
+            )
         }
     }
 
-    // ============================================================
-    // ENVIAR TEXTO
-    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
-                val mensagem = hashMapOf(
-                    "remetente" to emailUsuario,
-                    "texto" to texto,
-                    "tipo" to "texto",
-                    "timestamp" to System.currentTimeMillis(),
-                    "lida" to false
+                val m = hashMapOf<String, Any>(
+                    "remetente" to emailUsuario, "texto" to texto, "tipo" to "texto",
+                    "timestamp" to System.currentTimeMillis(), "lida" to false
                 )
-                db.collection("chats").document(chatId)
-                    .collection("mensagens").add(mensagem).await()
-
+                adicionarResposta(m)
+                db.collection("chats").document(chatId).collection("mensagens").add(m).await()
                 db.collection("chats").document(chatId).update(
-                    mapOf(
-                        "ultimaMensagem" to texto,
-                        "atualizadoEm" to System.currentTimeMillis()
-                    )
+                    mapOf("ultimaMensagem" to texto, "atualizadoEm" to System.currentTimeMillis())
                 ).await()
-            } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+                cancelarResposta()
+            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
     }
 
-    // ============================================================
-    // ENVIAR FOTO
-    // ============================================================
+    private fun dispararResposta(msgId: String, texto: String, remetente: String, tipo: String = "texto") {
+        lifecycleScope.launch {
+            try {
+                val nomeRem = if (remetente == emailUsuario) "Você" else {
+                    db.collection("usuarios").document(remetente).get().await().getString("nome") ?: remetente
+                }
+                respostaAtiva = RespostaInfo(msgId, texto, remetente, nomeRem, tipo)
+                findViewById<TextView>(R.id.txtRespondendoA).text = "Respondendo a $nomeRem"
+                findViewById<TextView>(R.id.txtTextoRespondendo).text = when (tipo) {
+                    "foto" -> "📷 Foto"; "video" -> "🎥 Vídeo"; "arquivo" -> "📎 Arquivo"; else -> texto
+                }
+                findViewById<LinearLayout>(R.id.containerRespondendo).visibility = View.VISIBLE
+                findViewById<EditText>(R.id.edtMensagem).requestFocus()
+            } catch (e: Exception) { Log.e("CHAT", "Erro: ${e.message}") }
+        }
+    }
+
     private fun enviarFoto(uri: Uri) {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
-
-        MediaManager.get().upload(uri)
-            .unsigned("fqb729sb")
-            .option("folder", "chats_pv/")
+        MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
                     val url = resultData?.get("secure_url") as? String
-                    if (url != null) {
-                        runOnUiThread {
-                            lifecycleScope.launch {
-                                try {
-                                    val mensagem = hashMapOf(
-                                        "remetente" to emailUsuario,
-                                        "texto" to "",
-                                        "fotoUrl" to url,
-                                        "tipo" to "foto",
-                                        "timestamp" to System.currentTimeMillis(),
-                                        "lida" to false
-                                    )
-                                    db.collection("chats").document(chatId)
-                                        .collection("mensagens").add(mensagem).await()
-                                    Toast.makeText(this@ChatActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
-                                } catch (e: Exception) {
-                                    Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-                                }
-                            }
-                        }
-                    }
+                    if (url != null) runOnUiThread { lifecycleScope.launch {
+                        try {
+                            val m = hashMapOf<String, Any>(
+                                "remetente" to emailUsuario, "texto" to "", "fotoUrl" to url,
+                                "tipo" to "foto", "timestamp" to System.currentTimeMillis(), "lida" to false
+                            )
+                            adicionarResposta(m)
+                            db.collection("chats").document(chatId).collection("mensagens").add(m).await()
+                            Toast.makeText(this@ChatActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
+                            cancelarResposta()
+                        } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                    } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread {
-                        Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show()
-                    }
+                    runOnUiThread { Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
-            })
-            .dispatch()
+            }).dispatch()
     }
 
-    // ============================================================
-    // ENVIAR VÍDEO
-    // ============================================================
     private fun enviarVideo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
-
-        MediaManager.get().upload(uri)
-            .unsigned("fqb729sb")
-            .option("resource_type", "video")
-            .option("folder", "chats_videos/")
+        MediaManager.get().upload(uri).unsigned("fqb729sb")
+            .option("resource_type", "video").option("folder", "chats_videos/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
                     val url = resultData?.get("secure_url") as? String
-                    if (url != null) {
-                        runOnUiThread {
-                            lifecycleScope.launch {
-                                try {
-                                    val mensagem = hashMapOf(
-                                        "remetente" to emailUsuario,
-                                        "texto" to "",
-                                        "videoUrl" to url,
-                                        "tipo" to "video",
-                                        "timestamp" to System.currentTimeMillis(),
-                                        "lida" to false
-                                    )
-                                    db.collection("chats").document(chatId)
-                                        .collection("mensagens").add(mensagem).await()
-                                    Toast.makeText(this@ChatActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
-                                } catch (e: Exception) {
-                                    Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-                                }
-                            }
-                        }
-                    }
+                    if (url != null) runOnUiThread { lifecycleScope.launch {
+                        try {
+                            val m = hashMapOf<String, Any>(
+                                "remetente" to emailUsuario, "texto" to "", "videoUrl" to url,
+                                "tipo" to "video", "timestamp" to System.currentTimeMillis(), "lida" to false
+                            )
+                            adicionarResposta(m)
+                            db.collection("chats").document(chatId).collection("mensagens").add(m).await()
+                            Toast.makeText(this@ChatActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
+                            cancelarResposta()
+                        } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                    } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread {
-                        Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show()
-                    }
+                    runOnUiThread { Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
-            })
-            .dispatch()
+            }).dispatch()
     }
 
-    // ============================================================
-    // ENVIAR ARQUIVO
-    // ============================================================
     private fun enviarArquivo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
-
-        var nomeArquivo = "arquivo"
-        var tamanhoArquivo = 0L
-        var mimeType = "application/octet-stream"
-
+        var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
         try {
-            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                    val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
-                    if (nameIndex != -1) nomeArquivo = cursor.getString(nameIndex) ?: "arquivo"
-                    if (sizeIndex != -1) tamanhoArquivo = cursor.getLong(sizeIndex)
+            contentResolver.query(uri, null, null, null, null)?.use { c ->
+                if (c.moveToFirst()) {
+                    val n = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    val s = c.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                    if (n != -1) nome = c.getString(n) ?: "arquivo"
+                    if (s != -1) tam = c.getLong(s)
                 }
             }
-            mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
+            mime = contentResolver.getType(uri) ?: "application/octet-stream"
         } catch (_: Exception) { }
 
-        val nomeFinal = nomeArquivo
-        val tamanhoFinal = tamanhoArquivo
-        val mimeFinal = mimeType
-
-        MediaManager.get().upload(uri)
-            .unsigned("fqb729sb")
-            .option("resource_type", "raw")
-            .option("folder", "chats_arquivos/")
+        val nF = nome; val tF = tam; val mF = mime
+        MediaManager.get().upload(uri).unsigned("fqb729sb")
+            .option("resource_type", "raw").option("folder", "chats_arquivos/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
                     val url = resultData?.get("secure_url") as? String
-                    if (url != null) {
-                        runOnUiThread {
-                            lifecycleScope.launch {
-                                try {
-                                    val mensagem = hashMapOf(
-                                        "remetente" to emailUsuario,
-                                        "texto" to "",
-                                        "arquivoUrl" to url,
-                                        "nomeArquivo" to nomeFinal,
-                                        "tamanhoArquivo" to tamanhoFinal,
-                                        "mimeType" to mimeFinal,
-                                        "tipo" to "arquivo",
-                                        "timestamp" to System.currentTimeMillis(),
-                                        "lida" to false
-                                    )
-                                    db.collection("chats").document(chatId)
-                                        .collection("mensagens").add(mensagem).await()
-                                    Toast.makeText(this@ChatActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
-                                } catch (e: Exception) {
-                                    Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-                                }
-                            }
-                        }
-                    }
+                    if (url != null) runOnUiThread { lifecycleScope.launch {
+                        try {
+                            val m = hashMapOf<String, Any>(
+                                "remetente" to emailUsuario, "texto" to "", "arquivoUrl" to url,
+                                "nomeArquivo" to nF, "tamanhoArquivo" to tF, "mimeType" to mF,
+                                "tipo" to "arquivo", "timestamp" to System.currentTimeMillis(), "lida" to false
+                            )
+                            adicionarResposta(m)
+                            db.collection("chats").document(chatId).collection("mensagens").add(m).await()
+                            Toast.makeText(this@ChatActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
+                            cancelarResposta()
+                        } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                    } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread {
-                        Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show()
-                    }
+                    runOnUiThread { Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
-            })
-            .dispatch()
+            }).dispatch()
     }
 
-    // ============================================================
-    // CARREGAR MENSAGENS
-    // ============================================================
     private fun carregarMensagens() {
         val container = findViewById<LinearLayout>(R.id.containerMensagens)
         val scroll = findViewById<ScrollView>(R.id.scrollMensagens)
@@ -459,29 +346,20 @@ class ChatActivity : AppCompatActivity() {
         db.collection("chats").document(chatId).collection("mensagens")
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshots, error ->
-                if (error != null) return@addSnapshotListener
-                if (snapshots == null) return@addSnapshotListener
+                if (error != null || snapshots == null) return@addSnapshotListener
 
                 container.removeAllViews()
                 val inflater = LayoutInflater.from(this)
 
                 val listaMidias = mutableListOf<Pair<String, String>>()
-
                 snapshots.documents.forEach { doc ->
-                    val tipo = doc.getString("tipo") ?: "texto"
-                    when (tipo) {
-                        "foto" -> {
-                            val url = doc.getString("fotoUrl") ?: ""
-                            if (url.isNotEmpty()) listaMidias.add("foto" to url)
-                        }
-                        "video" -> {
-                            val url = doc.getString("videoUrl") ?: ""
-                            if (url.isNotEmpty()) listaMidias.add("video" to url)
-                        }
+                    when (doc.getString("tipo") ?: "texto") {
+                        "foto" -> (doc.getString("fotoUrl") ?: "").takeIf { it.isNotEmpty() }?.let { listaMidias.add("foto" to it) }
+                        "video" -> (doc.getString("videoUrl") ?: "").takeIf { it.isNotEmpty() }?.let { listaMidias.add("video" to it) }
                     }
                 }
 
-                var indexMidia = 0
+                var idx = 0
 
                 snapshots.documents.forEach { doc ->
                     val msgId = doc.id
@@ -492,204 +370,204 @@ class ChatActivity : AppCompatActivity() {
                     val videoUrl = doc.getString("videoUrl") ?: ""
                     val arquivoUrl = doc.getString("arquivoUrl") ?: ""
                     val nomeArquivo = doc.getString("nomeArquivo") ?: "arquivo"
-                    val tamanhoArquivo = doc.getLong("tamanhoArquivo") ?: 0L
+                    val tamArquivo = doc.getLong("tamanhoArquivo") ?: 0L
                     val mimeType = doc.getString("mimeType") ?: ""
-
-                    val ehRemetente = remetente == emailUsuario
+                    val respostaPara = doc.get("respostaPara") as? Map<*, *>
+                    val ehRem = remetente == emailUsuario
 
                     when (tipo) {
+                        "texto" -> {
+                            val view = inflater.inflate(R.layout.item_mensagem_texto, container, false)
+                            renderizarTexto(view, msgId, texto, remetente, "", respostaPara, ehRem)
+                            container.addView(view)
+                        }
                         "foto" -> {
                             val view = inflater.inflate(R.layout.item_mensagem_foto, container, false)
                             val img = view.findViewById<ImageView>(R.id.imgMensagemFoto)
                             val txtNome = view.findViewById<TextView>(R.id.txtNomeFoto)
+                            val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
+                            val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
 
-                            txtNome.text = if (ehRemetente) "Você" else outroEmail
+                            txtNome.text = if (ehRem) "Você" else outroEmail
                             Glide.with(this).load(fotoUrl).into(img)
+                            aplicarAlinhamentoRelative(containerBalao, ehRem)
 
-                            val posicaoNaLista = indexMidia
-                            indexMidia++
-
-                            view.setOnClickListener {
-                                abrirGaleria(listaMidias, posicaoNaLista)
-                            }
-
-                            // ✅ Menu com Favoritar + opções de mídia
-                            view.setOnLongClickListener {
-                                mostrarMenuMidia("foto", fotoUrl, "", mimeType, msgId, ehRemetente, texto, remetente)
-                                true
+                            val pos = idx; idx++
+                            SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, "", remetente, "foto") }
+                            containerBalao.setOnClickListener { abrirGaleria(listaMidias, pos) }
+                            containerBalao.setOnLongClickListener {
+                                mostrarMenuMidia("foto", fotoUrl, "", mimeType, msgId, ehRem, texto, remetente); true
                             }
                             container.addView(view)
                         }
-
                         "video" -> {
                             val view = inflater.inflate(R.layout.item_mensagem_video, container, false)
                             val videoView = view.findViewById<VideoView>(R.id.videoMensagem)
                             val btnPlay = view.findViewById<Button>(R.id.btnPlayVideo)
                             val txtNome = view.findViewById<TextView>(R.id.txtNomeVideo)
+                            val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
+                            val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
+                            val overlay = view.findViewById<View>(R.id.overlayVideo)
 
-                            txtNome.text = if (ehRemetente) "Você" else outroEmail
+                            txtNome.text = if (ehRem) "Você" else outroEmail
+                            aplicarAlinhamentoRelative(containerBalao, ehRem)
 
-                            val mediaController = MediaController(this)
-                            mediaController.setAnchorView(videoView)
-                            videoView.setMediaController(mediaController)
                             videoView.setVideoURI(Uri.parse(videoUrl))
-
                             btnPlay.setOnClickListener {
                                 if (videoView.isPlaying) {
                                     videoView.pause()
                                     btnPlay.text = "▶"
-                                    btnPlay.visibility = android.view.View.VISIBLE
+                                    btnPlay.visibility = View.VISIBLE
                                 } else {
                                     videoView.start()
-                                    btnPlay.visibility = android.view.View.GONE
+                                    btnPlay.visibility = View.GONE
                                 }
                             }
-
                             videoView.setOnCompletionListener {
                                 btnPlay.text = "▶"
-                                btnPlay.visibility = android.view.View.VISIBLE
+                                btnPlay.visibility = View.VISIBLE
                             }
 
-                            val posicaoNaLista = indexMidia
-                            indexMidia++
-
-                            videoView.setOnClickListener {
-                                abrirGaleria(listaMidias, posicaoNaLista)
-                            }
-
-                            view.setOnLongClickListener {
-                                mostrarMenuMidia("video", videoUrl, "", "", msgId, ehRemetente, texto, remetente)
-                                true
+                            val pos = idx; idx++
+                            SwipeToReplyHelper.attach(
+                                viewToTouch = overlay,
+                                containerBalao = containerBalao,
+                                imgIndicador = imgInd,
+                                onResponder = { dispararResposta(msgId, "", remetente, "video") }
+                            )
+                            overlay.setOnClickListener { abrirGaleria(listaMidias, pos) }
+                            overlay.setOnLongClickListener {
+                                mostrarMenuMidia("video", videoUrl, "", "", msgId, ehRem, texto, remetente); true
                             }
                             container.addView(view)
                         }
-
                         "arquivo" -> {
                             val view = inflater.inflate(R.layout.item_mensagem_arquivo, container, false)
                             val txtNomeRem = view.findViewById<TextView>(R.id.txtNomeArquivoRemetente)
                             val txtNomeArq = view.findViewById<TextView>(R.id.txtNomeArquivo)
-                            val txtTamanho = view.findViewById<TextView>(R.id.txtTamanhoArquivo)
+                            val txtTam = view.findViewById<TextView>(R.id.txtTamanhoArquivo)
+                            val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
+                            val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
 
-                            txtNomeRem.text = if (ehRemetente) "Você" else outroEmail
+                            txtNomeRem.text = if (ehRem) "Você" else outroEmail
                             txtNomeArq.text = nomeArquivo
-                            txtTamanho.text = formatarTamanho(tamanhoArquivo)
+                            txtTam.text = formatarTamanho(tamArquivo)
+                            aplicarAlinhamentoRelative(containerBalao, ehRem)
 
-                            view.setOnClickListener {
-                                abrirArquivoExterno(arquivoUrl, mimeType, nomeArquivo)
-                            }
-
-                            view.setOnLongClickListener {
-                                mostrarMenuMidia("arquivo", arquivoUrl, nomeArquivo, mimeType, msgId, ehRemetente, texto, remetente)
-                                true
-                            }
-                            container.addView(view)
-                        }
-
-                        else -> {
-                            val view = inflater.inflate(android.R.layout.simple_list_item_1, container, false)
-                            val tv = view.findViewById<TextView>(android.R.id.text1)
-
-                            if (ehRemetente) {
-                                tv.text = "Você: $texto"
-                                tv.setTextColor(android.graphics.Color.parseColor("#F5E6D0"))
-                            } else {
-                                tv.text = texto
-                                tv.setTextColor(android.graphics.Color.WHITE)
-                            }
-                            tv.textSize = 16f
-                            view.setPadding(0, 12, 0, 12)
-
-                            // ✅ Todo mundo pode favoritar; só o remetente pode apagar
-                            view.setOnLongClickListener {
-                                mostrarOpcaoMensagem(msgId, texto, remetente, ehRemetente)
-                                true
+                            SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, "", remetente, "arquivo") }
+                            containerBalao.setOnClickListener { abrirArquivoExterno(arquivoUrl, mimeType, nomeArquivo) }
+                            containerBalao.setOnLongClickListener {
+                                mostrarMenuMidia("arquivo", arquivoUrl, nomeArquivo, mimeType, msgId, ehRem, texto, remetente); true
                             }
                             container.addView(view)
                         }
                     }
                 }
-
                 scroll.post { scroll.fullScroll(ScrollView.FOCUS_DOWN) }
             }
     }
 
-    // ============================================================
-    // MENU DE MENSAGEM (texto) — Favoritar + Apagar
-    // ============================================================
-    private fun mostrarOpcaoMensagem(
-        msgId: String,
-        texto: String,
-        remetente: String,
-        ehRemetente: Boolean
+    private fun aplicarAlinhamentoRelative(containerBalao: LinearLayout, ehRemetente: Boolean) {
+        val params = containerBalao.layoutParams as RelativeLayout.LayoutParams
+        if (ehRemetente) {
+            params.addRule(RelativeLayout.ALIGN_PARENT_END, 1)
+            params.removeRule(RelativeLayout.ALIGN_PARENT_START)
+        } else {
+            params.addRule(RelativeLayout.ALIGN_PARENT_START, 1)
+            params.removeRule(RelativeLayout.ALIGN_PARENT_END)
+        }
+        containerBalao.layoutParams = params
+    }
+
+    private fun renderizarTexto(
+        view: View, msgId: String, texto: String, remetente: String,
+        nomeRemetente: String, respostaPara: Map<*, *>?, ehRemetente: Boolean
     ) {
-        lifecycleScope.launch {
-            try {
-                val jaFavorito = db.collection("favoritos")
-                    .whereEqualTo("usuarioEmail", emailUsuario)
-                    .whereEqualTo("mensagemId", msgId)
-                    .limit(1)
-                    .get().await()
-                    .let { !it.isEmpty }
+        val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
+        val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
+        val txtTexto = view.findViewById<TextView>(R.id.txtTextoMensagem)
+        val containerCit = view.findViewById<LinearLayout>(R.id.containerCitacao)
+        val txtNomeCit = view.findViewById<TextView>(R.id.txtNomeCitado)
+        val txtTextoCit = view.findViewById<TextView>(R.id.txtTextoCitado)
 
-                val opcoes = mutableListOf<String>()
-                opcoes.add(if (jaFavorito) "⭐ Remover dos favoritos" else "⭐ Favoritar")
-                if (ehRemetente) opcoes.add("🗑 Apagar para todos")
+        aplicarAlinhamentoRelative(containerBalao, ehRemetente)
 
-                AlertDialog.Builder(this@ChatActivity)
-                    .setTitle("Opções")
-                    .setItems(opcoes.toTypedArray()) { _, which ->
-                        when (opcoes[which]) {
-                            "⭐ Favoritar" -> favoritarMensagem(msgId, texto, remetente, "texto")
-                            "⭐ Remover dos favoritos" -> desfavoritarMensagem(msgId)
-                            "🗑 Apagar para todos" -> apagarMensagem(msgId)
-                        }
-                    }
-                    .show()
-            } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+        if (ehRemetente) {
+            containerBalao.setBackgroundResource(R.drawable.bg_bolha_enviada)
+            txtTexto.setTextColor(ContextCompat.getColor(this, R.color.accent_dark))
+        } else {
+            containerBalao.setBackgroundResource(R.drawable.bg_bolha_recebida)
+            txtTexto.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
+        }
+
+        txtTexto.text = texto
+
+        if (respostaPara != null) {
+            containerCit.visibility = View.VISIBLE
+            txtNomeCit.text = respostaPara["nomeRemetente"] as? String ?: ""
+            txtTextoCit.text = when (respostaPara["tipo"] as? String ?: "texto") {
+                "foto" -> "📷 Foto"; "video" -> "🎥 Vídeo"; "arquivo" -> "📎 Arquivo"
+                else -> respostaPara["texto"] as? String ?: ""
             }
+        } else {
+            containerCit.visibility = View.GONE
+        }
+
+        SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, texto, remetente, "texto") }
+        containerBalao.setOnLongClickListener {
+            mostrarOpcaoMensagem(msgId, texto, remetente, ehRemetente); true
         }
     }
 
-    // ============================================================
-    // MENU DE MÍDIA — Favoritar + Baixar + Abrir + Apagar
-    // ============================================================
+    private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, ehRem: Boolean) {
+        lifecycleScope.launch {
+            try {
+                val jaFav = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario).whereEqualTo("mensagemId", msgId)
+                    .limit(1).get().await().let { !it.isEmpty }
+                val opcoes = mutableListOf("💬 Responder")
+                opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                if (ehRem) opcoes.add("🗑 Apagar para todos")
+
+                AlertDialog.Builder(this@ChatActivity).setTitle("Opções")
+                    .setItems(opcoes.toTypedArray()) { _, w ->
+                        when (opcoes[w]) {
+                            "💬 Responder" -> dispararResposta(msgId, texto, remetente, "texto")
+                            "⭐ Favoritar" -> favoritar(msgId, texto, remetente, "texto")
+                            "⭐ Remover dos favoritos" -> desfavoritar(msgId)
+                            "🗑 Apagar para todos" -> apagarMensagem(msgId)
+                        }
+                    }.show()
+            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+        }
+    }
+
     private fun mostrarMenuMidia(
-        tipo: String,
-        url: String,
-        nomeArquivo: String,
-        mimeType: String,
-        msgId: String,
-        ehRemetente: Boolean,
-        texto: String,
-        remetente: String
+        tipo: String, url: String, nomeArq: String, mime: String,
+        msgId: String, ehRem: Boolean, texto: String, remetente: String
     ) {
         lifecycleScope.launch {
             try {
-                val jaFavorito = db.collection("favoritos")
-                    .whereEqualTo("usuarioEmail", emailUsuario)
-                    .whereEqualTo("mensagemId", msgId)
-                    .limit(1)
-                    .get().await()
-                    .let { !it.isEmpty }
-
-                val opcoes = mutableListOf<String>()
-                opcoes.add(if (jaFavorito) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                val jaFav = db.collection("favoritos")
+                    .whereEqualTo("usuarioEmail", emailUsuario).whereEqualTo("mensagemId", msgId)
+                    .limit(1).get().await().let { !it.isEmpty }
+                val opcoes = mutableListOf("💬 Responder")
+                opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
                 opcoes.add("⬇ Baixar")
                 if (tipo == "arquivo") opcoes.add("📂 Abrir")
-                if (ehRemetente) opcoes.add("🗑 Apagar")
+                if (ehRem) opcoes.add("🗑 Apagar")
 
-                AlertDialog.Builder(this@ChatActivity)
-                    .setTitle("Opções")
-                    .setItems(opcoes.toTypedArray()) { _, which ->
-                        when (opcoes[which]) {
-                            "⭐ Favoritar" -> favoritarMensagem(msgId, texto, remetente, tipo)
-                            "⭐ Remover dos favoritos" -> desfavoritarMensagem(msgId)
+                AlertDialog.Builder(this@ChatActivity).setTitle("Opções")
+                    .setItems(opcoes.toTypedArray()) { _, w ->
+                        when (opcoes[w]) {
+                            "💬 Responder" -> dispararResposta(msgId, texto, remetente, tipo)
+                            "⭐ Favoritar" -> favoritar(msgId, texto, remetente, tipo)
+                            "⭐ Remover dos favoritos" -> desfavoritar(msgId)
                             "⬇ Baixar" -> {
                                 val nome = when (tipo) {
                                     "foto" -> "CTR_foto_${System.currentTimeMillis()}.jpg"
                                     "video" -> "CTR_video_${System.currentTimeMillis()}.mp4"
-                                    else -> nomeArquivo
+                                    else -> nomeArq
                                 }
                                 val pasta = when (tipo) {
                                     "foto" -> Environment.DIRECTORY_PICTURES
@@ -698,130 +576,91 @@ class ChatActivity : AppCompatActivity() {
                                 }
                                 baixarArquivo(url, nome, pasta)
                             }
-                            "📂 Abrir" -> abrirArquivoExterno(url, mimeType, nomeArquivo)
+                            "📂 Abrir" -> abrirArquivoExterno(url, mime, nomeArq)
                             "🗑 Apagar" -> apagarMensagem(msgId)
                         }
-                    }
-                    .show()
-            } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+                    }.show()
+            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
     }
 
-    // ============================================================
-    // FAVORITAR / DESFAVORITAR
-    // ============================================================
-    private fun favoritarMensagem(msgId: String, texto: String, remetente: String, tipoMidia: String) {
+    private fun favoritar(msgId: String, texto: String, remetente: String, tipoMidia: String) {
         lifecycleScope.launch {
             try {
-                val nomeRemetente = if (remetente == emailUsuario) "Você" else {
-                    val u = db.collection("usuarios").document(remetente).get().await()
-                    u.getString("nome") ?: remetente
+                val nomeRem = if (remetente == emailUsuario) "Você" else {
+                    db.collection("usuarios").document(remetente).get().await().getString("nome") ?: remetente
                 }
-
-                db.collection("favoritos").add(
-                    hashMapOf(
-                        "usuarioEmail" to emailUsuario,
-                        "mensagemId" to msgId,
-                        "chatId" to chatId,
-                        "tipoChat" to "pv",
-                        "texto" to texto,
-                        "remetente" to remetente,
-                        "nomeRemetente" to nomeRemetente,
-                        "tipoMidia" to tipoMidia,
-                        "criadoEm" to System.currentTimeMillis()
-                    )
-                ).await()
-
-                Toast.makeText(this@ChatActivity, "⭐ Adicionado aos favoritos", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+                db.collection("favoritos").add(hashMapOf(
+                    "usuarioEmail" to emailUsuario, "mensagemId" to msgId, "chatId" to chatId,
+                    "tipoChat" to "pv", "texto" to texto, "remetente" to remetente,
+                    "nomeRemetente" to nomeRem, "tipoMidia" to tipoMidia,
+                    "criadoEm" to System.currentTimeMillis()
+                )).await()
+                Toast.makeText(this@ChatActivity, "⭐ Favoritado", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
     }
 
-    private fun desfavoritarMensagem(msgId: String) {
+    private fun desfavoritar(msgId: String) {
         lifecycleScope.launch {
             try {
-                val favoritos = db.collection("favoritos")
-                    .whereEqualTo("usuarioEmail", emailUsuario)
-                    .whereEqualTo("mensagemId", msgId)
-                    .get().await()
-
-                favoritos.documents.forEach { it.reference.delete().await() }
-
-                Toast.makeText(this@ChatActivity, "Removido dos favoritos", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+                db.collection("favoritos").whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId).get().await()
+                    .documents.forEach { it.reference.delete().await() }
+                Toast.makeText(this@ChatActivity, "Removido", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
     }
 
-    // ============================================================
-    // HELPERS DE MÍDIA
-    // ============================================================
-    private fun abrirGaleria(listaMidias: List<Pair<String, String>>, posicaoInicial: Int) {
-        val urls = listaMidias.map { it.second }.toTypedArray()
-        val tipos = listaMidias.map { it.first }.toTypedArray()
-
-        val intent = Intent(this, GaleriaMidiaActivity::class.java)
-        intent.putExtra("urls", urls)
-        intent.putExtra("tipos", tipos)
-        intent.putExtra("posicaoInicial", posicaoInicial)
-        startActivity(intent)
+    private fun abrirGaleria(lista: List<Pair<String, String>>, pos: Int) {
+        val urls = lista.map { it.second }.toTypedArray()
+        val tipos = lista.map { it.first }.toTypedArray()
+        val i = Intent(this, GaleriaMidiaActivity::class.java)
+        i.putExtra("urls", urls); i.putExtra("tipos", tipos); i.putExtra("posicaoInicial", pos)
+        startActivity(i)
     }
 
-    private fun abrirArquivoExterno(url: String, mimeType: String, nome: String) {
+    private fun abrirArquivoExterno(url: String, mime: String, nome: String) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(Uri.parse(url), mimeType.ifEmpty { "*/*" })
+            val i = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(Uri.parse(url), mime.ifEmpty { "*/*" })
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Nenhum app para abrir '$nome'", Toast.LENGTH_LONG).show()
-        }
+            startActivity(i)
+        } catch (e: Exception) { Toast.makeText(this, "Nenhum app", Toast.LENGTH_LONG).show() }
     }
 
-    private fun baixarArquivo(url: String, nomeArquivo: String, pastaDestino: String) {
+    private fun baixarArquivo(url: String, nome: String, pasta: String) {
         try {
-            val request = DownloadManager.Request(Uri.parse(url))
-            request.setTitle(nomeArquivo)
-            request.setDescription("Baixando do CTR...")
-            request.allowScanningByMediaScanner()
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            request.setDestinationInExternalPublicDir(pastaDestino, nomeArquivo)
-
-            val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            downloadManager.enqueue(request)
-
+            val req = DownloadManager.Request(Uri.parse(url))
+            req.setTitle(nome); req.setDescription("Baixando do CTR...")
+            req.allowScanningByMediaScanner()
+            req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            req.setDestinationInExternalPublicDir(pasta, nome)
+            (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(req)
             Toast.makeText(this, "⬇ Baixando...", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Erro ao baixar: ${e.message}", Toast.LENGTH_LONG).show()
-        }
+        } catch (e: Exception) { Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
     }
 
     private fun apagarMensagem(msgId: String) {
         lifecycleScope.launch {
             try {
-                db.collection("chats").document(chatId)
-                    .collection("mensagens").document(msgId)
-                    .delete().await()
-                Toast.makeText(this@ChatActivity, "Mensagem apagada", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+                db.collection("chats").document(chatId).collection("mensagens").document(msgId).delete().await()
+                Toast.makeText(this@ChatActivity, "Apagada", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
     }
 
-    private fun formatarTamanho(bytes: Long): String {
-        return when {
-            bytes < 1024 -> "$bytes B"
-            bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-            bytes < 1024 * 1024 * 1024 -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
-            else -> String.format("%.1f GB", bytes / (1024.0 * 1024.0 * 1024.0))
-        }
+    private fun formatarTamanho(b: Long): String = when {
+        b < 1024 -> "$b B"
+        b < 1024 * 1024 -> "${b / 1024} KB"
+        b < 1024 * 1024 * 1024 -> String.format("%.1f MB", b / (1024.0 * 1024.0))
+        else -> String.format("%.1f GB", b / (1024.0 * 1024.0 * 1024.0))
     }
+
+    data class RespostaInfo(
+        val msgId: String, val texto: String, val remetente: String,
+        val nomeRemetente: String, val tipo: String
+    )
 }

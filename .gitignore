@@ -1,25 +1,28 @@
 # ============================================
-# Android
+# Android / Build
 # ============================================
 *.apk
 *.aab
 *.ap_
 *.dex
 *.class
-
-# Build
 build/
 app/build/
 out/
 bin/
 gen/
 release/
+captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+.artifacts/
 
+# ============================================
 # Gradle
-.gradle/
+# ============================================
+/.gradle/
 gradle-app.setting
-!gradle-wrapper.jar
-!gradle-wrapper.properties
 
 # ============================================
 # Firebase (NÃO subir)
@@ -33,17 +36,6 @@ app/google-services.json
 *.iml
 *.iws
 *.ipr
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/gradle.xml
-.idea/assetWizardSettings.xml
-.idea/dictionaries
-.idea/libraries
-.idea/caches
-.idea/modules.xml
-.idea/navEditor.xml
-.idea/compiler.xml
-.idea/misc.xml
 
 # ============================================
 # Kotlin
@@ -61,15 +53,6 @@ app/google-services.json
 Thumbs.db
 
 # ============================================
-# Capturas e exports
-# ============================================
-captures/
-.externalNativeBuild/
-.cxx/
-*.hprof
-.artifacts/
-
-# ============================================
 # Keystore (NUNCA subir)
 # ============================================
 *.jks
@@ -85,15 +68,11 @@ local.properties
 .classpath
 
 # ============================================
-# Node (se usar algum script)
+# Node / Python (scripts)
 # ============================================
 node_modules/
 package-lock.json
 yarn.lock
-
-# ============================================
-# Python (se usar algum script)
-# ============================================
 __pycache__/
 *.py[cod]
 .venv/
