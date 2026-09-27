@@ -59,6 +59,19 @@
 
             </LinearLayout>
 
+            <!-- Botao comentarios -->
+            <Button
+                android:id="@+id/btnComentariosGerenciar"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:minWidth="0dp"
+                android:padding="8dp"
+                android:text="0"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp" />
+
             <!-- Botao anexos -->
             <Button
                 android:id="@+id/btnAnexosGerenciar"
@@ -87,17 +100,6 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-
-        <!-- Contador de anexos -->
-        <TextView
-            android:id="@+id/txtContadorAnexosGerenciar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text=""
-            android:textColor="@color/accent"
-            android:textSize="12sp"
-            android:visibility="gone" />
 
     </LinearLayout>
 

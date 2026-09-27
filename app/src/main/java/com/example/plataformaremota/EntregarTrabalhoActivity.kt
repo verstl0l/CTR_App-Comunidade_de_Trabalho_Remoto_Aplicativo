@@ -205,6 +205,25 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                 mostrarOpcoesStatus(trabalhoId, status, container)
             }
 
+            // Conta comentarios deste trabalho
+            val btnComentarios = view.findViewById<Button>(R.id.btnComentariosMembro)
+            lifecycleScope.launch {
+                try {
+                    val total = ComentarioHelper.contar(trabalhoId)
+                    btnComentarios.text = total.toString()
+                } catch (e: Exception) {
+                    btnComentarios.text = "0"
+                }
+            }
+
+            // Click no botao comentarios -> abre ComentariosTrabalhoActivity
+            btnComentarios.setOnClickListener {
+                val intent = Intent(this@EntregarTrabalhoActivity, ComentariosTrabalhoActivity::class.java)
+                intent.putExtra("trabalhoId", trabalhoId)
+                intent.putExtra("tituloTrabalho", titulo)
+                startActivity(intent)
+            }
+
             // Conta anexos deste trabalho
             val btnAnexos = view.findViewById<Button>(R.id.btnAnexosMembro)
             lifecycleScope.launch {

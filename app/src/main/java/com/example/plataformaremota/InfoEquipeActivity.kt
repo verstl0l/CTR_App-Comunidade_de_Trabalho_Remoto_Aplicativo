@@ -275,12 +275,19 @@ class InfoEquipeActivity : AppCompatActivity() {
             .setPositiveButton("Excluir") { _, _ ->
                 lifecycleScope.launch {
                     try {
-                        // 1. Anexos dos trabalhos (deletar ANTES dos trabalhos)
+                        // 1. Anexos e comentarios dos trabalhos (deletar ANTES dos trabalhos)
                         val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", equipeId).get().await()
                         for (trabalho in trabalhos.documents) {
+                            // Anexos
                             val anexos = trabalho.reference.collection("anexos").get().await()
                             anexos.documents.forEach { anexo ->
                                 anexo.reference.delete().await()
+                            }
+
+                            // Comentarios
+                            val comentarios = trabalho.reference.collection("comentarios").get().await()
+                            comentarios.documents.forEach { comentario ->
+                                comentario.reference.delete().await()
                             }
                         }
 

@@ -99,6 +99,18 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
+            <!-- Botao comentarios -->
+            <Button
+                android:id="@+id/btnComentariosMembro"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:padding="8dp"
+                android:text="0"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp" />
+
             <!-- Botao anexos -->
             <Button
                 android:id="@+id/btnAnexosMembro"
@@ -116,22 +128,12 @@
                 android:id="@+id/btnEntregarTrabalho"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
                 android:backgroundTint="@color/bg_surface_hover"
                 android:text="INICIAR"
                 android:textColor="@color/text_primary" />
 
         </LinearLayout>
-
-        <!-- Contador de anexos (opcional) -->
-        <TextView
-            android:id="@+id/txtContadorAnexosMembro"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text=""
-            android:textColor="@color/accent"
-            android:textSize="12sp"
-            android:visibility="gone" />
 
     </LinearLayout>
 

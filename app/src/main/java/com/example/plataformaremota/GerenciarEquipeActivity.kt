@@ -632,6 +632,25 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     view.findViewById<TextView>(R.id.txtInfoGerenciar).text = "$categoria - $prazo"
                     view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
 
+                    // Conta comentarios deste trabalho
+                    val btnComentarios = view.findViewById<Button>(R.id.btnComentariosGerenciar)
+                    lifecycleScope.launch {
+                        try {
+                            val total = ComentarioHelper.contar(trabalhoId)
+                            btnComentarios.text = total.toString()
+                        } catch (e: Exception) {
+                            btnComentarios.text = "0"
+                        }
+                    }
+
+                    // Click no botao comentarios -> abre ComentariosTrabalhoActivity
+                    btnComentarios.setOnClickListener {
+                        val intent = Intent(this@GerenciarEquipeActivity, ComentariosTrabalhoActivity::class.java)
+                        intent.putExtra("trabalhoId", trabalhoId)
+                        intent.putExtra("tituloTrabalho", titulo)
+                        startActivity(intent)
+                    }
+
                     // Conta anexos deste trabalho
                     val btnAnexos = view.findViewById<Button>(R.id.btnAnexosGerenciar)
                     lifecycleScope.launch {
@@ -672,6 +691,13 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                             .setPositiveButton("Excluir") { _, _ ->
                                 lifecycleScope.launch {
                                     try {
+                                        // Exclui comentarios antes do trabalho
+                                        val comentarios = db.collection("trabalhos").document(trabalhoId)
+                                            .collection("comentarios").get().await()
+                                        comentarios.documents.forEach {
+                                            it.reference.delete().await()
+                                        }
+
                                         // Exclui anexos antes do trabalho
                                         val anexos = db.collection("trabalhos").document(trabalhoId)
                                             .collection("anexos").get().await()
