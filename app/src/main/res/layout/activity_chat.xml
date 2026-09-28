@@ -42,7 +42,6 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <!-- ✅ NOVO: texto "digitando..." -->
             <TextView
                 android:id="@+id/txtDigitando"
                 android:layout_width="match_parent"
@@ -66,22 +65,15 @@
 
     </LinearLayout>
 
-    <!-- Lista de mensagens -->
-    <ScrollView
-        android:id="@+id/scrollMensagens"
+    <!-- Lista de mensagens — AGORA É RECYCLERVIEW -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerMensagens"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:padding="12dp"
         app:layout_constraintBottom_toTopOf="@+id/containerRespondendo"
-        app:layout_constraintTop_toBottomOf="@+id/headerChat">
-
-        <LinearLayout
-            android:id="@+id/containerMensagens"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp" />
-
-    </ScrollView>
+        app:layout_constraintTop_toBottomOf="@+id/headerChat" />
 
     <!-- Barra "Respondendo a..." -->
     <LinearLayout

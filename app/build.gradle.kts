@@ -58,6 +58,8 @@ android {
 }
 
 dependencies {
+    // Recyclerview
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

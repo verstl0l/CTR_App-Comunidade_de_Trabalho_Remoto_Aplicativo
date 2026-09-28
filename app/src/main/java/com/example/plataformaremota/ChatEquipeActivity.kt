@@ -5,22 +5,18 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -38,6 +34,10 @@ class ChatEquipeActivity : AppCompatActivity() {
 
     private var respostaAtiva: RespostaInfo? = null
     private var typingHelper: TypingIndicatorHelper? = null
+
+    // ✅ NOVO: adapter e recycler
+    private lateinit var adapter: MensagemAdapter
+    private lateinit var recycler: RecyclerView
 
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
@@ -132,6 +132,49 @@ class ChatEquipeActivity : AppCompatActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
+        // ============================================================
+        // ✅ CONFIGURA RECYCLERVIEW + ADAPTER
+        // ============================================================
+        recycler = findViewById(R.id.recyclerMensagensEquipe)
+        adapter = MensagemAdapter(
+            emailUsuario = emailUsuario,
+            outroEmail = "", // chat de equipe não tem "outro" específico
+            contexto = this,
+            callbacks = object : MensagemAdapter.Callbacks {
+                override fun onResponder(msgId: String, texto: String, remetente: String, tipo: String) {
+                    dispararResposta(msgId, texto, remetente, nomeUsuario, tipo)
+                }
+
+                override fun onFotoClick(posicaoNaGaleria: Int, listaMidias: List<Pair<String, String>>) {
+                    abrirGaleria(listaMidias, posicaoNaGaleria)
+                }
+
+                override fun onVideoClick(posicaoNaGaleria: Int, listaMidias: List<Pair<String, String>>) {
+                    abrirGaleria(listaMidias, posicaoNaGaleria)
+                }
+
+                override fun onLongPressTexto(msgId: String, texto: String, remetente: String, ehRem: Boolean) {
+                    mostrarOpcaoMensagem(msgId, texto, remetente, nomeUsuario, ehRem)
+                }
+
+                override fun onLongPressMidia(
+                    tipo: String, url: String, nomeArq: String, mime: String,
+                    msgId: String, ehRem: Boolean, texto: String, remetente: String
+                ) {
+                    mostrarMenuMidia(tipo, url, nomeArq, mime, msgId, ehRem, texto, remetente, nomeUsuario)
+                }
+
+                override fun onAbrirArquivo(url: String, mime: String, nome: String) {
+                    abrirArquivoExterno(url, mime, nome)
+                }
+            }
+        )
+        recycler.layoutManager = LinearLayoutManager(this).apply {
+            stackFromEnd = true
+        }
+        recycler.adapter = adapter
+
+        // ✅ Carrega as mensagens (agora usando adapter)
         carregarMensagens()
     }
 
@@ -145,16 +188,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         typingHelper = null
     }
 
-    private suspend fun garantirCampoDigitando() {
-        try {
-            val docRef = db.collection("chats_equipe").document(equipeId)
-            val doc = docRef.get().await()
-            if (doc.exists() && !doc.contains("digitando")) {
-                docRef.update("digitando", emptyMap<String, Long>()).await()
-            }
-        } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro garantir digitando: ${e.message}") }
-    }
-
+    // ============================================================
+    // MARCAR COMO LIDAS
+    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (equipeId.isEmpty()) return
         lifecycleScope.launch {
@@ -171,11 +207,30 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // GARANTIR CAMPO DIGITANDO
+    // ============================================================
+    private suspend fun garantirCampoDigitando() {
+        try {
+            val docRef = db.collection("chats_equipe").document(equipeId)
+            val doc = docRef.get().await()
+            if (doc.exists() && !doc.contains("digitando")) {
+                docRef.update("digitando", emptyMap<String, Long>()).await()
+            }
+        } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro garantir digitando: ${e.message}") }
+    }
+
+    // ============================================================
+    // CANCELAR RESPOSTA
+    // ============================================================
     private fun cancelarResposta() {
         respostaAtiva = null
         findViewById<LinearLayout>(R.id.containerRespondendoEquipe).visibility = View.GONE
     }
 
+    // ============================================================
+    // ADICIONAR RESPOSTA
+    // ============================================================
     private fun adicionarResposta(m: HashMap<String, Any>) {
         respostaAtiva?.let { r ->
             m["respostaPara"] = hashMapOf(
@@ -185,6 +240,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // DISPARAR RESPOSTA
+    // ============================================================
     private fun dispararResposta(msgId: String, texto: String, remetente: String, nomeRem: String, tipo: String = "texto") {
         respostaAtiva = RespostaInfo(msgId, texto, remetente, nomeRem, tipo)
         findViewById<TextView>(R.id.txtRespondendoAEquipe).text = "Respondendo a $nomeRem"
@@ -195,6 +253,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         findViewById<EditText>(R.id.edtMensagemEquipe).requestFocus()
     }
 
+    // ============================================================
+    // ENVIAR MENSAGEM DE TEXTO
+    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -214,6 +275,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // ENVIAR FOTO
+    // ============================================================
     private fun enviarFoto(uri: Uri) {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_equipe/")
@@ -243,6 +307,9 @@ class ChatEquipeActivity : AppCompatActivity() {
             }).dispatch()
     }
 
+    // ============================================================
+    // ENVIAR VÍDEO
+    // ============================================================
     private fun enviarVideo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
@@ -273,6 +340,9 @@ class ChatEquipeActivity : AppCompatActivity() {
             }).dispatch()
     }
 
+    // ============================================================
+    // ENVIAR ARQUIVO
+    // ============================================================
     private fun enviarArquivo(uri: Uri) {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
@@ -318,11 +388,11 @@ class ChatEquipeActivity : AppCompatActivity() {
             }).dispatch()
     }
 
+    // ============================================================
+    // ✅ CARREGAR MENSAGENS (agora com adapter)
+    // ============================================================
     private fun carregarMensagens() {
         if (isFinishing || isDestroyed) return
-
-        val container = findViewById<LinearLayout>(R.id.containerMensagensEquipe)
-        val scroll = findViewById<ScrollView>(R.id.scrollMensagensEquipe)
 
         db.collection("chats_equipe").document(equipeId).collection("mensagens")
             .orderBy("timestamp", Query.Direction.ASCENDING)
@@ -330,191 +400,19 @@ class ChatEquipeActivity : AppCompatActivity() {
                 if (isFinishing || isDestroyed) return@addSnapshotListener
                 if (error != null || snapshots == null) return@addSnapshotListener
 
-                container.removeAllViews()
-                val inflater = LayoutInflater.from(this)
+                val mensagens = snapshots.documents.map { Mensagem.deDocumento(it) }
 
-                snapshots.documents.forEach { doc ->
-                    if (isFinishing || isDestroyed) return@forEach
-
-                    val msgId = doc.id
-                    val remetente = doc.getString("remetente") ?: ""
-                    val nomeRem = doc.getString("nomeRemetente") ?: "Usuário"
-                    val texto = doc.getString("texto") ?: ""
-                    val tipo = doc.getString("tipo") ?: "texto"
-                    val fotoUrl = doc.getString("fotoUrl") ?: ""
-                    val videoUrl = doc.getString("videoUrl") ?: ""
-                    val arquivoUrl = doc.getString("arquivoUrl") ?: ""
-                    val nomeArq = doc.getString("nomeArquivo") ?: "arquivo"
-                    val tamArq = doc.getLong("tamanhoArquivo") ?: 0L
-                    val mime = doc.getString("mimeType") ?: ""
-                    val respostaPara = doc.get("respostaPara") as? Map<*, *>
-                    val ehRem = remetente == emailUsuario
-
-                    when (tipo) {
-                        "texto" -> {
-                            val view = inflater.inflate(R.layout.item_mensagem_texto, container, false)
-                            renderizarTexto(view, msgId, texto, remetente, nomeRem, respostaPara, ehRem)
-                            container.addView(view)
-                        }
-                        "foto" -> {
-                            val view = inflater.inflate(R.layout.item_mensagem_foto, container, false)
-                            val img = view.findViewById<ImageView>(R.id.imgMensagemFoto)
-                            val txtNome = view.findViewById<TextView>(R.id.txtNomeFoto)
-                            val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
-                            val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
-
-                            txtNome.text = if (ehRem) "Você" else nomeRem
-
-                            if (!isFinishing && !isDestroyed) {
-                                Glide.with(applicationContext).load(fotoUrl).into(img)
-                            }
-
-                            aplicarAlinhamentoRelative(containerBalao, ehRem)
-
-                            SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, "", remetente, nomeRem, "foto") }
-                            containerBalao.setOnClickListener {
-                                val i = Intent(this, VisualizarMidiaActivity::class.java)
-                                i.putExtra("tipo", "foto"); i.putExtra("url", fotoUrl); startActivity(i)
-                            }
-                            containerBalao.setOnLongClickListener {
-                                mostrarMenuMidia("foto", fotoUrl, "", mime, msgId, ehRem, texto, remetente, nomeRem); true
-                            }
-                            container.addView(view)
-                        }
-                        "video" -> {
-                            val view = inflater.inflate(R.layout.item_mensagem_video, container, false)
-                            val videoView = view.findViewById<android.widget.VideoView>(R.id.videoMensagem)
-                            val btnPlay = view.findViewById<Button>(R.id.btnPlayVideo)
-                            val txtNome = view.findViewById<TextView>(R.id.txtNomeVideo)
-                            val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
-                            val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
-                            val overlay = view.findViewById<View>(R.id.overlayVideo)
-
-                            txtNome.text = if (ehRem) "Você" else nomeRem
-                            aplicarAlinhamentoRelative(containerBalao, ehRem)
-
-                            try {
-                                videoView.setVideoURI(Uri.parse(videoUrl))
-                            } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro video: ${e.message}") }
-
-                            videoView.setOnErrorListener { _, _, _ -> btnPlay.text = "⚠"; btnPlay.visibility = View.VISIBLE; true }
-
-                            btnPlay.setOnClickListener {
-                                try {
-                                    if (videoView.isPlaying) {
-                                        videoView.pause(); btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE
-                                    } else {
-                                        videoView.start(); btnPlay.visibility = View.GONE
-                                    }
-                                } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro play: ${e.message}") }
-                            }
-                            videoView.setOnCompletionListener { btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE }
-
-                            SwipeToReplyHelper.attach(
-                                viewToTouch = overlay, containerBalao = containerBalao,
-                                imgIndicador = imgInd, onResponder = { dispararResposta(msgId, "", remetente, nomeRem, "video") }
-                            )
-                            overlay.setOnClickListener {
-                                val i = Intent(this, VisualizarMidiaActivity::class.java)
-                                i.putExtra("tipo", "video"); i.putExtra("url", videoUrl); startActivity(i)
-                            }
-                            overlay.setOnLongClickListener {
-                                mostrarMenuMidia("video", videoUrl, "", "", msgId, ehRem, texto, remetente, nomeRem); true
-                            }
-                            container.addView(view)
-                        }
-                        "arquivo" -> {
-                            val view = inflater.inflate(R.layout.item_mensagem_arquivo, container, false)
-                            val txtNomeRem = view.findViewById<TextView>(R.id.txtNomeArquivoRemetente)
-                            val txtNomeArq = view.findViewById<TextView>(R.id.txtNomeArquivo)
-                            val txtTam = view.findViewById<TextView>(R.id.txtTamanhoArquivo)
-                            val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
-                            val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
-
-                            txtNomeRem.text = if (ehRem) "Você" else nomeRem
-                            txtNomeArq.text = nomeArq
-                            txtTam.text = formatarTamanho(tamArq)
-                            aplicarAlinhamentoRelative(containerBalao, ehRem)
-
-                            SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, "", remetente, nomeRem, "arquivo") }
-                            containerBalao.setOnClickListener {
-                                try {
-                                    val i = Intent(Intent.ACTION_VIEW).apply {
-                                        setDataAndType(Uri.parse(arquivoUrl), mime.ifEmpty { "*/*" })
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    }
-                                    startActivity(i)
-                                } catch (e: Exception) { Toast.makeText(this, "Nenhum app", Toast.LENGTH_LONG).show() }
-                            }
-                            containerBalao.setOnLongClickListener {
-                                mostrarMenuMidia("arquivo", arquivoUrl, nomeArq, mime, msgId, ehRem, texto, remetente, nomeRem); true
-                            }
-                            container.addView(view)
-                        }
+                adapter.submitList(mensagens) {
+                    if (mensagens.isNotEmpty()) {
+                        recycler.scrollToPosition(mensagens.size - 1)
                     }
                 }
-                scroll.post { scroll.fullScroll(ScrollView.FOCUS_DOWN) }
             }
     }
 
-    private fun aplicarAlinhamentoRelative(containerBalao: LinearLayout, ehRemetente: Boolean) {
-        val params = containerBalao.layoutParams as RelativeLayout.LayoutParams
-        if (ehRemetente) {
-            params.addRule(RelativeLayout.ALIGN_PARENT_END, 1)
-            params.removeRule(RelativeLayout.ALIGN_PARENT_START)
-        } else {
-            params.addRule(RelativeLayout.ALIGN_PARENT_START, 1)
-            params.removeRule(RelativeLayout.ALIGN_PARENT_END)
-        }
-        containerBalao.layoutParams = params
-    }
-
-    private fun renderizarTexto(
-        view: View, msgId: String, texto: String, remetente: String,
-        nomeRem: String, respostaPara: Map<*, *>?, ehRem: Boolean
-    ) {
-        val containerBalao = view.findViewById<LinearLayout>(R.id.containerBalao)
-        val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
-        val txtNomeRem = view.findViewById<TextView>(R.id.txtNomeRemetenteMensagem)
-        val txtTexto = view.findViewById<TextView>(R.id.txtTextoMensagem)
-        val containerCit = view.findViewById<LinearLayout>(R.id.containerCitacao)
-        val txtNomeCit = view.findViewById<TextView>(R.id.txtNomeCitado)
-        val txtTextoCit = view.findViewById<TextView>(R.id.txtTextoCitado)
-
-        txtNomeRem.visibility = View.VISIBLE
-        txtNomeRem.text = if (ehRem) "Você" else nomeRem
-        aplicarAlinhamentoRelative(containerBalao, ehRem)
-
-        if (ehRem) {
-            containerBalao.setBackgroundResource(R.drawable.bg_bolha_enviada)
-            txtTexto.setTextColor(ContextCompat.getColor(this, R.color.accent_dark))
-            txtNomeRem.setTextColor(ContextCompat.getColor(this, R.color.accent_dark))
-        } else {
-            containerBalao.setBackgroundResource(R.drawable.bg_bolha_recebida)
-            txtTexto.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
-            txtNomeRem.setTextColor(ContextCompat.getColor(this, R.color.accent))
-        }
-
-        txtTexto.text = texto
-
-        if (respostaPara != null) {
-            containerCit.visibility = View.VISIBLE
-            txtNomeCit.text = respostaPara["nomeRemetente"] as? String ?: ""
-            txtTextoCit.text = when (respostaPara["tipo"] as? String ?: "texto") {
-                "foto" -> "📷 Foto"; "video" -> "🎥 Vídeo"; "arquivo" -> "📎 Arquivo"
-                else -> respostaPara["texto"] as? String ?: ""
-            }
-        } else {
-            containerCit.visibility = View.GONE
-        }
-
-        SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, texto, remetente, nomeRem, "texto") }
-        containerBalao.setOnLongClickListener {
-            mostrarOpcaoMensagem(msgId, texto, remetente, nomeRem, ehRem); true
-        }
-    }
-
+    // ============================================================
+    // MOSTRAR OPÇÕES DE MENSAGEM (texto)
+    // ============================================================
     private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, nomeRem: String, ehRem: Boolean) {
         lifecycleScope.launch {
             try {
@@ -538,6 +436,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // MOSTRAR MENU DE MÍDIA
+    // ============================================================
     private fun mostrarMenuMidia(
         tipo: String, url: String, nomeArq: String, mime: String,
         msgId: String, ehRem: Boolean, texto: String, remetente: String, nomeRem: String
@@ -577,6 +478,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // FAVORITAR / DESFAVORITAR
+    // ============================================================
     private fun favoritar(msgId: String, texto: String, remetente: String, nomeRem: String, tipoMidia: String) {
         lifecycleScope.launch {
             try {
@@ -602,6 +506,34 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // ABRIR GALERIA
+    // ============================================================
+    private fun abrirGaleria(lista: List<Pair<String, String>>, pos: Int) {
+        val urls = lista.map { it.second }.toTypedArray()
+        val tipos = lista.map { it.first }.toTypedArray()
+        val i = Intent(this, GaleriaMidiaActivity::class.java)
+        i.putExtra("urls", urls); i.putExtra("tipos", tipos); i.putExtra("posicaoInicial", pos)
+        startActivity(i)
+    }
+
+    // ============================================================
+    // ABRIR ARQUIVO EXTERNO
+    // ============================================================
+    private fun abrirArquivoExterno(url: String, mime: String, nome: String) {
+        try {
+            val i = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(Uri.parse(url), mime.ifEmpty { "*/*" })
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(i)
+        } catch (e: Exception) { Toast.makeText(this, "Nenhum app", Toast.LENGTH_LONG).show() }
+    }
+
+    // ============================================================
+    // APAGAR MENSAGEM
+    // ============================================================
     private fun apagarMensagem(msgId: String) {
         lifecycleScope.launch {
             try {
@@ -611,13 +543,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
-    private fun formatarTamanho(b: Long): String = when {
-        b < 1024 -> "$b B"
-        b < 1024 * 1024 -> "${b / 1024} KB"
-        b < 1024 * 1024 * 1024 -> String.format("%.1f MB", b / (1024.0 * 1024.0))
-        else -> String.format("%.1f GB", b / (1024.0 * 1024.0 * 1024.0))
-    }
-
+    // ============================================================
+    // RESPOSTA INFO
+    // ============================================================
     data class RespostaInfo(
         val msgId: String, val texto: String, val remetente: String,
         val nomeRemetente: String, val tipo: String
