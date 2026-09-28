@@ -192,7 +192,6 @@ class NotificacoesActivity : BaseActivity() {
         if (referenciaTipo == "equipe") {
             lifecycleScope.launch {
                 try {
-                    // Verifica se ha um convite pendente com esse equipeId
                     val convites = db.collection("convites_equipe")
                         .whereEqualTo("emailConvidado", emailUsuario)
                         .whereEqualTo("equipeId", referenciaId)
@@ -216,7 +215,6 @@ class NotificacoesActivity : BaseActivity() {
                         intent.putExtra("nomeRemetente", nomeRemetente)
                         startActivity(intent)
                     } else {
-                        // Nao e convite pendente: abre InfoEquipe normal
                         val intent = Intent(this@NotificacoesActivity, InfoEquipeActivity::class.java)
                         intent.putExtra("equipeId", referenciaId)
                         startActivity(intent)
@@ -228,11 +226,27 @@ class NotificacoesActivity : BaseActivity() {
             return
         }
 
-        // Outros tipos
         when (referenciaTipo) {
             "trabalho" -> {
-                val intent = Intent(this, MinhasEquipesActivity::class.java)
-                startActivity(intent)
+                // Abre ComentariosTrabalhoActivity se for notificacao de comentario
+                // Para outras (novo_trabalho, anexo), vai para MinhasEquipes
+                lifecycleScope.launch {
+                    try {
+                        val trabalhoDoc = db.collection("trabalhos").document(referenciaId).get().await()
+                        val titulo = trabalhoDoc.getString("titulo") ?: "Trabalho"
+                        val equipeIdTrab = trabalhoDoc.getString("equipeId") ?: ""
+
+                        val intent = Intent(this@NotificacoesActivity, ComentariosTrabalhoActivity::class.java)
+                        intent.putExtra("trabalhoId", referenciaId)
+                        intent.putExtra("tituloTrabalho", titulo)
+                        intent.putExtra("equipeId", equipeIdTrab)
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        // Fallback: abre MinhasEquipes
+                        val intent = Intent(this@NotificacoesActivity, MinhasEquipesActivity::class.java)
+                        startActivity(intent)
+                    }
+                }
             }
             "grupo" -> {
                 val intent = Intent(this, ChatGrupoActivity::class.java)

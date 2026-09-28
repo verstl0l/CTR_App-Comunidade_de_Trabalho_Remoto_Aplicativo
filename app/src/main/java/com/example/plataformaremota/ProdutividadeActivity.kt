@@ -1,6 +1,7 @@
 package com.example.plataformaremota
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,7 +12,19 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -36,7 +49,7 @@ class ProdutividadeActivity : AppCompatActivity() {
         equipeId = intent.getStringExtra("equipeId") ?: ""
 
         if (equipeId.isEmpty()) {
-            Toast.makeText(this, "Equipe não encontrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Equipe nao encontrada", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -48,10 +61,13 @@ class ProdutividadeActivity : AppCompatActivity() {
         carregarEstatisticas()
     }
 
+    // ============================================================
+    // CARREGAR ESTATISTICAS
+    // ============================================================
     private fun carregarEstatisticas() {
         lifecycleScope.launch {
             try {
-                // 1. Verifica se é dono
+                // 1. Verifica se e dono
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                 val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
                 ehDono = criadorEmail == emailUsuario
@@ -67,7 +83,6 @@ class ProdutividadeActivity : AppCompatActivity() {
                 var emProgresso = 0
                 var pendentes = 0
 
-                // Contador por membro (email -> quantidade)
                 val porMembro = mutableMapOf<String, Int>()
 
                 trabalhos.documents.forEach { doc ->
@@ -85,26 +100,29 @@ class ProdutividadeActivity : AppCompatActivity() {
                     }
                 }
 
-                // 3. Atualiza a UI
+                // 3. Atualiza a UI de texto
                 findViewById<TextView>(R.id.txtTotalTrabalhos).text = total.toString()
-
                 findViewById<TextView>(R.id.txtQtdConcluido).text = concluidos.toString()
                 findViewById<TextView>(R.id.txtQtdProgresso).text = emProgresso.toString()
                 findViewById<TextView>(R.id.txtQtdPendente).text = pendentes.toString()
 
-                // ProgressBars (proporção em %)
                 if (total > 0) {
                     findViewById<ProgressBar>(R.id.barConcluido).progress = (concluidos * 100) / total
                     findViewById<ProgressBar>(R.id.barProgresso).progress = (emProgresso * 100) / total
                     findViewById<ProgressBar>(R.id.barPendente).progress = (pendentes * 100) / total
                 }
 
-                // Taxa de conclusão
                 val taxa = if (total > 0) (concluidos * 100) / total else 0
                 findViewById<TextView>(R.id.txtTaxaConclusao).text = "$taxa%"
                 findViewById<TextView>(R.id.txtDetalheTaxa).text = "$concluidos de $total trabalhos"
 
-                // 4. Card "Por Membro" (só pro dono)
+                // 4. Popula o grafico de PIZZA
+                configurarGraficoPizza(concluidos, emProgresso, pendentes)
+
+                // 5. Popula o grafico de BARRAS
+                configurarGraficoBarras(porMembro)
+
+                // 6. Card "Por Membro" (texto) - so dono ve
                 if (ehDono && porMembro.isNotEmpty()) {
                     findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardPorMembro).visibility = View.VISIBLE
                     montarListaPorMembro(porMembro, total)
@@ -117,18 +135,166 @@ class ProdutividadeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // GRAFICO DE PIZZA
+    // ============================================================
+    private fun configurarGraficoPizza(concluidos: Int, emProgresso: Int, pendentes: Int) {
+        val pieChart = findViewById<PieChart>(R.id.pieChartStatus)
+
+        val total = concluidos + emProgresso + pendentes
+
+        if (total == 0) {
+            pieChart.clear()
+            pieChart.setNoDataText("Nenhum trabalho ainda")
+            pieChart.setNoDataTextColor(ContextCompat.getColor(this, R.color.text_secondary))
+            pieChart.invalidate()
+            return
+        }
+
+        // Entradas (fatias)
+        val entradas = mutableListOf<PieEntry>()
+        if (concluidos > 0) entradas.add(PieEntry(concluidos.toFloat(), "Concluido"))
+        if (emProgresso > 0) entradas.add(PieEntry(emProgresso.toFloat(), "Em Progresso"))
+        if (pendentes > 0) entradas.add(PieEntry(pendentes.toFloat(), "Pendente"))
+
+        // Cores das fatias
+        val cores = mutableListOf<Int>()
+        if (concluidos > 0) cores.add(ContextCompat.getColor(this, R.color.chart_pizza_concluido))
+        if (emProgresso > 0) cores.add(ContextCompat.getColor(this, R.color.chart_pizza_progresso))
+        if (pendentes > 0) cores.add(ContextCompat.getColor(this, R.color.chart_pizza_pendente))
+
+        val dataSet = PieDataSet(entradas, "")
+        dataSet.colors = cores
+        dataSet.valueTextColor = Color.WHITE
+        dataSet.valueTextSize = 12f
+        dataSet.sliceSpace = 3f
+
+        // Formatter: mostra "N" (quantidade) em vez de percentual
+        dataSet.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return value.toInt().toString()
+            }
+        }
+
+        val data = PieData(dataSet)
+        pieChart.data = data
+
+        // Configuracoes visuais
+        pieChart.description.isEnabled = false
+        pieChart.isDrawHoleEnabled = true
+        pieChart.setHoleColor(ContextCompat.getColor(this, R.color.bg_surface))
+        pieChart.setHoleRadius(55f)
+        pieChart.setTransparentCircleRadius(60f)
+        pieChart.setEntryLabelColor(Color.WHITE)
+        pieChart.setEntryLabelTextSize(11f)
+        pieChart.legend.textColor = ContextCompat.getColor(this, R.color.chart_legend)
+        pieChart.legend.textSize = 12f
+        pieChart.legend.verticalAlignment = com.github.mikephil.charting.components.Legend.LegendVerticalAlignment.BOTTOM
+        pieChart.legend.horizontalAlignment = com.github.mikephil.charting.components.Legend.LegendHorizontalAlignment.CENTER
+        pieChart.legend.orientation = com.github.mikephil.charting.components.Legend.LegendOrientation.HORIZONTAL
+        pieChart.legend.isWordWrapEnabled = true
+        pieChart.setUsePercentValues(false)
+
+        pieChart.invalidate()
+        pieChart.animateY(600)
+    }
+
+    // ============================================================
+    // GRAFICO DE BARRAS
+    // ============================================================
+    private fun configurarGraficoBarras(porMembro: Map<String, Int>) {
+        val barChart = findViewById<BarChart>(R.id.barChartMembros)
+
+        if (porMembro.isEmpty()) {
+            barChart.clear()
+            barChart.setNoDataText("Nenhum membro com trabalhos")
+            barChart.setNoDataTextColor(ContextCompat.getColor(this, R.color.text_secondary))
+            barChart.invalidate()
+            return
+        }
+
+        // Ordena por quantidade (maior primeiro)
+        val ordenado = porMembro.entries.sortedByDescending { it.value }
+
+        // Precisa buscar nomes dos membros
+        lifecycleScope.launch {
+            try {
+                val entradas = mutableListOf<BarEntry>()
+                val nomes = mutableListOf<String>()
+
+                ordenado.forEachIndexed { index, entry ->
+                    val userDoc = db.collection("usuarios").document(entry.key).get().await()
+                    val nome = userDoc.getString("nome") ?: entry.key.substringBefore("@")
+
+                    // Nome curto (primeiro nome)
+                    val nomeCurto = nome.split(" ").firstOrNull() ?: nome
+                    nomes.add(nomeCurto)
+
+                    entradas.add(BarEntry(index.toFloat(), entry.value.toFloat()))
+                }
+
+                val dataSet = BarDataSet(entradas, "Trabalhos")
+                dataSet.color = ContextCompat.getColor(this@ProdutividadeActivity, R.color.chart_barra_principal)
+                dataSet.valueTextColor = Color.WHITE
+                dataSet.valueTextSize = 12f
+
+                dataSet.valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        return value.toInt().toString()
+                    }
+                }
+
+                val data = BarData(dataSet)
+                data.barWidth = 0.5f
+                barChart.data = data
+
+                // Eixo X: nomes dos membros
+                val xAxis = barChart.xAxis
+                xAxis.valueFormatter = IndexAxisValueFormatter(nomes)
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.granularity = 1f
+                xAxis.setDrawGridLines(false)
+                xAxis.textColor = ContextCompat.getColor(this@ProdutividadeActivity, R.color.chart_text)
+                xAxis.textSize = 11f
+
+                // Eixo Y: numeros
+                val yAxisLeft = barChart.axisLeft
+                yAxisLeft.axisMinimum = 0f
+                yAxisLeft.granularity = 1f
+                yAxisLeft.textColor = ContextCompat.getColor(this@ProdutividadeActivity, R.color.chart_text)
+                yAxisLeft.gridColor = ContextCompat.getColor(this@ProdutividadeActivity, R.color.chart_grid)
+                yAxisLeft.axisLineColor = ContextCompat.getColor(this@ProdutividadeActivity, R.color.chart_grid)
+
+                barChart.axisRight.isEnabled = false
+
+                // Legendas e descricao
+                barChart.description.isEnabled = false
+                barChart.legend.isEnabled = false
+
+                barChart.setFitBars(true)
+                barChart.setScaleEnabled(false)
+                barChart.invalidate()
+                barChart.animateY(600)
+
+            } catch (e: Exception) {
+                Log.e("PRODUTIVIDADE", "Erro ao montar barras: ${e.message}")
+            }
+        }
+    }
+
+    // ============================================================
+    // LISTA POR MEMBRO (texto)
+    // ============================================================
     private fun montarListaPorMembro(porMembro: Map<String, Int>, total: Int) {
         val container = findViewById<LinearLayout>(R.id.containerPorMembro)
         container.removeAllViews()
         val inflater = LayoutInflater.from(this)
 
-        // Ordena por quantidade (maior primeiro)
         val ordenado = porMembro.entries.sortedByDescending { it.value }
 
         lifecycleScope.launch {
             try {
                 ordenado.forEach { (emailMembro, qtd) ->
-                    // Busca o nome do membro
                     val userDoc = db.collection("usuarios").document(emailMembro).get().await()
                     val nome = userDoc.getString("nome") ?: emailMembro
 
@@ -148,6 +314,9 @@ class ProdutividadeActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // BOTTOM NAVIGATION
+    // ============================================================
     private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->

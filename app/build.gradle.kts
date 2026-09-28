@@ -16,6 +16,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -59,18 +60,20 @@ dependencies {
     // Cloudinary
     implementation("com.cloudinary:cloudinary-android:3.0.2")
 
-    // Glide (para carregar imagens)
+    // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // PhotoView
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+
+    // OneSignal
+    implementation("com.onesignal:OneSignal:5.0.0")
+
+    // MPAndroidChart (graficos)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     // Testes
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    // PhotoView (zoom em imagens)
-    implementation("com.github.chrisbanes:PhotoView:2.3.0")
-
-    // OneSignal (notificações push)
-    implementation("com.onesignal:OneSignal:5.0.0")
-
 }

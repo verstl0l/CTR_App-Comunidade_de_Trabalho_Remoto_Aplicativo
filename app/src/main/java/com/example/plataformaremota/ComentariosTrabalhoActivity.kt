@@ -36,6 +36,10 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
 
     private var trabalhoId: String = ""
     private var tituloTrabalho: String = "Trabalho"
+    private var equipeId: String = ""
+
+    // Verifica se pode excluir comentarios dos outros (dono ou admin)
+    private var podeApagarQualquer: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +50,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
         emailUsuario = auth.currentUser?.email ?: ""
         trabalhoId = intent.getStringExtra("trabalhoId") ?: ""
         tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: "Trabalho"
+        equipeId = intent.getStringExtra("equipeId") ?: ""
 
         if (trabalhoId.isEmpty()) {
             Toast.makeText(this, "Trabalho nao encontrado", Toast.LENGTH_SHORT).show()
@@ -69,10 +74,44 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
             enviarComentario(texto)
         }
 
-        // Carrega dados do usuario e depois a lista
+        // Carrega permissao + dados do usuario + lista
         lifecycleScope.launch {
+            verificarPermissao()
             carregarDadosUsuario()
             carregarComentarios()
+        }
+    }
+
+    // ============================================================
+    // VERIFICA SE PODE APAGAR COMENTARIOS DOS OUTROS
+    // ============================================================
+    private suspend fun verificarPermissao() {
+        if (equipeId.isEmpty()) return
+
+        try {
+            // 1. Verifica se e dono
+            val equipeDoc = db.collection("equipes").document(equipeId).get().await()
+            val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
+
+            if (criadorEmail == emailUsuario) {
+                podeApagarQualquer = true
+                return
+            }
+
+            // 2. Verifica se e admin
+            val membro = db.collection("membros_equipe")
+                .whereEqualTo("equipeId", equipeId)
+                .whereEqualTo("email", emailUsuario)
+                .limit(1)
+                .get()
+                .await()
+
+            if (!membro.isEmpty) {
+                val funcao = membro.documents[0].getString("funcao") ?: ""
+                podeApagarQualquer = funcao == "administrador"
+            }
+        } catch (e: Exception) {
+            Log.e("COMENTARIOS", "Erro permissao: ${e.message}")
         }
     }
 
@@ -130,6 +169,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                     val editadoEm = doc.getLong("editadoEm")
 
                     val ehAutor = autorEmail == emailUsuario
+                    val podeApagar = ehAutor || podeApagarQualquer
 
                     val view = inflater.inflate(R.layout.item_comentario, container, false)
 
@@ -145,20 +185,30 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                     txtData.text = formatarDataRelativa(criadoEm)
                     txtTexto.text = texto
 
-                    // Indicador (editado)
                     if (editadoEm != null && editadoEm > 0) {
                         txtEditado.visibility = View.VISIBLE
                     } else {
                         txtEditado.visibility = View.GONE
                     }
 
-                    // Avatar
                     configurarAvatar(cardAvatar, imgAvatar, txtIniciais, autorNome, autorFotoUrl)
 
-                    // Long press: menu (editar/excluir se for autor)
-                    if (ehAutor) {
+                    // Long press no comentario
+                    if (podeApagar) {
                         view.setOnLongClickListener {
-                            mostrarMenuComentario(comentarioId, texto)
+                            val opcoes = mutableListOf<String>()
+                            if (ehAutor) opcoes.add("Editar")
+                            opcoes.add("Excluir")
+
+                            AlertDialog.Builder(this@ComentariosTrabalhoActivity)
+                                .setTitle("Opcoes")
+                                .setItems(opcoes.toTypedArray()) { _, which ->
+                                    when (opcoes[which]) {
+                                        "Editar" -> abrirDialogEdicao(comentarioId, texto)
+                                        "Excluir" -> confirmarExclusao(comentarioId)
+                                    }
+                                }
+                                .show()
                             true
                         }
                     }
@@ -166,13 +216,12 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                     container.addView(view)
                 }
 
-                // Rola para o final
                 scroll.post { scroll.fullScroll(ScrollView.FOCUS_DOWN) }
             }
     }
 
     // ============================================================
-    // CONFIGURAR AVATAR (foto ou iniciais)
+    // CONFIGURAR AVATAR
     // ============================================================
     private fun configurarAvatar(
         cardAvatar: com.google.android.material.card.MaterialCardView,
@@ -182,10 +231,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
         fotoUrl: String
     ) {
         if (fotoUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(fotoUrl)
-                .circleCrop()
-                .into(imgAvatar)
+            Glide.with(this).load(fotoUrl).circleCrop().into(imgAvatar)
             imgAvatar.visibility = View.VISIBLE
             txtIniciais.visibility = View.GONE
         } else {
@@ -223,45 +269,20 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                 )
 
                 if (id == null) {
-                    Toast.makeText(
-                        this@ComentariosTrabalhoActivity,
-                        "Erro ao enviar comentario",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@ComentariosTrabalhoActivity, "Erro ao enviar", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
-                // Notifica participantes (criador + quem ja comentou)
                 ComentarioHelper.notificarParticipantes(
                     trabalhoId = trabalhoId,
                     tituloTrabalho = tituloTrabalho,
                     autorEmail = emailUsuario,
                     autorNome = nomeUsuario
                 )
-
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@ComentariosTrabalhoActivity,
-                    getString(R.string.erro_generico, e.message ?: ""),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@ComentariosTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
-    }
-
-    // ============================================================
-    // MENU: EDITAR / EXCLUIR
-    // ============================================================
-    private fun mostrarMenuComentario(comentarioId: String, textoAtual: String) {
-        AlertDialog.Builder(this)
-            .setTitle("Opcoes")
-            .setItems(arrayOf("Editar", "Excluir")) { _, which ->
-                when (which) {
-                    0 -> abrirDialogEdicao(comentarioId, textoAtual)
-                    1 -> confirmarExclusao(comentarioId)
-                }
-            }
-            .show()
     }
 
     // ============================================================
@@ -283,25 +304,14 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                     Toast.makeText(this, "Digite um texto", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-
-                if (novoTexto == textoAtual) {
-                    return@setPositiveButton
-                }
+                if (novoTexto == textoAtual) return@setPositiveButton
 
                 lifecycleScope.launch {
                     val ok = ComentarioHelper.editar(trabalhoId, comentarioId, novoTexto)
                     if (ok) {
-                        Toast.makeText(
-                            this@ComentariosTrabalhoActivity,
-                            "Comentario atualizado",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, "Atualizado", Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(
-                            this@ComentariosTrabalhoActivity,
-                            "Erro ao atualizar",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, "Erro ao atualizar", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -320,17 +330,9 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     val ok = ComentarioHelper.remover(trabalhoId, comentarioId)
                     if (ok) {
-                        Toast.makeText(
-                            this@ComentariosTrabalhoActivity,
-                            "Comentario excluido",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, "Excluido", Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(
-                            this@ComentariosTrabalhoActivity,
-                            "Erro ao excluir",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, "Erro ao excluir", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

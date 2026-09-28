@@ -632,7 +632,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     view.findViewById<TextView>(R.id.txtInfoGerenciar).text = "$categoria - $prazo"
                     view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
 
-                    // Conta comentarios deste trabalho
+                    // Conta comentarios
                     val btnComentarios = view.findViewById<Button>(R.id.btnComentariosGerenciar)
                     lifecycleScope.launch {
                         try {
@@ -643,15 +643,16 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Click no botao comentarios -> abre ComentariosTrabalhoActivity
+                    // Click -> abre ComentariosTrabalhoActivity
                     btnComentarios.setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, ComentariosTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
                         intent.putExtra("tituloTrabalho", titulo)
+                        intent.putExtra("equipeId", equipeId)
                         startActivity(intent)
                     }
 
-                    // Conta anexos deste trabalho
+                    // Conta anexos
                     val btnAnexos = view.findViewById<Button>(R.id.btnAnexosGerenciar)
                     lifecycleScope.launch {
                         try {
@@ -662,7 +663,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Click no botao anexos -> abre AnexosTrabalhoActivity
                     btnAnexos.setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, AnexosTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
@@ -670,7 +670,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Click no botao convidar
+                    // Convidar
                     view.findViewById<Button>(R.id.btnConvidarGerenciar).setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, ConvidarTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
@@ -683,7 +683,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         abrirDialogEditarTrabalho(trabalhoId, titulo, descricao, categoria, prazo)
                     }
 
-                    // Long press no card -> excluir
+                    // Long press -> excluir
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@GerenciarEquipeActivity)
                             .setTitle("Excluir trabalho")
@@ -691,21 +691,14 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                             .setPositiveButton("Excluir") { _, _ ->
                                 lifecycleScope.launch {
                                     try {
-                                        // Exclui comentarios antes do trabalho
                                         val comentarios = db.collection("trabalhos").document(trabalhoId)
                                             .collection("comentarios").get().await()
-                                        comentarios.documents.forEach {
-                                            it.reference.delete().await()
-                                        }
+                                        comentarios.documents.forEach { it.reference.delete().await() }
 
-                                        // Exclui anexos antes do trabalho
                                         val anexos = db.collection("trabalhos").document(trabalhoId)
                                             .collection("anexos").get().await()
-                                        anexos.documents.forEach {
-                                            it.reference.delete().await()
-                                        }
+                                        anexos.documents.forEach { it.reference.delete().await() }
 
-                                        // Exclui o trabalho
                                         db.collection("trabalhos").document(trabalhoId).delete().await()
 
                                         carregarTrabalhos(equipeId)

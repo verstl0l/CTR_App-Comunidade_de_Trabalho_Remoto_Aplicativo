@@ -1,27 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
+    <!-- Backgrounds -->
     <color name="bg_primary">#1C1C1C</color>
     <color name="bg_dark">#1C1311</color>
     <color name="bg_surface">#2B1F1C</color>
     <color name="bg_surface_light">#2E1A16</color>
     <color name="bg_surface_hover">#3D2B27</color>
 
+    <!-- Accent -->
     <color name="accent">#F5E6D0</color>
     <color name="accent_dark">#241614</color>
 
+    <!-- Text -->
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#9E9E9E</color>
     <color name="text_tertiary">#CCCCCC</color>
     <color name="text_hint">#888888</color>
 
+    <!-- Status -->
     <color name="status_concluido">#4CAF50</color>
     <color name="status_erro">#FF6B6B</color>
 
+    <!-- Dividers -->
     <color name="divider">#33FFFFFF</color>
-    <color name="linkedin_blue">#0A66C2</color>
 
+    <!-- Basicos -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <!-- Social -->
+    <color name="linkedin_blue">#0A66C2</color>
+    <color name="github_dark">#24292E</color>
+
+    <!-- ============================================================ -->
+    <!-- CORES DOS GRAFICOS                                           -->
+    <!-- ============================================================ -->
+
+    <!-- Pizza - status dos trabalhos -->
+    <color name="chart_pizza_concluido">#4CAF50</color>
+    <color name="chart_pizza_progresso">#F5E6D0</color>
+    <color name="chart_pizza_pendente">#9E9E9E</color>
+
+    <!-- Barras - produtividade por membro -->
+    <color name="chart_barra_principal">#F5E6D0</color>
+
+    <!-- Texto e linhas dos graficos -->
+    <color name="chart_text">#FFFFFF</color>
+    <color name="chart_grid">#33FFFFFF</color>
+    <color name="chart_legend">#9E9E9E</color>
 </resources>
