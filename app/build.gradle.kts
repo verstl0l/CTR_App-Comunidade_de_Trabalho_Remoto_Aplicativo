@@ -1,7 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+}
+
+// ✅ Le as chaves do local.properties
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
@@ -17,6 +25,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+
+        // ✅ Expoe as chaves como BuildConfig (seguro)
+        buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${localProps["CLOUDINARY_CLOUD_NAME"] ?: ""}\"")
+        buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"${localProps["CLOUDINARY_UPLOAD_PRESET"] ?: ""}\"")
+        buildConfigField("String", "ONESIGNAL_APP_ID", "\"${localProps["ONESIGNAL_APP_ID"] ?: ""}\"")
     }
 
     buildTypes {
@@ -28,12 +41,19 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+    // ✅ Habilita o BuildConfig (necessario pra usar BuildConfig.CLOUDINARY_*)
+    buildFeatures {
+        buildConfig = true
     }
 }
 

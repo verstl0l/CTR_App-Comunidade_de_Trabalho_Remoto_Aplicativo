@@ -1,0 +1,312 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function isLogado() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isLogado() && request.auth.uid == userId;
+    }
+
+    function isEmailProprio(email) {
+      return isLogado() && request.auth.token.email == email;
+    }
+
+    function isDonoEquipe(equipeId) {
+      return isLogado() &&
+        get(/databases/$(database)/documents/equipes/$(equipeId)).data.criadorEmail == request.auth.token.email;
+    }
+
+    function isMembroEquipe(equipeId) {
+      return isLogado() &&
+        exists(/databases/$(database)/documents/membros_equipe/$(request.auth.token.email + "_" + equipeId));
+    }
+
+    function isParticipanteChat(chatId) {
+      return isLogado() &&
+        request.auth.token.email in get(/databases/$(database)/documents/chats/$(chatId)).data.participantes;
+    }
+
+    // ============================================================
+    // USUARIOS
+    // ============================================================
+    match /usuarios/{email} {
+
+      // Qualquer usuario logado pode ler perfis (necessario pra chat/equipe)
+      allow read: if isLogado();
+
+      // So o proprio usuario pode criar/editar seu documento
+      allow create: if isLogado() && request.auth.token.email == email;
+      allow update: if isLogado() && request.auth.token.email == email;
+      allow delete: if false; // Ninguem deleta usuario direto
+    }
+
+    // ============================================================
+    // EQUIPES
+    // ============================================================
+    match /equipes/{equipeId} {
+
+      // So membros (ou o criador) podem ler
+      allow read: if isLogado() && (
+        resource.data.criadorEmail == request.auth.token.email ||
+        isMembroEquipe(equipeId) ||
+        resource.data.privada == false  // Equipe publica pode ser lida por qualquer logado (pra busca)
+      );
+
+      // Qualquer usuario logado pode criar equipe (vira dono)
+      allow create: if isLogado() &&
+        request.resource.data.criadorEmail == request.auth.token.email;
+
+      // So o dono pode editar
+      allow update: if isDonoEquipe(equipeId);
+
+      // So o dono pode excluir
+      allow delete: if isDonoEquipe(equipeId);
+    }
+
+    // ============================================================
+    // MEMBROS_EQUIPE
+    // ============================================================
+    match /membros_equipe/{membroId} {
+
+      allow read: if isLogado();
+
+      // Dono da equipe ou o proprio usuario pode criar
+      allow create: if isLogado() && (
+        request.resource.data.email == request.auth.token.email ||
+        isDonoEquipe(request.resource.data.equipeId)
+      );
+
+      // Dono da equipe pode editar/remover qualquer membro
+      // O proprio membro pode se remover
+      allow update, delete: if isLogado() && (
+        isDonoEquipe(resource.data.equipeId) ||
+        resource.data.email == request.auth.token.email
+      );
+    }
+
+    // ============================================================
+    // TRABALHOS
+    // ============================================================
+    match /trabalhos/{trabalhoId} {
+
+      allow read: if isLogado();
+
+      allow create: if isLogado() &&
+        request.resource.data.criadorEmail == request.auth.token.email;
+
+      allow update, delete: if isLogado() && (
+        resource.data.criadorEmail == request.auth.token.email ||
+        isDonoEquipe(resource.data.equipeId)
+      );
+
+      // Anexos (subcoleção)
+      match /anexos/{anexoId} {
+        allow read: if isLogado();
+        allow create: if isLogado();
+        allow delete: if isLogado();
+      }
+
+      // Comentarios (subcolecao)
+      match /comentarios/{comentarioId} {
+        allow read: if isLogado();
+        allow create: if isLogado() &&
+          request.resource.data.autorEmail == request.auth.token.email;
+        allow update, delete: if isLogado() && (
+          resource.data.autorEmail == request.auth.token.email ||
+          isDonoEquipe(get(/databases/$(database)/documents/trabalhos/$(trabalhoId)).data.equipeId)
+        );
+      }
+    }
+
+    // ============================================================
+    // CHATS (PV)
+    // ============================================================
+    match /chats/{chatId} {
+
+      allow read: if isParticipanteChat(chatId);
+
+      allow create: if isLogado() &&
+        request.auth.token.email in request.resource.data.participantes;
+
+      allow update: if isParticipanteChat(chatId);
+      allow delete: if isParticipanteChat(chatId);
+
+      match /mensagens/{mensagemId} {
+        allow read: if isParticipanteChat(chatId);
+        allow create: if isParticipanteChat(chatId) &&
+          request.resource.data.remetente == request.auth.token.email;
+        allow update, delete: if isParticipanteChat(chatId) &&
+          resource.data.remetente == request.auth.token.email;
+      }
+    }
+
+    // ============================================================
+    // CHATS_EQUIPE
+    // ============================================================
+    match /chats_equipe/{equipeId} {
+
+      allow read: if isLogado() && (
+        isMembroEquipe(equipeId) || isDonoEquipe(equipeId)
+      );
+
+      allow create, update: if isLogado() && (
+        isMembroEquipe(equipeId) || isDonoEquipe(equipeId)
+      );
+
+      match /mensagens/{mensagemId} {
+        allow read: if isLogado() && (
+          isMembroEquipe(equipeId) || isDonoEquipe(equipeId)
+        );
+        allow create: if isLogado() && (
+          isMembroEquipe(equipeId) || isDonoEquipe(equipeId)
+        ) && request.resource.data.remetente == request.auth.token.email;
+        allow update, delete: if isLogado() && (
+          isMembroEquipe(equipeId) || isDonoEquipe(equipeId)
+        ) && resource.data.remetente == request.auth.token.email;
+      }
+    }
+
+    // ============================================================
+    // GRUPOS
+    // ============================================================
+    match /grupos/{grupoId} {
+
+      allow read: if isLogado();
+
+      allow create: if isLogado() &&
+        request.resource.data.criadorEmail == request.auth.token.email;
+
+      allow update, delete: if isLogado() && (
+        resource.data.criadorEmail == request.auth.token.email ||
+        request.auth.token.email in resource.data.membros
+      );
+
+      match /mensagens/{mensagemId} {
+        allow read: if isLogado();
+        allow create: if isLogado() &&
+          request.resource.data.remetente == request.auth.token.email;
+        allow update, delete: if isLogado() &&
+          resource.data.remetente == request.auth.token.email;
+      }
+    }
+
+    // ============================================================
+    // CONVITES_EQUIPE
+    // ============================================================
+    match /convites_equipe/{conviteId} {
+
+      // So o destinatario ou o dono da equipe podem ler
+      allow read: if isLogado() && (
+        resource.data.emailConvidado == request.auth.token.email ||
+        resource.data.emailRemetente == request.auth.token.email
+      );
+
+      allow create: if isLogado() &&
+        request.resource.data.emailRemetente == request.auth.token.email;
+
+      // So o destinatario pode aceitar/recusar
+      allow update, delete: if isLogado() && (
+        resource.data.emailConvidado == request.auth.token.email ||
+        resource.data.emailRemetente == request.auth.token.email
+      );
+    }
+
+    // ============================================================
+    // CONVITES_TRABALHO
+    // ============================================================
+    match /convites_trabalho/{conviteId} {
+
+      allow read: if isLogado() && (
+        resource.data.emailConvidado == request.auth.token.email ||
+        resource.data.emailRemetente == request.auth.token.email
+      );
+
+      allow create: if isLogado() &&
+        request.resource.data.emailRemetente == request.auth.token.email;
+
+      allow update, delete: if isLogado() && (
+        resource.data.emailConvidado == request.auth.token.email ||
+        resource.data.emailRemetente == request.auth.token.email
+      );
+    }
+
+    // ============================================================
+    // PEDIDOS_ENTRADA
+    // ============================================================
+    match /pedidos_entrada/{pedidoId} {
+
+      allow read: if isLogado() && (
+        resource.data.emailSolicitante == request.auth.token.email ||
+        isDonoEquipe(resource.data.equipeId)
+      );
+
+      allow create: if isLogado() &&
+        request.resource.data.emailSolicitante == request.auth.token.email;
+
+      allow update, delete: if isLogado() && (
+        resource.data.emailSolicitante == request.auth.token.email ||
+        isDonoEquipe(resource.data.equipeId)
+      );
+    }
+
+    // ============================================================
+    // BLOQUEIOS
+    // ============================================================
+    match /bloqueios/{bloqueioId} {
+
+      allow read: if isLogado() && (
+        resource.data.bloqueadorEmail == request.auth.token.email ||
+        resource.data.bloqueadoEmail == request.auth.token.email
+      );
+
+      allow create: if isLogado() &&
+        request.resource.data.bloqueadorEmail == request.auth.token.email;
+
+      allow delete: if isLogado() &&
+        resource.data.bloqueadorEmail == request.auth.token.email;
+    }
+
+    // ============================================================
+    // FAVORITOS
+    // ============================================================
+    match /favoritos/{favoritoId} {
+
+      allow read: if isLogado() &&
+        resource.data.usuarioEmail == request.auth.token.email;
+
+      allow create: if isLogado() &&
+        request.resource.data.usuarioEmail == request.auth.token.email;
+
+      allow delete: if isLogado() &&
+        resource.data.usuarioEmail == request.auth.token.email;
+    }
+
+    // ============================================================
+    // NOTIFICACOES
+    // ============================================================
+    match /notificacoes/{notificacaoId} {
+
+      allow read: if isLogado() &&
+        resource.data.destinatario == request.auth.token.email;
+
+      allow create: if isLogado();
+
+      allow update, delete: if isLogado() &&
+        resource.data.destinatario == request.auth.token.email;
+    }
+
+    // ============================================================
+    // FALLBACK: BLOQUEAR TUDO O RESTO
+    // ============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

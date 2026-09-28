@@ -21,11 +21,12 @@ captures/
 # ============================================
 # Gradle
 # ============================================
-/.gradle/
+.gradle/
+**/.gradle/
 gradle-app.setting
 
 # ============================================
-# Firebase (NÃO subir)
+# Firebase (NAO SUBIR)
 # ============================================
 app/google-services.json
 
@@ -36,6 +37,7 @@ app/google-services.json
 *.iml
 *.iws
 *.ipr
+.navigation/
 
 # ============================================
 # Kotlin
@@ -43,7 +45,7 @@ app/google-services.json
 .kotlin/
 
 # ============================================
-# Logs e temporários
+# Logs e temporarios
 # ============================================
 *.log
 *.tmp
@@ -60,7 +62,7 @@ Thumbs.db
 keystore.properties
 
 # ============================================
-# Configurações locais
+# Configuracoes locais
 # ============================================
 local.properties
 .settings/
@@ -77,3 +79,15 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# ============================================
+# Outros editores
+# ============================================
+.fleet/
+.vscode/
+
+# ============================================
+# Env vars (opcional)
+# ============================================
+*.env
+.env
