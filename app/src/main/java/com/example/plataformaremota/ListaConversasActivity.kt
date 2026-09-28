@@ -55,6 +55,12 @@ class ListaConversasActivity : BaseActivity() {
 
         lifecycleScope.launch {
             try {
+                // ✅ CORRIGIDO: usar emailUsuario (não emailOutro)
+                if (emailUsuario.isNullOrEmpty()) {
+                    Log.e("LISTA_CONVERSAS", "Email do usuário vazio, pulando")
+                    return@launch
+                }
+
                 val itens = mutableListOf<ConversaItem>()
 
                 // ✅ 1 query: usuário com IDs denormalizados

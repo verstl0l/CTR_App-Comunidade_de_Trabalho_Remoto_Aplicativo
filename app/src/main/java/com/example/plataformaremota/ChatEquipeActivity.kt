@@ -37,6 +37,7 @@ class ChatEquipeActivity : AppCompatActivity() {
     private var equipeId: String = ""
 
     private var respostaAtiva: RespostaInfo? = null
+    private var typingHelper: TypingIndicatorHelper? = null
 
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
@@ -69,6 +70,7 @@ class ChatEquipeActivity : AppCompatActivity() {
         val btnGrupos = findViewById<Button>(R.id.btnVerGrupos)
         val edtMensagem = findViewById<EditText>(R.id.edtMensagemEquipe)
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeChat)
+        val txtDigitando = findViewById<TextView>(R.id.txtDigitandoEquipe)
         val btnCancelarResposta = findViewById<Button>(R.id.btnCancelarRespostaEquipe)
 
         btnVoltar.setOnClickListener { finish() }
@@ -101,10 +103,57 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
         btnCancelarResposta.setOnClickListener { cancelarResposta() }
 
+        lifecycleScope.launch {
+            garantirCampoDigitando()
+            typingHelper = TypingIndicatorHelper(
+                collection = "chats_equipe",
+                documentId = equipeId,
+                emailUsuario = emailUsuario,
+                onStatusChanged = { nome, estaDigitando ->
+                    runOnUiThread {
+                        if (isFinishing || isDestroyed) return@runOnUiThread
+                        if (estaDigitando) {
+                            txtDigitando.text = "$nome está digitando..."
+                            txtDigitando.visibility = View.VISIBLE
+                        } else {
+                            txtDigitando.visibility = View.GONE
+                        }
+                    }
+                }
+            )
+            typingHelper?.iniciar()
+        }
+
+        edtMensagem.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                typingHelper?.onDigitou()
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         carregarMensagens()
     }
 
     override fun onResume() { super.onResume(); marcarMensagensComoLidas() }
+
+    override fun onPause() { super.onPause(); typingHelper?.limpar() }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        typingHelper?.destruir()
+        typingHelper = null
+    }
+
+    private suspend fun garantirCampoDigitando() {
+        try {
+            val docRef = db.collection("chats_equipe").document(equipeId)
+            val doc = docRef.get().await()
+            if (doc.exists() && !doc.contains("digitando")) {
+                docRef.update("digitando", emptyMap<String, Long>()).await()
+            }
+        } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro garantir digitando: ${e.message}") }
+    }
 
     private fun marcarMensagensComoLidas() {
         if (equipeId.isEmpty()) return
@@ -159,6 +208,7 @@ class ChatEquipeActivity : AppCompatActivity() {
                 db.collection("chats_equipe").document(equipeId).set(
                     mapOf("equipeId" to equipeId, "ultimaMensagem" to texto, "atualizadoEm" to System.currentTimeMillis())
                 )
+                typingHelper?.limpar()
                 cancelarResposta()
             } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
@@ -182,7 +232,7 @@ class ChatEquipeActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("chats_equipe").document(equipeId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatEquipeActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
-                            cancelarResposta()
+                            typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
                 }
@@ -212,7 +262,7 @@ class ChatEquipeActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("chats_equipe").document(equipeId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatEquipeActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
-                            cancelarResposta()
+                            typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
                 }
@@ -257,7 +307,7 @@ class ChatEquipeActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("chats_equipe").document(equipeId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatEquipeActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
-                            cancelarResposta()
+                            typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
                 }
@@ -269,18 +319,23 @@ class ChatEquipeActivity : AppCompatActivity() {
     }
 
     private fun carregarMensagens() {
+        if (isFinishing || isDestroyed) return
+
         val container = findViewById<LinearLayout>(R.id.containerMensagensEquipe)
         val scroll = findViewById<ScrollView>(R.id.scrollMensagensEquipe)
 
         db.collection("chats_equipe").document(equipeId).collection("mensagens")
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshots, error ->
+                if (isFinishing || isDestroyed) return@addSnapshotListener
                 if (error != null || snapshots == null) return@addSnapshotListener
 
                 container.removeAllViews()
                 val inflater = LayoutInflater.from(this)
 
                 snapshots.documents.forEach { doc ->
+                    if (isFinishing || isDestroyed) return@forEach
+
                     val msgId = doc.id
                     val remetente = doc.getString("remetente") ?: ""
                     val nomeRem = doc.getString("nomeRemetente") ?: "Usuário"
@@ -309,7 +364,11 @@ class ChatEquipeActivity : AppCompatActivity() {
                             val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
 
                             txtNome.text = if (ehRem) "Você" else nomeRem
-                            Glide.with(this).load(fotoUrl).into(img)
+
+                            if (!isFinishing && !isDestroyed) {
+                                Glide.with(applicationContext).load(fotoUrl).into(img)
+                            }
+
                             aplicarAlinhamentoRelative(containerBalao, ehRem)
 
                             SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, "", remetente, nomeRem, "foto") }
@@ -334,27 +393,26 @@ class ChatEquipeActivity : AppCompatActivity() {
                             txtNome.text = if (ehRem) "Você" else nomeRem
                             aplicarAlinhamentoRelative(containerBalao, ehRem)
 
-                            videoView.setVideoURI(Uri.parse(videoUrl))
+                            try {
+                                videoView.setVideoURI(Uri.parse(videoUrl))
+                            } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro video: ${e.message}") }
+
+                            videoView.setOnErrorListener { _, _, _ -> btnPlay.text = "⚠"; btnPlay.visibility = View.VISIBLE; true }
+
                             btnPlay.setOnClickListener {
-                                if (videoView.isPlaying) {
-                                    videoView.pause()
-                                    btnPlay.text = "▶"
-                                    btnPlay.visibility = View.VISIBLE
-                                } else {
-                                    videoView.start()
-                                    btnPlay.visibility = View.GONE
-                                }
+                                try {
+                                    if (videoView.isPlaying) {
+                                        videoView.pause(); btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE
+                                    } else {
+                                        videoView.start(); btnPlay.visibility = View.GONE
+                                    }
+                                } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro play: ${e.message}") }
                             }
-                            videoView.setOnCompletionListener {
-                                btnPlay.text = "▶"
-                                btnPlay.visibility = View.VISIBLE
-                            }
+                            videoView.setOnCompletionListener { btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE }
 
                             SwipeToReplyHelper.attach(
-                                viewToTouch = overlay,
-                                containerBalao = containerBalao,
-                                imgIndicador = imgInd,
-                                onResponder = { dispararResposta(msgId, "", remetente, nomeRem, "video") }
+                                viewToTouch = overlay, containerBalao = containerBalao,
+                                imgIndicador = imgInd, onResponder = { dispararResposta(msgId, "", remetente, nomeRem, "video") }
                             )
                             overlay.setOnClickListener {
                                 val i = Intent(this, VisualizarMidiaActivity::class.java)

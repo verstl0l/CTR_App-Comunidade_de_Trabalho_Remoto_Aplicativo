@@ -39,6 +39,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var equipeId: String = ""
 
     private var respostaAtiva: RespostaInfo? = null
+    private var typingHelper: TypingIndicatorHelper? = null
 
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
@@ -77,6 +78,7 @@ class ChatGrupoActivity : AppCompatActivity() {
         val btnArquivo = findViewById<Button>(R.id.btnEnviarArquivoGrupo)
         val edtMensagem = findViewById<EditText>(R.id.edtMensagemGrupo)
         val txtNomeGrupo = findViewById<TextView>(R.id.txtNomeGrupoChat)
+        val txtDigitando = findViewById<TextView>(R.id.txtDigitandoGrupo)
         val btnCancelarResposta = findViewById<Button>(R.id.btnCancelarRespostaGrupo)
 
         txtNomeGrupo.text = nomeGrupo
@@ -106,10 +108,57 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
         btnCancelarResposta.setOnClickListener { cancelarResposta() }
 
+        lifecycleScope.launch {
+            garantirCampoDigitando()
+            typingHelper = TypingIndicatorHelper(
+                collection = "grupos",
+                documentId = grupoId,
+                emailUsuario = emailUsuario,
+                onStatusChanged = { nome, estaDigitando ->
+                    runOnUiThread {
+                        if (isFinishing || isDestroyed) return@runOnUiThread
+                        if (estaDigitando) {
+                            txtDigitando.text = "$nome está digitando..."
+                            txtDigitando.visibility = View.VISIBLE
+                        } else {
+                            txtDigitando.visibility = View.GONE
+                        }
+                    }
+                }
+            )
+            typingHelper?.iniciar()
+        }
+
+        edtMensagem.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                typingHelper?.onDigitou()
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         carregarMensagens()
     }
 
     override fun onResume() { super.onResume(); marcarMensagensComoLidas() }
+
+    override fun onPause() { super.onPause(); typingHelper?.limpar() }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        typingHelper?.destruir()
+        typingHelper = null
+    }
+
+    private suspend fun garantirCampoDigitando() {
+        try {
+            val docRef = db.collection("grupos").document(grupoId)
+            val doc = docRef.get().await()
+            if (doc.exists() && !doc.contains("digitando")) {
+                docRef.update("digitando", emptyMap<String, Long>()).await()
+            }
+        } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro garantir digitando: ${e.message}") }
+    }
 
     private fun marcarMensagensComoLidas() {
         if (grupoId.isEmpty()) return
@@ -186,6 +235,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                 )
                 adicionarResposta(m)
                 db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
+                typingHelper?.limpar()
                 cancelarResposta()
             } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
@@ -209,7 +259,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatGrupoActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
-                            cancelarResposta()
+                            typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
                 }
@@ -239,7 +289,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatGrupoActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
-                            cancelarResposta()
+                            typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
                 }
@@ -284,7 +334,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatGrupoActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
-                            cancelarResposta()
+                            typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
                 }
@@ -296,18 +346,23 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     private fun carregarMensagens() {
+        if (isFinishing || isDestroyed) return
+
         val container = findViewById<LinearLayout>(R.id.containerMensagensGrupo)
         val scroll = findViewById<ScrollView>(R.id.scrollMensagensGrupo)
 
         db.collection("grupos").document(grupoId).collection("mensagens")
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshots, error ->
+                if (isFinishing || isDestroyed) return@addSnapshotListener
                 if (error != null || snapshots == null) return@addSnapshotListener
 
                 container.removeAllViews()
                 val inflater = LayoutInflater.from(this)
 
                 snapshots.documents.forEach { doc ->
+                    if (isFinishing || isDestroyed) return@forEach
+
                     val msgId = doc.id
                     val remetente = doc.getString("remetente") ?: ""
                     val nomeRem = doc.getString("nomeRemetente") ?: "Usuário"
@@ -336,7 +391,11 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
 
                             txtNome.text = if (ehRem) "Você" else nomeRem
-                            Glide.with(this).load(fotoUrl).into(img)
+
+                            if (!isFinishing && !isDestroyed) {
+                                Glide.with(applicationContext).load(fotoUrl).into(img)
+                            }
+
                             aplicarAlinhamentoRelative(containerBalao, ehRem)
 
                             SwipeToReplyHelper.attach(containerBalao, imgInd) { dispararResposta(msgId, "", remetente, nomeRem, "foto") }
@@ -361,27 +420,26 @@ class ChatGrupoActivity : AppCompatActivity() {
                             txtNome.text = if (ehRem) "Você" else nomeRem
                             aplicarAlinhamentoRelative(containerBalao, ehRem)
 
-                            videoView.setVideoURI(Uri.parse(videoUrl))
+                            try {
+                                videoView.setVideoURI(Uri.parse(videoUrl))
+                            } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro video: ${e.message}") }
+
+                            videoView.setOnErrorListener { _, _, _ -> btnPlay.text = "⚠"; btnPlay.visibility = View.VISIBLE; true }
+
                             btnPlay.setOnClickListener {
-                                if (videoView.isPlaying) {
-                                    videoView.pause()
-                                    btnPlay.text = "▶"
-                                    btnPlay.visibility = View.VISIBLE
-                                } else {
-                                    videoView.start()
-                                    btnPlay.visibility = View.GONE
-                                }
+                                try {
+                                    if (videoView.isPlaying) {
+                                        videoView.pause(); btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE
+                                    } else {
+                                        videoView.start(); btnPlay.visibility = View.GONE
+                                    }
+                                } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro play: ${e.message}") }
                             }
-                            videoView.setOnCompletionListener {
-                                btnPlay.text = "▶"
-                                btnPlay.visibility = View.VISIBLE
-                            }
+                            videoView.setOnCompletionListener { btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE }
 
                             SwipeToReplyHelper.attach(
-                                viewToTouch = overlay,
-                                containerBalao = containerBalao,
-                                imgIndicador = imgInd,
-                                onResponder = { dispararResposta(msgId, "", remetente, nomeRem, "video") }
+                                viewToTouch = overlay, containerBalao = containerBalao,
+                                imgIndicador = imgInd, onResponder = { dispararResposta(msgId, "", remetente, nomeRem, "video") }
                             )
                             overlay.setOnClickListener {
                                 val i = Intent(this, VisualizarMidiaActivity::class.java)

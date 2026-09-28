@@ -7,6 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +43,7 @@ class ChatActivity : AppCompatActivity() {
     private var chatId: String = ""
 
     private var respostaAtiva: RespostaInfo? = null
+    private var typingHelper: TypingIndicatorHelper? = null
 
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
@@ -65,7 +68,7 @@ class ChatActivity : AppCompatActivity() {
         if (chatId.isEmpty()) {
             lifecycleScope.launch {
                 chatId = criarOuBuscarChat()
-                configurarUI()
+                if (!isFinishing && !isDestroyed) configurarUI()
             }
         } else {
             configurarUI()
@@ -75,6 +78,17 @@ class ChatActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         marcarMensagensComoLidas()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        typingHelper?.limpar()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        typingHelper?.destruir()
+        typingHelper = null
     }
 
     private fun marcarMensagensComoLidas() {
@@ -102,13 +116,15 @@ class ChatActivity : AppCompatActivity() {
         val btnArquivo = findViewById<Button>(R.id.btnEnviarArquivo)
         val edtMensagem = findViewById<EditText>(R.id.edtMensagem)
         val txtNomeOutro = findViewById<TextView>(R.id.txtNomeOutro)
+        val txtDigitando = findViewById<TextView>(R.id.txtDigitando)
         val btnCancelarResposta = findViewById<Button>(R.id.btnCancelarResposta)
 
         btnVoltar.setOnClickListener { finish() }
 
         btnVerPerfil.setOnClickListener {
             val i = Intent(this, PerfilUsuarioActivity::class.java)
-            i.putExtra("emailOutro", outroEmail); startActivity(i)
+            i.putExtra("emailOutro", outroEmail)
+            startActivity(i)
         }
 
         lifecycleScope.launch {
@@ -123,21 +139,66 @@ class ChatActivity : AppCompatActivity() {
         btnEnviar.setOnClickListener {
             val texto = edtMensagem.text.toString().trim()
             if (texto.isEmpty()) return@setOnClickListener
-            edtMensagem.text.clear(); enviarMensagem(texto)
+            edtMensagem.text.clear()
+            enviarMensagem(texto)
         }
         btnFoto.setOnClickListener {
-            val i = Intent(Intent.ACTION_PICK); i.type = "image/*"; selecionarImagem.launch(i)
+            val i = Intent(Intent.ACTION_PICK); i.type = "image/*"
+            selecionarImagem.launch(i)
         }
         btnVideo.setOnClickListener {
-            val i = Intent(Intent.ACTION_PICK); i.type = "video/*"; selecionarVideo.launch(i)
+            val i = Intent(Intent.ACTION_PICK); i.type = "video/*"
+            selecionarVideo.launch(i)
         }
         btnArquivo.setOnClickListener {
             val i = Intent(Intent.ACTION_GET_CONTENT); i.type = "*/*"
-            i.addCategory(Intent.CATEGORY_OPENABLE); selecionarArquivo.launch(i)
+            i.addCategory(Intent.CATEGORY_OPENABLE)
+            selecionarArquivo.launch(i)
         }
         btnCancelarResposta.setOnClickListener { cancelarResposta() }
 
+        lifecycleScope.launch {
+            garantirCampoDigitando()
+            typingHelper = TypingIndicatorHelper(
+                collection = "chats",
+                documentId = chatId,
+                emailUsuario = emailUsuario,
+                onStatusChanged = { nome, estaDigitando ->
+                    runOnUiThread {
+                        if (isFinishing || isDestroyed) return@runOnUiThread
+                        if (estaDigitando) {
+                            txtDigitando.text = "$nome está digitando..."
+                            txtDigitando.visibility = View.VISIBLE
+                        } else {
+                            txtDigitando.visibility = View.GONE
+                        }
+                    }
+                }
+            )
+            typingHelper?.iniciar()
+        }
+
+        edtMensagem.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                typingHelper?.onDigitou()
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
         carregarMensagens()
+    }
+
+    private suspend fun garantirCampoDigitando() {
+        try {
+            val docRef = db.collection("chats").document(chatId)
+            val doc = docRef.get().await()
+            if (doc.exists() && !doc.contains("digitando")) {
+                docRef.update("digitando", emptyMap<String, Long>()).await()
+            }
+        } catch (e: Exception) {
+            Log.e("CHAT", "Erro garantir digitando: ${e.message}")
+        }
     }
 
     private fun cancelarResposta() {
@@ -171,10 +232,11 @@ class ChatActivity : AppCompatActivity() {
         return if (chatExistente != null) {
             garantirChatsIdsDenormalizados(chatExistente.id); chatExistente.id
         } else {
-            val novo = hashMapOf(
+            val novo = hashMapOf<String, Any>(
                 "participantes" to listOf(emailUsuario, outroEmail),
                 "ultimaMensagem" to "", "atualizadoEm" to System.currentTimeMillis(),
-                "tipo" to "individual"
+                "tipo" to "individual",
+                "digitando" to emptyMap<String, Long>()
             )
             val id = db.collection("chats").add(novo).await().id
             garantirChatsIdsDenormalizados(id); id
@@ -216,6 +278,7 @@ class ChatActivity : AppCompatActivity() {
                 db.collection("chats").document(chatId).update(
                     mapOf("ultimaMensagem" to texto, "atualizadoEm" to System.currentTimeMillis())
                 ).await()
+                typingHelper?.limpar()
                 cancelarResposta()
             } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
@@ -255,6 +318,7 @@ class ChatActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("chats").document(chatId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
+                            typingHelper?.limpar()
                             cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
@@ -284,6 +348,7 @@ class ChatActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("chats").document(chatId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
+                            typingHelper?.limpar()
                             cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
@@ -328,6 +393,7 @@ class ChatActivity : AppCompatActivity() {
                             adicionarResposta(m)
                             db.collection("chats").document(chatId).collection("mensagens").add(m).await()
                             Toast.makeText(this@ChatActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
+                            typingHelper?.limpar()
                             cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                     } }
@@ -340,12 +406,17 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun carregarMensagens() {
+        // ✅ GUARDA: se Activity ja foi destruida, nao carrega nada
+        if (isFinishing || isDestroyed) return
+
         val container = findViewById<LinearLayout>(R.id.containerMensagens)
         val scroll = findViewById<ScrollView>(R.id.scrollMensagens)
 
         db.collection("chats").document(chatId).collection("mensagens")
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshots, error ->
+                // ✅ GUARDA: se Activity foi destruida enquanto o listener rodava, aborta
+                if (isFinishing || isDestroyed) return@addSnapshotListener
                 if (error != null || snapshots == null) return@addSnapshotListener
 
                 container.removeAllViews()
@@ -362,6 +433,9 @@ class ChatActivity : AppCompatActivity() {
                 var idx = 0
 
                 snapshots.documents.forEach { doc ->
+                    // ✅ GUARDA por mensagem (belt and suspenders)
+                    if (isFinishing || isDestroyed) return@forEach
+
                     val msgId = doc.id
                     val remetente = doc.getString("remetente") ?: ""
                     val texto = doc.getString("texto") ?: ""
@@ -389,7 +463,12 @@ class ChatActivity : AppCompatActivity() {
                             val imgInd = view.findViewById<ImageView>(R.id.imgIndicadorResposta)
 
                             txtNome.text = if (ehRem) "Você" else outroEmail
-                            Glide.with(this).load(fotoUrl).into(img)
+
+                            // ✅ applicationContext em vez de this
+                            if (!isFinishing && !isDestroyed) {
+                                Glide.with(applicationContext).load(fotoUrl).into(img)
+                            }
+
                             aplicarAlinhamentoRelative(containerBalao, ehRem)
 
                             val pos = idx; idx++
@@ -412,20 +491,27 @@ class ChatActivity : AppCompatActivity() {
                             txtNome.text = if (ehRem) "Você" else outroEmail
                             aplicarAlinhamentoRelative(containerBalao, ehRem)
 
-                            videoView.setVideoURI(Uri.parse(videoUrl))
+                            try {
+                                videoView.setVideoURI(Uri.parse(videoUrl))
+                            } catch (e: Exception) {
+                                Log.e("CHAT", "Erro video: ${e.message}")
+                            }
+
+                            videoView.setOnErrorListener { _, _, _ ->
+                                btnPlay.text = "⚠"; btnPlay.visibility = View.VISIBLE; true
+                            }
+
                             btnPlay.setOnClickListener {
-                                if (videoView.isPlaying) {
-                                    videoView.pause()
-                                    btnPlay.text = "▶"
-                                    btnPlay.visibility = View.VISIBLE
-                                } else {
-                                    videoView.start()
-                                    btnPlay.visibility = View.GONE
-                                }
+                                try {
+                                    if (videoView.isPlaying) {
+                                        videoView.pause(); btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE
+                                    } else {
+                                        videoView.start(); btnPlay.visibility = View.GONE
+                                    }
+                                } catch (e: Exception) { Log.e("CHAT", "Erro play: ${e.message}") }
                             }
                             videoView.setOnCompletionListener {
-                                btnPlay.text = "▶"
-                                btnPlay.visibility = View.VISIBLE
+                                btnPlay.text = "▶"; btnPlay.visibility = View.VISIBLE
                             }
 
                             val pos = idx; idx++

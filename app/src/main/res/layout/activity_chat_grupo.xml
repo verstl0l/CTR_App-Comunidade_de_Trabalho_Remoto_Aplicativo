@@ -26,16 +26,38 @@
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/txtNomeGrupoChat"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="Grupo"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtNomeGrupoChat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Grupo"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- ✅ NOVO: texto "digitando..." -->
+            <TextView
+                android:id="@+id/txtDigitandoGrupo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="@color/accent"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                android:visibility="gone" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnSairGrupo"
@@ -75,7 +97,7 @@
 
     </ScrollView>
 
-    <!-- Barra "Respondendo a..." (oculta por padrao) -->
+    <!-- Barra "Respondendo a..." -->
     <LinearLayout
         android:id="@+id/containerRespondendoGrupo"
         android:layout_width="match_parent"
