@@ -44,6 +44,18 @@
             android:background="@color/bg_surface_hover"
             android:scaleType="centerCrop" />
 
+        <!-- ✅ NOVO: legenda embaixo da foto -->
+        <TextView
+            android:id="@+id/txtLegendaFoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:maxWidth="200dp"
+            android:text=""
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 </RelativeLayout>

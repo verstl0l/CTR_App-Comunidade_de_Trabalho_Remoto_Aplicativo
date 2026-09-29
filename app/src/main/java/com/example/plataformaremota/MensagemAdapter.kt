@@ -169,6 +169,13 @@ class MensagemAdapter(
     private fun bindFoto(holder: FotoViewHolder, msg: Mensagem, ehRem: Boolean) {
         holder.txtNome.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
 
+        if (msg.texto.isNotEmpty()) {
+            holder.txtLegenda.text = msg.texto
+            holder.txtLegenda.visibility = View.VISIBLE
+        } else {
+            holder.txtLegenda.visibility = View.GONE
+        }
+
         Glide.with(contexto.applicationContext)
             .load(msg.fotoUrl)
             .into(holder.img)
@@ -212,6 +219,13 @@ class MensagemAdapter(
     private fun bindVideo(holder: VideoViewHolder, msg: Mensagem, ehRem: Boolean) {
         holder.txtNome.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
         aplicarAlinhamento(holder.containerBalao, ehRem)
+
+        if (msg.texto.isNotEmpty()) {
+            holder.txtLegenda.text = msg.texto
+            holder.txtLegenda.visibility = View.VISIBLE
+        } else {
+            holder.txtLegenda.visibility = View.GONE
+        }
 
         // Reset do estado do vídeo
         holder.btnPlay.text = "▶"
@@ -364,11 +378,14 @@ class MensagemAdapter(
     class FotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val img: ImageView = view.findViewById(R.id.imgMensagemFoto)
         val txtNome: TextView = view.findViewById(R.id.txtNomeFoto)
+
+        val txtLegenda: TextView = view.findViewById(R.id.txtLegendaFoto)
         val containerBalao: LinearLayout = view.findViewById(R.id.containerBalao)
         val imgIndicadorResposta: ImageView = view.findViewById(R.id.imgIndicadorResposta)
     }
 
     class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val txtLegenda: TextView = view.findViewById(R.id.txtLegendaVideo)
         val videoView: VideoView = view.findViewById(R.id.videoMensagem)
         val btnPlay: Button = view.findViewById(R.id.btnPlayVideo)
         val txtNome: TextView = view.findViewById(R.id.txtNomeVideo)

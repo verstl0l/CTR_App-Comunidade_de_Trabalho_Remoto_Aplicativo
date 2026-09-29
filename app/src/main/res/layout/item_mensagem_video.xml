@@ -71,6 +71,18 @@
 
         </FrameLayout>
 
+        <!-- ✅ Legenda FORA do FrameLayout (embaixo do vídeo) -->
+        <TextView
+            android:id="@+id/txtLegendaVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:maxWidth="260dp"
+            android:text=""
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 </RelativeLayout>

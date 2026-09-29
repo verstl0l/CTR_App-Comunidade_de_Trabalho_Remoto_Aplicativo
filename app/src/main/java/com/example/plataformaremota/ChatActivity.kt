@@ -47,14 +47,67 @@ class ChatActivity : AppCompatActivity() {
     private var paginacaoHelper: ChatPaginacaoHelper? = null
     private var deveAutoScroll: Boolean = true
 
+    // ✅ Launcher da tela de preview
+    private val abrirPreview = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        if (r.resultCode == Activity.RESULT_OK) {
+            val acao = r.data?.getStringExtra("acao")
+            if (acao == "enviar") {
+                val uri = r.data?.getStringExtra("uri")?.let { Uri.parse(it) }
+                val tipoMidia = r.data?.getStringExtra("tipo") ?: "foto"
+                val legenda = r.data?.getStringExtra("legenda") ?: ""
+                if (uri != null) {
+                    when (tipoMidia) {
+                        "foto" -> enviarFoto(uri, legenda)
+                        "video" -> enviarVideo(uri, legenda)
+                        "arquivo" -> enviarArquivo(uri, legenda)
+                    }
+                }
+            }
+        }
+    }
+
+    // ✅ Selecionadores agora só abrem a PreviewMidiaActivity
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
-        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
+        if (r.resultCode == Activity.RESULT_OK) {
+            val uri = r.data?.data
+            if (uri != null) {
+                val i = Intent(this, PreviewMidiaActivity::class.java).apply {
+                    putExtra("uri", uri.toString())
+                    putExtra("tipo", "foto")
+                    putExtra("chatTipo", "pv")
+                    putExtra("chatId", chatId)
+                }
+                abrirPreview.launch(i)
+            }
+        }
     }
     private val selecionarVideo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
-        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarVideo(it) } }
+        if (r.resultCode == Activity.RESULT_OK) {
+            val uri = r.data?.data
+            if (uri != null) {
+                val i = Intent(this, PreviewMidiaActivity::class.java).apply {
+                    putExtra("uri", uri.toString())
+                    putExtra("tipo", "video")
+                    putExtra("chatTipo", "pv")
+                    putExtra("chatId", chatId)
+                }
+                abrirPreview.launch(i)
+            }
+        }
     }
     private val selecionarArquivo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
-        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarArquivo(it) } }
+        if (r.resultCode == Activity.RESULT_OK) {
+            val uri = r.data?.data
+            if (uri != null) {
+                val i = Intent(this, PreviewMidiaActivity::class.java).apply {
+                    putExtra("uri", uri.toString())
+                    putExtra("tipo", "arquivo")
+                    putExtra("chatTipo", "pv")
+                    putExtra("chatId", chatId)
+                }
+                abrirPreview.launch(i)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -445,9 +498,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ENVIAR FOTO
+    // ENVIAR FOTO (agora recebe legenda)
     // ============================================================
-    private fun enviarFoto(uri: Uri) {
+    private fun enviarFoto(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
@@ -459,7 +512,7 @@ class ChatActivity : AppCompatActivity() {
                         try {
                             val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
-                                "remetente" to emailUsuario, "texto" to "", "fotoUrl" to url,
+                                "remetente" to emailUsuario, "texto" to legenda, "fotoUrl" to url,
                                 "tipo" to "foto", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
@@ -469,13 +522,13 @@ class ChatActivity : AppCompatActivity() {
                             batch.set(msgRef, m)
 
                             val preview = hashMapOf<String, Any>(
-                                "texto" to "Foto",
+                                "texto" to legenda.ifEmpty { "Foto" },
                                 "autorNome" to emailUsuario,
                                 "tipo" to "foto",
                                 "timestamp" to ts
                             )
                             val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to "📷 Foto",
+                                "ultimaMensagem" to if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda",
                                 "ultimaMensagemPreview" to preview,
                                 "atualizadoEm" to ts,
                                 "naoLidas.$outroEmail" to FieldValue.increment(1)
@@ -498,9 +551,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ENVIAR VÍDEO
+    // ENVIAR VÍDEO (agora recebe legenda)
     // ============================================================
-    private fun enviarVideo(uri: Uri) {
+    private fun enviarVideo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
             .option("resource_type", "video").option("folder", "chats_videos/")
@@ -513,7 +566,7 @@ class ChatActivity : AppCompatActivity() {
                         try {
                             val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
-                                "remetente" to emailUsuario, "texto" to "", "videoUrl" to url,
+                                "remetente" to emailUsuario, "texto" to legenda, "videoUrl" to url,
                                 "tipo" to "video", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
@@ -523,13 +576,13 @@ class ChatActivity : AppCompatActivity() {
                             batch.set(msgRef, m)
 
                             val preview = hashMapOf<String, Any>(
-                                "texto" to "Vídeo",
+                                "texto" to legenda.ifEmpty { "Vídeo" },
                                 "autorNome" to emailUsuario,
                                 "tipo" to "video",
                                 "timestamp" to ts
                             )
                             val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to "🎥 Vídeo",
+                                "ultimaMensagem" to if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda",
                                 "ultimaMensagemPreview" to preview,
                                 "atualizadoEm" to ts,
                                 "naoLidas.$outroEmail" to FieldValue.increment(1)
@@ -552,9 +605,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ENVIAR ARQUIVO
+    // ENVIAR ARQUIVO (agora recebe legenda)
     // ============================================================
-    private fun enviarArquivo(uri: Uri) {
+    private fun enviarArquivo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
         try {
@@ -581,7 +634,7 @@ class ChatActivity : AppCompatActivity() {
                         try {
                             val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
-                                "remetente" to emailUsuario, "texto" to "", "arquivoUrl" to url,
+                                "remetente" to emailUsuario, "texto" to legenda, "arquivoUrl" to url,
                                 "nomeArquivo" to nF, "tamanhoArquivo" to tF, "mimeType" to mF,
                                 "tipo" to "arquivo", "timestamp" to ts, "lida" to false
                             )
@@ -592,13 +645,13 @@ class ChatActivity : AppCompatActivity() {
                             batch.set(msgRef, m)
 
                             val preview = hashMapOf<String, Any>(
-                                "texto" to nF,
+                                "texto" to legenda.ifEmpty { nF },
                                 "autorNome" to emailUsuario,
                                 "tipo" to "arquivo",
                                 "timestamp" to ts
                             )
                             val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to "📎 $nF",
+                                "ultimaMensagem" to if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda",
                                 "ultimaMensagemPreview" to preview,
                                 "atualizadoEm" to ts,
                                 "naoLidas.$outroEmail" to FieldValue.increment(1)

@@ -130,6 +130,19 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- uCrop -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <!-- android-video-trimmer -->
+        <activity
+            android:name="com.gowtham.library.ui.ActVideoTrimmer"
+            android:screenOrientation="portrait"
+            android:theme="@style/VideoTrimmerTheme"
+            tools:replace="android:theme" />
+
         <!-- ANEXOS DE TRABALHO -->
         <activity
             android:name=".AnexosTrabalhoActivity"
@@ -142,6 +155,11 @@
         <activity
             android:name=".ComentariosTrabalhoActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".PreviewMidiaActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
     </application>
 

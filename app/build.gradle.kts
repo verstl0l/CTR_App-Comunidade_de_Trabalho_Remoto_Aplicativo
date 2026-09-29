@@ -94,6 +94,12 @@ dependencies {
     // MPAndroidChart (graficos)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
+    // Crop de imagem
+    implementation("com.github.yalantis:ucrop:2.2.11")
+
+    // Trim de vídeo
+    implementation("com.github.a914-gowtham:android-video-trimmer:1.8.0")
+
     // Testes
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
