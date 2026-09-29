@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -30,6 +31,9 @@ class ChatEquipeActivity : AppCompatActivity() {
     private var emailUsuario: String = ""
     private var nomeUsuario: String = "Usuário"
     private var equipeId: String = ""
+
+    // ✅ Cache de membros da equipe (populado ao abrir o chat)
+    private var membrosEquipeCache: List<String> = emptyList()
 
     private var respostaAtiva: RespostaInfo? = null
     private var typingHelper: TypingIndicatorHelper? = null
@@ -87,6 +91,9 @@ class ChatEquipeActivity : AppCompatActivity() {
                 txtNomeEquipe.text = db.collection("equipes").document(equipeId).get().await().getString("nome") ?: "Equipe"
             } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro: ${e.message}") }
         }
+
+        // ✅ Carrega membros uma vez e cacheia
+        carregarMembrosEquipe()
 
         btnEnviar.setOnClickListener {
             val t = edtMensagem.text.toString().trim()
@@ -241,6 +248,36 @@ class ChatEquipeActivity : AppCompatActivity() {
     }
 
     // ============================================================
+    // ✅ CARREGAR E CACHEADAR MEMBROS DA EQUIPE
+    // ============================================================
+    private fun carregarMembrosEquipe() {
+        lifecycleScope.launch {
+            try {
+                val snap = db.collection("membros_equipe")
+                    .whereEqualTo("equipeId", equipeId)
+                    .get().await()
+
+                membrosEquipeCache = snap.documents
+                    .mapNotNull { it.getString("email") }
+                    .filter { it.isNotEmpty() && it != emailUsuario }
+
+                Log.d("CHAT_EQUIPE", "Membros cacheados: ${membrosEquipeCache.size}")
+            } catch (e: Exception) {
+                Log.e("CHAT_EQUIPE", "Erro ao carregar membros: ${e.message}")
+            }
+        }
+    }
+
+    // ============================================================
+    // HELPER: monta os updates de naoLidas pra todos os membros
+    // ============================================================
+    private fun montarUpdatesNaoLidas(): Map<String, Any> {
+        return membrosEquipeCache.associate { email ->
+            "naoLidas.$email" to FieldValue.increment(1)
+        }
+    }
+
+    // ============================================================
     // MARCAR COMO LIDAS
     // ============================================================
     private fun marcarMensagensComoLidas() {
@@ -311,16 +348,34 @@ class ChatEquipeActivity : AppCompatActivity() {
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
+                val ts = System.currentTimeMillis()
                 val m = hashMapOf<String, Any>(
                     "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                     "texto" to texto, "tipo" to "texto",
-                    "timestamp" to System.currentTimeMillis(), "lida" to false
+                    "timestamp" to ts, "lida" to false
                 )
                 adicionarResposta(m)
-                db.collection("chats_equipe").document(equipeId).collection("mensagens").add(m).await()
-                db.collection("chats_equipe").document(equipeId).set(
-                    mapOf("ultimaMensagem" to texto, "atualizadoEm" to System.currentTimeMillis())
+
+                val batch = db.batch()
+                val msgRef = db.collection("chats_equipe").document(equipeId).collection("mensagens").document()
+                batch.set(msgRef, m)
+
+                val preview = hashMapOf<String, Any>(
+                    "texto" to texto,
+                    "autorNome" to nomeUsuario,
+                    "tipo" to "texto",
+                    "timestamp" to ts
                 )
+                val chatUpdates = hashMapOf<String, Any>(
+                    "ultimaMensagem" to texto,
+                    "ultimaMensagemPreview" to preview,
+                    "atualizadoEm" to ts
+                )
+                chatUpdates.putAll(montarUpdatesNaoLidas())
+                batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+
+                batch.commit().await()
+
                 typingHelper?.limpar()
                 cancelarResposta()
             } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -340,13 +395,34 @@ class ChatEquipeActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                                 "texto" to "", "fotoUrl" to url, "tipo" to "foto",
-                                "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("chats_equipe").document(equipeId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("chats_equipe").document(equipeId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to "Foto",
+                                "autorNome" to nomeUsuario,
+                                "tipo" to "foto",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "📷 Foto",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts
+                            )
+                            chatUpdates.putAll(montarUpdatesNaoLidas())
+                            batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatEquipeActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -373,13 +449,34 @@ class ChatEquipeActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                                 "texto" to "", "videoUrl" to url, "tipo" to "video",
-                                "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("chats_equipe").document(equipeId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("chats_equipe").document(equipeId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to "Vídeo",
+                                "autorNome" to nomeUsuario,
+                                "tipo" to "video",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "🎥 Vídeo",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts
+                            )
+                            chatUpdates.putAll(montarUpdatesNaoLidas())
+                            batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatEquipeActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -420,14 +517,35 @@ class ChatEquipeActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                                 "texto" to "", "arquivoUrl" to url, "nomeArquivo" to nF,
                                 "tamanhoArquivo" to tF, "mimeType" to mF,
-                                "tipo" to "arquivo", "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "tipo" to "arquivo", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("chats_equipe").document(equipeId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("chats_equipe").document(equipeId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to nF,
+                                "autorNome" to nomeUsuario,
+                                "tipo" to "arquivo",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "📎 $nF",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts
+                            )
+                            chatUpdates.putAll(montarUpdatesNaoLidas())
+                            batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatEquipeActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -441,7 +559,7 @@ class ChatEquipeActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // MOSTRAR OPÇÕES
+    // MOSTRAR OPÇÕES / MENU DE MÍDIA
     // ============================================================
     private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, nomeRem: String, ehRem: Boolean) {
         lifecycleScope.launch {
@@ -466,9 +584,6 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // MOSTRAR MENU DE MÍDIA
-    // ============================================================
     private fun mostrarMenuMidia(
         tipo: String, url: String, nomeArq: String, mime: String,
         msgId: String, ehRem: Boolean, texto: String, remetente: String, nomeRem: String

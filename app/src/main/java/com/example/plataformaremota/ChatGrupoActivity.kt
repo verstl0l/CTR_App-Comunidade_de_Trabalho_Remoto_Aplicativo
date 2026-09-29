@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -31,6 +32,9 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var nomeUsuario: String = "Usuário"
     private var grupoId: String = ""
     private var equipeId: String = ""
+
+    // ✅ Cache de membros do grupo
+    private var membrosGrupoCache: List<String> = emptyList()
 
     private var respostaAtiva: RespostaInfo? = null
     private var typingHelper: TypingIndicatorHelper? = null
@@ -85,12 +89,8 @@ class ChatGrupoActivity : AppCompatActivity() {
         txtNomeGrupo.text = nomeGrupo
         btnVoltar.setOnClickListener { finish() }
 
-        lifecycleScope.launch {
-            try {
-                equipeId = db.collection("grupos").document(grupoId).get().await().getString("equipeId") ?: ""
-                nomeUsuario = db.collection("usuarios").document(emailUsuario).get().await().getString("nome") ?: "Usuário"
-            } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
-        }
+        // ✅ Carrega dados do grupo + cache de membros
+        carregarDadosGrupo()
 
         btnEnviar.setOnClickListener {
             val t = edtMensagem.text.toString().trim()
@@ -245,6 +245,39 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
+    // ✅ CARREGA EQUIPE ID + NOME + CACHE DE MEMBROS
+    // ============================================================
+    private fun carregarDadosGrupo() {
+        lifecycleScope.launch {
+            try {
+                val grupoDoc = db.collection("grupos").document(grupoId).get().await()
+                equipeId = grupoDoc.getString("equipeId") ?: ""
+
+                // ✅ Cache de membros do grupo (array "membros")
+                val membros = (grupoDoc.get("membros") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+                membrosGrupoCache = membros.filter { it.isNotEmpty() && it != emailUsuario }
+
+                // Nome do usuário atual
+                nomeUsuario = db.collection("usuarios").document(emailUsuario)
+                    .get().await().getString("nome") ?: "Usuário"
+
+                Log.d("CHAT_GRUPO", "Membros cacheados: ${membrosGrupoCache.size}")
+            } catch (e: Exception) {
+                Log.e("CHAT_GRUPO", "Erro ao carregar dados: ${e.message}")
+            }
+        }
+    }
+
+    // ============================================================
+    // HELPER: monta os updates de naoLidas pra todos os membros
+    // ============================================================
+    private fun montarUpdatesNaoLidas(): Map<String, Any> {
+        return membrosGrupoCache.associate { email ->
+            "naoLidas.$email" to FieldValue.increment(1)
+        }
+    }
+
+    // ============================================================
     // MARCAR COMO LIDAS
     // ============================================================
     private fun marcarMensagensComoLidas() {
@@ -340,13 +373,34 @@ class ChatGrupoActivity : AppCompatActivity() {
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
+                val ts = System.currentTimeMillis()
                 val m = hashMapOf<String, Any>(
                     "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                     "texto" to texto, "tipo" to "texto",
-                    "timestamp" to System.currentTimeMillis(), "lida" to false
+                    "timestamp" to ts, "lida" to false
                 )
                 adicionarResposta(m)
-                db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
+
+                val batch = db.batch()
+                val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
+                batch.set(msgRef, m)
+
+                val preview = hashMapOf<String, Any>(
+                    "texto" to texto,
+                    "autorNome" to nomeUsuario,
+                    "tipo" to "texto",
+                    "timestamp" to ts
+                )
+                val chatUpdates = hashMapOf<String, Any>(
+                    "ultimaMensagem" to texto,
+                    "ultimaMensagemPreview" to preview,
+                    "atualizadoEm" to ts
+                )
+                chatUpdates.putAll(montarUpdatesNaoLidas())
+                batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+
+                batch.commit().await()
+
                 typingHelper?.limpar()
                 cancelarResposta()
             } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -366,13 +420,34 @@ class ChatGrupoActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                                 "texto" to "", "fotoUrl" to url, "tipo" to "foto",
-                                "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to "Foto",
+                                "autorNome" to nomeUsuario,
+                                "tipo" to "foto",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "📷 Foto",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts
+                            )
+                            chatUpdates.putAll(montarUpdatesNaoLidas())
+                            batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatGrupoActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -399,13 +474,34 @@ class ChatGrupoActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                                 "texto" to "", "videoUrl" to url, "tipo" to "video",
-                                "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to "Vídeo",
+                                "autorNome" to nomeUsuario,
+                                "tipo" to "video",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "🎥 Vídeo",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts
+                            )
+                            chatUpdates.putAll(montarUpdatesNaoLidas())
+                            batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatGrupoActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -446,14 +542,35 @@ class ChatGrupoActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
                                 "texto" to "", "arquivoUrl" to url, "nomeArquivo" to nF,
                                 "tamanhoArquivo" to tF, "mimeType" to mF,
-                                "tipo" to "arquivo", "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "tipo" to "arquivo", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("grupos").document(grupoId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to nF,
+                                "autorNome" to nomeUsuario,
+                                "tipo" to "arquivo",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "📎 $nF",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts
+                            )
+                            chatUpdates.putAll(montarUpdatesNaoLidas())
+                            batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatGrupoActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -467,7 +584,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // MOSTRAR OPÇÕES
+    // MOSTRAR OPÇÕES / MENU DE MÍDIA
     // ============================================================
     private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, nomeRem: String, ehRem: Boolean) {
         lifecycleScope.launch {
@@ -492,9 +609,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // MOSTRAR MENU DE MÍDIA
-    // ============================================================
     private fun mostrarMenuMidia(
         tipo: String, url: String, nomeArq: String, mime: String,
         msgId: String, ehRem: Boolean, texto: String, remetente: String, nomeRem: String

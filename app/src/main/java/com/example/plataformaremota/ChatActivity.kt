@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -233,14 +234,12 @@ class ChatActivity : AppCompatActivity() {
             }
         )
 
-        // ✅ stackFromEnd = true (como era originalmente, sem reverse)
         layoutManager = LinearLayoutManager(this).apply {
             stackFromEnd = true
         }
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
 
-        // ✅ Detecta scroll no topo → carrega mais antigas
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(rv, dx, dy)
@@ -248,11 +247,9 @@ class ChatActivity : AppCompatActivity() {
                 val total = adapter.itemCount
                 if (total == 0) return
 
-                // ✅ Tá vendo o fim? (posição alta = perto do fim)
                 val ultimoVisivel = layoutManager.findLastCompletelyVisibleItemPosition()
                 deveAutoScroll = (total - ultimoVisivel) <= 3
 
-                // ✅ Perto do topo? Carrega mais antigas
                 val primeiroVisivel = layoutManager.findFirstCompletelyVisibleItemPosition()
                 if (primeiroVisivel in 0..3) {
                     paginacaoHelper?.carregarMaisAntigas()
@@ -260,7 +257,6 @@ class ChatActivity : AppCompatActivity() {
             }
         })
 
-        // ✅ Inicia paginação
         paginacaoHelper = ChatPaginacaoHelper(
             collection = "chats",
             documentId = chatId,
@@ -269,13 +265,10 @@ class ChatActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
 
-                    // ✅ Sempre submete a lista COMPLETA. DiffUtil faz o resto.
                     adapter.submitList(todas) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) {
-                            // Primeira carga → rola pro fim
                             recycler.scrollToPosition(adapter.itemCount - 1)
                         }
-                        // Inseriu no topo → NÃO mexe no scroll (stackFromEnd preserva)
                     }
                 }
             },
@@ -286,7 +279,6 @@ class ChatActivity : AppCompatActivity() {
 
                     val estavaNoFim = deveAutoScroll
 
-                    // ✅ Pega lista completa atual + adiciona novas
                     val listaAtual = adapter.currentList.toMutableList()
                     listaAtual.addAll(novas)
 
@@ -399,15 +391,33 @@ class ChatActivity : AppCompatActivity() {
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
+                val ts = System.currentTimeMillis()
                 val m = hashMapOf<String, Any>(
                     "remetente" to emailUsuario, "texto" to texto, "tipo" to "texto",
-                    "timestamp" to System.currentTimeMillis(), "lida" to false
+                    "timestamp" to ts, "lida" to false
                 )
                 adicionarResposta(m)
-                db.collection("chats").document(chatId).collection("mensagens").add(m).await()
-                db.collection("chats").document(chatId).update(
-                    mapOf("ultimaMensagem" to texto, "atualizadoEm" to System.currentTimeMillis())
-                ).await()
+
+                val batch = db.batch()
+                val msgRef = db.collection("chats").document(chatId).collection("mensagens").document()
+                batch.set(msgRef, m)
+
+                val preview = hashMapOf<String, Any>(
+                    "texto" to texto,
+                    "autorNome" to emailUsuario,
+                    "tipo" to "texto",
+                    "timestamp" to ts
+                )
+                val chatUpdates = hashMapOf<String, Any>(
+                    "ultimaMensagem" to texto,
+                    "ultimaMensagemPreview" to preview,
+                    "atualizadoEm" to ts,
+                    "naoLidas.$outroEmail" to FieldValue.increment(1)
+                )
+                batch.update(db.collection("chats").document(chatId), chatUpdates)
+
+                batch.commit().await()
+
                 typingHelper?.limpar()
                 cancelarResposta()
             } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -447,12 +457,33 @@ class ChatActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "texto" to "", "fotoUrl" to url,
-                                "tipo" to "foto", "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "tipo" to "foto", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("chats").document(chatId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("chats").document(chatId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to "Foto",
+                                "autorNome" to emailUsuario,
+                                "tipo" to "foto",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "📷 Foto",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts,
+                                "naoLidas.$outroEmail" to FieldValue.increment(1)
+                            )
+                            batch.update(db.collection("chats").document(chatId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
@@ -480,12 +511,33 @@ class ChatActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "texto" to "", "videoUrl" to url,
-                                "tipo" to "video", "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "tipo" to "video", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("chats").document(chatId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("chats").document(chatId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to "Vídeo",
+                                "autorNome" to emailUsuario,
+                                "tipo" to "video",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "🎥 Vídeo",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts,
+                                "naoLidas.$outroEmail" to FieldValue.increment(1)
+                            )
+                            batch.update(db.collection("chats").document(chatId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
@@ -527,13 +579,34 @@ class ChatActivity : AppCompatActivity() {
                     val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
+                            val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "texto" to "", "arquivoUrl" to url,
                                 "nomeArquivo" to nF, "tamanhoArquivo" to tF, "mimeType" to mF,
-                                "tipo" to "arquivo", "timestamp" to System.currentTimeMillis(), "lida" to false
+                                "tipo" to "arquivo", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            db.collection("chats").document(chatId).collection("mensagens").add(m).await()
+
+                            val batch = db.batch()
+                            val msgRef = db.collection("chats").document(chatId).collection("mensagens").document()
+                            batch.set(msgRef, m)
+
+                            val preview = hashMapOf<String, Any>(
+                                "texto" to nF,
+                                "autorNome" to emailUsuario,
+                                "tipo" to "arquivo",
+                                "timestamp" to ts
+                            )
+                            val chatUpdates = hashMapOf<String, Any>(
+                                "ultimaMensagem" to "📎 $nF",
+                                "ultimaMensagemPreview" to preview,
+                                "atualizadoEm" to ts,
+                                "naoLidas.$outroEmail" to FieldValue.increment(1)
+                            )
+                            batch.update(db.collection("chats").document(chatId), chatUpdates)
+
+                            batch.commit().await()
+
                             Toast.makeText(this@ChatActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
