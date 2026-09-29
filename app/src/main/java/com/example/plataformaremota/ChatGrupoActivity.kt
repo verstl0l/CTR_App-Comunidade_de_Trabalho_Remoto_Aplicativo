@@ -33,7 +33,6 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var grupoId: String = ""
     private var equipeId: String = ""
 
-    // ✅ Cache de membros do grupo
     private var membrosGrupoCache: List<String> = emptyList()
 
     private var respostaAtiva: RespostaInfo? = null
@@ -46,14 +45,65 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var paginacaoHelper: ChatPaginacaoHelper? = null
     private var deveAutoScroll: Boolean = true
 
+    private val abrirPreview = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        if (r.resultCode == Activity.RESULT_OK) {
+            val acao = r.data?.getStringExtra("acao")
+            if (acao == "enviar") {
+                val uri = r.data?.getStringExtra("uri")?.let { Uri.parse(it) }
+                val tipoMidia = r.data?.getStringExtra("tipo") ?: "foto"
+                val legenda = r.data?.getStringExtra("legenda") ?: ""
+                if (uri != null) {
+                    when (tipoMidia) {
+                        "foto" -> enviarFoto(uri, legenda)
+                        "video" -> enviarVideo(uri, legenda)
+                        "arquivo" -> enviarArquivo(uri, legenda)
+                    }
+                }
+            }
+        }
+    }
+
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
-        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
+        if (r.resultCode == Activity.RESULT_OK) {
+            val uri = r.data?.data
+            if (uri != null) {
+                val i = Intent(this, PreviewMidiaActivity::class.java).apply {
+                    putExtra("uri", uri.toString())
+                    putExtra("tipo", "foto")
+                    putExtra("chatTipo", "grupo")
+                    putExtra("chatId", grupoId)
+                }
+                abrirPreview.launch(i)
+            }
+        }
     }
     private val selecionarVideo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
-        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarVideo(it) } }
+        if (r.resultCode == Activity.RESULT_OK) {
+            val uri = r.data?.data
+            if (uri != null) {
+                val i = Intent(this, PreviewMidiaActivity::class.java).apply {
+                    putExtra("uri", uri.toString())
+                    putExtra("tipo", "video")
+                    putExtra("chatTipo", "grupo")
+                    putExtra("chatId", grupoId)
+                }
+                abrirPreview.launch(i)
+            }
+        }
     }
     private val selecionarArquivo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
-        if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarArquivo(it) } }
+        if (r.resultCode == Activity.RESULT_OK) {
+            val uri = r.data?.data
+            if (uri != null) {
+                val i = Intent(this, PreviewMidiaActivity::class.java).apply {
+                    putExtra("uri", uri.toString())
+                    putExtra("tipo", "arquivo")
+                    putExtra("chatTipo", "grupo")
+                    putExtra("chatId", grupoId)
+                }
+                abrirPreview.launch(i)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,7 +139,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         txtNomeGrupo.text = nomeGrupo
         btnVoltar.setOnClickListener { finish() }
 
-        // ✅ Carrega dados do grupo + cache de membros
         carregarDadosGrupo()
 
         btnEnviar.setOnClickListener {
@@ -138,9 +187,6 @@ class ChatGrupoActivity : AppCompatActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        // ============================================================
-        // RECYCLERVIEW + ADAPTER
-        // ============================================================
         recycler = findViewById(R.id.recyclerMensagensGrupo)
         adapter = MensagemAdapter(
             emailUsuario = emailUsuario,
@@ -150,52 +196,40 @@ class ChatGrupoActivity : AppCompatActivity() {
                 override fun onResponder(msgId: String, texto: String, remetente: String, tipo: String) {
                     dispararResposta(msgId, texto, remetente, nomeUsuario, tipo)
                 }
-
                 override fun onFotoClick(posicaoNaGaleria: Int, listaMidias: List<Pair<String, String>>) {
                     abrirGaleria(listaMidias, posicaoNaGaleria)
                 }
-
                 override fun onVideoClick(posicaoNaGaleria: Int, listaMidias: List<Pair<String, String>>) {
                     abrirGaleria(listaMidias, posicaoNaGaleria)
                 }
-
                 override fun onLongPressTexto(msgId: String, texto: String, remetente: String, ehRem: Boolean) {
                     mostrarOpcaoMensagem(msgId, texto, remetente, nomeUsuario, ehRem)
                 }
-
                 override fun onLongPressMidia(
                     tipo: String, url: String, nomeArq: String, mime: String,
                     msgId: String, ehRem: Boolean, texto: String, remetente: String
                 ) {
                     mostrarMenuMidia(tipo, url, nomeArq, mime, msgId, ehRem, texto, remetente, nomeUsuario)
                 }
-
                 override fun onAbrirArquivo(url: String, mime: String, nome: String) {
                     abrirArquivoExterno(url, mime, nome)
                 }
             }
         )
 
-        layoutManager = LinearLayoutManager(this).apply {
-            stackFromEnd = true
-        }
+        layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(rv, dx, dy)
-
                 val total = adapter.itemCount
                 if (total == 0) return
-
                 val ultimoVisivel = layoutManager.findLastCompletelyVisibleItemPosition()
                 deveAutoScroll = (total - ultimoVisivel) <= 3
-
                 val primeiroVisivel = layoutManager.findFirstCompletelyVisibleItemPosition()
-                if (primeiroVisivel in 0..3) {
-                    paginacaoHelper?.carregarMaisAntigas()
-                }
+                if (primeiroVisivel in 0..3) paginacaoHelper?.carregarMaisAntigas()
             }
         })
 
@@ -207,9 +241,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
                     adapter.submitList(todas) {
-                        if (!inseriuNoTopo && adapter.itemCount > 0) {
-                            recycler.scrollToPosition(adapter.itemCount - 1)
-                        }
+                        if (!inseriuNoTopo && adapter.itemCount > 0) recycler.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
             },
@@ -217,15 +249,11 @@ class ChatGrupoActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
                     if (novas.isEmpty()) return@runOnUiThread
-
                     val estavaNoFim = deveAutoScroll
                     val listaAtual = adapter.currentList.toMutableList()
                     listaAtual.addAll(novas)
-
                     adapter.submitList(listaAtual) {
-                        if (estavaNoFim && adapter.itemCount > 0) {
-                            recycler.scrollToPosition(adapter.itemCount - 1)
-                        }
+                        if (estavaNoFim && adapter.itemCount > 0) recycler.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
             }
@@ -238,48 +266,26 @@ class ChatGrupoActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        typingHelper?.destruir()
-        typingHelper = null
-        paginacaoHelper?.destruir()
-        paginacaoHelper = null
+        typingHelper?.destruir(); typingHelper = null
+        paginacaoHelper?.destruir(); paginacaoHelper = null
     }
 
-    // ============================================================
-    // ✅ CARREGA EQUIPE ID + NOME + CACHE DE MEMBROS
-    // ============================================================
     private fun carregarDadosGrupo() {
         lifecycleScope.launch {
             try {
                 val grupoDoc = db.collection("grupos").document(grupoId).get().await()
                 equipeId = grupoDoc.getString("equipeId") ?: ""
-
-                // ✅ Cache de membros do grupo (array "membros")
                 val membros = (grupoDoc.get("membros") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
                 membrosGrupoCache = membros.filter { it.isNotEmpty() && it != emailUsuario }
-
-                // Nome do usuário atual
-                nomeUsuario = db.collection("usuarios").document(emailUsuario)
-                    .get().await().getString("nome") ?: "Usuário"
-
-                Log.d("CHAT_GRUPO", "Membros cacheados: ${membrosGrupoCache.size}")
-            } catch (e: Exception) {
-                Log.e("CHAT_GRUPO", "Erro ao carregar dados: ${e.message}")
-            }
+                nomeUsuario = db.collection("usuarios").document(emailUsuario).get().await().getString("nome") ?: "Usuário"
+            } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
         }
     }
 
-    // ============================================================
-    // HELPER: monta os updates de naoLidas pra todos os membros
-    // ============================================================
     private fun montarUpdatesNaoLidas(): Map<String, Any> {
-        return membrosGrupoCache.associate { email ->
-            "naoLidas.$email" to FieldValue.increment(1)
-        }
+        return membrosGrupoCache.associate { email -> "naoLidas.$email" to FieldValue.increment(1) }
     }
 
-    // ============================================================
-    // MARCAR COMO LIDAS
-    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (grupoId.isEmpty()) return
         lifecycleScope.launch {
@@ -296,30 +302,19 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // GARANTIR CAMPO DIGITANDO
-    // ============================================================
     private suspend fun garantirCampoDigitando() {
         try {
             val docRef = db.collection("grupos").document(grupoId)
             val doc = docRef.get().await()
-            if (doc.exists() && !doc.contains("digitando")) {
-                docRef.update("digitando", emptyMap<String, Long>()).await()
-            }
-        } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro garantir digitando: ${e.message}") }
+            if (doc.exists() && !doc.contains("digitando")) docRef.update("digitando", emptyMap<String, Long>()).await()
+        } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
     }
 
-    // ============================================================
-    // CANCELAR RESPOSTA
-    // ============================================================
     private fun cancelarResposta() {
         respostaAtiva = null
         findViewById<LinearLayout>(R.id.containerRespondendoGrupo).visibility = View.GONE
     }
 
-    // ============================================================
-    // ADICIONAR / DISPARAR RESPOSTA
-    // ============================================================
     private fun adicionarResposta(m: HashMap<String, Any>) {
         respostaAtiva?.let { r ->
             m["respostaPara"] = hashMapOf(
@@ -339,9 +334,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         findViewById<EditText>(R.id.edtMensagemGrupo).requestFocus()
     }
 
-    // ============================================================
-    // SAIR DO GRUPO
-    // ============================================================
     private fun confirmarSairGrupo() {
         lifecycleScope.launch {
             try {
@@ -367,50 +359,33 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ENVIAR MENSAGEM DE TEXTO
-    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
                 val ts = System.currentTimeMillis()
                 val m = hashMapOf<String, Any>(
                     "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
-                    "texto" to texto, "tipo" to "texto",
-                    "timestamp" to ts, "lida" to false
+                    "texto" to texto, "tipo" to "texto", "timestamp" to ts, "lida" to false
                 )
                 adicionarResposta(m)
-
                 val batch = db.batch()
                 val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
                 batch.set(msgRef, m)
-
                 val preview = hashMapOf<String, Any>(
-                    "texto" to texto,
-                    "autorNome" to nomeUsuario,
-                    "tipo" to "texto",
-                    "timestamp" to ts
+                    "texto" to texto, "autorNome" to nomeUsuario, "tipo" to "texto", "timestamp" to ts
                 )
                 val chatUpdates = hashMapOf<String, Any>(
-                    "ultimaMensagem" to texto,
-                    "ultimaMensagemPreview" to preview,
-                    "atualizadoEm" to ts
+                    "ultimaMensagem" to texto, "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                 )
                 chatUpdates.putAll(montarUpdatesNaoLidas())
                 batch.update(db.collection("grupos").document(grupoId), chatUpdates)
-
                 batch.commit().await()
-
-                typingHelper?.limpar()
-                cancelarResposta()
+                typingHelper?.limpar(); cancelarResposta()
             } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
     }
 
-    // ============================================================
-    // ENVIAR FOTO
-    // ============================================================
-    private fun enviarFoto(uri: Uri) {
+    private fun enviarFoto(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_grupo/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
@@ -423,31 +398,23 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
-                                "texto" to "", "fotoUrl" to url, "tipo" to "foto",
-                                "timestamp" to ts, "lida" to false
+                                "texto" to legenda, "fotoUrl" to url, "tipo" to "foto", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-
                             val batch = db.batch()
                             val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
                             batch.set(msgRef, m)
-
                             val preview = hashMapOf<String, Any>(
-                                "texto" to "Foto",
-                                "autorNome" to nomeUsuario,
-                                "tipo" to "foto",
-                                "timestamp" to ts
+                                "texto" to legenda.ifEmpty { "Foto" }, "autorNome" to nomeUsuario,
+                                "tipo" to "foto", "timestamp" to ts
                             )
                             val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to "📷 Foto",
-                                "ultimaMensagemPreview" to preview,
-                                "atualizadoEm" to ts
+                                "ultimaMensagem" to if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda",
+                                "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
                             batch.update(db.collection("grupos").document(grupoId), chatUpdates)
-
                             batch.commit().await()
-
                             Toast.makeText(this@ChatGrupoActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -460,10 +427,7 @@ class ChatGrupoActivity : AppCompatActivity() {
             }).dispatch()
     }
 
-    // ============================================================
-    // ENVIAR VÍDEO
-    // ============================================================
-    private fun enviarVideo(uri: Uri) {
+    private fun enviarVideo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
             .option("resource_type", "video").option("folder", "chats_grupo_videos/")
@@ -477,31 +441,23 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
-                                "texto" to "", "videoUrl" to url, "tipo" to "video",
-                                "timestamp" to ts, "lida" to false
+                                "texto" to legenda, "videoUrl" to url, "tipo" to "video", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-
                             val batch = db.batch()
                             val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
                             batch.set(msgRef, m)
-
                             val preview = hashMapOf<String, Any>(
-                                "texto" to "Vídeo",
-                                "autorNome" to nomeUsuario,
-                                "tipo" to "video",
-                                "timestamp" to ts
+                                "texto" to legenda.ifEmpty { "Vídeo" }, "autorNome" to nomeUsuario,
+                                "tipo" to "video", "timestamp" to ts
                             )
                             val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to "🎥 Vídeo",
-                                "ultimaMensagemPreview" to preview,
-                                "atualizadoEm" to ts
+                                "ultimaMensagem" to if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda",
+                                "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
                             batch.update(db.collection("grupos").document(grupoId), chatUpdates)
-
                             batch.commit().await()
-
                             Toast.makeText(this@ChatGrupoActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -514,10 +470,7 @@ class ChatGrupoActivity : AppCompatActivity() {
             }).dispatch()
     }
 
-    // ============================================================
-    // ENVIAR ARQUIVO
-    // ============================================================
-    private fun enviarArquivo(uri: Uri) {
+    private fun enviarArquivo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
         try {
@@ -545,32 +498,25 @@ class ChatGrupoActivity : AppCompatActivity() {
                             val ts = System.currentTimeMillis()
                             val m = hashMapOf<String, Any>(
                                 "remetente" to emailUsuario, "nomeRemetente" to nomeUsuario,
-                                "texto" to "", "arquivoUrl" to url, "nomeArquivo" to nF,
+                                "texto" to legenda, "arquivoUrl" to url, "nomeArquivo" to nF,
                                 "tamanhoArquivo" to tF, "mimeType" to mF,
                                 "tipo" to "arquivo", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-
                             val batch = db.batch()
                             val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
                             batch.set(msgRef, m)
-
                             val preview = hashMapOf<String, Any>(
-                                "texto" to nF,
-                                "autorNome" to nomeUsuario,
-                                "tipo" to "arquivo",
-                                "timestamp" to ts
+                                "texto" to legenda.ifEmpty { nF }, "autorNome" to nomeUsuario,
+                                "tipo" to "arquivo", "timestamp" to ts
                             )
                             val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to "📎 $nF",
-                                "ultimaMensagemPreview" to preview,
-                                "atualizadoEm" to ts
+                                "ultimaMensagem" to if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda",
+                                "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
                             batch.update(db.collection("grupos").document(grupoId), chatUpdates)
-
                             batch.commit().await()
-
                             Toast.makeText(this@ChatGrupoActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -583,15 +529,11 @@ class ChatGrupoActivity : AppCompatActivity() {
             }).dispatch()
     }
 
-    // ============================================================
-    // MOSTRAR OPÇÕES / MENU DE MÍDIA
-    // ============================================================
     private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, nomeRem: String, ehRem: Boolean) {
         lifecycleScope.launch {
             try {
-                val jaFav = db.collection("favoritos")
-                    .whereEqualTo("usuarioEmail", emailUsuario).whereEqualTo("mensagemId", msgId)
-                    .limit(1).get().await().let { !it.isEmpty }
+                val jaFav = db.collection("favoritos").whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId).limit(1).get().await().let { !it.isEmpty }
                 val opcoes = mutableListOf("💬 Responder")
                 opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
                 if (ehRem) opcoes.add("🗑 Apagar para todos")
@@ -615,9 +557,8 @@ class ChatGrupoActivity : AppCompatActivity() {
     ) {
         lifecycleScope.launch {
             try {
-                val jaFav = db.collection("favoritos")
-                    .whereEqualTo("usuarioEmail", emailUsuario).whereEqualTo("mensagemId", msgId)
-                    .limit(1).get().await().let { !it.isEmpty }
+                val jaFav = db.collection("favoritos").whereEqualTo("usuarioEmail", emailUsuario)
+                    .whereEqualTo("mensagemId", msgId).limit(1).get().await().let { !it.isEmpty }
                 val opcoes = mutableListOf("💬 Responder")
                 opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
                 opcoes.add("⬇ Baixar")
@@ -648,9 +589,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // FAVORITAR / DESFAVORITAR
-    // ============================================================
     private fun favoritar(msgId: String, texto: String, remetente: String, nomeRem: String, tipoMidia: String) {
         lifecycleScope.launch {
             try {
@@ -676,9 +614,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ABRIR GALERIA / ARQUIVO / APAGAR
-    // ============================================================
     private fun abrirGaleria(lista: List<Pair<String, String>>, pos: Int) {
         val urls = lista.map { it.second }.toTypedArray()
         val tipos = lista.map { it.first }.toTypedArray()
@@ -707,9 +642,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // REMOVER GRUPO ID DO USUÁRIO
-    // ============================================================
     private suspend fun removerGrupoIdDoUsuario(email: String, gid: String) {
         try {
             val ref = db.collection("usuarios").document(email)
@@ -719,9 +651,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
     }
 
-    // ============================================================
-    // RESPOSTA INFO
-    // ============================================================
     data class RespostaInfo(
         val msgId: String, val texto: String, val remetente: String,
         val nomeRemetente: String, val tipo: String
