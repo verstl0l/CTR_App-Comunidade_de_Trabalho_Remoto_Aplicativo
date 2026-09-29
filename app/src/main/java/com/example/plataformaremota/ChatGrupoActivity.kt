@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -36,9 +35,12 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var respostaAtiva: RespostaInfo? = null
     private var typingHelper: TypingIndicatorHelper? = null
 
-    // ✅ NOVO: adapter e recycler
     private lateinit var adapter: MensagemAdapter
     private lateinit var recycler: RecyclerView
+    private lateinit var layoutManager: LinearLayoutManager
+
+    private var paginacaoHelper: ChatPaginacaoHelper? = null
+    private var deveAutoScroll: Boolean = true
 
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) { r.data?.data?.let { enviarFoto(it) } }
@@ -137,12 +139,12 @@ class ChatGrupoActivity : AppCompatActivity() {
         })
 
         // ============================================================
-        // ✅ CONFIGURA RECYCLERVIEW + ADAPTER
+        // RECYCLERVIEW + ADAPTER
         // ============================================================
         recycler = findViewById(R.id.recyclerMensagensGrupo)
         adapter = MensagemAdapter(
             emailUsuario = emailUsuario,
-            outroEmail = "", // grupo não tem "outro" específico
+            outroEmail = "",
             contexto = this,
             callbacks = object : MensagemAdapter.Callbacks {
                 override fun onResponder(msgId: String, texto: String, remetente: String, tipo: String) {
@@ -173,23 +175,73 @@ class ChatGrupoActivity : AppCompatActivity() {
                 }
             }
         )
-        recycler.layoutManager = LinearLayoutManager(this).apply {
+
+        layoutManager = LinearLayoutManager(this).apply {
             stackFromEnd = true
         }
+        recycler.layoutManager = layoutManager
         recycler.adapter = adapter
 
-        // ✅ Carrega as mensagens (agora usando adapter)
-        carregarMensagens()
+        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(rv, dx, dy)
+
+                val total = adapter.itemCount
+                if (total == 0) return
+
+                val ultimoVisivel = layoutManager.findLastCompletelyVisibleItemPosition()
+                deveAutoScroll = (total - ultimoVisivel) <= 3
+
+                val primeiroVisivel = layoutManager.findFirstCompletelyVisibleItemPosition()
+                if (primeiroVisivel in 0..3) {
+                    paginacaoHelper?.carregarMaisAntigas()
+                }
+            }
+        })
+
+        paginacaoHelper = ChatPaginacaoHelper(
+            collection = "grupos",
+            documentId = grupoId,
+            pageSize = 50,
+            onListaAtualizada = { todas, inseriuNoTopo ->
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    adapter.submitList(todas) {
+                        if (!inseriuNoTopo && adapter.itemCount > 0) {
+                            recycler.scrollToPosition(adapter.itemCount - 1)
+                        }
+                    }
+                }
+            },
+            onNovasMensagens = { novas ->
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    if (novas.isEmpty()) return@runOnUiThread
+
+                    val estavaNoFim = deveAutoScroll
+                    val listaAtual = adapter.currentList.toMutableList()
+                    listaAtual.addAll(novas)
+
+                    adapter.submitList(listaAtual) {
+                        if (estavaNoFim && adapter.itemCount > 0) {
+                            recycler.scrollToPosition(adapter.itemCount - 1)
+                        }
+                    }
+                }
+            }
+        )
+        paginacaoHelper?.iniciar()
     }
 
     override fun onResume() { super.onResume(); marcarMensagensComoLidas() }
-
     override fun onPause() { super.onPause(); typingHelper?.limpar() }
 
     override fun onDestroy() {
         super.onDestroy()
         typingHelper?.destruir()
         typingHelper = null
+        paginacaoHelper?.destruir()
+        paginacaoHelper = null
     }
 
     // ============================================================
@@ -233,7 +285,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ADICIONAR RESPOSTA
+    // ADICIONAR / DISPARAR RESPOSTA
     // ============================================================
     private fun adicionarResposta(m: HashMap<String, Any>) {
         respostaAtiva?.let { r ->
@@ -244,9 +296,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // DISPARAR RESPOSTA
-    // ============================================================
     private fun dispararResposta(msgId: String, texto: String, remetente: String, nomeRem: String, tipo: String = "texto") {
         respostaAtiva = RespostaInfo(msgId, texto, remetente, nomeRem, tipo)
         findViewById<TextView>(R.id.txtRespondendoAGrupo).text = "Respondendo a $nomeRem"
@@ -418,29 +467,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ✅ CARREGAR MENSAGENS (agora com adapter)
-    // ============================================================
-    private fun carregarMensagens() {
-        if (isFinishing || isDestroyed) return
-
-        db.collection("grupos").document(grupoId).collection("mensagens")
-            .orderBy("timestamp", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshots, error ->
-                if (isFinishing || isDestroyed) return@addSnapshotListener
-                if (error != null || snapshots == null) return@addSnapshotListener
-
-                val mensagens = snapshots.documents.map { Mensagem.deDocumento(it) }
-
-                adapter.submitList(mensagens) {
-                    if (mensagens.isNotEmpty()) {
-                        recycler.scrollToPosition(mensagens.size - 1)
-                    }
-                }
-            }
-    }
-
-    // ============================================================
-    // MOSTRAR OPÇÕES DE MENSAGEM (texto)
+    // MOSTRAR OPÇÕES
     // ============================================================
     private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, nomeRem: String, ehRem: Boolean) {
         lifecycleScope.launch {
@@ -536,7 +563,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ABRIR GALERIA
+    // ABRIR GALERIA / ARQUIVO / APAGAR
     // ============================================================
     private fun abrirGaleria(lista: List<Pair<String, String>>, pos: Int) {
         val urls = lista.map { it.second }.toTypedArray()
@@ -546,9 +573,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         startActivity(i)
     }
 
-    // ============================================================
-    // ABRIR ARQUIVO EXTERNO
-    // ============================================================
     private fun abrirArquivoExterno(url: String, mime: String, nome: String) {
         try {
             val i = Intent(Intent.ACTION_VIEW).apply {
@@ -560,9 +584,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         } catch (e: Exception) { Toast.makeText(this, "Nenhum app", Toast.LENGTH_LONG).show() }
     }
 
-    // ============================================================
-    // APAGAR MENSAGEM
-    // ============================================================
     private fun apagarMensagem(msgId: String) {
         lifecycleScope.launch {
             try {
