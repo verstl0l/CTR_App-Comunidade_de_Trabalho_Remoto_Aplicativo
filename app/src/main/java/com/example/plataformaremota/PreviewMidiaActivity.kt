@@ -19,13 +19,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.gowtham.library.utils.TrimVideo
 import com.yalantis.ucrop.UCrop
 import java.io.File
 
 class PreviewMidiaActivity : AppCompatActivity() {
 
     private var uriAtual: Uri? = null
-    private var uriOriginal: Uri? = null   // ✅ guarda a original (nunca perde)
+    private var uriOriginal: Uri? = null
     private var tipo: String = "foto"
     private var chatTipo: String = ""
     private var chatId: String = ""
@@ -47,12 +48,11 @@ class PreviewMidiaActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val resultUri = data?.let { UCrop.getOutput(it) }
+            val resultUri = result.data?.let { UCrop.getOutput(it) }
             if (resultUri != null) {
                 Log.d("PREVIEW_MIDIA", "Crop OK: $resultUri")
                 uriAtual = resultUri
-                carregarFoto()  // recarrega com a nova URI
+                carregarFoto()
                 Toast.makeText(this, "Imagem cortada", Toast.LENGTH_SHORT).show()
             } else {
                 Log.e("PREVIEW_MIDIA", "Crop retornou URI nula")
@@ -62,7 +62,27 @@ class PreviewMidiaActivity : AppCompatActivity() {
             Log.e("PREVIEW_MIDIA", "Crop erro: ${error?.message}")
             Toast.makeText(this, "Erro ao cortar: ${error?.message}", Toast.LENGTH_LONG).show()
         }
-        // Se cancelou (RESULT_CANCELED), não faz nada
+    }
+
+    // ✅ Launcher do video-trimmer
+    private val abrirVideoTrimmer = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            if (data != null) {
+                val trimmedPath = TrimVideo.getTrimmedVideoPath(data)
+                if (!trimmedPath.isNullOrEmpty()) {
+                    Log.d("PREVIEW_MIDIA", "Trim OK: $trimmedPath")
+                    val novaUri = Uri.parse(trimmedPath)
+                    uriAtual = novaUri
+                    carregarVideo()
+                    Toast.makeText(this, "Vídeo cortado", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("PREVIEW_MIDIA", "Trim retornou path nulo")
+                }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +100,7 @@ class PreviewMidiaActivity : AppCompatActivity() {
             return
         }
         uriAtual = Uri.parse(uriString)
-        uriOriginal = uriAtual   // ✅ guarda a original
+        uriOriginal = uriAtual
 
         imgPreview = findViewById(R.id.imgPreview)
         videoPreview = findViewById(R.id.videoPreview)
@@ -106,12 +126,8 @@ class PreviewMidiaActivity : AppCompatActivity() {
         }
 
         btnEnviar.setOnClickListener { confirmarEnvio() }
-
-        // ✅ Botão de cortar (só funciona em foto)
         btnCortar.setOnClickListener { abrirCrop() }
-
-        // Trim de vídeo ainda não implementado (Fase 8.3)
-        btnEditarVideo.isEnabled = false
+        btnEditarVideo.setOnClickListener { abrirTrimVideo() }
     }
 
     // ============================================================
@@ -124,17 +140,13 @@ class PreviewMidiaActivity : AppCompatActivity() {
 
         carregarFoto()
 
-        // ✅ Botão de cortar visível e habilitado em foto
         btnCortar.visibility = View.VISIBLE
         btnCortar.isEnabled = true
         btnEditarVideo.visibility = View.GONE
     }
 
-    /** Carrega a imagem do uriAtual no imgPreview (reutilizado após o crop). */
     private fun carregarFoto() {
-        Glide.with(this)
-            .load(uriAtual)
-            .into(imgPreview)
+        Glide.with(this).load(uriAtual).into(imgPreview)
     }
 
     // ============================================================
@@ -145,6 +157,15 @@ class PreviewMidiaActivity : AppCompatActivity() {
         videoPreview.visibility = View.VISIBLE
         containerArquivo.visibility = View.GONE
 
+        carregarVideo()
+
+        btnCortar.visibility = View.GONE
+        btnEditarVideo.visibility = View.VISIBLE
+        btnEditarVideo.isEnabled = true
+    }
+
+    /** Carrega o vídeo do uriAtual (reutilizado após trim). */
+    private fun carregarVideo() {
         try {
             videoPreview.setVideoURI(uriAtual)
             videoPreview.setOnPreparedListener { mp ->
@@ -154,9 +175,6 @@ class PreviewMidiaActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("PREVIEW_MIDIA", "Erro video: ${e.message}")
         }
-
-        btnCortar.visibility = View.GONE
-        btnEditarVideo.visibility = View.VISIBLE
     }
 
     // ============================================================
@@ -203,16 +221,14 @@ class PreviewMidiaActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ✅ ABRIR O UCROP
+    // ABRIR UCROP (crop de imagem)
     // ============================================================
     private fun abrirCrop() {
         val origem = uriAtual ?: return
 
-        // Cria arquivo temporário pra uCrop salvar o resultado
         val pastaCache = File(cacheDir, "crop_temp").apply { mkdirs() }
         val arquivoSaida = File(pastaCache, "crop_${System.currentTimeMillis()}.jpg")
 
-        // Pega URI via FileProvider (precisa estar declarado no Manifest)
         val destinoUri = try {
             FileProvider.getUriForFile(this, "$packageName.fileprovider", arquivoSaida)
         } catch (e: Exception) {
@@ -221,27 +237,40 @@ class PreviewMidiaActivity : AppCompatActivity() {
             return
         }
 
-        // Configura o uCrop
         val opcoes = UCrop.Options().apply {
             setCompressionFormat(android.graphics.Bitmap.CompressFormat.JPEG)
             setCompressionQuality(90)
             setHideBottomControls(false)
-            setFreeStyleCropEnabled(true)   // ✅ crop livre
+            setFreeStyleCropEnabled(true)
             setToolbarTitle("Cortar imagem")
-            setToolbarColor(getColor(R.color.bg_primary))
-            setToolbarWidgetColor(getColor(R.color.text_primary))
-            setRootViewBackgroundColor(getColor(R.color.bg_primary))
+            setToolbarColor(androidx.core.content.ContextCompat.getColor(this@PreviewMidiaActivity, R.color.bg_primary))
+            setToolbarWidgetColor(androidx.core.content.ContextCompat.getColor(this@PreviewMidiaActivity, R.color.text_primary))
+            setRootViewBackgroundColor(androidx.core.content.ContextCompat.getColor(this@PreviewMidiaActivity, R.color.bg_primary))
         }
 
-        val intent = UCrop.of(origem, destinoUri)
-            .withOptions(opcoes)
-            .getIntent(this)
+        val intent = UCrop.of(origem, destinoUri).withOptions(opcoes).getIntent(this)
 
         try {
             abrirUCrop.launch(intent)
         } catch (e: Exception) {
             Log.e("PREVIEW_MIDIA", "Erro ao abrir uCrop: ${e.message}")
             Toast.makeText(this, "Erro ao abrir editor", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // ============================================================
+    // ✅ ABRIR VIDEO TRIMMER (trim de vídeo)
+    // ============================================================
+    private fun abrirTrimVideo() {
+        val origem = uriAtual ?: return
+
+        try {
+            TrimVideo.activity(origem.toString())
+                .setHideSeekBar(false)  // mostra barra de progresso
+                .start(this, abrirVideoTrimmer)
+        } catch (e: Exception) {
+            Log.e("PREVIEW_MIDIA", "Erro ao abrir trim: ${e.message}")
+            Toast.makeText(this, "Erro ao abrir editor de vídeo", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -253,7 +282,7 @@ class PreviewMidiaActivity : AppCompatActivity() {
 
         val resultado = Intent().apply {
             putExtra("acao", "enviar")
-            putExtra("uri", uriAtual.toString())   // ✅ manda a URI ATUAL (após crop, se houver)
+            putExtra("uri", uriAtual.toString())
             putExtra("tipo", tipo)
             putExtra("legenda", legenda)
         }

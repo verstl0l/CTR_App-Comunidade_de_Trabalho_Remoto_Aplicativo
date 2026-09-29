@@ -14,6 +14,6 @@
         android:gravity="center">
         <bitmap
             android:gravity="center"
-            android:src="@drawable/logo_ctr" />
+            android:src="@drawable/ic_launcher_foreground" />
     </item>
 </layer-list>
