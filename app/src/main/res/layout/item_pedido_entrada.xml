@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="@color/bg_surface"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Nome + Email -->
+        <TextView
+            android:id="@+id/txtNomeSolicitante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nome"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtEmailSolicitante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="email@x.com"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <!-- Profissão -->
+        <TextView
+            android:id="@+id/txtProfissaoSolicitante"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@color/bg_surface_hover"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="Profissão"
+            android:textColor="@color/accent"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <!-- Motivos -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="MOTIVOS"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtMotivos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Motivos..."
+            android:textColor="@color/text_tertiary"
+            android:textSize="14sp" />
+
+        <!-- Especialidades -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="ESPECIALIDADES"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtEspecialidades"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Especialidades..."
+            android:textColor="@color/text_tertiary"
+            android:textSize="14sp" />
+
+        <!-- Botões -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnVerPerfilSolicitante"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/bg_surface_hover"
+                android:text="PERFIL"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btnRecusarPedido"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/bg_surface_hover"
+                android:text="RECUSAR"
+                android:textColor="@color/status_erro"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:strokeColor="@color/status_erro"
+                app:strokeWidth="1dp" />
+
+            <Button
+                android:id="@+id/btnAceitarPedido"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:backgroundTint="@color/accent"
+                android:text="ACEITAR"
+                android:textColor="@color/accent_dark"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

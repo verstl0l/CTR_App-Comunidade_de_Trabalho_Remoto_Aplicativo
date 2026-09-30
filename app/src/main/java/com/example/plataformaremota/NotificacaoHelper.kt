@@ -141,6 +141,28 @@ object NotificacaoHelper {
         )
     }
 
+    // ============================================================
+    // ✅ NOVO — Pedido de entrada (usuário quer entrar)
+    // ============================================================
+    suspend fun notificarPedidoEntrada(
+        destinatario: String,
+        remetente: String,
+        nomeRemetente: String,
+        equipeId: String,
+        nomeEquipe: String
+    ) {
+        criar(
+            destinatario = destinatario,
+            tipo = "pedido_entrada",
+            titulo = "Novo pedido de entrada",
+            mensagem = "$nomeRemetente quer entrar em $nomeEquipe",
+            referenciaId = equipeId,
+            referenciaTipo = "equipe",
+            remetente = remetente,
+            nomeRemetente = nomeRemetente
+        )
+    }
+
     suspend fun notificarMembroAdicionado(
         destinatario: String,
         remetente: String,

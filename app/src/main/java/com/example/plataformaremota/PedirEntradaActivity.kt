@@ -41,6 +41,30 @@ class PedirEntradaActivity : AppCompatActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
+        // ✅ Verifica se já existe pedido pendente ao abrir a tela
+        lifecycleScope.launch {
+            try {
+                val pedidos = db.collection("pedidos_entrada")
+                    .whereEqualTo("equipeId", equipeId)
+                    .whereEqualTo("emailSolicitante", emailSolicitante)
+                    .whereEqualTo("status", "pendente")
+                    .get()
+                    .await()
+
+                if (!pedidos.isEmpty) {
+                    Toast.makeText(
+                        this@PedirEntradaActivity,
+                        "Você já enviou um pedido para esta equipe",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    btnEnviar.isEnabled = false
+                    btnEnviar.text = "PEDIDO JÁ ENVIADO"
+                }
+            } catch (e: Exception) {
+                Log.e("PEDIR_ENTRADA", "Erro ao verificar: ${e.message}")
+            }
+        }
+
         btnEnviar.setOnClickListener {
             val motivos = edtMotivos.text.toString().trim()
             val especialidades = edtEspecialidades.text.toString().trim()
@@ -55,25 +79,54 @@ class PedirEntradaActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
+                    // ✅ Re-verifica antes de enviar (evita duplicado por clique duplo)
+                    val jaExiste = db.collection("pedidos_entrada")
+                        .whereEqualTo("equipeId", equipeId)
+                        .whereEqualTo("emailSolicitante", emailSolicitante)
+                        .whereEqualTo("status", "pendente")
+                        .get()
+                        .await()
+
+                    if (!jaExiste.isEmpty) {
+                        Toast.makeText(
+                            this@PedirEntradaActivity,
+                            "Você já enviou um pedido para esta equipe",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        btnEnviar.isEnabled = true
+                        btnEnviar.text = "ENVIAR PEDIDO"
+                        return@launch
+                    }
+
+                    // Busca dados do solicitante
                     val usuarioDoc = db.collection("usuarios").document(emailSolicitante).get().await()
                     val nomeSolicitante = usuarioDoc.getString("nome") ?: "Usuário"
+                    val profissaoSolicitante = usuarioDoc.getString("profissao") ?: ""
 
+                    // Cria o pedido
                     val pedido = hashMapOf(
                         "equipeId" to equipeId,
                         "nomeEquipe" to nomeEquipe,
                         "emailSolicitante" to emailSolicitante,
                         "nomeSolicitante" to nomeSolicitante,
+                        "profissaoSolicitante" to profissaoSolicitante,
                         "motivos" to motivos,
                         "especialidades" to especialidades,
                         "status" to "pendente",
                         "criadoEm" to System.currentTimeMillis()
                     )
 
-                    //  ID determinístico: email_equipeId (evita pedidos duplicados)
-                    val pedidoId = "${emailSolicitante}_${equipeId}"
-                    db.collection("pedidos_entrada").document(pedidoId).set(pedido).await()
-
+                    db.collection("pedidos_entrada").add(pedido).await()
                     Log.d("PEDIR_ENTRADA", "✅ Pedido enviado!")
+
+                    // ✅ Notifica o dono da equipe
+                    notificarDono(
+                        equipeId = equipeId,
+                        nomeEquipe = nomeEquipe,
+                        nomeSolicitante = nomeSolicitante,
+                        emailSolicitante = emailSolicitante
+                    )
+
                     Toast.makeText(
                         this@PedirEntradaActivity,
                         "✅ Pedido enviado! Aguarde aprovação.",
@@ -84,14 +137,51 @@ class PedirEntradaActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
                     Log.e("PEDIR_ENTRADA", "Erro: ${e.message}")
-                    Toast.makeText(this@PedirEntradaActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@PedirEntradaActivity,
+                        "Erro: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                     btnEnviar.isEnabled = true
                     btnEnviar.text = "ENVIAR PEDIDO"
                 }
             }
         }
 
-        // ========== BOTTOM NAVIGATION ==========
+        configurarBottomNavigation()
+    }
+
+    // ============================================================
+    // ✅ NOTIFICAR O DONO DA EQUIPE
+    // ============================================================
+    private suspend fun notificarDono(
+        equipeId: String,
+        nomeEquipe: String,
+        nomeSolicitante: String,
+        emailSolicitante: String
+    ) {
+        try {
+            val equipeDoc = db.collection("equipes").document(equipeId).get().await()
+            val emailDono = equipeDoc.getString("criadorEmail") ?: return
+
+            NotificacaoHelper.notificarPedidoEntrada(
+                destinatario = emailDono,
+                remetente = emailSolicitante,
+                nomeRemetente = nomeSolicitante,
+                equipeId = equipeId,
+                nomeEquipe = nomeEquipe
+            )
+
+            Log.d("PEDIR_ENTRADA", "✅ Dono notificado: $emailDono")
+        } catch (e: Exception) {
+            Log.e("PEDIR_ENTRADA", "Erro ao notificar dono: ${e.message}")
+        }
+    }
+
+    // ============================================================
+    // BOTTOM NAVIGATION
+    // ============================================================
+    private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -100,12 +190,12 @@ class PedirEntradaActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_chat -> {                                    // ✅ CORRIGIDO: faltava
+                R.id.nav_chat -> {
                     startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }
-                R.id.nav_groups -> {                                  // ✅ CORRIGIDO: era produtos
+                R.id.nav_groups -> {
                     startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true

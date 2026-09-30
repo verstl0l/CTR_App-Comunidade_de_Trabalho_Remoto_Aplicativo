@@ -120,7 +120,7 @@ class NotificacoesActivity : BaseActivity() {
                                 NotificacaoHelper.marcarComoLida(notificacaoId)
                             }
                         }
-                        navegarParaNotificacao(referenciaTipo, referenciaId)
+                        navegarParaNotificacao(tipo, referenciaTipo, referenciaId)
                     }
 
                     // Long press: opcao de apagar
@@ -187,8 +187,18 @@ class NotificacoesActivity : BaseActivity() {
     // ============================================================
     // NAVEGAR PARA O DESTINO DA NOTIFICACAO
     // ============================================================
-    private fun navegarParaNotificacao(referenciaTipo: String, referenciaId: String) {
+    private fun navegarParaNotificacao(tipo: String, referenciaTipo: String, referenciaId: String) {
         // Convites de equipe vao para a tela dedicada
+        // Pedido de entrada → tela dedicada de pedidos
+        // Verifica se é pedido de entrada checando o tipo da notificação
+        // (a notificação tem tipo "pedido_entrada")
+        if (tipo == "pedido_entrada") {
+            val intent = Intent(this@NotificacoesActivity, PedidosPendentesActivity::class.java)
+            intent.putExtra("equipeId", referenciaId)
+            startActivity(intent)
+            return
+        }
+
         if (referenciaTipo == "equipe") {
             lifecycleScope.launch {
                 try {
