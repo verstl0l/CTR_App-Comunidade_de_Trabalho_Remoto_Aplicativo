@@ -21,6 +21,7 @@ import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -306,7 +307,9 @@ class ChatGrupoActivity : AppCompatActivity() {
         try {
             val docRef = db.collection("grupos").document(grupoId)
             val doc = docRef.get().await()
-            if (doc.exists() && !doc.contains("digitando")) docRef.update("digitando", emptyMap<String, Long>()).await()
+            if (doc.exists() && !doc.contains("digitando")) {
+                docRef.update("digitando", emptyMap<String, Long>()).await()
+            }
         } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
     }
 
@@ -359,6 +362,9 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -378,13 +384,23 @@ class ChatGrupoActivity : AppCompatActivity() {
                     "ultimaMensagem" to texto, "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                 )
                 chatUpdates.putAll(montarUpdatesNaoLidas())
-                batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+                // ✅ set com merge (permite criar se não existir)
+                batch.set(
+                    db.collection("grupos").document(grupoId),
+                    chatUpdates,
+                    SetOptions.merge()
+                )
                 batch.commit().await()
                 typingHelper?.limpar(); cancelarResposta()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarFoto(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_grupo/")
@@ -413,11 +429,17 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+                            batch.set(
+                                db.collection("grupos").document(grupoId),
+                                chatUpdates,
+                                SetOptions.merge()
+                            )
                             batch.commit().await()
                             Toast.makeText(this@ChatGrupoActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
-                        } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
@@ -427,6 +449,9 @@ class ChatGrupoActivity : AppCompatActivity() {
             }).dispatch()
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarVideo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
@@ -456,11 +481,17 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+                            batch.set(
+                                db.collection("grupos").document(grupoId),
+                                chatUpdates,
+                                SetOptions.merge()
+                            )
                             batch.commit().await()
                             Toast.makeText(this@ChatGrupoActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
-                        } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
@@ -470,6 +501,9 @@ class ChatGrupoActivity : AppCompatActivity() {
             }).dispatch()
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarArquivo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
@@ -515,11 +549,17 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.update(db.collection("grupos").document(grupoId), chatUpdates)
+                            batch.set(
+                                db.collection("grupos").document(grupoId),
+                                chatUpdates,
+                                SetOptions.merge()
+                            )
                             batch.commit().await()
                             Toast.makeText(this@ChatGrupoActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
-                        } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {

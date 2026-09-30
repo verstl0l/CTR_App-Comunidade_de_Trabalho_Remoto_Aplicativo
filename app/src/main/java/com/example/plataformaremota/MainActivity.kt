@@ -68,6 +68,9 @@ class MainActivity : BaseActivity() {
         // ✅ MIGRAÇÃO: popula chatsIds e gruposIds para usuários antigos
         migrarDenormalizacao()
 
+        // ✅ MIGRAÇÃO: ID determinístico em membros_equipe (Onda 0)
+        migrarMembrosEquipeDeterministicos()
+
         // ✅ Salva token OneSignal
         salvarTokenOneSignal()
     }
@@ -128,6 +131,83 @@ class MainActivity : BaseActivity() {
 
             } catch (e: Exception) {
                 Log.e("MIGRACAO", "Erro: ${e.message}")
+            }
+        }
+    }
+
+    // ============================================================
+    // ✅ ONDA 0 — Migração: membros_equipe com ID determinístico
+    // ============================================================
+    // Este script roda UMA VEZ e converte todos os docs de
+    // membros_equipe com ID aleatório (do .add()) para o padrão
+    // determinístico {email}_{equipeId}.
+    //
+    // Isso é necessário porque as Firestore Rules usam
+    // exists(/membros_equipe/{email}_{equipeId}) para verificar
+    // se o usuário é membro — e IDs aleatórios quebram essa checagem.
+    //
+    // ⚠️ Depois de rodar 1x em produção, comente a chamada
+    //    em onCreate (linha "migrarMembrosEquipeDeterministicos()")
+    // ============================================================
+    private fun migrarMembrosEquipeDeterministicos() {
+        lifecycleScope.launch {
+            try {
+                val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
+                val jaMigrou = prefs.getBoolean("membros_migrados_v2", false)
+                if (jaMigrou) {
+                    Log.d("MIGRACAO_MEMBROS", "Já migrado neste dispositivo, pulando")
+                    return@launch
+                }
+
+                val emailLogado = auth.currentUser?.email ?: return@launch
+                Log.d("MIGRACAO_MEMBROS", "Iniciando migração para $emailLogado...")
+
+                // ✅ Só busca os membros do usuário logado
+                val membros = db.collection("membros_equipe")
+                    .whereEqualTo("email", emailLogado)
+                    .get()
+                    .await()
+
+                var migrados = 0
+                var jaOk = 0
+                var erros = 0
+
+                membros.documents.forEach { doc ->
+                    try {
+                        val email = doc.getString("email")?.trim()?.lowercase() ?: return@forEach
+                        val equipeId = doc.getString("equipeId")?.trim() ?: return@forEach
+                        val idEsperado = "${email}_${equipeId}"
+
+                        if (doc.id == idEsperado) {
+                            jaOk++
+                            return@forEach
+                        }
+
+                        // 1. Cria com ID determinístico
+                        val dados = doc.data ?: emptyMap<String, Any>()
+                        db.collection("membros_equipe").document(idEsperado)
+                            .set(dados).await()
+
+                        // 2. Deleta o antigo (é do usuário logado, então a rule permite)
+                        doc.reference.delete().await()
+
+                        migrados++
+                        Log.d("MIGRACAO_MEMBROS", "✅ ${doc.id} -> $idEsperado")
+
+                    } catch (e: Exception) {
+                        erros++
+                        Log.e("MIGRACAO_MEMBROS", "Erro em ${doc.id}: ${e.message}")
+                    }
+                }
+
+                prefs.edit().putBoolean("membros_migrados_v2", true).apply()
+
+                Log.d(
+                    "MIGRACAO_MEMBROS",
+                    "✅ Migração completa: $migrados migrados, $jaOk já OK, $erros erros"
+                )
+            } catch (e: Exception) {
+                Log.e("MIGRACAO_MEMBROS", "Erro geral: ${e.message}")
             }
         }
     }

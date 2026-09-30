@@ -508,7 +508,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                         db.collection("pedidos_entrada").document(pedidoId)
                                             .update("status", "aceito").await()
 
-                                        // 2. Adiciona como membro da equipe
+                                        // 2. Adiciona como membro com ID determinístico
                                         val membro = hashMapOf(
                                             "equipeId" to equipeId,
                                             "email" to emailSol,
@@ -516,7 +516,9 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                             "funcao" to "membro",
                                             "entrouEm" to System.currentTimeMillis()
                                         )
-                                        db.collection("membros_equipe").add(membro).await()
+                                        // ✅ ID determinístico
+                                        val membroId = "${emailSol}_${equipeId}"
+                                        db.collection("membros_equipe").document(membroId).set(membro).await()
 
                                         // 3. Notifica o solicitante que foi aceito
                                         NotificacaoHelper.notificarPedidoAceito(

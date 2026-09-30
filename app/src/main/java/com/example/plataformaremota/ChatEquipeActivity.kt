@@ -21,6 +21,7 @@ import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -44,7 +45,6 @@ class ChatEquipeActivity : AppCompatActivity() {
     private var paginacaoHelper: ChatPaginacaoHelper? = null
     private var deveAutoScroll: Boolean = true
 
-    // ✅ Launcher do preview
     private val abrirPreview = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) {
             val acao = r.data?.getStringExtra("acao")
@@ -63,7 +63,6 @@ class ChatEquipeActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ Selecionadores agora abrem o preview
     private val selecionarImagem = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) {
             val uri = r.data?.data
@@ -309,7 +308,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         try {
             val docRef = db.collection("chats_equipe").document(equipeId)
             val doc = docRef.get().await()
-            if (doc.exists() && !doc.contains("digitando")) docRef.update("digitando", emptyMap<String, Long>()).await()
+            if (doc.exists() && !doc.contains("digitando")) {
+                docRef.update("digitando", emptyMap<String, Long>()).await()
+            }
         } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro: ${e.message}") }
     }
 
@@ -337,6 +338,9 @@ class ChatEquipeActivity : AppCompatActivity() {
         findViewById<EditText>(R.id.edtMensagemEquipe).requestFocus()
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -356,13 +360,23 @@ class ChatEquipeActivity : AppCompatActivity() {
                     "ultimaMensagem" to texto, "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                 )
                 chatUpdates.putAll(montarUpdatesNaoLidas())
-                batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+                // ✅ set com merge (permite criar se não existir)
+                batch.set(
+                    db.collection("chats_equipe").document(equipeId),
+                    chatUpdates,
+                    SetOptions.merge()
+                )
                 batch.commit().await()
                 typingHelper?.limpar(); cancelarResposta()
-            } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarFoto(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_equipe/")
@@ -391,11 +405,17 @@ class ChatEquipeActivity : AppCompatActivity() {
                                 "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+                            batch.set(
+                                db.collection("chats_equipe").document(equipeId),
+                                chatUpdates,
+                                SetOptions.merge()
+                            )
                             batch.commit().await()
                             Toast.makeText(this@ChatEquipeActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
-                        } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
@@ -405,6 +425,9 @@ class ChatEquipeActivity : AppCompatActivity() {
             }).dispatch()
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarVideo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
@@ -434,11 +457,17 @@ class ChatEquipeActivity : AppCompatActivity() {
                                 "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+                            batch.set(
+                                db.collection("chats_equipe").document(equipeId),
+                                chatUpdates,
+                                SetOptions.merge()
+                            )
                             batch.commit().await()
                             Toast.makeText(this@ChatEquipeActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
-                        } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
@@ -448,6 +477,9 @@ class ChatEquipeActivity : AppCompatActivity() {
             }).dispatch()
     }
 
+    // ============================================================
+    // ✅ CORRIGIDO: set + merge
+    // ============================================================
     private fun enviarArquivo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
@@ -493,11 +525,17 @@ class ChatEquipeActivity : AppCompatActivity() {
                                 "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                             )
                             chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.set(db.collection("chats_equipe").document(equipeId), chatUpdates)
+                            batch.set(
+                                db.collection("chats_equipe").document(equipeId),
+                                chatUpdates,
+                                SetOptions.merge()
+                            )
                             batch.commit().await()
                             Toast.makeText(this@ChatEquipeActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
-                        } catch (e: Exception) { Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {

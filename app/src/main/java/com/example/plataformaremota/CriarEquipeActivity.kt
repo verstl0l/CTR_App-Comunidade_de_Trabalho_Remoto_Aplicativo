@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.DocumentSnapshot
 
 class CriarEquipeActivity : AppCompatActivity() {
 
@@ -57,7 +56,7 @@ class CriarEquipeActivity : AppCompatActivity() {
                 .addOnSuccessListener { documentReference ->
                     Log.d("CRIAR_EQUIPE", "✅ Equipe criada! ID: ${documentReference.id}")
 
-                    // Adiciona o criador como administrador na coleção de membros
+                    // ✅ Adiciona o criador como administrador na coleção de membros
                     val membro = hashMapOf(
                         "equipeId" to documentReference.id,
                         "email" to email,
@@ -66,8 +65,12 @@ class CriarEquipeActivity : AppCompatActivity() {
                         "entrouEm" to System.currentTimeMillis()
                     )
 
+                    // ✅ ONDA 0 — ID determinístico: {email}_{equipeId}
+                    val membroId = "${email}_${documentReference.id}"
+
                     db.collection("membros_equipe")
-                        .add(membro)
+                        .document(membroId)
+                        .set(membro)
                         .addOnSuccessListener {
                             Toast.makeText(this, "✅ Equipe criada com sucesso!", Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this, produtos::class.java))
@@ -75,7 +78,11 @@ class CriarEquipeActivity : AppCompatActivity() {
                         }
                         .addOnFailureListener { e ->
                             Log.e("CRIAR_EQUIPE", "Erro ao adicionar membro: ${e.message}")
-                            Toast.makeText(this, "Equipe criada, mas erro ao adicionar membro", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                this,
+                                "Equipe criada, mas erro ao adicionar membro",
+                                Toast.LENGTH_LONG
+                            ).show()
                             startActivity(Intent(this, produtos::class.java))
                             finish()
                         }

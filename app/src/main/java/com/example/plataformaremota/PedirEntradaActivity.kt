@@ -69,7 +69,9 @@ class PedirEntradaActivity : AppCompatActivity() {
                         "criadoEm" to System.currentTimeMillis()
                     )
 
-                    db.collection("pedidos_entrada").add(pedido).await()
+                    //  ID determinístico: email_equipeId (evita pedidos duplicados)
+                    val pedidoId = "${emailSolicitante}_${equipeId}"
+                    db.collection("pedidos_entrada").document(pedidoId).set(pedido).await()
 
                     Log.d("PEDIR_ENTRADA", "✅ Pedido enviado!")
                     Toast.makeText(

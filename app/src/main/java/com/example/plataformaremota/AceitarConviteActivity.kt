@@ -133,7 +133,9 @@ class AceitarConviteActivity : AppCompatActivity() {
                         "funcao" to "membro",
                         "entrouEm" to System.currentTimeMillis()
                     )
-                    db.collection("membros_equipe").add(membro).await()
+                    // ID determinístico
+                    val membroId = "${emailUsuario}_${equipeId}"
+                    db.collection("membros_equipe").document(membroId).set(membro).await()
                 }
 
                 Toast.makeText(
