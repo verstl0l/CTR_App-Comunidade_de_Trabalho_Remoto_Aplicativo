@@ -27,6 +27,7 @@
         android:orientation="vertical"
         android:padding="8dp">
 
+
         <TextView
             android:id="@+id/txtNomeFoto"
             android:layout_width="wrap_content"
@@ -55,6 +56,16 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/txtHoraMensagemFoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="4dp"
+            android:text=""
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp" />
 
     </LinearLayout>
 

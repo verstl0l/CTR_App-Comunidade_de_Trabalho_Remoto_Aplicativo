@@ -258,6 +258,22 @@ class ChatActivity : AppCompatActivity() {
             outroEmail = outroEmail,
             contexto = this,
             callbacks = object : MensagemAdapter.Callbacks {
+                override fun onInfoMensagem(mensagem: Mensagem) {
+                    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", java.util.Locale("pt", "BR"))
+                    val info = buildString {
+                        append("Enviada: ${sdf.format(java.util.Date(mensagem.timestamp))}\n")
+                        append("Lida: ${if (mensagem.lida) "✅" else "❌"}\n")
+                        append("Tipo: ${mensagem.tipo}\n")
+                        if (mensagem.nomeArquivo != null) append("Arquivo: ${mensagem.nomeArquivo}\n")
+                        if (mensagem.tamanhoArquivo > 0) append("Tamanho: ${mensagem.tamanhoArquivo} bytes\n")
+                        if (mensagem.respostaPara != null) append("Resposta a: ${mensagem.respostaPara.nomeRemetente}\n")
+                    }
+                    androidx.appcompat.app.AlertDialog.Builder(this@ChatActivity)
+                        .setTitle("ℹ️ Informações da mensagem")
+                        .setMessage(info)
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
                 override fun onResponder(msgId: String, texto: String, remetente: String, tipo: String) {
                     dispararResposta(msgId, texto, remetente, tipo)
                 }
@@ -318,7 +334,7 @@ class ChatActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
 
-                    adapter.submitList(todas) {
+                    adapter.submitList(ItemChat.deMensagens(todas)) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) {
                             recycler.scrollToPosition(adapter.itemCount - 1)
                         }
@@ -329,16 +345,17 @@ class ChatActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
                     if (novas.isEmpty()) return@runOnUiThread
-
                     val estavaNoFim = deveAutoScroll
 
-                    val listaAtual = adapter.currentList.toMutableList()
-                    listaAtual.addAll(novas)
+                    val mensagensAtuais = adapter.currentList
+                        .filterIsInstance<ItemChat.MensagemItem>()
+                        .map { it.mensagem }
+                        .toMutableList()
 
-                    adapter.submitList(listaAtual) {
-                        if (estavaNoFim && adapter.itemCount > 0) {
+                    mensagensAtuais.addAll(novas)
+                    adapter.submitList(ItemChat.deMensagens(mensagensAtuais)) {
+                        if (estavaNoFim && adapter.itemCount > 0)
                             recycler.scrollToPosition(adapter.itemCount - 1)
-                        }
                     }
                 }
             }
