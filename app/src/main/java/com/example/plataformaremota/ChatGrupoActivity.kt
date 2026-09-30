@@ -596,6 +596,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                     .whereEqualTo("mensagemId", msgId).limit(1).get().await().let { !it.isEmpty }
                 val opcoes = mutableListOf("💬 Responder")
                 opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                opcoes.add("ℹ️ Informações")
                 if (ehRem) opcoes.add("🗑 Apagar para todos")
 
                 AlertDialog.Builder(this@ChatGrupoActivity).setTitle("Opções")
@@ -604,6 +605,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             "💬 Responder" -> dispararResposta(msgId, texto, remetente, nomeRem, "texto")
                             "⭐ Favoritar" -> favoritar(msgId, texto, remetente, nomeRem, "texto")
                             "⭐ Remover dos favoritos" -> desfavoritar(msgId)
+                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
                             "🗑 Apagar para todos" -> apagarMensagem(msgId)
                         }
                     }.show()
@@ -621,6 +623,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                     .whereEqualTo("mensagemId", msgId).limit(1).get().await().let { !it.isEmpty }
                 val opcoes = mutableListOf("💬 Responder")
                 opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                opcoes.add("ℹ️ Informações")
                 opcoes.add("⬇ Baixar")
                 if (tipo == "arquivo") opcoes.add("📂 Abrir")
                 if (ehRem) opcoes.add("🗑 Apagar")
@@ -631,6 +634,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                             "💬 Responder" -> dispararResposta(msgId, texto, remetente, nomeRem, tipo)
                             "⭐ Favoritar" -> favoritar(msgId, texto, remetente, nomeRem, tipo)
                             "⭐ Remover dos favoritos" -> desfavoritar(msgId)
+                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
                             "⬇ Baixar" -> Toast.makeText(this@ChatGrupoActivity, "⬇ Baixando...", Toast.LENGTH_SHORT).show()
                             "📂 Abrir" -> {
                                 try {
@@ -709,6 +713,47 @@ class ChatGrupoActivity : AppCompatActivity() {
             val ids = (doc.get("gruposIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
             if (gid in ids) ref.update("gruposIds", ids - gid).await()
         } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
+    }
+
+    // ============================================================
+// ABRIR INFO DA MENSAGEM
+// ============================================================
+    private fun abrirInfoMensagem(msgId: String) {
+        val msg = adapter.currentList
+            .filterIsInstance<ItemChat.MensagemItem>()
+            .find { it.mensagem.id == msgId }
+            ?.mensagem
+
+        if (msg == null) {
+            Toast.makeText(this, "Mensagem não encontrada", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val sdf = java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", java.util.Locale("pt", "BR"))
+        val info = buildString {
+            append("Enviada: ${sdf.format(java.util.Date(msg.timestamp))}\n")
+            append("Lida: ${if (msg.lida) "✅" else "❌"}\n")
+            append("Tipo: ${msg.tipo}\n")
+            if (msg.nomeArquivo != null) append("Arquivo: ${msg.nomeArquivo}\n")
+            if (msg.tamanhoArquivo > 0) {
+                append("Tamanho: ${formatarTamanhoInfo(msg.tamanhoArquivo)}\n")
+            }
+            if (msg.respostaPara != null) {
+                append("Resposta a: ${msg.respostaPara.nomeRemetente}\n")
+            }
+        }
+        AlertDialog.Builder(this)
+            .setTitle("ℹ️ Informações da mensagem")
+            .setMessage(info)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun formatarTamanhoInfo(b: Long): String = when {
+        b < 1024 -> "$b B"
+        b < 1024 * 1024 -> "${b / 1024} KB"
+        b < 1024 * 1024 * 1024 -> String.format("%.1f MB", b / (1024.0 * 1024.0))
+        else -> String.format("%.1f GB", b / (1024.0 * 1024.0 * 1024.0))
     }
 
     data class RespostaInfo(

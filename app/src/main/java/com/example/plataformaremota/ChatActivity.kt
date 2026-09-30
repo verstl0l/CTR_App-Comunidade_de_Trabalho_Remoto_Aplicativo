@@ -701,6 +701,7 @@ class ChatActivity : AppCompatActivity() {
                     .limit(1).get().await().let { !it.isEmpty }
                 val opcoes = mutableListOf("💬 Responder")
                 opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                opcoes.add("ℹ️ Informações")
                 if (ehRem) opcoes.add("🗑 Apagar para todos")
 
                 AlertDialog.Builder(this@ChatActivity).setTitle("Opções")
@@ -709,6 +710,7 @@ class ChatActivity : AppCompatActivity() {
                             "💬 Responder" -> dispararResposta(msgId, texto, remetente, "texto")
                             "⭐ Favoritar" -> favoritar(msgId, texto, remetente, "texto")
                             "⭐ Remover dos favoritos" -> desfavoritar(msgId)
+                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
                             "🗑 Apagar para todos" -> apagarMensagem(msgId)
                         }
                     }.show()
@@ -730,6 +732,7 @@ class ChatActivity : AppCompatActivity() {
                     .limit(1).get().await().let { !it.isEmpty }
                 val opcoes = mutableListOf("💬 Responder")
                 opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
+                opcoes.add("ℹ️ Informações")
                 opcoes.add("⬇ Baixar")
                 if (tipo == "arquivo") opcoes.add("📂 Abrir")
                 if (ehRem) opcoes.add("🗑 Apagar")
@@ -740,6 +743,7 @@ class ChatActivity : AppCompatActivity() {
                             "💬 Responder" -> dispararResposta(msgId, texto, remetente, tipo)
                             "⭐ Favoritar" -> favoritar(msgId, texto, remetente, tipo)
                             "⭐ Remover dos favoritos" -> desfavoritar(msgId)
+                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
                             "⬇ Baixar" -> {
                                 val nome = when (tipo) {
                                     "foto" -> "CTR_foto_${System.currentTimeMillis()}.jpg"
@@ -760,7 +764,6 @@ class ChatActivity : AppCompatActivity() {
             } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
     }
-
     // ============================================================
     // FAVORITAR / DESFAVORITAR
     // ============================================================
@@ -836,6 +839,47 @@ class ChatActivity : AppCompatActivity() {
                 Toast.makeText(this@ChatActivity, "Apagada", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
         }
+    }
+
+    // ============================================================
+// ABRIR INFO DA MENSAGEM
+// ============================================================
+    private fun abrirInfoMensagem(msgId: String) {
+        val msg = adapter.currentList
+            .filterIsInstance<ItemChat.MensagemItem>()
+            .find { it.mensagem.id == msgId }
+            ?.mensagem
+
+        if (msg == null) {
+            Toast.makeText(this, "Mensagem não encontrada", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val sdf = java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", java.util.Locale("pt", "BR"))
+        val info = buildString {
+            append("Enviada: ${sdf.format(java.util.Date(msg.timestamp))}\n")
+            append("Lida: ${if (msg.lida) "✅" else "❌"}\n")
+            append("Tipo: ${msg.tipo}\n")
+            if (msg.nomeArquivo != null) append("Arquivo: ${msg.nomeArquivo}\n")
+            if (msg.tamanhoArquivo > 0) {
+                append("Tamanho: ${formatarTamanhoInfo(msg.tamanhoArquivo)}\n")
+            }
+            if (msg.respostaPara != null) {
+                append("Resposta a: ${msg.respostaPara.nomeRemetente}\n")
+            }
+        }
+        AlertDialog.Builder(this)
+            .setTitle("ℹ️ Informações da mensagem")
+            .setMessage(info)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun formatarTamanhoInfo(b: Long): String = when {
+        b < 1024 -> "$b B"
+        b < 1024 * 1024 -> "${b / 1024} KB"
+        b < 1024 * 1024 * 1024 -> String.format("%.1f MB", b / (1024.0 * 1024.0))
+        else -> String.format("%.1f GB", b / (1024.0 * 1024.0 * 1024.0))
     }
 
     // ============================================================
