@@ -187,7 +187,7 @@ Status: Nao iniciada.
 - [x] Zero crashes conhecidos
 - [x] Rules de seguranca consistentes
 - [x] Real-time em telas criticas
-- [ ] Cobertura de testes maior que 30%
+- [x] Cobertura de testes maior que 30%
 - [x] CI/CD funcionando
 - [ ] Documentacao de API
 
