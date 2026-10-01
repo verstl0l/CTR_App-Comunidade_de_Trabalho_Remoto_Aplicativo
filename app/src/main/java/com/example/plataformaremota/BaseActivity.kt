@@ -3,6 +3,7 @@ package com.example.plataformaremota
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
@@ -13,9 +14,15 @@ import kotlinx.coroutines.launch
  *   - Navegacao entre as 5 telas principais
  *   - Badge de chat e de notificacoes
  *
- * Uso: herde de BaseActivity e chame configurarBottomNavigation(R.id.nav_xxx)
+ * Modo da barra de status: VISÍVEL mas sem sobrepor o conteúdo.
  */
 abstract class BaseActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // ✅ Opção B: barra de status visível, mas conteúdo respeita
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+    }
 
     /**
      * Configura o BottomNavigationView de forma padronizada.

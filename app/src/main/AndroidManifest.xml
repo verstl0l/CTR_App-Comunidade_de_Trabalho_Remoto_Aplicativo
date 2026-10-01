@@ -4,10 +4,11 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".CTRApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -24,27 +25,26 @@
             android:theme="@style/Theme.CTR">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- TELAS COM TECLADO (adjustPan) -->
+        <!-- ✅ TELAS COM TECLADO (adjustResize — teclado empurra o conteúdo) -->
         <activity
             android:name=".LoginActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CadastroActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CriarEquipeActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".GerenciarEquipeActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CriarTrabalhoActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- TELAS SEM TECLADO -->
         <activity android:name=".MainActivity" />
@@ -56,11 +56,11 @@
         <activity
             android:name=".ConvidarTrabalhoActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".PedirEntradaActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".EntregarTrabalhoActivity"
             android:exported="false"
@@ -73,11 +73,22 @@
         <activity
             android:name=".BuscarEquipesActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ✅ CHATS — adjustResize (teclado empurra o input) -->
         <activity
             android:name=".ChatActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ChatEquipeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ChatGrupoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".ListaConversasActivity"
             android:exported="false"
@@ -87,15 +98,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ChatEquipeActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".GruposActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ChatGrupoActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -143,7 +146,7 @@
             android:theme="@style/VideoTrimmerTheme"
             tools:replace="android:theme" />
 
-        <!-- ANEXOS DE TRABALHO -->
+        <!-- ✅ NOVAS TELAS -->
         <activity
             android:name=".AnexosTrabalhoActivity"
             android:exported="false"
@@ -161,6 +164,10 @@
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".PedidosPendentesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -171,11 +178,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity
-            android:name=".PedidosPendentesActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

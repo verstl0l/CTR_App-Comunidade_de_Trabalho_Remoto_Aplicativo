@@ -117,16 +117,71 @@ class ChatActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
-        outroEmail = intent.getStringExtra("outroEmail") ?: ""
-        chatId = intent.getStringExtra("chatId") ?: ""
+        outroEmail = intent.getStringExtra("outroEmail")?.trim()?.lowercase() ?: ""
+        chatId = intent.getStringExtra("chatId")?.trim() ?: ""
 
-        if (chatId.isEmpty()) {
+        //  Validação: se email do usuário está vazio, algo está errado
+        if (emailUsuario.isEmpty()) {
+            Toast.makeText(this, "Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        //  Validação: precisa ter pelo menos OUTRO EMAIL ou CHAT ID
+        if (outroEmail.isEmpty() && chatId.isEmpty()) {
+            Log.e("CHAT", "ChatActivity aberta sem outroEmail e sem chatId")
+            Toast.makeText(this, "Conversa inválida", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        //  Se tem chatId mas não tem outroEmail, busca o outro participante
+        if (outroEmail.isEmpty() && chatId.isNotEmpty()) {
             lifecycleScope.launch {
+                try {
+                    val chatDoc = db.collection("chats").document(chatId).get().await()
+                    if (!chatDoc.exists()) {
+                        Toast.makeText(this@ChatActivity, "Conversa não encontrada", Toast.LENGTH_SHORT).show()
+                        finish()
+                        return@launch
+                    }
+
+                    val participantes = chatDoc.get("participantes") as? List<*>
+                    val outro = participantes?.firstOrNull { it != emailUsuario } as? String
+
+                    if (outro.isNullOrEmpty()) {
+                        Toast.makeText(this@ChatActivity, "Conversa inválida", Toast.LENGTH_SHORT).show()
+                        finish()
+                        return@launch
+                    }
+
+                    outroEmail = outro.lowercase()
+                    if (!isFinishing && !isDestroyed) configurarUI()
+                } catch (e: Exception) {
+                    Log.e("CHAT", "Erro ao buscar outro participante: ${e.message}")
+                    Toast.makeText(this@ChatActivity, "Erro ao abrir conversa", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+            }
+            return
+        }
+
+        //  Se tem chatId, abre direto
+        if (chatId.isNotEmpty()) {
+            configurarUI()
+            return
+        }
+
+        //  Se só tem outroEmail, cria ou busca o chat
+        lifecycleScope.launch {
+            try {
                 chatId = criarOuBuscarChat()
                 if (!isFinishing && !isDestroyed) configurarUI()
+            } catch (e: Exception) {
+                Log.e("CHAT", "Erro ao criar chat: ${e.message}")
+                Toast.makeText(this@ChatActivity, "Erro ao abrir conversa: ${e.message}", Toast.LENGTH_LONG).show()
+                finish()
             }
-        } else {
-            configurarUI()
         }
     }
 
@@ -185,16 +240,26 @@ class ChatActivity : AppCompatActivity() {
         btnVoltar.setOnClickListener { finish() }
 
         btnVerPerfil.setOnClickListener {
+            if (outroEmail.isEmpty()) {
+                Toast.makeText(this, "Não é possível ver o perfil", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val i = Intent(this, PerfilUsuarioActivity::class.java)
             i.putExtra("emailOutro", outroEmail)
             startActivity(i)
         }
 
-        lifecycleScope.launch {
-            try {
-                val u = db.collection("usuarios").document(outroEmail).get().await()
-                txtNomeOutro.text = u.getString("nome") ?: outroEmail
-            } catch (e: Exception) { txtNomeOutro.text = outroEmail }
+        if (outroEmail.isNotEmpty()) {
+            lifecycleScope.launch {
+                try {
+                    val u = db.collection("usuarios").document(outroEmail).get().await()
+                    txtNomeOutro.text = u.getString("nome") ?: outroEmail
+                } catch (e: Exception) {
+                    txtNomeOutro.text = outroEmail
+                }
+            }
+        } else {
+            txtNomeOutro.text = "Conversa"
         }
 
         verificarBloqueio(edtMensagem, btnEnviar)
@@ -258,22 +323,7 @@ class ChatActivity : AppCompatActivity() {
             outroEmail = outroEmail,
             contexto = this,
             callbacks = object : MensagemAdapter.Callbacks {
-                override fun onInfoMensagem(mensagem: Mensagem) {
-                    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", java.util.Locale("pt", "BR"))
-                    val info = buildString {
-                        append("Enviada: ${sdf.format(java.util.Date(mensagem.timestamp))}\n")
-                        append("Lida: ${if (mensagem.lida) "✅" else "❌"}\n")
-                        append("Tipo: ${mensagem.tipo}\n")
-                        if (mensagem.nomeArquivo != null) append("Arquivo: ${mensagem.nomeArquivo}\n")
-                        if (mensagem.tamanhoArquivo > 0) append("Tamanho: ${mensagem.tamanhoArquivo} bytes\n")
-                        if (mensagem.respostaPara != null) append("Resposta a: ${mensagem.respostaPara.nomeRemetente}\n")
-                    }
-                    androidx.appcompat.app.AlertDialog.Builder(this@ChatActivity)
-                        .setTitle("ℹ️ Informações da mensagem")
-                        .setMessage(info)
-                        .setPositiveButton("OK", null)
-                        .show()
-                }
+
                 override fun onResponder(msgId: String, texto: String, remetente: String, tipo: String) {
                     dispararResposta(msgId, texto, remetente, tipo)
                 }
@@ -835,9 +885,24 @@ class ChatActivity : AppCompatActivity() {
     private fun apagarMensagem(msgId: String) {
         lifecycleScope.launch {
             try {
-                db.collection("chats").document(chatId).collection("mensagens").document(msgId).delete().await()
-                Toast.makeText(this@ChatActivity, "Apagada", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                db.collection("chats").document(chatId).collection("mensagens").document(msgId)
+                    .update(
+                        mapOf(
+                            "apagada" to true,
+                            "texto" to "🚫 Mensagem apagada",
+                            "fotoUrl" to null,
+                            "videoUrl" to null,
+                            "arquivoUrl" to null,
+                            "nomeArquivo" to null,
+                            "tamanhoArquivo" to null,
+                            "mimeType" to null,
+                            "respostaPara" to null
+                        )
+                    ).await()
+                Toast.makeText(this@ChatActivity, "Mensagem apagada", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 

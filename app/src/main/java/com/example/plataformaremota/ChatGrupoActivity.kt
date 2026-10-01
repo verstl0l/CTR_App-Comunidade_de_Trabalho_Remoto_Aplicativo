@@ -194,22 +194,7 @@ class ChatGrupoActivity : AppCompatActivity() {
             outroEmail = "",
             contexto = this,
             callbacks = object : MensagemAdapter.Callbacks {
-                override fun onInfoMensagem(mensagem: Mensagem) {
-                    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", java.util.Locale("pt", "BR"))
-                    val info = buildString {
-                        append("Enviada: ${sdf.format(java.util.Date(mensagem.timestamp))}\n")
-                        append("Lida: ${if (mensagem.lida) "✅" else "❌"}\n")
-                        append("Tipo: ${mensagem.tipo}\n")
-                        if (mensagem.nomeArquivo != null) append("Arquivo: ${mensagem.nomeArquivo}\n")
-                        if (mensagem.tamanhoArquivo > 0) append("Tamanho: ${mensagem.tamanhoArquivo} bytes\n")
-                        if (mensagem.respostaPara != null) append("Resposta a: ${mensagem.respostaPara.nomeRemetente}\n")
-                    }
-                    androidx.appcompat.app.AlertDialog.Builder(this@ChatGrupoActivity)
-                        .setTitle("ℹ️ Informações da mensagem")
-                        .setMessage(info)
-                        .setPositiveButton("OK", null)
-                        .show()
-                }
+
                 override fun onResponder(msgId: String, texto: String, remetente: String, tipo: String) {
                     dispararResposta(msgId, texto, remetente, nomeUsuario, tipo)
                 }
@@ -700,9 +685,24 @@ class ChatGrupoActivity : AppCompatActivity() {
     private fun apagarMensagem(msgId: String) {
         lifecycleScope.launch {
             try {
-                db.collection("grupos").document(grupoId).collection("mensagens").document(msgId).delete().await()
-                Toast.makeText(this@ChatGrupoActivity, "Apagada", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                db.collection("grupos").document(grupoId).collection("mensagens").document(msgId)
+                    .update(
+                        mapOf(
+                            "apagada" to true,
+                            "texto" to "🚫 Mensagem apagada",
+                            "fotoUrl" to null,
+                            "videoUrl" to null,
+                            "arquivoUrl" to null,
+                            "nomeArquivo" to null,
+                            "tamanhoArquivo" to null,
+                            "mimeType" to null,
+                            "respostaPara" to null
+                        )
+                    ).await()
+                Toast.makeText(this@ChatGrupoActivity, "Mensagem apagada", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 

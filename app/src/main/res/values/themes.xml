@@ -12,6 +12,7 @@
         <item name="android:statusBarColor">#1C1C1C</item>
         <item name="android:navigationBarColor">#1C1C1C</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
     <!-- Tema para a Tela de Splash (Android 12+) -->
@@ -19,10 +20,5 @@
         <item name="windowSplashScreenBackground">#1C1C1C</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="postSplashScreenTheme">@style/Theme.CTR</item>
-    </style>
-  <!-- Base application theme. -->
-    <style name="Base.Theme.CTR" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 </resources>

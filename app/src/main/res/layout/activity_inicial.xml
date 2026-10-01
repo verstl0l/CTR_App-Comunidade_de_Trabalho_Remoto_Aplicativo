@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1C1C">
+    android:background="@color/bg_primary"
+    android:fitsSystemWindows="true">
 
-    <!-- Header com botão de chat no canto superior direito -->
+    <!-- Header -->
     <LinearLayout
         android:id="@+id/headerInicial"
         android:layout_width="match_parent"
@@ -20,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="CTR"
-            android:textColor="#F5E6D0"
+            android:textColor="@color/accent"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -28,11 +29,12 @@
             android:id="@+id/btnChatTopo"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_chat"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:contentDescription="Abrir chat"
             android:focusable="true"
-            app:tint="#F5E6D0" />
+            android:src="@drawable/ic_chat"
+            app:tint="@color/accent" />
 
     </LinearLayout>
 
@@ -56,37 +58,40 @@
                 android:layout_marginBottom="32dp"
                 android:gravity="center"
                 android:text="Bem-vindo ao CTR"
-                android:textColor="@android:color/white"
+                android:textColor="@color/text_primary"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
+            <!-- ✅ ID semântico: btnCadastrar -->
             <Button
-                android:id="@+id/button3"
+                android:id="@+id/btnCadastrar"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
-                android:backgroundTint="#F5E6D0"
+                android:backgroundTint="@color/accent"
                 android:text="CADASTRAR-SE"
-                android:textColor="#1C1311"
+                android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 
+            <!-- ✅ ID semântico: btnEntrarEquipe -->
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btnEntrarEquipe"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
-                android:backgroundTint="#F5E6D0"
+                android:backgroundTint="@color/accent"
                 android:text="ENTRAR EM EQUIPE"
-                android:textColor="#1C1311"
+                android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 
+            <!-- ✅ ID semântico: btnCriarEquipe -->
             <Button
-                android:id="@+id/button5"
+                android:id="@+id/btnCriarEquipe"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:backgroundTint="#F5E6D0"
+                android:backgroundTint="@color/accent"
                 android:text="CRIAR EQUIPE"
-                android:textColor="#1C1311"
+                android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -96,9 +101,9 @@
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#2E1A16"
-        app:itemIconTint="@android:color/white"
-        app:itemTextColor="@android:color/white"
+        android:background="@color/bg_surface_light"
+        app:itemIconTint="@color/text_primary"
+        app:itemTextColor="@color/text_primary"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

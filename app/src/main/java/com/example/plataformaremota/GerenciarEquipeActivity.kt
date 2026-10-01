@@ -396,7 +396,20 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                membros.documents.forEach { doc ->
+                // ✅ Ordena: dono primeiro, depois admins, depois membros
+                val membrosOrdenados = membros.documents.sortedWith(
+                    compareBy(
+                        { it.getString("email") != email },       // dono por último? não, por primeiro
+                        { it.getString("funcao") != "administrador" },
+                        { it.getString("nome") ?: "" }
+                    )
+                )
+
+                // ✅ Pega o dono da equipe
+                val equipeDoc = db.collection("equipes").document(equipeId).get().await()
+                val emailDono = equipeDoc.getString("criadorEmail") ?: ""
+
+                membrosOrdenados.forEach { doc ->
                     val membroId = doc.id
                     val nome = doc.getString("nome") ?: "Usuário"
                     val emailMembro = doc.getString("email") ?: ""
@@ -406,38 +419,128 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     val t1 = view.findViewById<TextView>(android.R.id.text1)
                     val t2 = view.findViewById<TextView>(android.R.id.text2)
 
-                    t1.text = "$nome ($funcao)"
+                    // ✅ Mostra "VOCÊ" se for o usuário logado
+                    val souEu = emailMembro == email
+                    val ehDono = emailMembro == emailDono
+
+                    val nomeExibido = when {
+                        ehDono -> "$nome (Dono)"
+                        funcao == "administrador" -> "$nome (Admin)"
+                        else -> nome
+                    }
+
+                    t1.text = if (souEu) "$nomeExibido ← VOCÊ" else nomeExibido
                     t1.setTextColor(android.graphics.Color.WHITE)
                     t2.text = emailMembro
                     t2.setTextColor(android.graphics.Color.GRAY)
                     view.setPadding(0, 24, 0, 24)
 
+                    // Clique curto → perfil
                     view.setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, PerfilUsuarioActivity::class.java)
                         intent.putExtra("emailOutro", emailMembro)
                         startActivity(intent)
                     }
 
+                    // ✅ Long press → menu de ações (SÓ se pode fazer algo)
                     view.setOnLongClickListener {
+                        val opcoes = mutableListOf<String>()
+
+                        // Não pode promover se já é admin ou é o dono
+                        if (funcao != "administrador" && !ehDono) {
+                            opcoes.add("Promover a Administrador")
+                        }
+
+                        // Não pode rebaixar se já é membro
+                        if (funcao == "administrador" && !ehDono) {
+                            opcoes.add("Rebaixar a Membro")
+                        }
+
+                        // ✅ NÃO pode remover a si mesmo
+                        // ✅ NÃO pode remover o dono
+                        if (!souEu && !ehDono) {
+                            opcoes.add("Remover da Equipe")
+                        }
+
+                        // Se não tem nenhuma opção, não mostra nada
+                        if (opcoes.isEmpty()) {
+                            Toast.makeText(
+                                this@GerenciarEquipeActivity,
+                                "Nenhuma ação disponível",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@setOnLongClickListener true
+                        }
+
                         AlertDialog.Builder(this@GerenciarEquipeActivity)
-                            .setTitle(nome)
-                            .setItems(arrayOf("Promover a Administrador", "Remover da Equipe")) { _, which ->
-                                lifecycleScope.launch {
-                                    try {
-                                        when (which) {
-                                            0 -> {
+                            .setTitle(nomeExibido)
+                            .setItems(opcoes.toTypedArray()) { _, which ->
+                                when (opcoes[which]) {
+                                    "Promover a Administrador" -> {
+                                        lifecycleScope.launch {
+                                            try {
                                                 db.collection("membros_equipe").document(membroId)
                                                     .update("funcao", "administrador").await()
-                                                Toast.makeText(this@GerenciarEquipeActivity, "Promovido!", Toast.LENGTH_SHORT).show()
-                                            }
-                                            1 -> {
-                                                db.collection("membros_equipe").document(membroId).delete().await()
-                                                Toast.makeText(this@GerenciarEquipeActivity, "Removido!", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(
+                                                    this@GerenciarEquipeActivity,
+                                                    "✅ $nome promovido a administrador",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                carregarMembros(equipeId)
+                                            } catch (e: Exception) {
+                                                Toast.makeText(
+                                                    this@GerenciarEquipeActivity,
+                                                    "Erro: ${e.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
                                             }
                                         }
-                                        carregarMembros(equipeId)
-                                    } catch (e: Exception) {
-                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                                    }
+                                    "Rebaixar a Membro" -> {
+                                        lifecycleScope.launch {
+                                            try {
+                                                db.collection("membros_equipe").document(membroId)
+                                                    .update("funcao", "membro").await()
+                                                Toast.makeText(
+                                                    this@GerenciarEquipeActivity,
+                                                    "✅ $nome rebaixado a membro",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                carregarMembros(equipeId)
+                                            } catch (e: Exception) {
+                                                Toast.makeText(
+                                                    this@GerenciarEquipeActivity,
+                                                    "Erro: ${e.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }
+                                    }
+                                    "Remover da Equipe" -> {
+                                        AlertDialog.Builder(this@GerenciarEquipeActivity)
+                                            .setTitle("Remover membro")
+                                            .setMessage("Remover $nome da equipe?")
+                                            .setPositiveButton("Remover") { _, _ ->
+                                                lifecycleScope.launch {
+                                                    try {
+                                                        db.collection("membros_equipe").document(membroId).delete().await()
+                                                        Toast.makeText(
+                                                            this@GerenciarEquipeActivity,
+                                                            "✅ $nome removido",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        carregarMembros(equipeId)
+                                                    } catch (e: Exception) {
+                                                        Toast.makeText(
+                                                            this@GerenciarEquipeActivity,
+                                                            "Erro: ${e.message}",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                    }
+                                                }
+                                            }
+                                            .setNegativeButton("Cancelar", null)
+                                            .show()
                                     }
                                 }
                             }

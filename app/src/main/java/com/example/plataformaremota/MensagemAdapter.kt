@@ -39,13 +39,11 @@ class MensagemAdapter(
             msgId: String, ehRem: Boolean, texto: String, remetente: String
         )
         fun onAbrirArquivo(url: String, mime: String, nome: String)
-        fun onInfoMensagem(mensagem: Mensagem)
     }
 
     private var listaMidias: List<Pair<String, String>> = emptyList()
 
     override fun submitList(list: List<ItemChat>?) {
-        // Reconstrói a lista de mídias (só dos itens que são mensagem)
         listaMidias = list?.mapNotNull { item ->
             if (item is ItemChat.MensagemItem) {
                 val msg = item.mensagem
@@ -112,6 +110,12 @@ class MensagemAdapter(
         val msg = (item as ItemChat.MensagemItem).mensagem
         val ehRem = msg.remetente == emailUsuario
 
+        // ✅ NOVO: se a mensagem foi apagada, renderiza como texto "apagada"
+        if (msg.apagada) {
+            bindApagada(holder, msg, ehRem)
+            return
+        }
+
         when (holder) {
             is TextoViewHolder -> bindTexto(holder, msg, ehRem)
             is FotoViewHolder -> bindFoto(holder, msg, ehRem)
@@ -121,17 +125,67 @@ class MensagemAdapter(
     }
 
     // ============================================================
-    // BIND: SEPARADOR
+    // ✅ NOVO: BIND APAGADA
     // ============================================================
+    private fun bindApagada(holder: RecyclerView.ViewHolder, msg: Mensagem, ehRem: Boolean) {
+        val containerBalao: LinearLayout
+        val txtHora: TextView?
+
+        when (holder) {
+            is TextoViewHolder -> {
+                containerBalao = holder.containerBalao
+                txtHora = holder.txtHora
+                holder.containerCitacao.visibility = View.GONE
+                holder.txtTexto.text = "🚫 Mensagem apagada"
+                holder.txtTexto.setTextColor(ContextCompat.getColor(contexto, R.color.text_secondary))
+                holder.txtTexto.setTypeface(null, android.graphics.Typeface.ITALIC)
+            }
+            is FotoViewHolder -> {
+                containerBalao = holder.containerBalao
+                txtHora = holder.txtHora
+                holder.img.visibility = View.GONE
+                holder.txtNome.visibility = View.GONE
+                holder.txtLegenda.visibility = View.GONE
+            }
+            is VideoViewHolder -> {
+                containerBalao = holder.containerBalao
+                txtHora = holder.txtHora
+                holder.videoView.visibility = View.GONE
+                holder.btnPlay.visibility = View.GONE
+                holder.txtNome.visibility = View.GONE
+                holder.txtLegenda.visibility = View.GONE
+            }
+            is ArquivoViewHolder -> {
+                containerBalao = holder.containerBalao
+                txtHora = holder.txtHora
+                holder.txtNomeArq.text = "🚫 Mensagem apagada"
+                holder.txtNomeArq.setTextColor(ContextCompat.getColor(contexto, R.color.text_secondary))
+                holder.txtTam.visibility = View.GONE
+                holder.txtNomeRem.visibility = View.GONE
+            }
+            else -> return
+        }
+
+        aplicarAlinhamento(containerBalao, ehRem)
+
+        // Balão cinza
+        containerBalao.setBackgroundResource(R.drawable.bg_bolha_recebida)
+        txtHora?.text = fmtHora.format(Date(msg.timestamp))
+
+        // Remove listeners (não pode responder, favoritar, etc)
+        containerBalao.setOnClickListener(null)
+        containerBalao.setOnLongClickListener(null)
+    }
+
     private fun SeparadorViewHolder.bind(item: ItemChat.SeparadorData) {
         txtSeparador.text = item.texto
     }
 
-    // ============================================================
-    // BIND: TEXTO
-    // ============================================================
     private fun bindTexto(holder: TextoViewHolder, msg: Mensagem, ehRem: Boolean) {
         aplicarAlinhamento(holder.containerBalao, ehRem)
+
+        // Reset do typeface (pode ter sido alterado por bindApagada)
+        holder.txtTexto.setTypeface(null, android.graphics.Typeface.NORMAL)
 
         if (ehRem) {
             holder.containerBalao.setBackgroundResource(R.drawable.bg_bolha_enviada)
@@ -143,14 +197,12 @@ class MensagemAdapter(
 
         holder.txtTexto.text = msg.texto
 
-        // ✅ Horário
         holder.txtHora.text = fmtHora.format(Date(msg.timestamp))
         holder.txtHora.setTextColor(
             if (ehRem) ContextCompat.getColor(contexto, R.color.accent_dark)
             else ContextCompat.getColor(contexto, R.color.text_secondary)
         )
 
-        // Citação (resposta)
         val rp = msg.respostaPara
         if (rp != null) {
             holder.containerCitacao.visibility = View.VISIBLE
@@ -165,22 +217,19 @@ class MensagemAdapter(
             holder.containerCitacao.visibility = View.GONE
         }
 
-        // Swipe to reply
         SwipeToReplyHelper.attach(holder.containerBalao, holder.imgIndicadorResposta) {
             callbacks.onResponder(msg.id, msg.texto, msg.remetente, "texto")
         }
 
-        // Long press
         holder.containerBalao.setOnLongClickListener {
             callbacks.onLongPressTexto(msg.id, msg.texto, msg.remetente, ehRem)
             true
         }
     }
 
-    // ============================================================
-    // BIND: FOTO
-    // ============================================================
     private fun bindFoto(holder: FotoViewHolder, msg: Mensagem, ehRem: Boolean) {
+        holder.img.visibility = View.VISIBLE
+        holder.txtNome.visibility = View.VISIBLE
         holder.txtNome.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
 
         if (msg.texto.isNotEmpty()) {
@@ -190,7 +239,6 @@ class MensagemAdapter(
             holder.txtLegenda.visibility = View.GONE
         }
 
-        // ✅ Horário
         holder.txtHora.text = fmtHora.format(Date(msg.timestamp))
 
         Glide.with(contexto.applicationContext)
@@ -205,16 +253,10 @@ class MensagemAdapter(
 
         holder.containerBalao.setOnClickListener {
             val url = msg.fotoUrl
-            if (url.isNullOrEmpty()) {
-                Toast.makeText(contexto, "Foto sem URL", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            if (url.isNullOrEmpty()) return@setOnClickListener
             val posNaGaleria = listaMidias.indexOfFirst { it.second == url }
-            if (posNaGaleria >= 0) {
-                callbacks.onFotoClick(posNaGaleria, listaMidias)
-            } else {
-                callbacks.onFotoClick(0, listOf("foto" to url))
-            }
+            if (posNaGaleria >= 0) callbacks.onFotoClick(posNaGaleria, listaMidias)
+            else callbacks.onFotoClick(0, listOf("foto" to url))
         }
 
         holder.containerBalao.setOnLongClickListener {
@@ -226,10 +268,9 @@ class MensagemAdapter(
         }
     }
 
-    // ============================================================
-    // BIND: VÍDEO
-    // ============================================================
     private fun bindVideo(holder: VideoViewHolder, msg: Mensagem, ehRem: Boolean) {
+        holder.videoView.visibility = View.VISIBLE
+        holder.txtNome.visibility = View.VISIBLE
         holder.txtNome.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
         aplicarAlinhamento(holder.containerBalao, ehRem)
 
@@ -251,12 +292,6 @@ class MensagemAdapter(
             Log.e("MENSAGEM_ADAPTER", "Erro video: ${e.message}")
         }
 
-        holder.videoView.setOnErrorListener { _, _, _ ->
-            holder.btnPlay.text = "⚠"
-            holder.btnPlay.visibility = View.VISIBLE
-            true
-        }
-
         holder.btnPlay.setOnClickListener {
             try {
                 if (holder.videoView.isPlaying) {
@@ -267,9 +302,7 @@ class MensagemAdapter(
                     holder.videoView.start()
                     holder.btnPlay.visibility = View.GONE
                 }
-            } catch (e: Exception) {
-                Log.e("MENSAGEM_ADAPTER", "Erro play: ${e.message}")
-            }
+            } catch (e: Exception) { }
         }
 
         holder.videoView.setOnCompletionListener {
@@ -277,27 +310,16 @@ class MensagemAdapter(
             holder.btnPlay.visibility = View.VISIBLE
         }
 
-        SwipeToReplyHelper.attach(
-            viewToTouch = holder.overlay,
-            containerBalao = holder.containerBalao,
-            imgIndicador = holder.imgIndicadorResposta,
-            onResponder = {
-                callbacks.onResponder(msg.id, "", msg.remetente, "video")
-            }
-        )
+        SwipeToReplyHelper.attach(holder.overlay, holder.containerBalao, holder.imgIndicadorResposta) {
+            callbacks.onResponder(msg.id, "", msg.remetente, "video")
+        }
 
         holder.overlay.setOnClickListener {
-            val url = msg.videoUrl
-            if (url.isNullOrEmpty()) {
-                Toast.makeText(contexto, "Vídeo sem URL", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val posNaGaleria = listaMidias.indexOfFirst { it.second == url }
-            if (posNaGaleria >= 0) {
-                callbacks.onVideoClick(posNaGaleria, listaMidias)
-            } else {
-                callbacks.onVideoClick(0, listOf("video" to url))
-            }
+            val url = msg.videoUrl ?: return@setOnClickListener
+            if (url.isEmpty()) return@setOnClickListener
+            val pos = listaMidias.indexOfFirst { it.second == url }
+            if (pos >= 0) callbacks.onVideoClick(pos, listaMidias)
+            else callbacks.onVideoClick(0, listOf("video" to url))
         }
 
         holder.overlay.setOnLongClickListener {
@@ -309,12 +331,12 @@ class MensagemAdapter(
         }
     }
 
-    // ============================================================
-    // BIND: ARQUIVO
-    // ============================================================
     private fun bindArquivo(holder: ArquivoViewHolder, msg: Mensagem, ehRem: Boolean) {
+        holder.txtNomeRem.visibility = View.VISIBLE
+        holder.txtTam.visibility = View.VISIBLE
         holder.txtNomeRem.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
         holder.txtNomeArq.text = msg.nomeArquivo ?: "arquivo"
+        holder.txtNomeArq.setTextColor(ContextCompat.getColor(contexto, R.color.text_primary))
         holder.txtTam.text = formatarTamanho(msg.tamanhoArquivo)
         aplicarAlinhamento(holder.containerBalao, ehRem)
 

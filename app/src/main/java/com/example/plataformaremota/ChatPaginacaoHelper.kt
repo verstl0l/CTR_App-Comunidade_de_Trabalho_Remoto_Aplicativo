@@ -9,13 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-/**
- * Helper de paginacao de mensagens.
- *
- * IMPORTANTE: sempre entrega a lista COMPLETA (todasMensagens) no callback,
- * nunca so o delta. O adapter substitui a lista inteira via submitList, entao
- * ele PRECISA receber o estado completo sempre.
- */
 class ChatPaginacaoHelper(
     private val collection: String,
     private val documentId: String,
@@ -43,6 +36,9 @@ class ChatPaginacaoHelper(
     private var listenerNovas: ListenerRegistration? = null
     private var maiorTimestampVisto: Long = 0L
 
+    // ✅ NOVO: controla se a primeira carga já foi feita
+    private var primeiraCargaFeita = false
+
     fun iniciar() {
         scope.launch {
             try {
@@ -56,7 +52,6 @@ class ChatPaginacaoHelper(
                 if (!ativo) return@launch
 
                 val docs = snap.documents
-                // Inverte pra ASC (mais antiga -> mais recente)
                 val mensagens = docs.map { Mensagem.deDocumento(it) }.reversed()
 
                 todasMensagens.clear()
@@ -68,10 +63,10 @@ class ChatPaginacaoHelper(
                 maiorTimestampVisto = mensagens.lastOrNull()?.timestamp ?: 0L
                 temMaisAntigas = docs.size >= pageSize
 
-                // ✅ Sempre lista completa. inseriuNoTopo = false (primeira carga)
                 onListaAtualizada(todasMensagens.toList(), false)
 
-                escutarNovas()
+                primeiraCargaFeita = true
+                escutarAlteracoes()
 
             } catch (e: Exception) {
                 Log.e(TAG, "Erro primeira pagina: ${e.message}")
@@ -107,15 +102,12 @@ class ChatPaginacaoHelper(
                     return@launch
                 }
 
-                // ✅ Atualiza cursor
                 menorTimestampCarregado = novas.first().timestamp
                 temMaisAntigas = docs.size >= pageSize
 
-                // Insere no INICIO da lista completa
                 todasMensagens.addAll(0, novas)
                 novas.forEach { idsConhecidos.add(it.id) }
 
-                // ✅ Entrega a LISTA COMPLETA (nao so as novas)
                 onListaAtualizada(todasMensagens.toList(), true)
 
             } catch (e: Exception) {
@@ -126,20 +118,20 @@ class ChatPaginacaoHelper(
         }
     }
 
-    private fun escutarNovas() {
+    // ============================================================
+    // ✅ NOVO: listener que escuta NOVAS + UPDATES (apagadas)
+    // ============================================================
+    private fun escutarAlteracoes() {
         if (!ativo) return
         try {
-            val query = if (maiorTimestampVisto > 0L) {
-                db.collection(collection).document(documentId)
-                    .collection("mensagens")
-                    .whereGreaterThan("timestamp", maiorTimestampVisto)
-                    .orderBy("timestamp", Query.Direction.ASCENDING)
-            } else {
-                db.collection(collection).document(documentId)
-                    .collection("mensagens")
-                    .orderBy("timestamp", Query.Direction.ASCENDING)
-                    .limit(pageSize.toLong())
-            }
+            // Escuta TODAS as mensagens a partir do menor timestamp carregado
+            // (não só as novas — assim pega updates também)
+            val cursor = menorTimestampCarregado ?: 0L
+
+            val query = db.collection(collection).document(documentId)
+                .collection("mensagens")
+                .whereGreaterThanOrEqualTo("timestamp", cursor)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
 
             listenerNovas = query.addSnapshotListener { snapshot, error ->
                 if (!ativo) return@addSnapshotListener
@@ -149,17 +141,43 @@ class ChatPaginacaoHelper(
                 }
                 if (snapshot == null) return@addSnapshotListener
 
-                val novas = snapshot.documents
+                val mensagensAtualizadas = snapshot.documents
                     .map { Mensagem.deDocumento(it) }
-                    .filter { it.id !in idsConhecidos }
 
-                if (novas.isEmpty()) return@addSnapshotListener
+                // Encontra novas (não conhecidas)
+                val novas = mensagensAtualizadas.filter { it.id !in idsConhecidos }
 
-                novas.forEach { idsConhecidos.add(it.id) }
-                todasMensagens.addAll(novas)
-                maiorTimestampVisto = maxOf(maiorTimestampVisto, novas.last().timestamp)
+                // Encontra atualizadas (já conhecidas mas com dados diferentes)
+                val atualizadas = mensagensAtualizadas.filter { nova ->
+                    val antiga = todasMensagens.find { it.id == nova.id }
+                    antiga != null && antiga != nova
+                }
 
-                onNovasMensagens(novas)
+                if (novas.isEmpty() && atualizadas.isEmpty()) return@addSnapshotListener
+
+                // Atualiza lista em memória
+                novas.forEach { nova ->
+                    todasMensagens.add(nova)
+                    idsConhecidos.add(nova.id)
+                    maiorTimestampVisto = maxOf(maiorTimestampVisto, nova.timestamp)
+                }
+
+                atualizadas.forEach { nova ->
+                    val index = todasMensagens.indexOfFirst { it.id == nova.id }
+                    if (index >= 0) {
+                        todasMensagens[index] = nova
+                    }
+                }
+
+                // Notifica a Activity
+                if (novas.isNotEmpty()) {
+                    onNovasMensagens(novas)
+                }
+
+                if (atualizadas.isNotEmpty()) {
+                    // Reenvia a lista completa (isso regenera os separadores de data)
+                    onListaAtualizada(todasMensagens.toList(), false)
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao registrar listener: ${e.message}")
