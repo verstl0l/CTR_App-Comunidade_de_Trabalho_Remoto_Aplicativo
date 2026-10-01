@@ -56,13 +56,13 @@ class AnexoHelperTest {
 
     @Test
     fun formatarTamanho_1MB_retorna1_0MB() {
-        assertEquals("1,0 MB", AnexoHelper.formatarTamanho(1024L * 1024L))
+        assertEquals("1.0 MB", AnexoHelper.formatarTamanho(1024L * 1024L))
     }
 
     @Test
     fun formatarTamanho_2_5MB_retorna2_5MB() {
         val bytes = (2.5 * 1024 * 1024).toLong()
-        assertEquals("2,5 MB", AnexoHelper.formatarTamanho(bytes))
+        assertEquals("2.5 MB", AnexoHelper.formatarTamanho(bytes))
     }
 
     // ============================================================
@@ -71,6 +71,6 @@ class AnexoHelperTest {
 
     @Test
     fun formatarTamanho_1GB_retorna1_0GB() {
-        assertEquals("1,0 GB", AnexoHelper.formatarTamanho(1024L * 1024L * 1024L))
+        assertEquals("1.0 GB", AnexoHelper.formatarTamanho(1024L * 1024L * 1024L))
     }
 }

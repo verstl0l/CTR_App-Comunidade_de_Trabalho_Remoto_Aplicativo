@@ -161,16 +161,16 @@ object AnexoHelper {
     // HELPERS
     // ============================================================
 
-    private fun detectarTipo(mimeType: String): String {
+    internal fun detectarTipo(mimeType: String): String {
         return when {
             mimeType.startsWith("image/") -> "imagem"
             mimeType.startsWith("video/") -> "video"
             mimeType == "application/pdf" -> "pdf"
-            mimeType.contains("word") || mimeType.contains("document") -> "documento"
-            mimeType.contains("sheet") || mimeType.contains("excel") -> "planilha"
-            mimeType.contains("presentation") || mimeType.contains("powerpoint") -> "apresentacao"
             mimeType.startsWith("text/") -> "texto"
             mimeType.startsWith("audio/") -> "audio"
+            mimeType.contains("sheet") || mimeType.contains("excel") -> "planilha"
+            mimeType.contains("presentation") || mimeType.contains("powerpoint") -> "apresentacao"
+            mimeType.contains("word") -> "documento"
             mimeType.contains("zip") || mimeType.contains("rar") -> "compactado"
             else -> "outro"
         }
@@ -180,8 +180,8 @@ object AnexoHelper {
         return when {
             bytes < 1024 -> "$bytes B"
             bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-            bytes < 1024 * 1024 * 1024 -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
-            else -> String.format("%.1f GB", bytes / (1024.0 * 1024.0 * 1024.0))
+            bytes < 1024 * 1024 * 1024 -> String.format(java.util.Locale.US, "%.1f MB", bytes / (1024.0 * 1024.0))
+            else -> String.format(java.util.Locale.US, "%.1f GB", bytes / (1024.0 * 1024.0 * 1024.0))
         }
     }
 }
