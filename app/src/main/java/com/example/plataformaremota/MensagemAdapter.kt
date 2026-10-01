@@ -243,6 +243,7 @@ class MensagemAdapter(
 
         Glide.with(contexto.applicationContext)
             .load(msg.fotoUrl)
+            .signature(com.bumptech.glide.signature.ObjectKey(msg.fotoUrl ?: ""))
             .into(holder.img)
 
         aplicarAlinhamento(holder.containerBalao, ehRem)

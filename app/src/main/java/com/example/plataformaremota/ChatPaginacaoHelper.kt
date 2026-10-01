@@ -130,7 +130,8 @@ class ChatPaginacaoHelper(
 
             val query = db.collection(collection).document(documentId)
                 .collection("mensagens")
-                .whereGreaterThanOrEqualTo("timestamp", cursor)
+                // Escuta só as últimas 50 (que são as que podem mudar)
+                .whereGreaterThan("timestamp", maiorTimestampVisto - 3600000)
                 .orderBy("timestamp", Query.Direction.ASCENDING)
 
             listenerNovas = query.addSnapshotListener { snapshot, error ->

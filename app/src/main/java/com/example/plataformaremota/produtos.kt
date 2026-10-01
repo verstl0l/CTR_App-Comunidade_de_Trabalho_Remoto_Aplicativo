@@ -12,7 +12,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -23,6 +25,15 @@ class produtos : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private var equipeIdAtual: String? = null
     private var filtroAtual: String = "todos"
+
+    // ✅ Cache local de trabalhos
+    private var todosTrabalhos: List<DocumentSnapshot> = emptyList()
+
+    // ✅ Listener pra atualizar em tempo real
+    private var listenerTrabalhos: ListenerRegistration? = null
+
+    // ✅ Referência do container (pra reusar)
+    private lateinit var containerTrabalhos: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,31 +79,35 @@ class produtos : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // ✅ Remove listener
+        listenerTrabalhos?.remove()
+        listenerTrabalhos = null
+    }
+
     private fun configurarDashboard(email: String) {
         val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
         val nomeUsuario = prefs.getString("nomeUsuario", "Usuário") ?: "Usuário"
 
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeDashboard)
-
         val txtCriador = findViewById<TextView>(R.id.txtCriadorEquipeDashboard)
-
         val txtDescricao = findViewById<TextView>(R.id.txtDescricaoEquipeDashboard)
-
         val txtLogo = findViewById<TextView>(R.id.txtLogoEquipe)
-
         val btnConfig = findViewById<ImageView>(R.id.btnConfigEquipe)
-
         val btnCriarTrabalho = findViewById<Button>(R.id.btnCriarTrabalho)
-
-        val containerTrabalhos = findViewById<LinearLayout>(R.id.containerTrabalhosRecentes)
-        //  Botão Produtividade
         val btnProdutividade = findViewById<Button>(R.id.btnProdutividade)
+        val btnChatEquipe = findViewById<Button>(R.id.btnChatEquipe)
+
+        // ✅ Guarda o container pra reusar
+        containerTrabalhos = findViewById(R.id.containerTrabalhosRecentes)
+
         btnProdutividade.setOnClickListener {
             val intent = Intent(this, ProdutividadeActivity::class.java)
             intent.putExtra("equipeId", equipeIdAtual)
             startActivity(intent)
         }
-        val btnChatEquipe = findViewById<Button>(R.id.btnChatEquipe)
+
         btnChatEquipe.setOnClickListener {
             val intent = Intent(this, ChatEquipeActivity::class.java)
             intent.putExtra("equipeId", equipeIdAtual)
@@ -104,25 +119,26 @@ class produtos : AppCompatActivity() {
         val btnFiltroProgresso = findViewById<TextView>(R.id.btnFiltroProgresso)
         val btnFiltroConcluido = findViewById<TextView>(R.id.btnFiltroConcluido)
 
+        // ✅ Trocar filtro só renderiza em memória (instantâneo)
         btnFiltroTodos.setOnClickListener {
             filtroAtual = "todos"
             atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
-            carregarTrabalhosFiltrados(containerTrabalhos)
+            aplicarFiltro()
         }
         btnFiltroPendente.setOnClickListener {
             filtroAtual = "pendente"
             atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
-            carregarTrabalhosFiltrados(containerTrabalhos)
+            aplicarFiltro()
         }
         btnFiltroProgresso.setOnClickListener {
             filtroAtual = "em_progresso"
             atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
-            carregarTrabalhosFiltrados(containerTrabalhos)
+            aplicarFiltro()
         }
         btnFiltroConcluido.setOnClickListener {
             filtroAtual = "concluido"
             atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
-            carregarTrabalhosFiltrados(containerTrabalhos)
+            aplicarFiltro()
         }
 
         txtCriador.text = "Criado por $nomeUsuario"
@@ -142,7 +158,8 @@ class produtos : AppCompatActivity() {
                     .joinToString("")
                 txtLogo.text = iniciais.ifEmpty { "EQ" }
 
-                carregarTrabalhosFiltrados(containerTrabalhos)
+                // ✅ Inicia listener de trabalhos em tempo real
+                iniciarListenerTrabalhos()
 
             } catch (e: Exception) {
                 Log.e("PRODUTOS", "Erro ao carregar equipe: ${e.message}")
@@ -160,6 +177,46 @@ class produtos : AppCompatActivity() {
             intent.putExtra("equipeId", equipeIdAtual)
             startActivity(intent)
         }
+    }
+
+    // ============================================================
+    // ✅ LISTENER DE TRABALHOS EM TEMPO REAL
+    // ============================================================
+    private fun iniciarListenerTrabalhos() {
+        listenerTrabalhos?.remove()
+
+        val eqId = equipeIdAtual ?: return
+
+        listenerTrabalhos = db.collection("trabalhos")
+            .whereEqualTo("equipeId", eqId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("PRODUTOS", "Erro listener: ${error.message}")
+                    return@addSnapshotListener
+                }
+                if (snapshot == null) return@addSnapshotListener
+
+                // ✅ Guarda em memória
+                todosTrabalhos = snapshot.documents
+
+                // ✅ Aplica filtro atual (sem nova query)
+                aplicarFiltro()
+            }
+    }
+
+    // ============================================================
+    // ✅ APLICAR FILTRO (só em memória)
+    // ============================================================
+    private fun aplicarFiltro() {
+        val filtrados = if (filtroAtual == "todos") {
+            todosTrabalhos
+        } else {
+            todosTrabalhos.filter {
+                it.getString("status") == filtroAtual
+            }
+        }
+
+        carregarTrabalhosNoLayout(filtrados, containerTrabalhos)
     }
 
     private fun atualizarBotoesFiltro(
@@ -197,30 +254,6 @@ class produtos : AppCompatActivity() {
         }
     }
 
-    private fun carregarTrabalhosFiltrados(container: LinearLayout) {
-        lifecycleScope.launch {
-            try {
-                val trabalhos = db.collection("trabalhos")
-                    .whereEqualTo("equipeId", equipeIdAtual)
-                    .get()
-                    .await()
-
-                val filtrados = if (filtroAtual == "todos") {
-                    trabalhos.documents
-                } else {
-                    trabalhos.documents.filter {
-                        it.getString("status") == filtroAtual
-                    }
-                }
-
-                carregarTrabalhosNoLayout(filtrados, container)
-
-            } catch (e: Exception) {
-                Log.e("PRODUTOS", "Erro filtro: ${e.message}")
-            }
-        }
-    }
-
     private fun configurarTelaVazia() {
         val btnCriarEquipeVazio = findViewById<Button>(R.id.btnCriarEquipeVazio)
         btnCriarEquipeVazio.setOnClickListener {
@@ -229,7 +262,7 @@ class produtos : AppCompatActivity() {
     }
 
     private fun carregarTrabalhosNoLayout(
-        trabalhos: List<com.google.firebase.firestore.DocumentSnapshot>,
+        trabalhos: List<DocumentSnapshot>,
         container: LinearLayout
     ) {
         container.removeAllViews()

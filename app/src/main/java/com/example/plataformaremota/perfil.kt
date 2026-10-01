@@ -173,7 +173,11 @@ class perfil : BaseActivity() {
         lifecycleScope.launch {
             try {
                 db.collection("usuarios").document(email).update("fotoUrl", url).await()
-                Glide.with(this@perfil).load(url).circleCrop().into(imgAvatar)
+                Glide.with(this@perfil)
+                    .load(url)
+                    .signature(com.bumptech.glide.signature.ObjectKey(url))
+                    .circleCrop()
+                    .into(imgAvatar)
                 txtIniciais.visibility = View.GONE
                 Toast.makeText(this@perfil, "Foto atualizada", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
@@ -197,7 +201,11 @@ class perfil : BaseActivity() {
                 val nome = usuarioDoc.getString("nome") ?: "ME"
 
                 if (fotoUrl.isNotEmpty()) {
-                    Glide.with(this@perfil).load(fotoUrl).circleCrop().into(imgAvatar)
+                    Glide.with(this@perfil)
+                        .load(fotoUrl)
+                        .signature(com.bumptech.glide.signature.ObjectKey(fotoUrl))
+                        .circleCrop()
+                        .into(imgAvatar)
                     txtIniciais.visibility = View.GONE
                 } else {
                     val iniciais = nome.split(" ")

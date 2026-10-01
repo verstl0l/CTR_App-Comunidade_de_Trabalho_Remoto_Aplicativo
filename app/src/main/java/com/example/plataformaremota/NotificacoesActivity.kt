@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -23,12 +24,14 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-
 class NotificacoesActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
+
+    // ✅ Listener pra remover depois
+    private var listenerNotificacoes: ListenerRegistration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,40 +47,51 @@ class NotificacoesActivity : BaseActivity() {
         }
 
         configurarBottomNavigation(R.id.nav_notifications)
-    }
 
-    override fun onResume() {
-        super.onResume()
+        // ✅ Inicia o listener em tempo real
         carregarNotificacoes()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // ✅ Remove o listener ao sair
+        listenerNotificacoes?.remove()
+        listenerNotificacoes = null
+    }
+
     // ============================================================
-    // CARREGAR NOTIFICACOES
+    // CARREGAR NOTIFICACOES (tempo real)
     // ============================================================
     private fun carregarNotificacoes() {
+        // Remove listener antigo, se existir
+        listenerNotificacoes?.remove()
+
         val container = findViewById<LinearLayout>(R.id.containerNotificacoes)
         val containerVazio = findViewById<LinearLayout>(R.id.containerVazio)
-        container.removeAllViews()
 
-        lifecycleScope.launch {
-            try {
-                val notificacoes = db.collection("notificacoes")
-                    .whereEqualTo("destinatario", emailUsuario)
-                    .orderBy("criadoEm", Query.Direction.DESCENDING)
-                    .limit(100)
-                    .get()
-                    .await()
+        listenerNotificacoes = db.collection("notificacoes")
+            .whereEqualTo("destinatario", emailUsuario)
+            .orderBy("criadoEm", Query.Direction.DESCENDING)
+            .limit(100)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("NOTIFICACOES", "Erro no listener: ${error.message}")
+                    return@addSnapshotListener
+                }
+                if (snapshot == null) return@addSnapshotListener
 
-                if (notificacoes.isEmpty) {
+                container.removeAllViews()
+
+                if (snapshot.isEmpty) {
                     containerVazio.visibility = View.VISIBLE
-                    return@launch
+                    return@addSnapshotListener
                 }
 
                 containerVazio.visibility = View.GONE
 
                 val inflater = LayoutInflater.from(this@NotificacoesActivity)
 
-                notificacoes.documents.forEach { doc ->
+                snapshot.documents.forEach { doc ->
                     val notificacaoId = doc.id
                     val tipo = doc.getString("tipo") ?: "generico"
                     val titulo = doc.getString("titulo") ?: "Notificacao"
@@ -100,20 +114,12 @@ class NotificacoesActivity : BaseActivity() {
                     txtMensagem.text = mensagem
                     txtData.text = formatarDataRelativa(criadoEm)
 
-                    // Configurar icone conforme tipo
                     configurarIcone(cardIcone, imgIcone, tipo)
 
-                    // Indicador de nao lida
                     indicador.visibility = if (lida) View.GONE else View.VISIBLE
+                    view.alpha = if (lida) 0.7f else 1f
 
-                    // Se lida, aplica um tom mais apagado
-                    if (lida) {
-                        view.alpha = 0.7f
-                    } else {
-                        view.alpha = 1f
-                    }
-
-                    // Clique curto: marca como lida + navega
+                    // Clique: marca como lida + navega
                     view.setOnClickListener {
                         if (!lida) {
                             lifecycleScope.launch {
@@ -123,7 +129,7 @@ class NotificacoesActivity : BaseActivity() {
                         navegarParaNotificacao(tipo, referenciaTipo, referenciaId)
                     }
 
-                    // Long press: opcao de apagar
+                    // Long press: apagar
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@NotificacoesActivity)
                             .setTitle("Apagar notificacao")
@@ -138,11 +144,7 @@ class NotificacoesActivity : BaseActivity() {
 
                     container.addView(view)
                 }
-
-            } catch (e: Exception) {
-                Log.e("NOTIFICACOES", getString(R.string.erro_generico, e.message ?: ""))
             }
-        }
     }
 
     // ============================================================
@@ -154,7 +156,7 @@ class NotificacoesActivity : BaseActivity() {
         tipo: String
     ) {
         when (tipo) {
-            "convite_equipe", "convite_trabalho", "membro_adicionado", "pedido_recusado" -> {
+            "convite_equipe", "convite_trabalho", "membro_adicionado", "pedido_recusado", "pedido_entrada" -> {
                 imgIcone.setImageResource(R.drawable.ic_notification_convite)
                 cardIcone.setCardBackgroundColor(
                     ContextCompat.getColor(this@NotificacoesActivity, R.color.bg_surface_hover)
@@ -185,13 +187,10 @@ class NotificacoesActivity : BaseActivity() {
     }
 
     // ============================================================
-    // NAVEGAR PARA O DESTINO DA NOTIFICACAO
+    // NAVEGAR
     // ============================================================
     private fun navegarParaNotificacao(tipo: String, referenciaTipo: String, referenciaId: String) {
-        // Convites de equipe vao para a tela dedicada
-        // Pedido de entrada → tela dedicada de pedidos
-        // Verifica se é pedido de entrada checando o tipo da notificação
-        // (a notificação tem tipo "pedido_entrada")
+        // ✅ Pedido de entrada → tela dedicada
         if (tipo == "pedido_entrada") {
             val intent = Intent(this@NotificacoesActivity, PedidosPendentesActivity::class.java)
             intent.putExtra("equipeId", referenciaId)
@@ -199,6 +198,7 @@ class NotificacoesActivity : BaseActivity() {
             return
         }
 
+        // Convites de equipe → tela dedicada
         if (referenciaTipo == "equipe") {
             lifecycleScope.launch {
                 try {
@@ -238,8 +238,6 @@ class NotificacoesActivity : BaseActivity() {
 
         when (referenciaTipo) {
             "trabalho" -> {
-                // Abre ComentariosTrabalhoActivity se for notificacao de comentario
-                // Para outras (novo_trabalho, anexo), vai para MinhasEquipes
                 lifecycleScope.launch {
                     try {
                         val trabalhoDoc = db.collection("trabalhos").document(referenciaId).get().await()
@@ -252,7 +250,6 @@ class NotificacoesActivity : BaseActivity() {
                         intent.putExtra("equipeId", equipeIdTrab)
                         startActivity(intent)
                     } catch (e: Exception) {
-                        // Fallback: abre MinhasEquipes
                         val intent = Intent(this@NotificacoesActivity, MinhasEquipesActivity::class.java)
                         startActivity(intent)
                     }
@@ -263,9 +260,7 @@ class NotificacoesActivity : BaseActivity() {
                 intent.putExtra("grupoId", referenciaId)
                 startActivity(intent)
             }
-            else -> {
-                // Sem destino especifico
-            }
+            else -> { }
         }
     }
 
@@ -281,7 +276,7 @@ class NotificacoesActivity : BaseActivity() {
                     "Todas marcadas como lidas",
                     Toast.LENGTH_SHORT
                 ).show()
-                carregarNotificacoes()
+                // ✅ Não precisa recarregar: o listener já atualiza
             } catch (e: Exception) {
                 Toast.makeText(
                     this@NotificacoesActivity,
@@ -293,7 +288,7 @@ class NotificacoesActivity : BaseActivity() {
     }
 
     // ============================================================
-    // APAGAR NOTIFICACAO
+    // APAGAR
     // ============================================================
     private fun apagarNotificacao(notificacaoId: String) {
         lifecycleScope.launch {
@@ -304,7 +299,7 @@ class NotificacoesActivity : BaseActivity() {
                     "Notificacao apagada",
                     Toast.LENGTH_SHORT
                 ).show()
-                carregarNotificacoes()
+                // ✅ Não precisa recarregar: o listener já atualiza
             } catch (e: Exception) {
                 Toast.makeText(
                     this@NotificacoesActivity,
@@ -316,7 +311,7 @@ class NotificacoesActivity : BaseActivity() {
     }
 
     // ============================================================
-    // FORMATAR DATA RELATIVA
+    // FORMATAR DATA
     // ============================================================
     private fun formatarDataRelativa(timestamp: Long): String {
         if (timestamp == 0L) return ""

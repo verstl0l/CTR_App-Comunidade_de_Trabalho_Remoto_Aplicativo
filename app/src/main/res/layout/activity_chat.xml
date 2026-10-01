@@ -180,7 +180,12 @@
             android:backgroundTint="@color/bg_surface_hover"
             android:hint="Digite..."
             android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary" />
+            android:textColorHint="@color/text_secondary"
+            android:inputType="textMultiLine|textCapSentences"
+            android:maxLines="8"
+            android:maxHeight="150dp"
+            android:minLines="1"
+            android:scrollHorizontally="false" />
 
         <Button
             android:id="@+id/btnEnviar"

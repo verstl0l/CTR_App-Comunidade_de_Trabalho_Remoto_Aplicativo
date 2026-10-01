@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -24,6 +26,9 @@ class ListaConversasActivity : BaseActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
+
+    // ✅ Listener em tempo real no doc do usuário
+    private var listenerUsuario: ListenerRegistration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,37 +41,54 @@ class ListaConversasActivity : BaseActivity() {
         val btnNovaConversa = findViewById<Button>(R.id.btnNovaConversa)
         btnNovaConversa.setOnClickListener { mostrarDialogNovaConversa() }
 
-        // ✅ Bottom nav em 1 linha
         configurarBottomNavigation(R.id.nav_chat)
+
+        // ✅ Inicia listener em tempo real
+        iniciarListenerConversas()
     }
 
-    override fun onResume() {
-        super.onResume()
-        carregarConversas()
+    override fun onDestroy() {
+        super.onDestroy()
+        listenerUsuario?.remove()
+        listenerUsuario = null
     }
 
     // ============================================================
-    // ✅ ALTERADO: usa chatsIds/gruposIds (offline-friendly)
-    // ✅ Otimizado: ~2 queries iniciais em vez de N+1
+    // ✅ LISTENER EM TEMPO REAL
     // ============================================================
-    private fun carregarConversas() {
+    private fun iniciarListenerConversas() {
+        listenerUsuario?.remove()
+
+        if (emailUsuario.isEmpty()) {
+            Log.e("LISTA_CONVERSAS", "Email do usuário vazio")
+            return
+        }
+
+        // Escuta o documento do usuário (chatsIds e gruposIds)
+        listenerUsuario = db.collection("usuarios").document(emailUsuario)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("LISTA_CONVERSAS", "Erro listener: ${error.message}")
+                    return@addSnapshotListener
+                }
+                if (snapshot == null || !snapshot.exists()) return@addSnapshotListener
+
+                val chatsIds = (snapshot.get("chatsIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+                val gruposIds = (snapshot.get("gruposIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+
+                carregarConversas(chatsIds, gruposIds)
+            }
+    }
+
+    // ============================================================
+    // ✅ CARREGAR CONVERSAS (com IDs já em mãos)
+    // ============================================================
+    private fun carregarConversas(chatsIds: List<String>, gruposIds: List<String>) {
         val container = findViewById<LinearLayout>(R.id.containerConversas)
-        container.removeAllViews()
 
         lifecycleScope.launch {
             try {
-                // ✅ CORRIGIDO: usar emailUsuario (não emailOutro)
-                if (emailUsuario.isNullOrEmpty()) {
-                    Log.e("LISTA_CONVERSAS", "Email do usuário vazio, pulando")
-                    return@launch
-                }
-
                 val itens = mutableListOf<ConversaItem>()
-
-                // ✅ 1 query: usuário com IDs denormalizados
-                val usuarioDoc = db.collection("usuarios").document(emailUsuario).get().await()
-                val chatsIds = (usuarioDoc.get("chatsIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
-                val gruposIds = (usuarioDoc.get("gruposIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
 
                 // ========== 1. CHATS PV ==========
                 for (chatId in chatsIds) {
@@ -115,7 +137,7 @@ class ListaConversasActivity : BaseActivity() {
                         val nomeGrupo = grupo.getString("nomeGrupo") ?: "Grupo"
 
                         val ultimaMsgDoc = grupo.reference.collection("mensagens")
-                            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                            .orderBy("timestamp", Query.Direction.DESCENDING)
                             .limit(1)
                             .get().await()
 
@@ -124,10 +146,13 @@ class ListaConversasActivity : BaseActivity() {
                             val nome = doc.getString("nomeRemetente") ?: "Usuário"
                             val texto = doc.getString("texto") ?: ""
                             val tipo = doc.getString("tipo") ?: "texto"
-                            when (tipo) {
-                                "foto" -> "$nome: 📷 Foto"
-                                "video" -> "$nome: 🎥 Vídeo"
-                                "arquivo" -> "$nome: 📎 Arquivo"
+                            val apagada = doc.getBoolean("apagada") ?: false
+
+                            when {
+                                apagada -> "$nome: 🚫 Mensagem apagada"
+                                tipo == "foto" -> "$nome: 📷 Foto"
+                                tipo == "video" -> "$nome: 🎥 Vídeo"
+                                tipo == "arquivo" -> "$nome: 📎 Arquivo"
                                 else -> "$nome: $texto"
                             }
                         } else "Nenhuma mensagem ainda"
@@ -169,6 +194,8 @@ class ListaConversasActivity : BaseActivity() {
     }
 
     private fun exibirConversas(itens: List<ConversaItem>, container: LinearLayout) {
+        container.removeAllViews()
+
         if (itens.isEmpty()) {
             val txtVazio = TextView(this@ListaConversasActivity).apply {
                 text = "Nenhuma conversa ainda"
@@ -278,7 +305,7 @@ class ListaConversasActivity : BaseActivity() {
                 ).await()
 
                 Toast.makeText(this@ListaConversasActivity, "Mensagens apagadas", Toast.LENGTH_SHORT).show()
-                carregarConversas()
+                // ✅ Não precisa recarregar: o listener vai atualizar
 
             } catch (e: Exception) {
                 Toast.makeText(
@@ -303,11 +330,10 @@ class ListaConversasActivity : BaseActivity() {
 
                 db.collection("chats").document(chatId).delete().await()
 
-                // ✅ Remove o chatId da lista do usuário
                 removerChatIdDoUsuario(emailUsuario, chatId)
 
                 Toast.makeText(this@ListaConversasActivity, "Conversa apagada", Toast.LENGTH_SHORT).show()
-                carregarConversas()
+                // ✅ Não precisa recarregar: o listener vai atualizar
 
             } catch (e: Exception) {
                 Toast.makeText(
@@ -378,7 +404,6 @@ class ListaConversasActivity : BaseActivity() {
                         }
 
                         val chatId = if (chatExistente != null) {
-                            // ✅ Garante chatsIds
                             atualizarChatsIds(emailUsuario, chatExistente.id)
                             atualizarChatsIds(emailOutro, chatExistente.id)
                             chatExistente.id
@@ -391,7 +416,6 @@ class ListaConversasActivity : BaseActivity() {
                             )
                             val novoId = db.collection("chats").add(novoChat).await().id
 
-                            // ✅ Adiciona chatId aos dois
                             atualizarChatsIds(emailUsuario, novoId)
                             atualizarChatsIds(emailOutro, novoId)
 
@@ -416,9 +440,6 @@ class ListaConversasActivity : BaseActivity() {
             .show()
     }
 
-    /**
-     * ✅ Adiciona o chatId na lista `chatsIds` do usuário (idempotente).
-     */
     private suspend fun atualizarChatsIds(email: String, chatId: String) {
         try {
             val userRef = db.collection("usuarios").document(email)

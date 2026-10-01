@@ -51,12 +51,12 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     .get()
                     .await()
 
-                equipesCriador.documents.forEach { doc ->
+                for (doc in equipesCriador.documents) {
                     val equipeId = doc.id
                     val nome = doc.getString("nome") ?: "Equipe"
                     val descricao = doc.getString("descricao") ?: "Sem descrição"
 
-                    // Busca trabalhos
+                    // Conta trabalhos (volta pro get().size())
                     val trabalhos = db.collection("trabalhos")
                         .whereEqualTo("equipeId", equipeId)
                         .get()
@@ -93,6 +93,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     val nome = equipeDoc.getString("nome") ?: "Equipe"
                     val descricao = equipeDoc.getString("descricao") ?: "Sem descrição"
 
+                    // Conta trabalhos
                     val trabalhos = db.collection("trabalhos")
                         .whereEqualTo("equipeId", equipeId)
                         .get()
@@ -138,7 +139,6 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     txtPapel.text = equipe.papel
                     txtTrabalhos.text = "${equipe.totalTrabalhos} trabalhos"
 
-                    // Cor do papel
                     if (equipe.ehDono) {
                         txtPapel.setTextColor(android.graphics.Color.parseColor("#F5E6D0"))
                     } else {
@@ -147,12 +147,10 @@ class MinhasEquipesActivity : AppCompatActivity() {
 
                     view.setOnClickListener {
                         if (equipe.ehDono) {
-                            // Criador → produtos
                             val intent = Intent(this@MinhasEquipesActivity, produtos::class.java)
                             intent.putExtra("equipeId", equipe.equipeId)
                             startActivity(intent)
                         } else {
-                            // Membro → EntregarTrabalho
                             val intent = Intent(this@MinhasEquipesActivity, EntregarTrabalhoActivity::class.java)
                             intent.putExtra("equipeId", equipe.equipeId)
                             startActivity(intent)
