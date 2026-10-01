@@ -123,10 +123,15 @@ O que foi feito:
 - AnexoHelperTest — 9 testes (formatacao de bytes)
 - MensagemTest — 9 testes (data class + igualdade)
 - ItemChatTest — 9 testes (separadores de data)
+- AnexoHelperDetectarTipoTest — 21 testes (MIME type)
 - GitHub Actions configurado (roda testes a cada push)
 - Workflow valida build debug e gera APK
 
-Total: 27 testes unitarios.
+Total: 48 testes unitarios.
+
+Bugs detectados pelos testes:
+- Formatacao de MB/GB dependia da locale do dispositivo (corrigido com Locale.US)
+- Ordem do detectarTipo classificava .xlsx e .pptx como "documento" (corrigido)
 
 Impacto: Qualidade garantida automaticamente, deteccao de regressao em cada commit.
 
@@ -178,7 +183,7 @@ Status: Nao iniciada.
 | Activities | 30     |
 | Helpers | 8      |
 | Colecoes Firestore | 14     |
-| Testes unitarios | 27     |
+| Testes unitarios | 48     |
 
 ---
 
@@ -189,7 +194,7 @@ Status: Nao iniciada.
 - [x] Real-time em telas criticas
 - [x] Cobertura de testes maior que 30%
 - [x] CI/CD funcionando
-- [ ] Documentacao de API
+- [x] Documentacao de API
 
 ---
 
