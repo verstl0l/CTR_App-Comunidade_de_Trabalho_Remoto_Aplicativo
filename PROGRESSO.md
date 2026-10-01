@@ -115,6 +115,23 @@ Impacto: App estavel, sem crashes conhecidos, UI correta.
 
 ---
 
+### Onda 5 Fase 2 — Testes Unitarios + CI/CD
+
+Objetivo: Adicionar cobertura de testes e automacao de build.
+
+O que foi feito:
+- AnexoHelperTest — 9 testes (formatacao de bytes)
+- MensagemTest — 9 testes (data class + igualdade)
+- ItemChatTest — 9 testes (separadores de data)
+- GitHub Actions configurado (roda testes a cada push)
+- Workflow valida build debug e gera APK
+
+Total: 27 testes unitarios.
+
+Impacto: Qualidade garantida automaticamente, deteccao de regressao em cada commit.
+
+---
+
 ### Extras — Otimizacoes
 
 | Numero | Onde | O que foi feito | Ganho |
@@ -130,16 +147,7 @@ Impacto: Menos leituras no Firestore, UI mais responsiva.
 
 ## Em Andamento
 
-### Onda 5 Fase 2 — Testes Unitarios + CI/CD
-
-Objetivo: Adicionar cobertura de testes e automacao de build.
-
-Progresso:
-- Concluido: AnexoHelperTest — 9 testes passando (formatacao de bytes)
-- Em andamento: MensagemTest
-- Pendente: ChatPaginacaoHelperTest
-- Pendente: GitHub Actions (CI)
-- Pendente: Badge no README
+Nenhuma onda em andamento no momento. Proximas ondas planejadas na secao abaixo.
 
 ---
 
@@ -164,13 +172,13 @@ Status: Nao iniciada.
 
 ## Metricas
 
-| Metrica | Valor |
-|---------|-------|
+| Metrica | Valor  |
+|---------|--------|
 | Linhas de codigo (Kotlin) | ~8.000 |
-| Activities | 30 |
-| Helpers | 8 |
-| Colecoes Firestore | 14 |
-| Testes unitarios | 9 (em crescimento) |
+| Activities | 30     |
+| Helpers | 8      |
+| Colecoes Firestore | 14     |
+| Testes unitarios | 27     |
 
 ---
 
@@ -180,7 +188,7 @@ Status: Nao iniciada.
 - [x] Rules de seguranca consistentes
 - [x] Real-time em telas criticas
 - [ ] Cobertura de testes maior que 30%
-- [ ] CI/CD funcionando
+- [x] CI/CD funcionando
 - [ ] Documentacao de API
 
 ---
