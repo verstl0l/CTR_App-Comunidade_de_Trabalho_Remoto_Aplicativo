@@ -15,7 +15,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -30,8 +29,8 @@ class NotificacoesActivity : BaseActivity() {
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
 
-    // ✅ Listener pra remover depois
-    private var listenerNotificacoes: ListenerRegistration? = null
+    // ✅ Guard contra chamadas simultaneas
+    private var carregando = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,50 +47,57 @@ class NotificacoesActivity : BaseActivity() {
 
         configurarBottomNavigation(R.id.nav_notifications)
 
-        // ✅ Inicia o listener em tempo real
-        carregarNotificacoes()
+        // ✅ NAO chama carregarNotificacoes aqui — o onResume cuida
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // ✅ Remove o listener ao sair
-        listenerNotificacoes?.remove()
-        listenerNotificacoes = null
+    override fun onResume() {
+        super.onResume()
+        if (emailUsuario.isNotEmpty()) {
+            carregando = false
+            carregarNotificacoes()
+        }
     }
 
     // ============================================================
-    // CARREGAR NOTIFICACOES (tempo real)
+    // CARREGAR NOTIFICACOES
     // ============================================================
     private fun carregarNotificacoes() {
-        // Remove listener antigo, se existir
-        listenerNotificacoes?.remove()
+        // ✅ Guard
+        if (carregando) return
+        carregando = true
 
         val container = findViewById<LinearLayout>(R.id.containerNotificacoes)
         val containerVazio = findViewById<LinearLayout>(R.id.containerVazio)
+        container.removeAllViews()
 
-        listenerNotificacoes = db.collection("notificacoes")
-            .whereEqualTo("destinatario", emailUsuario)
-            .orderBy("criadoEm", Query.Direction.DESCENDING)
-            .limit(100)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e("NOTIFICACOES", "Erro no listener: ${error.message}")
-                    return@addSnapshotListener
-                }
-                if (snapshot == null) return@addSnapshotListener
+        lifecycleScope.launch {
+            try {
+                val notificacoes = db.collection("notificacoes")
+                    .whereEqualTo("destinatario", emailUsuario)
+                    .orderBy("criadoEm", Query.Direction.DESCENDING)
+                    .limit(100)
+                    .get()
+                    .await()
 
-                container.removeAllViews()
-
-                if (snapshot.isEmpty) {
+                if (notificacoes.isEmpty) {
                     containerVazio.visibility = View.VISIBLE
-                    return@addSnapshotListener
+                    return@launch
                 }
 
                 containerVazio.visibility = View.GONE
 
+                // ✅ Deduplica (mesmo titulo + mensagem + tipo criados em <5s)
+                val unicas = notificacoes.documents.distinctBy { doc ->
+                    val tipo = doc.getString("tipo") ?: ""
+                    val titulo = doc.getString("titulo") ?: ""
+                    val msg = doc.getString("mensagem") ?: ""
+                    // Chave de deduplicacao: combina campos unicos
+                    "${tipo}_${titulo}_${msg}_${doc.getString("referenciaId") ?: ""}"
+                }
+
                 val inflater = LayoutInflater.from(this@NotificacoesActivity)
 
-                snapshot.documents.forEach { doc ->
+                unicas.forEach { doc ->
                     val notificacaoId = doc.id
                     val tipo = doc.getString("tipo") ?: "generico"
                     val titulo = doc.getString("titulo") ?: "Notificacao"
@@ -119,7 +125,6 @@ class NotificacoesActivity : BaseActivity() {
                     indicador.visibility = if (lida) View.GONE else View.VISIBLE
                     view.alpha = if (lida) 0.7f else 1f
 
-                    // Clique: marca como lida + navega
                     view.setOnClickListener {
                         if (!lida) {
                             lifecycleScope.launch {
@@ -129,7 +134,6 @@ class NotificacoesActivity : BaseActivity() {
                         navegarParaNotificacao(tipo, referenciaTipo, referenciaId)
                     }
 
-                    // Long press: apagar
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@NotificacoesActivity)
                             .setTitle("Apagar notificacao")
@@ -144,7 +148,14 @@ class NotificacoesActivity : BaseActivity() {
 
                     container.addView(view)
                 }
+
+            } catch (e: Exception) {
+                Log.e("NOTIFICACOES", getString(R.string.erro_generico, e.message ?: ""))
+            } finally {
+                // ✅ Libera o guard
+                carregando = false
             }
+        }
     }
 
     // ============================================================
@@ -190,7 +201,6 @@ class NotificacoesActivity : BaseActivity() {
     // NAVEGAR
     // ============================================================
     private fun navegarParaNotificacao(tipo: String, referenciaTipo: String, referenciaId: String) {
-        // ✅ Pedido de entrada → tela dedicada
         if (tipo == "pedido_entrada") {
             val intent = Intent(this@NotificacoesActivity, PedidosPendentesActivity::class.java)
             intent.putExtra("equipeId", referenciaId)
@@ -198,7 +208,6 @@ class NotificacoesActivity : BaseActivity() {
             return
         }
 
-        // Convites de equipe → tela dedicada
         if (referenciaTipo == "equipe") {
             lifecycleScope.launch {
                 try {
@@ -230,7 +239,7 @@ class NotificacoesActivity : BaseActivity() {
                         startActivity(intent)
                     }
                 } catch (e: Exception) {
-                    Log.e("NOTIFICACOES", "Erro ao checar convite: ${e.message}")
+                    Log.e("NOTIFICACOES", "Erro convite: ${e.message}")
                 }
             }
             return
@@ -276,7 +285,8 @@ class NotificacoesActivity : BaseActivity() {
                     "Todas marcadas como lidas",
                     Toast.LENGTH_SHORT
                 ).show()
-                // ✅ Não precisa recarregar: o listener já atualiza
+                carregando = false
+                carregarNotificacoes()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@NotificacoesActivity,
@@ -288,18 +298,15 @@ class NotificacoesActivity : BaseActivity() {
     }
 
     // ============================================================
-    // APAGAR
+    // APAGAR NOTIFICACAO
     // ============================================================
     private fun apagarNotificacao(notificacaoId: String) {
         lifecycleScope.launch {
             try {
                 db.collection("notificacoes").document(notificacaoId).delete().await()
-                Toast.makeText(
-                    this@NotificacoesActivity,
-                    "Notificacao apagada",
-                    Toast.LENGTH_SHORT
-                ).show()
-                // ✅ Não precisa recarregar: o listener já atualiza
+                Toast.makeText(this@NotificacoesActivity, "Notificacao apagada", Toast.LENGTH_SHORT).show()
+                carregando = false
+                carregarNotificacoes()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@NotificacoesActivity,

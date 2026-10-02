@@ -22,6 +22,9 @@ class MinhasEquipesActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
 
+    // ✅ Guard contra chamadas simultaneas
+    private var carregando = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_minhas_equipes)
@@ -33,11 +36,28 @@ class MinhasEquipesActivity : AppCompatActivity() {
         val btnVoltar = findViewById<Button>(R.id.btnVoltarMinhasEquipes)
         btnVoltar.setOnClickListener { finish() }
 
-        carregarEquipes()
+        val btnNovaEquipe = findViewById<Button>(R.id.btnNovaEquipe)
+        btnNovaEquipe.setOnClickListener {
+            startActivity(Intent(this, CriarEquipeActivity::class.java))
+        }
+
+        // ✅ NAO chama carregarEquipes aqui — o onResume cuida
         configurarBottomNavigation()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (emailUsuario.isNotEmpty()) {
+            carregando = false
+            carregarEquipes()
+        }
+    }
+
     private fun carregarEquipes() {
+        // ✅ Guard
+        if (carregando) return
+        carregando = true
+
         val container = findViewById<LinearLayout>(R.id.containerMinhasEquipes)
         container.removeAllViews()
 
@@ -45,7 +65,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
             try {
                 val equipes = mutableListOf<EquipeItem>()
 
-                // 1. Equipes que o usuário é CRIADOR
+                // 1. Equipes que o usuario e CRIADOR
                 val equipesCriador = db.collection("equipes")
                     .whereEqualTo("criadorEmail", emailUsuario)
                     .get()
@@ -54,9 +74,8 @@ class MinhasEquipesActivity : AppCompatActivity() {
                 for (doc in equipesCriador.documents) {
                     val equipeId = doc.id
                     val nome = doc.getString("nome") ?: "Equipe"
-                    val descricao = doc.getString("descricao") ?: "Sem descrição"
+                    val descricao = doc.getString("descricao") ?: "Sem descricao"
 
-                    // Conta trabalhos (volta pro get().size())
                     val trabalhos = db.collection("trabalhos")
                         .whereEqualTo("equipeId", equipeId)
                         .get()
@@ -74,7 +93,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     )
                 }
 
-                // 2. Equipes que o usuário é MEMBRO
+                // 2. Equipes que o usuario e MEMBRO
                 val membros = db.collection("membros_equipe")
                     .whereEqualTo("email", emailUsuario)
                     .get()
@@ -84,16 +103,14 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     val equipeId = membro.getString("equipeId") ?: ""
                     val funcao = membro.getString("funcao") ?: "membro"
 
-                    // Verifica se já foi adicionada como criador
                     if (equipes.any { it.equipeId == equipeId }) continue
 
                     val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                     if (!equipeDoc.exists()) continue
 
                     val nome = equipeDoc.getString("nome") ?: "Equipe"
-                    val descricao = equipeDoc.getString("descricao") ?: "Sem descrição"
+                    val descricao = equipeDoc.getString("descricao") ?: "Sem descricao"
 
-                    // Conta trabalhos
                     val trabalhos = db.collection("trabalhos")
                         .whereEqualTo("equipeId", equipeId)
                         .get()
@@ -114,7 +131,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
                 // 3. Mostra na tela
                 if (equipes.isEmpty()) {
                     val txtVazio = TextView(this@MinhasEquipesActivity).apply {
-                        text = "Você não está em nenhuma equipe"
+                        text = "Voce nao esta em nenhuma equipe"
                         setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
                         textSize = 14f
                         setPadding(0, 60, 0, 60)
@@ -163,6 +180,9 @@ class MinhasEquipesActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("MINHAS_EQUIPES", "Erro: ${e.message}")
                 Toast.makeText(this@MinhasEquipesActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                // ✅ Libera o guard
+                carregando = false
             }
         }
     }
@@ -181,7 +201,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_groups -> true  // Já estamos aqui
+                R.id.nav_groups -> true  // Ja estamos aqui
                 R.id.nav_notifications -> {
                     startActivity(Intent(this, NotificacoesActivity::class.java))
                     finish()

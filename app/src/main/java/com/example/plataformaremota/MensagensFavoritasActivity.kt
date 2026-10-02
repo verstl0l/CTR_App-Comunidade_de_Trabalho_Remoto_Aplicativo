@@ -23,6 +23,9 @@ class MensagensFavoritasActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
 
+    // ✅ Guard contra chamadas simultaneas
+    private var carregando = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mensagens_favoritas)
@@ -34,18 +37,25 @@ class MensagensFavoritasActivity : AppCompatActivity() {
         val btnVoltar = findViewById<Button>(R.id.btnVoltarFavoritos)
         btnVoltar.setOnClickListener { finish() }
 
-        carregarFavoritos()
+        // ✅ NAO chama carregarFavoritos aqui — o onResume cuida
     }
 
     override fun onResume() {
         super.onResume()
-        carregarFavoritos()
+        if (emailUsuario.isNotEmpty()) {
+            carregando = false
+            carregarFavoritos()
+        }
     }
 
     // ============================================================
     // CARREGAR LISTA DE FAVORITOS
     // ============================================================
     private fun carregarFavoritos() {
+        // ✅ Guard
+        if (carregando) return
+        carregando = true
+
         val container = findViewById<LinearLayout>(R.id.containerFavoritos)
         container.removeAllViews()
 
@@ -68,14 +78,14 @@ class MensagensFavoritasActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Ordena por data (mais recentes primeiro)
-                val ordenados = favoritos.documents.sortedByDescending {
-                    it.getLong("criadoEm") ?: 0L
-                }
+                // ✅ Deduplica por mensagemId (evita duplicatas antigas)
+                val unicos = favoritos.documents
+                    .distinctBy { it.getString("mensagemId") ?: it.id }
+                    .sortedByDescending { it.getLong("criadoEm") ?: 0L }
 
                 val inflater = LayoutInflater.from(this@MensagensFavoritasActivity)
 
-                ordenados.forEach { doc ->
+                unicos.forEach { doc ->
                     val favoritoId = doc.id
                     val texto = doc.getString("texto") ?: "(sem texto)"
                     val nomeRemetente = doc.getString("nomeRemetente") ?: "Usuário"
@@ -124,12 +134,15 @@ class MensagensFavoritasActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("FAVORITOS", getString(R.string.erro_generico, e.message ?: ""))
+                Log.e("FAVORITOS", "Erro: ${e.message}")
                 Toast.makeText(
                     this@MensagensFavoritasActivity,
                     getString(R.string.erro_generico, e.message ?: ""),
                     Toast.LENGTH_LONG
                 ).show()
+            } finally {
+                // ✅ Libera o guard
+                carregando = false
             }
         }
     }
@@ -166,6 +179,7 @@ class MensagensFavoritasActivity : AppCompatActivity() {
             try {
                 db.collection("favoritos").document(favoritoId).delete().await()
                 Toast.makeText(this@MensagensFavoritasActivity, "Removido", Toast.LENGTH_SHORT).show()
+                carregando = false
                 carregarFavoritos()
             } catch (e: Exception) {
                 Toast.makeText(

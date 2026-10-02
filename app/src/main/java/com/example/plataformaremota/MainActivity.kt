@@ -1,14 +1,12 @@
 package com.example.plataformaremota
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -29,40 +27,40 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ✅ SEGURANÇA: verifica login ANTES de acessar UI
         auth = FirebaseAuth.getInstance()
-        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        val logado = auth.currentUser != null && prefs.getBoolean("logado", false)
+        db = FirebaseFirestore.getInstance()
 
-        if (!logado) {
+        // ✅ SEGURANÇA: verifica cache local ANTES de acessar UI
+        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+        val emailCache = prefs.getString("emailUsuario", "") ?: ""
+
+        if (emailCache.isEmpty()) {
+            // Sem cache: vai pro Login
+            Log.d("MAIN", "Sem cache. Indo pro Login")
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
         }
 
-
+        // ✅ Tem cache: segue normal (mesmo que auth.currentUser seja null)
+        Log.d("MAIN", "Cache OK: $emailCache. auth.currentUser: ${auth.currentUser?.email}")
 
         setContentView(R.layout.activity_inicial)
-        db = FirebaseFirestore.getInstance()
 
-        // ✅ IDs semânticos
         btnCadastrar = findViewById(R.id.btnCadastrar)
         btnEntrarEquipe = findViewById(R.id.btnEntrarEquipe)
         btnCriarEquipe = findViewById(R.id.btnCriarEquipe)
 
-        // ✅ Botão cadastrar
         btnCadastrar.setOnClickListener {
             startActivity(Intent(this, CadastroActivity::class.java))
         }
 
-        // ✅ Botão entrar equipe
         btnEntrarEquipe.setOnClickListener {
             startActivity(Intent(this, BuscarEquipesActivity::class.java))
         }
 
-        // ✅ Botão criar equipe
         btnCriarEquipe.setOnClickListener {
-            startActivity(Intent(this, produtos::class.java))
+            startActivity(Intent(this, CriarEquipeActivity::class.java))
         }
 
         // Botão de chat no canto superior direito
@@ -71,30 +69,32 @@ class MainActivity : BaseActivity() {
             startActivity(Intent(this, ListaConversasActivity::class.java))
         }
 
-        // ✅ Bottom nav em 1 linha
+        // Bottom nav
         configurarBottomNavigation(R.id.nav_home)
 
-        // ✅ MIGRAÇÃO: popula chatsIds e gruposIds para usuários antigos
+        // Migração de denormalização
         migrarDenormalizacao()
 
-        // ✅ Salva token OneSignal
+        // Salva token OneSignal
         salvarTokenOneSignal()
     }
 
     override fun onResume() {
         super.onResume()
 
-        // ✅ SEGURANÇA: verifica login novamente
-        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        if (auth.currentUser == null || !prefs.getBoolean("logado", false)) {
+        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+        val emailCache = prefs.getString("emailUsuario", "") ?: ""
+
+        // ✅ Só vai pro Login se NÃO tem cache
+        if (emailCache.isEmpty()) {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
         }
 
+        // Atualiza botões normalmente
         atualizarBotoes()
     }
-
 
     // ============================================================
     // ✅ Migração: popula chatsIds e gruposIds para usuários antigos
@@ -102,7 +102,11 @@ class MainActivity : BaseActivity() {
     private fun migrarDenormalizacao() {
         lifecycleScope.launch {
             try {
-                val email = auth.currentUser?.email ?: return@launch
+                val email = auth.currentUser?.email ?: run {
+                    val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+                    prefs.getString("emailUsuario", "") ?: return@launch
+                }
+
                 val userRef = db.collection("usuarios").document(email)
                 val userDoc = userRef.get().await()
 
@@ -148,7 +152,10 @@ class MainActivity : BaseActivity() {
                 delay(2000)
 
                 val subscriptionId = OneSignal.User.pushSubscription.id
-                val emailAtual = auth.currentUser?.email ?: ""
+                val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+                val emailAtual = auth.currentUser?.email
+                    ?: prefs.getString("emailUsuario", "")
+                    ?: ""
 
                 if (!subscriptionId.isNullOrEmpty() && emailAtual.isNotEmpty()) {
                     db.collection("usuarios").document(emailAtual)
@@ -168,26 +175,26 @@ class MainActivity : BaseActivity() {
     // ✅ Atualiza visibilidade dos botões
     // ============================================================
     private fun atualizarBotoes() {
-        val email = auth.currentUser?.email ?: ""
+        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
+        val emailEfetivo = auth.currentUser?.email
+            ?: prefs.getString("emailUsuario", "")
+            ?: ""
 
         lifecycleScope.launch {
             try {
                 val equipe = db.collection("equipes")
-                    .whereEqualTo("criadorEmail", email)
+                    .whereEqualTo("criadorEmail", emailEfetivo)
                     .limit(1)
                     .get()
                     .await()
 
-                val temEquipe = !equipe.isEmpty
+                // "CADASTRAR-SE" sempre escondido (já logado)
+                btnCadastrar.visibility = View.GONE
 
-                // ✅ "CADASTRAR-SE" só faz sentido se NÃO tiver equipe
-                // (já logado, botão ainda visível, mas se tiver equipe esconde)
-                btnCadastrar.visibility = View.GONE // ← sempre esconde: já tá logado
+                // "CRIAR EQUIPE" sempre visível
+                btnCriarEquipe.visibility = View.VISIBLE
 
-                // ✅ "CRIAR EQUIPE" só aparece se NÃO tem equipe
-                btnCriarEquipe.visibility = if (temEquipe) View.GONE else View.VISIBLE
-
-                // ✅ "ENTRAR EM EQUIPE" sempre visível
+                // "ENTRAR EM EQUIPE" sempre visível
                 btnEntrarEquipe.visibility = View.VISIBLE
 
             } catch (e: Exception) {

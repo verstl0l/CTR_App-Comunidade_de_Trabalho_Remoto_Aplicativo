@@ -14,14 +14,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Linha principal: info + botoes -->
+        <!-- Linha principal -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- Info do trabalho -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -59,45 +58,67 @@
 
             </LinearLayout>
 
-            <!-- Botao comentarios -->
+        </LinearLayout>
+
+        <!-- Linha de ações (com ícones + texto) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <!-- 💬 Comentários -->
             <Button
                 android:id="@+id/btnComentariosGerenciar"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:minWidth="0dp"
-                android:padding="8dp"
+                android:paddingHorizontal="8dp"
                 android:text="0"
                 android:textColor="@color/text_secondary"
-                android:textSize="16sp" />
+                android:textSize="14sp"
+                app:icon="@drawable/ic_chat"
+                app:iconGravity="textStart"
+                app:iconPadding="4dp"
+                app:iconSize="18dp"
+                app:iconTint="@color/text_secondary" />
 
-            <!-- Botao anexos -->
+            <!-- 📎 Anexos -->
             <Button
                 android:id="@+id/btnAnexosGerenciar"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:minWidth="0dp"
-                android:padding="8dp"
+                android:paddingHorizontal="8dp"
                 android:text="0"
                 android:textColor="@color/text_secondary"
-                android:textSize="16sp" />
+                android:textSize="14sp"
+                app:icon="@drawable/ic_notification_trabalho"
+                app:iconGravity="textStart"
+                app:iconPadding="4dp"
+                app:iconSize="18dp"
+                app:iconTint="@color/text_secondary" />
 
-            <!-- Botao convidar -->
+            <!-- 👤 Convidar -->
             <Button
                 android:id="@+id/btnConvidarGerenciar"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:minWidth="0dp"
-                android:padding="8dp"
-                android:text="C"
+                android:paddingHorizontal="8dp"
+                android:text="Convidar"
                 android:textColor="@color/accent"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:icon="@drawable/ic_person"
+                app:iconGravity="textStart"
+                app:iconPadding="4dp"
+                app:iconSize="18dp"
+                app:iconTint="@color/accent" />
 
         </LinearLayout>
 

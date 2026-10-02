@@ -34,7 +34,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         email = auth.currentUser?.email ?: ""
-        nomeUsuario = "Usuário"
+
         lifecycleScope.launch {
             try {
                 val userDoc = db.collection("usuarios").document(email).get().await()
@@ -53,6 +53,13 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         val btnEnviarConvite = findViewById<Button>(R.id.btnEnviarConviteEquipe)
 
         btnVoltar.setOnClickListener { finish() }
+
+        // ✅ Clicar no campo abre lista de usuários disponíveis
+        edtEmailConvite.isFocusable = false
+        edtEmailConvite.isClickable = true
+        edtEmailConvite.setOnClickListener {
+            mostrarDialogUsuariosDisponiveis()
+        }
 
         lifecycleScope.launch {
             try {
@@ -121,7 +128,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
             val emailConvidado = edtEmailConvite.text.toString().trim().lowercase()
 
             if (emailConvidado.isEmpty()) {
-                Toast.makeText(this, "Digite um email", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Selecione um usuário", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -175,7 +182,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
 
                     db.collection("convites_equipe").add(convite).await()
 
-                    // Notificacao in-app para o convidado
                     NotificacaoHelper.notificarConviteEquipe(
                         destinatario = emailConvidado,
                         remetente = email,
@@ -194,7 +200,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         }
 
         // ============================================================
-        // ✅ BUG CORRIGIDO: deleta subcoleções antes do doc raiz
+        // ✅ EXCLUIR EQUIPE (deleta subcoleções antes do doc raiz)
         // ============================================================
         btnExcluirEquipe.setOnClickListener {
             AlertDialog.Builder(this)
@@ -204,23 +210,18 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     equipeId?.let { id ->
                         lifecycleScope.launch {
                             try {
-                                // 1. Trabalhos
                                 val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", id).get().await()
                                 trabalhos.documents.forEach { db.collection("trabalhos").document(it.id).delete().await() }
 
-                                // 2. Membros
                                 val membros = db.collection("membros_equipe").whereEqualTo("equipeId", id).get().await()
                                 membros.documents.forEach { db.collection("membros_equipe").document(it.id).delete().await() }
 
-                                // 3. Convites
                                 val convites = db.collection("convites_equipe").whereEqualTo("equipeId", id).get().await()
                                 convites.documents.forEach { db.collection("convites_equipe").document(it.id).delete().await() }
 
-                                // 4. Pedidos
                                 val pedidos = db.collection("pedidos_entrada").whereEqualTo("equipeId", id).get().await()
                                 pedidos.documents.forEach { db.collection("pedidos_entrada").document(it.id).delete().await() }
 
-                                // 5. ✅ Mensagens do chat de equipe ANTES do doc raiz
                                 val msgsEquipe = db.collection("chats_equipe").document(id)
                                     .collection("mensagens").get().await()
                                 msgsEquipe.documents.forEach {
@@ -228,7 +229,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                         .collection("mensagens").document(it.id).delete().await()
                                 }
 
-                                // 6. ✅ Grupos + suas mensagens
                                 val grupos = db.collection("grupos").whereEqualTo("equipeId", id).get().await()
                                 grupos.documents.forEach { grupoDoc ->
                                     val msgsGrupo = grupoDoc.reference.collection("mensagens").get().await()
@@ -236,10 +236,7 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                     grupoDoc.reference.delete().await()
                                 }
 
-                                // 7. ✅ Doc raiz do chat de equipe
                                 db.collection("chats_equipe").document(id).delete().await()
-
-                                // 8. ✅ Equipe
                                 db.collection("equipes").document(id).delete().await()
 
                                 Toast.makeText(this@GerenciarEquipeActivity, "🗑️ Equipe excluída!", Toast.LENGTH_SHORT).show()
@@ -259,6 +256,77 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         configurarBottomNavigation()
     }
 
+    // ============================================================
+    // ✅ MOSTRA LISTA DE USUÁRIOS DISPONÍVEIS
+    // ============================================================
+    private fun mostrarDialogUsuariosDisponiveis() {
+        lifecycleScope.launch {
+            try {
+                val eqId = equipeId ?: run {
+                    Toast.makeText(this@GerenciarEquipeActivity, "Equipe não carregada", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // 1. Todos os usuários
+                val usuarios = db.collection("usuarios").get().await()
+
+                // 2. Membros atuais da equipe
+                val membros = db.collection("membros_equipe")
+                    .whereEqualTo("equipeId", eqId)
+                    .get()
+                    .await()
+
+                val emailsMembros = membros.documents.mapNotNull { it.getString("email") }.toSet()
+
+                // 3. Filtra: usuários que NÃO estão na equipe
+                val disponiveis = usuarios.documents
+                    .mapNotNull { doc ->
+                        val uEmail = doc.id
+                        val nome = doc.getString("nome") ?: uEmail
+                        val profissao = doc.getString("profissao") ?: ""
+                        if (uEmail !in emailsMembros) Triple(uEmail, nome, profissao) else null
+                    }
+                    .sortedBy { it.second.lowercase() }
+
+                if (disponiveis.isEmpty()) {
+                    Toast.makeText(
+                        this@GerenciarEquipeActivity,
+                        "Todos os usuários já estão na equipe",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+
+                val nomes = disponiveis.map { "${it.second} (${it.first})" }.toTypedArray()
+
+                AlertDialog.Builder(this@GerenciarEquipeActivity)
+                    .setTitle("Selecionar usuário (${disponiveis.size} disponíveis)")
+                    .setItems(nomes) { _, which ->
+                        val (emailEscolhido, nomeEscolhido, _) = disponiveis[which]
+                        findViewById<EditText>(R.id.edtEmailConviteEquipe).setText(emailEscolhido)
+                        Toast.makeText(
+                            this@GerenciarEquipeActivity,
+                            "Selecionado: $nomeEscolhido",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+
+            } catch (e: Exception) {
+                Log.e("GERENCIAR", "Erro lista usuários: ${e.message}")
+                Toast.makeText(
+                    this@GerenciarEquipeActivity,
+                    "Erro ao carregar usuários: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    // ============================================================
+    // ABRIR DIALOG EDITAR TRABALHO
+    // ============================================================
     private fun abrirDialogEditarTrabalho(
         trabalhoId: String,
         tituloAtual: String,
@@ -342,31 +410,11 @@ class GerenciarEquipeActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_chat -> {
-                    startActivity(Intent(this, ListaConversasActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_notifications -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, perfil::class.java))
-                    finish()
-                    true
-                }
+                R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); finish(); true }
+                R.id.nav_chat -> { startActivity(Intent(this, ListaConversasActivity::class.java)); finish(); true }
+                R.id.nav_groups -> { startActivity(Intent(this, MinhasEquipesActivity::class.java)); finish(); true }
+                R.id.nav_notifications -> { startActivity(Intent(this, NotificacoesActivity::class.java)); finish(); true }
+                R.id.nav_profile -> { startActivity(Intent(this, perfil::class.java)); finish(); true }
                 else -> false
             }
         }
@@ -399,13 +447,13 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                 // ✅ Ordena: dono primeiro, depois admins, depois membros
                 val membrosOrdenados = membros.documents.sortedWith(
                     compareBy(
-                        { it.getString("email") != email },       // dono por último? não, por primeiro
+                        { it.getString("email") != email },
                         { it.getString("funcao") != "administrador" },
                         { it.getString("nome") ?: "" }
                     )
                 )
 
-                // ✅ Pega o dono da equipe
+                // Pega o dono da equipe
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                 val emailDono = equipeDoc.getString("criadorEmail") ?: ""
 
@@ -419,7 +467,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     val t1 = view.findViewById<TextView>(android.R.id.text1)
                     val t2 = view.findViewById<TextView>(android.R.id.text2)
 
-                    // ✅ Mostra "VOCÊ" se for o usuário logado
                     val souEu = emailMembro == email
                     val ehDono = emailMembro == emailDono
 
@@ -435,34 +482,25 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     t2.setTextColor(android.graphics.Color.GRAY)
                     view.setPadding(0, 24, 0, 24)
 
-                    // Clique curto → perfil
                     view.setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, PerfilUsuarioActivity::class.java)
                         intent.putExtra("emailOutro", emailMembro)
                         startActivity(intent)
                     }
 
-                    // ✅ Long press → menu de ações (SÓ se pode fazer algo)
                     view.setOnLongClickListener {
                         val opcoes = mutableListOf<String>()
 
-                        // Não pode promover se já é admin ou é o dono
                         if (funcao != "administrador" && !ehDono) {
                             opcoes.add("Promover a Administrador")
                         }
-
-                        // Não pode rebaixar se já é membro
                         if (funcao == "administrador" && !ehDono) {
                             opcoes.add("Rebaixar a Membro")
                         }
-
-                        // ✅ NÃO pode remover a si mesmo
-                        // ✅ NÃO pode remover o dono
                         if (!souEu && !ehDono) {
                             opcoes.add("Remover da Equipe")
                         }
 
-                        // Se não tem nenhuma opção, não mostra nada
                         if (opcoes.isEmpty()) {
                             Toast.makeText(
                                 this@GerenciarEquipeActivity,
@@ -481,18 +519,10 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                             try {
                                                 db.collection("membros_equipe").document(membroId)
                                                     .update("funcao", "administrador").await()
-                                                Toast.makeText(
-                                                    this@GerenciarEquipeActivity,
-                                                    "✅ $nome promovido a administrador",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
+                                                Toast.makeText(this@GerenciarEquipeActivity, "✅ Promovido", Toast.LENGTH_SHORT).show()
                                                 carregarMembros(equipeId)
                                             } catch (e: Exception) {
-                                                Toast.makeText(
-                                                    this@GerenciarEquipeActivity,
-                                                    "Erro: ${e.message}",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
+                                                Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                                             }
                                         }
                                     }
@@ -501,18 +531,10 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                             try {
                                                 db.collection("membros_equipe").document(membroId)
                                                     .update("funcao", "membro").await()
-                                                Toast.makeText(
-                                                    this@GerenciarEquipeActivity,
-                                                    "✅ $nome rebaixado a membro",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
+                                                Toast.makeText(this@GerenciarEquipeActivity, "✅ Rebaixado", Toast.LENGTH_SHORT).show()
                                                 carregarMembros(equipeId)
                                             } catch (e: Exception) {
-                                                Toast.makeText(
-                                                    this@GerenciarEquipeActivity,
-                                                    "Erro: ${e.message}",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
+                                                Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                                             }
                                         }
                                     }
@@ -524,18 +546,10 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                                 lifecycleScope.launch {
                                                     try {
                                                         db.collection("membros_equipe").document(membroId).delete().await()
-                                                        Toast.makeText(
-                                                            this@GerenciarEquipeActivity,
-                                                            "✅ $nome removido",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
+                                                        Toast.makeText(this@GerenciarEquipeActivity, "✅ Removido", Toast.LENGTH_SHORT).show()
                                                         carregarMembros(equipeId)
                                                     } catch (e: Exception) {
-                                                        Toast.makeText(
-                                                            this@GerenciarEquipeActivity,
-                                                            "Erro: ${e.message}",
-                                                            Toast.LENGTH_LONG
-                                                        ).show()
+                                                        Toast.makeText(this@GerenciarEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                                                     }
                                                 }
                                             }
@@ -602,16 +616,12 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         AlertDialog.Builder(this@GerenciarEquipeActivity)
                             .setTitle("Pedido de $nome")
                             .setMessage("Motivos: $motivos\n\nEspecialidades: $especialidades")
-
-                            // Botao ACEITAR
                             .setPositiveButton("Aceitar") { _, _ ->
                                 lifecycleScope.launch {
                                     try {
-                                        // 1. Atualiza o status do pedido
                                         db.collection("pedidos_entrada").document(pedidoId)
                                             .update("status", "aceito").await()
 
-                                        // 2. Adiciona como membro com ID determinístico
                                         val membro = hashMapOf(
                                             "equipeId" to equipeId,
                                             "email" to emailSol,
@@ -619,11 +629,9 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                             "funcao" to "membro",
                                             "entrouEm" to System.currentTimeMillis()
                                         )
-                                        // ✅ ID determinístico
                                         val membroId = "${emailSol}_${equipeId}"
                                         db.collection("membros_equipe").document(membroId).set(membro).await()
 
-                                        // 3. Notifica o solicitante que foi aceito
                                         NotificacaoHelper.notificarPedidoAceito(
                                             destinatario = emailSol,
                                             remetente = email,
@@ -632,33 +640,21 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                             nomeEquipe = nomeEquipe
                                         )
 
-                                        Toast.makeText(
-                                            this@GerenciarEquipeActivity,
-                                            "Pedido aceito!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(this@GerenciarEquipeActivity, "Pedido aceito!", Toast.LENGTH_SHORT).show()
                                         carregarPedidos(equipeId)
                                         carregarMembros(equipeId)
 
                                     } catch (e: Exception) {
-                                        Toast.makeText(
-                                            this@GerenciarEquipeActivity,
-                                            getString(R.string.erro_generico, e.message ?: ""),
-                                            Toast.LENGTH_LONG
-                                        ).show()
+                                        Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
                                     }
                                 }
                             }
-
-                            // Botao RECUSAR
                             .setNegativeButton("Recusar") { _, _ ->
                                 lifecycleScope.launch {
                                     try {
-                                        // 1. Atualiza o status do pedido
                                         db.collection("pedidos_entrada").document(pedidoId)
                                             .update("status", "recusado").await()
 
-                                        // 2. Notifica o solicitante que foi recusado
                                         NotificacaoHelper.criar(
                                             destinatario = emailSol,
                                             tipo = "pedido_recusado",
@@ -670,24 +666,14 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                                             nomeRemetente = nomeUsuario
                                         )
 
-                                        Toast.makeText(
-                                            this@GerenciarEquipeActivity,
-                                            "Pedido recusado",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(this@GerenciarEquipeActivity, "Pedido recusado", Toast.LENGTH_SHORT).show()
                                         carregarPedidos(equipeId)
 
                                     } catch (e: Exception) {
-                                        Toast.makeText(
-                                            this@GerenciarEquipeActivity,
-                                            getString(R.string.erro_generico, e.message ?: ""),
-                                            Toast.LENGTH_LONG
-                                        ).show()
+                                        Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
                                     }
                                 }
                             }
-
-                            // Botao extra (opcional): so fecha
                             .setNeutralButton("Depois", null)
                             .show()
                     }
@@ -737,7 +723,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                     view.findViewById<TextView>(R.id.txtInfoGerenciar).text = "$categoria - $prazo"
                     view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
 
-                    // Conta comentarios
                     val btnComentarios = view.findViewById<Button>(R.id.btnComentariosGerenciar)
                     lifecycleScope.launch {
                         try {
@@ -748,7 +733,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Click -> abre ComentariosTrabalhoActivity
                     btnComentarios.setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, ComentariosTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
@@ -757,7 +741,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Conta anexos
                     val btnAnexos = view.findViewById<Button>(R.id.btnAnexosGerenciar)
                     lifecycleScope.launch {
                         try {
@@ -775,7 +758,6 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Convidar
                     view.findViewById<Button>(R.id.btnConvidarGerenciar).setOnClickListener {
                         val intent = Intent(this@GerenciarEquipeActivity, ConvidarTrabalhoActivity::class.java)
                         intent.putExtra("trabalhoId", trabalhoId)
@@ -783,12 +765,10 @@ class GerenciarEquipeActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Click curto no card -> editar
                     view.setOnClickListener {
                         abrirDialogEditarTrabalho(trabalhoId, titulo, descricao, categoria, prazo)
                     }
 
-                    // Long press -> excluir
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@GerenciarEquipeActivity)
                             .setTitle("Excluir trabalho")

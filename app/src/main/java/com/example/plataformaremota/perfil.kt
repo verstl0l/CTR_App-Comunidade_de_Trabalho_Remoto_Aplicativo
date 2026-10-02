@@ -17,7 +17,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.cloudinary.android.MediaManager
@@ -25,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -57,6 +57,7 @@ class perfil : BaseActivity() {
         val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
         email = auth.currentUser?.email ?: prefs.getString("emailUsuario", "") ?: ""
 
+        // Referencias das views
         val txtNomePerfil = findViewById<TextView>(R.id.txtNomePerfil)
         val txtProfissaoPerfil = findViewById<TextView>(R.id.txtProfissaoPerfil)
         val txtEmailPerfil = findViewById<TextView>(R.id.txtEmailPerfil)
@@ -70,10 +71,10 @@ class perfil : BaseActivity() {
         txtIniciais = findViewById(R.id.txtIniciais)
 
         txtEmailPerfil.text = email
-
-        carregarDados(txtNomePerfil, txtProfissaoPerfil, txtProfissaoCard, txtEquipeCard)
-        carregarLinks()
-        carregarFotoPerfil()
+        txtNomePerfil.text = "Carregando..."
+        txtProfissaoPerfil.text = ""
+        txtProfissaoCard.text = ""
+        txtEquipeCard.text = "Carregando..."
 
         cardAvatar.setOnClickListener { abrirGaleria() }
         cardCamera.setOnClickListener { abrirGaleria() }
@@ -88,10 +89,9 @@ class perfil : BaseActivity() {
 
         val btnMeusTrabalhos = findViewById<Button>(R.id.btnMeusTrabalhos)
         btnMeusTrabalhos.setOnClickListener {
-            startActivity(Intent(this, participantes::class.java))
+            startActivity(Intent(this, MeusTrabalhosActivity::class.java))
         }
 
-        // Botao de favoritos
         val btnFavoritos = findViewById<Button>(R.id.btnMensagensFavoritas)
         btnFavoritos.text = getString(R.string.perfil_favoritos)
         btnFavoritos.setOnClickListener {
@@ -108,14 +108,33 @@ class perfil : BaseActivity() {
                 .remove("nomeUsuario")
                 .remove("profissaoUsuario")
                 .apply()
-
             Toast.makeText(this, "Saindo da conta...", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this, LoginActivity::class.java))
             finishAffinity()
         }
 
-        // Bottom nav em 1 linha
         configurarBottomNavigation(R.id.nav_profile)
+
+        // ✅ Aguarda o Firebase Auth restaurar (sem travar a UI)
+        lifecycleScope.launch {
+            // Usa o SessionHelper se existir; senao, espera simples
+            val emailConfirmado = try {
+                SessionHelper.aguardarFirebaseAuth(this@perfil)
+            } catch (e: Exception) {
+                Log.e("PERFIL", "SessionHelper falhou: ${e.message}")
+                email
+            }
+
+            if (emailConfirmado.isNotEmpty()) {
+                email = emailConfirmado
+                txtEmailPerfil.text = email
+            }
+
+            // Agora carrega com RETRY
+            carregarDados(txtNomePerfil, txtProfissaoPerfil, txtProfissaoCard, txtEquipeCard)
+            carregarLinksComRetry()
+            carregarFotoPerfilComRetry()
+        }
     }
 
     // ============================================================
@@ -128,7 +147,7 @@ class perfil : BaseActivity() {
     }
 
     // ============================================================
-    // UPLOAD DA FOTO (Cloudinary)
+    // UPLOAD DA FOTO
     // ============================================================
     private fun fazerUploadImagem(uri: Uri) {
         Toast.makeText(this, "Enviando foto...", Toast.LENGTH_SHORT).show()
@@ -191,39 +210,49 @@ class perfil : BaseActivity() {
     }
 
     // ============================================================
-    // CARREGA FOTO DO PERFIL
+    // CARREGA FOTO DO PERFIL (com retry)
     // ============================================================
-    private fun carregarFotoPerfil() {
+    private fun carregarFotoPerfilComRetry() {
         lifecycleScope.launch {
-            try {
-                val usuarioDoc = db.collection("usuarios").document(email).get().await()
-                val fotoUrl = usuarioDoc.getString("fotoUrl") ?: ""
-                val nome = usuarioDoc.getString("nome") ?: "ME"
+            var tentativas = 0
+            val maxTentativas = 10
 
-                if (fotoUrl.isNotEmpty()) {
-                    Glide.with(this@perfil)
-                        .load(fotoUrl)
-                        .signature(com.bumptech.glide.signature.ObjectKey(fotoUrl))
-                        .circleCrop()
-                        .into(imgAvatar)
-                    txtIniciais.visibility = View.GONE
-                } else {
-                    val iniciais = nome.split(" ")
-                        .take(2)
-                        .map { it.firstOrNull()?.uppercase() ?: "" }
-                        .joinToString("")
-                    txtIniciais.text = iniciais.ifEmpty { "ME" }
-                    txtIniciais.visibility = View.VISIBLE
-                    imgAvatar.setImageDrawable(null)
+            while (tentativas < maxTentativas) {
+                try {
+                    val usuarioDoc = db.collection("usuarios").document(email).get().await()
+                    val fotoUrl = usuarioDoc.getString("fotoUrl") ?: ""
+                    val nome = usuarioDoc.getString("nome") ?: "ME"
+
+                    if (fotoUrl.isNotEmpty()) {
+                        Glide.with(this@perfil)
+                            .load(fotoUrl)
+                            .signature(com.bumptech.glide.signature.ObjectKey(fotoUrl))
+                            .circleCrop()
+                            .into(imgAvatar)
+                        txtIniciais.visibility = View.GONE
+                    } else {
+                        val iniciais = nome.split(" ")
+                            .take(2)
+                            .map { it.firstOrNull()?.uppercase() ?: "" }
+                            .joinToString("")
+                        txtIniciais.text = iniciais.ifEmpty { "ME" }
+                        txtIniciais.visibility = View.VISIBLE
+                        imgAvatar.setImageDrawable(null)
+                    }
+                    return@launch
+
+                } catch (e: Exception) {
+                    tentativas++
+                    Log.w("PERFIL", "Foto tentativa $tentativas falhou: ${e.message}")
+                    if (tentativas >= maxTentativas) return@launch
+                    delay(2000)
                 }
-            } catch (e: Exception) {
-                Log.e("PERFIL", "Erro foto: ${e.message}")
             }
         }
     }
 
     // ============================================================
-    // CARREGA DADOS DO USUARIO
+    // CARREGA DADOS DO USUARIO (com retry)
     // ============================================================
     private fun carregarDados(
         txtNomePerfil: TextView,
@@ -232,145 +261,178 @@ class perfil : BaseActivity() {
         txtEquipeCard: TextView
     ) {
         lifecycleScope.launch {
-            try {
-                val usuarioDoc = db.collection("usuarios").document(email).get().await()
-                val nome = usuarioDoc.getString("nome") ?: "Usuário"
-                val profissao = usuarioDoc.getString("profissao") ?: "Profissão"
+            //  LOGS DE DIAGNOSTICO
+            Log.e("PERFIL", "===== DEBUG AUTH =====")
+            Log.e("PERFIL", "auth.currentUser: ${auth.currentUser?.email}")
+            Log.e("PERFIL", "auth.currentUser?.uid: ${auth.currentUser?.uid}")
+            Log.e("PERFIL", "FirebaseApp: ${com.google.firebase.FirebaseApp.getInstance().name}")
+            var tentativas = 0
+            val maxTentativas = 10
 
-                txtNomePerfil.text = nome
-                txtProfissaoPerfil.text = profissao
-                txtProfissaoCard.text = profissao
+            while (tentativas < maxTentativas) {
+                try {
+                    val usuarioDoc = db.collection("usuarios").document(email).get().await()
+                    val nome = usuarioDoc.getString("nome") ?: "Usuário"
+                    val profissao = usuarioDoc.getString("profissao") ?: "Profissão"
 
-                val equipeCriador = db.collection("equipes")
-                    .whereEqualTo("criadorEmail", email)
-                    .limit(1)
-                    .get()
-                    .await()
+                    txtNomePerfil.text = nome
+                    txtProfissaoPerfil.text = profissao
+                    txtProfissaoCard.text = profissao
 
-                if (!equipeCriador.isEmpty) {
-                    txtEquipeCard.text = equipeCriador.documents[0].getString("nome")
-                } else {
-                    val membro = db.collection("membros_equipe")
-                        .whereEqualTo("email", email)
+                    val equipeCriador = db.collection("equipes")
+                        .whereEqualTo("criadorEmail", email)
                         .limit(1)
                         .get()
                         .await()
 
-                    if (!membro.isEmpty) {
-                        val equipeId = membro.documents[0].getString("equipeId") ?: ""
-                        val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-                        txtEquipeCard.text = equipeDoc.getString("nome") ?: "Nenhuma equipe"
+                    if (!equipeCriador.isEmpty) {
+                        txtEquipeCard.text = equipeCriador.documents[0].getString("nome")
                     } else {
-                        txtEquipeCard.text = "Nenhuma equipe"
-                    }
-                }
+                        val membro = db.collection("membros_equipe")
+                            .whereEqualTo("email", email)
+                            .limit(1)
+                            .get()
+                            .await()
 
-            } catch (e: Exception) {
-                Log.e("PERFIL", "Erro: ${e.message}")
+                        if (!membro.isEmpty) {
+                            val equipeId = membro.documents[0].getString("equipeId") ?: ""
+                            val equipeDoc = db.collection("equipes").document(equipeId).get().await()
+                            txtEquipeCard.text = equipeDoc.getString("nome") ?: "Nenhuma equipe"
+                        } else {
+                            txtEquipeCard.text = "Nenhuma equipe"
+                        }
+                    }
+
+                    Log.d("PERFIL", "✅ Dados carregados na tentativa ${tentativas + 1}")
+                    return@launch
+
+                } catch (e: Exception) {
+                    tentativas++
+                    Log.w("PERFIL", "Dados tentativa $tentativas falhou: ${e.message}")
+
+                    if (tentativas >= maxTentativas) {
+                        txtNomePerfil.text = "Erro ao carregar"
+                        txtProfissaoPerfil.text = "-"
+                        txtEquipeCard.text = "Erro ao carregar"
+                        return@launch
+                    }
+                    delay(2000)
+                }
             }
         }
     }
 
     // ============================================================
-    // CARREGA OS LINKS (lista nova com migracao automatica)
+    // CARREGA OS LINKS (com retry)
     // ============================================================
-    private fun carregarLinks() {
+    private fun carregarLinksComRetry() {
+        lifecycleScope.launch {
+            var tentativas = 0
+            val maxTentativas = 10
+
+            while (tentativas < maxTentativas) {
+                try {
+                    renderizarLinks()
+                    return@launch
+                } catch (e: Exception) {
+                    tentativas++
+                    Log.w("PERFIL", "Links tentativa $tentativas falhou: ${e.message}")
+                    if (tentativas >= maxTentativas) return@launch
+                    delay(2000)
+                }
+            }
+        }
+    }
+
+    private suspend fun renderizarLinks() {
         val containerLinks = findViewById<LinearLayout>(R.id.containerLinks)
         val txtSemLinks = findViewById<TextView>(R.id.txtSemLinks)
 
         containerLinks.removeAllViews()
 
-        lifecycleScope.launch {
-            try {
-                val usuarioDoc = db.collection("usuarios").document(email).get().await()
+        val usuarioDoc = db.collection("usuarios").document(email).get().await()
 
-                val links = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
+        val links = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
 
-                // Migracao automatica dos campos antigos
-                val linkedinAntigo = usuarioDoc.getString("linkedin") ?: ""
-                val githubAntigo = usuarioDoc.getString("github") ?: ""
-                val portfolioAntigo = usuarioDoc.getString("portfolio") ?: ""
+        val linkedinAntigo = usuarioDoc.getString("linkedin") ?: ""
+        val githubAntigo = usuarioDoc.getString("github") ?: ""
+        val portfolioAntigo = usuarioDoc.getString("portfolio") ?: ""
 
-                val linksMigrados = mutableListOf<Map<String, String>>()
-                linksMigrados.addAll(links)
+        val linksMigrados = mutableListOf<Map<String, String>>()
+        linksMigrados.addAll(links)
 
-                if (links.isEmpty()) {
-                    if (linkedinAntigo.isNotEmpty()) {
-                        linksMigrados.add(hashMapOf("tipo" to "linkedin", "url" to linkedinAntigo))
-                    }
-                    if (githubAntigo.isNotEmpty()) {
-                        linksMigrados.add(hashMapOf("tipo" to "github", "url" to githubAntigo))
-                    }
-                    if (portfolioAntigo.isNotEmpty()) {
-                        linksMigrados.add(hashMapOf("tipo" to "portfolio", "url" to portfolioAntigo))
-                    }
-
-                    if (linksMigrados.isNotEmpty()) {
-                        db.collection("usuarios").document(email)
-                            .update("links", linksMigrados).await()
-                    }
-                }
-
-                if (linksMigrados.isEmpty()) {
-                    txtSemLinks.visibility = View.VISIBLE
-                    return@launch
-                }
-
-                txtSemLinks.visibility = View.GONE
-
-                val inflater = LayoutInflater.from(this@perfil)
-
-                linksMigrados.forEachIndexed { index, link ->
-                    val tipo = link["tipo"] ?: "outro"
-                    val url = link["url"] ?: ""
-
-                    if (url.isEmpty()) return@forEachIndexed
-
-                    val view = inflater.inflate(R.layout.item_link, containerLinks, false)
-
-                    val cardLogo = view.findViewById<MaterialCardView>(R.id.cardLogoLink)
-                    val txtLogo = view.findViewById<TextView>(R.id.txtLogoLink)
-                    val txtUrl = view.findViewById<TextView>(R.id.txtUrlLink)
-                    val btnRemover = view.findViewById<Button>(R.id.btnRemoverLink)
-
-                    val (logo, corFundo, corTexto) = identificarLogo(url, tipo)
-                    txtLogo.text = logo
-                    cardLogo.setCardBackgroundColor(Color.parseColor(corFundo))
-                    txtLogo.setTextColor(Color.parseColor(corTexto))
-
-                    txtUrl.text = encurtarUrl(url)
-
-                    view.setOnClickListener {
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            startActivity(intent)
-                        } catch (e: Exception) {
-                            Toast.makeText(this@perfil, "Link inválido", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-
-                    btnRemover.setOnClickListener {
-                        AlertDialog.Builder(this@perfil)
-                            .setTitle("Remover link")
-                            .setMessage("Deseja remover este link?")
-                            .setPositiveButton("Sim") { _, _ ->
-                                removerLink(index)
-                            }
-                            .setNegativeButton(R.string.cancelar, null)
-                            .show()
-                    }
-
-                    containerLinks.addView(view)
-                }
-
-            } catch (e: Exception) {
-                Log.e("PERFIL", "Erro links: ${e.message}")
+        if (links.isEmpty()) {
+            if (linkedinAntigo.isNotEmpty()) {
+                linksMigrados.add(hashMapOf("tipo" to "linkedin", "url" to linkedinAntigo))
             }
+            if (githubAntigo.isNotEmpty()) {
+                linksMigrados.add(hashMapOf("tipo" to "github", "url" to githubAntigo))
+            }
+            if (portfolioAntigo.isNotEmpty()) {
+                linksMigrados.add(hashMapOf("tipo" to "portfolio", "url" to portfolioAntigo))
+            }
+
+            if (linksMigrados.isNotEmpty()) {
+                db.collection("usuarios").document(email)
+                    .update("links", linksMigrados).await()
+            }
+        }
+
+        if (linksMigrados.isEmpty()) {
+            txtSemLinks.visibility = View.VISIBLE
+            return
+        }
+
+        txtSemLinks.visibility = View.GONE
+
+        val inflater = LayoutInflater.from(this@perfil)
+
+        linksMigrados.forEachIndexed { index, link ->
+            val tipo = link["tipo"] ?: "outro"
+            val url = link["url"] ?: ""
+
+            if (url.isEmpty()) return@forEachIndexed
+
+            val view = inflater.inflate(R.layout.item_link, containerLinks, false)
+
+            val cardLogo = view.findViewById<MaterialCardView>(R.id.cardLogoLink)
+            val txtLogo = view.findViewById<TextView>(R.id.txtLogoLink)
+            val txtUrl = view.findViewById<TextView>(R.id.txtUrlLink)
+            val btnRemover = view.findViewById<Button>(R.id.btnRemoverLink)
+
+            val (logo, corFundo, corTexto) = identificarLogo(url, tipo)
+            txtLogo.text = logo
+            cardLogo.setCardBackgroundColor(Color.parseColor(corFundo))
+            txtLogo.setTextColor(Color.parseColor(corTexto))
+
+            txtUrl.text = encurtarUrl(url)
+
+            view.setOnClickListener {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this@perfil, "Link inválido", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            btnRemover.setOnClickListener {
+                AlertDialog.Builder(this@perfil)
+                    .setTitle("Remover link")
+                    .setMessage("Deseja remover este link?")
+                    .setPositiveButton("Sim") { _, _ ->
+                        removerLink(index)
+                    }
+                    .setNegativeButton(R.string.cancelar, null)
+                    .show()
+            }
+
+            containerLinks.addView(view)
         }
     }
 
     // ============================================================
-    // IDENTIFICA A LOGO PELO TIPO/URL
+    // IDENTIFICA A LOGO
     // ============================================================
     private fun identificarLogo(url: String, tipo: String): Triple<String, String, String> {
         val urlLower = url.lowercase()
@@ -402,7 +464,7 @@ class perfil : BaseActivity() {
     }
 
     // ============================================================
-    // ENCURTA A URL
+    // ENCURTA URL
     // ============================================================
     private fun encurtarUrl(url: String): String {
         return try {
@@ -417,7 +479,7 @@ class perfil : BaseActivity() {
     }
 
     // ============================================================
-    // DIALOGO PARA ADICIONAR LINK
+    // DIALOGO ADICIONAR LINK
     // ============================================================
     private fun abrirDialogAdicionarLink() {
         val layout = LinearLayout(this).apply {
@@ -463,7 +525,7 @@ class perfil : BaseActivity() {
     }
 
     // ============================================================
-    // SALVA O LINK NO FIRESTORE (lista)
+    // SALVA LINK
     // ============================================================
     private fun salvarLink(url: String) {
         val urlLower = url.lowercase()
@@ -497,7 +559,7 @@ class perfil : BaseActivity() {
                     .update("links", novosLinks).await()
 
                 Toast.makeText(this@perfil, "Link adicionado", Toast.LENGTH_SHORT).show()
-                carregarLinks()
+                carregarLinksComRetry()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@perfil,
@@ -509,7 +571,7 @@ class perfil : BaseActivity() {
     }
 
     // ============================================================
-    // REMOVE O LINK POR INDICE
+    // REMOVE LINK
     // ============================================================
     private fun removerLink(index: Int) {
         lifecycleScope.launch {
@@ -528,7 +590,7 @@ class perfil : BaseActivity() {
                     .update("links", novosLinks).await()
 
                 Toast.makeText(this@perfil, "Link removido", Toast.LENGTH_SHORT).show()
-                carregarLinks()
+                carregarLinksComRetry()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@perfil,

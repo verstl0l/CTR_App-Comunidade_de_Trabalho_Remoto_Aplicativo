@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
@@ -20,16 +21,20 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
+    private var trabalhoId: String = ""
+    private var tituloTrabalho: String = ""
+    private var emailRemetente: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_convidar_trabalho)
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-        val emailRemetente = auth.currentUser?.email ?: ""
+        emailRemetente = auth.currentUser?.email ?: ""
 
-        val trabalhoId = intent.getStringExtra("trabalhoId") ?: ""
-        val tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: ""
+        trabalhoId = intent.getStringExtra("trabalhoId") ?: ""
+        tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: ""
 
         val txtTitulo = findViewById<TextView>(R.id.txtTituloTrabalhoConvite)
         val edtEmail = findViewById<EditText>(R.id.edtEmailConvidado)
@@ -40,11 +45,18 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
+        // ✅ Clicar no campo abre lista de usuários disponíveis
+        edtEmail.isFocusable = false
+        edtEmail.isClickable = true
+        edtEmail.setOnClickListener {
+            mostrarUsuariosDisponiveis()
+        }
+
         btnEnviar.setOnClickListener {
             val emailConvidado = edtEmail.text.toString().trim().lowercase()
 
             if (emailConvidado.isEmpty()) {
-                Toast.makeText(this, "Digite um email", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Selecione um usuário", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -75,7 +87,6 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
 
                     db.collection("convites_trabalho").add(convite).await()
 
-                    Log.d("CONVITE_TRABALHO", "✅ Convite enviado para $emailConvidado")
                     Toast.makeText(
                         this@ConvidarTrabalhoActivity,
                         "✅ Convite enviado para $emailConvidado",
@@ -93,35 +104,91 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
             }
         }
 
-        // ========== BOTTOM NAVIGATION ==========
+        configurarBottomNavigation()
+    }
+
+    // ============================================================
+    // ✅ MOSTRA LISTA DE USUÁRIOS DISPONÍVEIS
+    // ============================================================
+    private fun mostrarUsuariosDisponiveis() {
+        lifecycleScope.launch {
+            try {
+                val usuarios = db.collection("usuarios").get().await()
+
+                val convites = db.collection("convites_trabalho")
+                    .whereEqualTo("trabalhoId", trabalhoId)
+                    .get()
+                    .await()
+
+                val emailsComConvite = convites.documents
+                    .filter { it.getString("status") == "pendente" }
+                    .mapNotNull { it.getString("emailConvidado") }
+                    .toSet()
+
+                val disponiveis = usuarios.documents
+                    .mapNotNull { doc ->
+                        val email = doc.id
+                        val nome = doc.getString("nome") ?: email
+                        val profissao = doc.getString("profissao") ?: ""
+                        if (email != emailRemetente && email !in emailsComConvite) {
+                            Triple(email, nome, profissao)
+                        } else null
+                    }
+                    .sortedBy { it.second.lowercase() }
+
+                if (disponiveis.isEmpty()) {
+                    Toast.makeText(
+                        this@ConvidarTrabalhoActivity,
+                        "Nenhum usuário disponível para convidar",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+
+                val nomes = disponiveis.map { "${it.second} (${it.first})" }.toTypedArray()
+
+                AlertDialog.Builder(this@ConvidarTrabalhoActivity)
+                    .setTitle("Selecionar usuário (${disponiveis.size} disponíveis)")
+                    .setItems(nomes) { _, which ->
+                        val (emailEscolhido, nomeEscolhido, _) = disponiveis[which]
+                        val edtEmail = findViewById<EditText>(R.id.edtEmailConvidado)
+                        edtEmail.setText(emailEscolhido)
+                        Toast.makeText(
+                            this@ConvidarTrabalhoActivity,
+                            "Selecionado: $nomeEscolhido",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+
+            } catch (e: Exception) {
+                Log.e("CONVITE_TRABALHO", "Erro lista: ${e.message}")
+
+                val mensagem = if (e.message?.contains("PERMISSION_DENIED") == true) {
+                    "Este dispositivo tem uma limitação de segurança. Tente novamente ou use outro dispositivo."
+                } else {
+                    "Erro ao carregar usuários: ${e.message}"
+                }
+
+                Toast.makeText(
+                    this@ConvidarTrabalhoActivity,
+                    mensagem,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun configurarBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_chat -> {                                    // ✅ CORRIGIDO: faltava
-                    startActivity(Intent(this, ListaConversasActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_groups -> {                                  // ✅ CORRIGIDO: era produtos
-                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_notifications -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, perfil::class.java))
-                    finish()
-                    true
-                }
+                R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); finish(); true }
+                R.id.nav_chat -> { startActivity(Intent(this, ListaConversasActivity::class.java)); finish(); true }
+                R.id.nav_groups -> { startActivity(Intent(this, MinhasEquipesActivity::class.java)); finish(); true }
+                R.id.nav_notifications -> { startActivity(Intent(this, NotificacoesActivity::class.java)); finish(); true }
+                R.id.nav_profile -> { startActivity(Intent(this, perfil::class.java)); finish(); true }
                 else -> false
             }
         }

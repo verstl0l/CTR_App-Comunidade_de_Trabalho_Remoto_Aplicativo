@@ -109,7 +109,7 @@ class produtos : AppCompatActivity() {
         }
 
         btnChatEquipe.setOnClickListener {
-            val intent = Intent(this, ChatEquipeActivity::class.java)
+            val intent = Intent(this, ChatEquipeHubActivity::class.java)
             intent.putExtra("equipeId", equipeIdAtual)
             startActivity(intent)
         }

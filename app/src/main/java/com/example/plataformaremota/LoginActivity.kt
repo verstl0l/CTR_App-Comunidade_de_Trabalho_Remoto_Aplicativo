@@ -34,9 +34,7 @@ class LoginActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
 
         // Se ja esta logado, vai direto pra MainActivity
-        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
-        val logado = auth.currentUser != null && prefs.getBoolean("logado", false)
-        if (logado) {
+        if (auth.currentUser != null) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
@@ -47,6 +45,12 @@ class LoginActivity : AppCompatActivity() {
         btnEntrar = findViewById(R.id.btnEntrar)
 
         btnEntrar.setOnClickListener { fazerLogin() }
+
+        // Botao criar conta
+        val btnCadastrar = findViewById<Button>(R.id.btnCadastrar)
+        btnCadastrar.setOnClickListener {
+            startActivity(Intent(this, CadastroActivity::class.java))
+        }
     }
 
     // ============================================================
@@ -74,23 +78,31 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // Bloqueia multiplos cliques + feedback visual
         btnEntrar.isEnabled = false
         btnEntrar.text = "ENTRANDO..."
 
-        // Roda em background para nao travar a main thread (evita ANR)
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 auth.signInWithEmailAndPassword(email, senha).await()
 
-                // Salva prefs em background
+                // ✅ Salva prefs (UMA VEZ SÓ)
                 val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
                 prefs.edit()
                     .putBoolean("logado", true)
                     .putString("emailUsuario", email)
                     .apply()
 
-                // Busca nome/profissao no Firestore
+                // ✅ Força refresh do token
+                val user = auth.currentUser
+                Log.d("LOGIN", "Login OK. user: ${user?.email}, uid: ${user?.uid}")
+                try {
+                    user?.getIdToken(true)?.await()
+                    Log.d("LOGIN", "✅ Token refresh OK")
+                } catch (e: Exception) {
+                    Log.e("LOGIN", "❌ Erro refresh token: ${e.message}")
+                }
+
+                // ✅ Busca nome/profissao no Firestore
                 try {
                     val userDoc = db.collection("usuarios").document(email).get().await()
                     val nome = userDoc.getString("nome") ?: ""
@@ -103,13 +115,8 @@ class LoginActivity : AppCompatActivity() {
                     Log.e("LOGIN", "Erro ao buscar dados do usuario: ${e.message}")
                 }
 
-                // Volta para a main thread para navegar
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@LoginActivity,
-                        "✅ Login realizado!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@LoginActivity, "✅ Login realizado!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 }
@@ -119,8 +126,6 @@ class LoginActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     val mensagem = traduzirErro(e.message ?: "")
                     Toast.makeText(this@LoginActivity, mensagem, Toast.LENGTH_LONG).show()
-
-                    // Restaura o botao
                     btnEntrar.isEnabled = true
                     btnEntrar.text = "ENTRAR"
                 }
