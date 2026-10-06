@@ -124,15 +124,12 @@ class ChatPaginacaoHelper(
     private fun escutarAlteracoes() {
         if (!ativo) return
         try {
-            // Escuta TODAS as mensagens a partir do menor timestamp carregado
-            // (não só as novas — assim pega updates também)
-            val cursor = menorTimestampCarregado ?: 0L
-
+            // ✅ Escuta TODAS as mensagens a partir do menor timestamp carregado.
+            // Sem filtro `whereGreaterThan` — assim pega qualquer mensagem nova.
             val query = db.collection(collection).document(documentId)
                 .collection("mensagens")
-                // Escuta só as últimas 50 (que são as que podem mudar)
-                .whereGreaterThan("timestamp", maiorTimestampVisto - 3600000)
                 .orderBy("timestamp", Query.Direction.ASCENDING)
+                .startAfter(menorTimestampCarregado ?: 0L)   // a partir da primeira carregada
 
             listenerNovas = query.addSnapshotListener { snapshot, error ->
                 if (!ativo) return@addSnapshotListener
@@ -145,10 +142,10 @@ class ChatPaginacaoHelper(
                 val mensagensAtualizadas = snapshot.documents
                     .map { Mensagem.deDocumento(it) }
 
-                // Encontra novas (não conhecidas)
+                // Novas: as que não conhecemos
                 val novas = mensagensAtualizadas.filter { it.id !in idsConhecidos }
 
-                // Encontra atualizadas (já conhecidas mas com dados diferentes)
+                // Atualizadas: conhecidas mas com dados diferentes (ex: apagada, lida)
                 val atualizadas = mensagensAtualizadas.filter { nova ->
                     val antiga = todasMensagens.find { it.id == nova.id }
                     antiga != null && antiga != nova
@@ -156,13 +153,14 @@ class ChatPaginacaoHelper(
 
                 if (novas.isEmpty() && atualizadas.isEmpty()) return@addSnapshotListener
 
-                // Atualiza lista em memória
+                // Adiciona novas em memória
                 novas.forEach { nova ->
                     todasMensagens.add(nova)
                     idsConhecidos.add(nova.id)
                     maiorTimestampVisto = maxOf(maiorTimestampVisto, nova.timestamp)
                 }
 
+                // Atualiza em memória as que mudaram
                 atualizadas.forEach { nova ->
                     val index = todasMensagens.indexOfFirst { it.id == nova.id }
                     if (index >= 0) {
@@ -176,7 +174,6 @@ class ChatPaginacaoHelper(
                 }
 
                 if (atualizadas.isNotEmpty()) {
-                    // Reenvia a lista completa (isso regenera os separadores de data)
                     onListaAtualizada(todasMensagens.toList(), false)
                 }
             }

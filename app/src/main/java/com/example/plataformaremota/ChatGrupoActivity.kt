@@ -33,6 +33,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var nomeUsuario: String = "Usuário"
     private var grupoId: String = ""
     private var equipeId: String = ""
+    private var nomeGrupo: String = "Grupo"   // ✅ NOVO: variável da classe
 
     private var membrosGrupoCache: List<String> = emptyList()
 
@@ -115,7 +116,7 @@ class ChatGrupoActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
         grupoId = intent.getStringExtra("grupoId") ?: ""
-        val nomeGrupo = intent.getStringExtra("nomeGrupo") ?: "Grupo"
+        nomeGrupo = intent.getStringExtra("nomeGrupo") ?: "Grupo"   // ✅ salva na variável da classe
 
         if (grupoId.isEmpty()) {
             Toast.makeText(this, "Grupo não encontrado", Toast.LENGTH_SHORT).show(); finish(); return
@@ -298,12 +299,19 @@ class ChatGrupoActivity : AppCompatActivity() {
             try {
                 val msgs = db.collection("grupos").document(grupoId).collection("mensagens")
                     .whereEqualTo("lida", false).get().await()
-                if (msgs.isEmpty) return@launch
+                if (msgs.isEmpty) {
+                    // ✅ Mesmo sem msgs, zera o resumo
+                    ChatResumoHelper.zerarNaoLidas(emailUsuario, grupoId)
+                    return@launch
+                }
                 val batch = db.batch()
                 msgs.documents.forEach { doc ->
                     if ((doc.getString("remetente") ?: "") != emailUsuario) batch.update(doc.reference, "lida", true)
                 }
                 batch.commit().await()
+
+                // ✅ Zera o badge no resumo
+                ChatResumoHelper.zerarNaoLidas(emailUsuario, grupoId)
             } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
         }
     }
@@ -342,6 +350,25 @@ class ChatGrupoActivity : AppCompatActivity() {
         findViewById<EditText>(R.id.edtMensagemGrupo).requestFocus()
     }
 
+    // ============================================================
+    // ✅ ATUALIZAR RESUMO (só o MEU)
+    // ============================================================
+    private suspend fun atualizarResumoGrupo(ultimaMsg: String, ts: Long) {
+        try {
+            ChatResumoHelper.atualizarResumo(
+                emailUsuario = emailUsuario,
+                chatId = grupoId,
+                nome = nomeGrupo,
+                ultimaMsg = ultimaMsg,
+                timestamp = ts,
+                tipo = "grupo",
+                incrementarNaoLidas = false
+            )
+        } catch (e: Exception) {
+            Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}")
+        }
+    }
+
     private fun confirmarSairGrupo() {
         lifecycleScope.launch {
             try {
@@ -359,6 +386,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 db.collection("grupos").document(grupoId)
                                     .update("membros", membros.filter { it != emailUsuario }).await()
                                 removerGrupoIdDoUsuario(emailUsuario, grupoId)
+                                ChatResumoHelper.removerResumo(emailUsuario, grupoId)
                                 Toast.makeText(this@ChatGrupoActivity, "Você saiu", Toast.LENGTH_SHORT).show(); finish()
                             } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
                         }
@@ -368,7 +396,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ✅ CORRIGIDO: set + merge
+    // ✅ ENVIAR MENSAGEM
     // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
@@ -389,13 +417,15 @@ class ChatGrupoActivity : AppCompatActivity() {
                     "ultimaMensagem" to texto, "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
                 )
                 chatUpdates.putAll(montarUpdatesNaoLidas())
-                // ✅ set com merge (permite criar se não existir)
                 batch.set(
                     db.collection("grupos").document(grupoId),
                     chatUpdates,
                     SetOptions.merge()
                 )
                 batch.commit().await()
+
+                atualizarResumoGrupo(texto, ts)
+
                 typingHelper?.limpar(); cancelarResposta()
             } catch (e: Exception) {
                 Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
@@ -404,7 +434,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ✅ CORRIGIDO: set + merge
+    // ✅ ENVIAR FOTO
     // ============================================================
     private fun enviarFoto(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
@@ -440,6 +470,10 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 SetOptions.merge()
                             )
                             batch.commit().await()
+
+                            val textoResumo = if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda"
+                            atualizarResumoGrupo(textoResumo, ts)
+
                             Toast.makeText(this@ChatGrupoActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
@@ -455,7 +489,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ✅ CORRIGIDO: set + merge
+    // ✅ ENVIAR VÍDEO
     // ============================================================
     private fun enviarVideo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
@@ -492,6 +526,11 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 SetOptions.merge()
                             )
                             batch.commit().await()
+
+                            // ✅ TEXTO CORRETO: 🎥 Vídeo (não 📷 Foto)
+                            val textoResumo = if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda"
+                            atualizarResumoGrupo(textoResumo, ts)
+
                             Toast.makeText(this@ChatGrupoActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
@@ -507,7 +546,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ✅ CORRIGIDO: set + merge
+    // ✅ ENVIAR ARQUIVO
     // ============================================================
     private fun enviarArquivo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
@@ -560,6 +599,10 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 SetOptions.merge()
                             )
                             batch.commit().await()
+
+                            val textoResumo = if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda"
+                            atualizarResumoGrupo(textoResumo, ts)
+
                             Toast.makeText(this@ChatGrupoActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
@@ -715,9 +758,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
     }
 
-    // ============================================================
-// ABRIR INFO DA MENSAGEM
-// ============================================================
     private fun abrirInfoMensagem(msgId: String) {
         val msg = adapter.currentList
             .filterIsInstance<ItemChat.MensagemItem>()

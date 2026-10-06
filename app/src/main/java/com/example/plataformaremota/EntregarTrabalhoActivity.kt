@@ -24,6 +24,9 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
     private var equipeId: String = ""
     private var filtroAtual: String = "todos"
 
+    // ✅ NOVO: saber se o utilizador é dono da equipe
+    private var ehDono: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entregar_trabalho)
@@ -87,6 +90,10 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
 
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                 txtNomeEquipe.text = equipeDoc.getString("nome") ?: "Equipe"
+
+                // ✅ NOVO: verifica se o utilizador é o dono da equipe
+                val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
+                ehDono = criadorEmail.equals(email, ignoreCase = true)
 
                 btnChatEquipe.setOnClickListener {
                     val intent = Intent(this@EntregarTrabalhoActivity, ChatEquipeActivity::class.java)
@@ -198,11 +205,21 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
             val txtStatus = view.findViewById<TextView>(R.id.txtStatusTrabalhoMembro)
             atualizarStatusUI(txtStatus, status)
 
-            // Botao iniciar/concluir
+            // ============================================================
+            // ✅ ALTERAÇÃO: Dono não pode iniciar/concluir
+            // ============================================================
             val btnEntregar = view.findViewById<Button>(R.id.btnEntregarTrabalho)
-            atualizarBotao(btnEntregar, status)
-            btnEntregar.setOnClickListener {
-                mostrarOpcoesStatus(trabalhoId, status, container)
+
+            if (ehDono) {
+                // Dono da equipe: esconde o botão
+                btnEntregar.visibility = android.view.View.GONE
+            } else {
+                // Membro: mostra o botão normal
+                btnEntregar.visibility = android.view.View.VISIBLE
+                atualizarBotao(btnEntregar, status)
+                btnEntregar.setOnClickListener {
+                    mostrarOpcoesStatus(trabalhoId, status, container)
+                }
             }
 
             // Conta comentarios deste trabalho
@@ -216,7 +233,6 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                 }
             }
 
-            // Click no botao comentarios -> abre ComentariosTrabalhoActivity
             btnComentarios.setOnClickListener {
                 val intent = Intent(this@EntregarTrabalhoActivity, ComentariosTrabalhoActivity::class.java)
                 intent.putExtra("trabalhoId", trabalhoId)
@@ -235,7 +251,6 @@ class EntregarTrabalhoActivity : AppCompatActivity() {
                 }
             }
 
-            // Click no botao anexos -> abre AnexosTrabalhoActivity
             btnAnexos.setOnClickListener {
                 val intent = Intent(this@EntregarTrabalhoActivity, AnexosTrabalhoActivity::class.java)
                 intent.putExtra("trabalhoId", trabalhoId)

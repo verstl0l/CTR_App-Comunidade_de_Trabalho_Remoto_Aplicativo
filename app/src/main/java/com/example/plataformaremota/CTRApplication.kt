@@ -12,7 +12,6 @@ class CTRApplication : Application() {
         super.onCreate()
 
         // ✅ Inicializa o Firebase EXPLICITAMENTE antes de tudo
-        // (Garante que o FirebaseAuth tenha um FirebaseApp configurado)
         try {
             FirebaseApp.initializeApp(this)
             Log.d("APP", "✅ FirebaseApp inicializado: ${FirebaseApp.getInstance().name}")
@@ -20,14 +19,15 @@ class CTRApplication : Application() {
             Log.e("APP", "❌ Erro ao inicializar FirebaseApp: ${e.message}", e)
         }
 
-        // ✅ Inicializa o Cloudinary com chaves do BuildConfig
+        // ✅ No Android, o Firebase Auth JÁ persiste por padrão.
+        // Não existe setPersistence() no SDK Android — isso é do JS SDK.
+        // A persistência é controlada automaticamente pelo SDK e NÃO
+        // pode ser desligada via código.
+
+        // ✅ Inicializa o Cloudinary
         CloudinaryConfig.init(this)
 
-        // ✅ Inicializa o OneSignal com App ID do BuildConfig
+        // ✅ Inicializa o OneSignal
         OneSignal.initWithContext(this, BuildConfig.ONESIGNAL_APP_ID)
-
-        // ⚠️ NÃO chamar requestPermission aqui:
-        // no OneSignal v5, requestPermission() e suspend function
-        // e nao pode ser chamada no Application.onCreate()
     }
 }

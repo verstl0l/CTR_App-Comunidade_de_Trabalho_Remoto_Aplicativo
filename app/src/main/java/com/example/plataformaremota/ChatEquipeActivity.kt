@@ -32,6 +32,7 @@ class ChatEquipeActivity : AppCompatActivity() {
     private var emailUsuario: String = ""
     private var nomeUsuario: String = "Usuário"
     private var equipeId: String = ""
+    private var nomeEquipe: String = "Equipe"
 
     private var membrosEquipeCache: List<String> = emptyList()
 
@@ -139,7 +140,8 @@ class ChatEquipeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 nomeUsuario = db.collection("usuarios").document(emailUsuario).get().await().getString("nome") ?: "Usuário"
-                txtNomeEquipe.text = db.collection("equipes").document(equipeId).get().await().getString("nome") ?: "Equipe"
+                nomeEquipe = db.collection("equipes").document(equipeId).get().await().getString("nome") ?: "Equipe"
+                txtNomeEquipe.text = nomeEquipe
             } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro: ${e.message}") }
         }
 
@@ -302,12 +304,18 @@ class ChatEquipeActivity : AppCompatActivity() {
             try {
                 val msgs = db.collection("chats_equipe").document(equipeId).collection("mensagens")
                     .whereEqualTo("lida", false).get().await()
-                if (msgs.isEmpty) return@launch
+                if (msgs.isEmpty) {
+                    ChatResumoHelper.zerarNaoLidas(emailUsuario, equipeId)
+                    return@launch
+                }
                 val batch = db.batch()
                 msgs.documents.forEach { doc ->
                     if ((doc.getString("remetente") ?: "") != emailUsuario) batch.update(doc.reference, "lida", true)
                 }
                 batch.commit().await()
+
+                // ✅ Zera o badge no resumo
+                ChatResumoHelper.zerarNaoLidas(emailUsuario, equipeId)
             } catch (e: Exception) { Log.e("CHAT_EQUIPE", "Erro: ${e.message}") }
         }
     }
@@ -375,6 +383,9 @@ class ChatEquipeActivity : AppCompatActivity() {
                     SetOptions.merge()
                 )
                 batch.commit().await()
+
+                atualizarResumoEquipe(texto, ts)
+
                 typingHelper?.limpar(); cancelarResposta()
             } catch (e: Exception) {
                 Toast.makeText(this@ChatEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
@@ -419,6 +430,11 @@ class ChatEquipeActivity : AppCompatActivity() {
                                 SetOptions.merge()
                             )
                             batch.commit().await()
+
+                            val textoResumo = if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda"
+                            atualizarResumoEquipe(textoResumo, ts)
+
+
                             Toast.makeText(this@ChatEquipeActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
@@ -471,6 +487,9 @@ class ChatEquipeActivity : AppCompatActivity() {
                                 SetOptions.merge()
                             )
                             batch.commit().await()
+
+                            val textoResumo = if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda"
+
                             Toast.makeText(this@ChatEquipeActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
@@ -510,7 +529,7 @@ class ChatEquipeActivity : AppCompatActivity() {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
-                    val url = resultData?.get("secure_url") as? String
+                      val url = resultData?.get("secure_url") as? String
                     if (url != null) runOnUiThread { lifecycleScope.launch {
                         try {
                             val ts = System.currentTimeMillis()
@@ -539,6 +558,10 @@ class ChatEquipeActivity : AppCompatActivity() {
                                 SetOptions.merge()
                             )
                             batch.commit().await()
+
+                            val textoResumo = if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda"
+                            atualizarResumoEquipe(textoResumo, ts)
+
                             Toast.makeText(this@ChatEquipeActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
@@ -724,6 +747,23 @@ class ChatEquipeActivity : AppCompatActivity() {
         b < 1024 * 1024 -> "${b / 1024} KB"
         b < 1024 * 1024 * 1024 -> String.format("%.1f MB", b / (1024.0 * 1024.0))
         else -> String.format("%.1f GB", b / (1024.0 * 1024.0 * 1024.0))
+    }
+
+    private suspend fun atualizarResumoEquipe(ultimaMsg: String, ts: Long) {
+        try {
+            ChatResumoHelper.atualizarResumo(
+                emailUsuario = emailUsuario,
+                chatId = equipeId,
+                nome = nomeEquipe,
+                ultimaMsg = ultimaMsg,
+                timestamp = ts,
+                tipo = "equipe",
+                incrementarNaoLidas = false
+            )
+
+        } catch (e: Exception) {
+            Log.e("CHAT_EQUIPE", "Erro resumo: ${e.message}")
+        }
     }
 
     data class RespostaInfo(
