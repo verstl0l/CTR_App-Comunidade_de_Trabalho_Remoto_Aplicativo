@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
@@ -33,7 +32,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     private var nomeUsuario: String = "Usuário"
     private var grupoId: String = ""
     private var equipeId: String = ""
-    private var nomeGrupo: String = "Grupo"   // ✅ NOVO: variável da classe
+    private var nomeGrupo: String = "Grupo"
 
     private var membrosGrupoCache: List<String> = emptyList()
 
@@ -116,7 +115,7 @@ class ChatGrupoActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
         grupoId = intent.getStringExtra("grupoId") ?: ""
-        nomeGrupo = intent.getStringExtra("nomeGrupo") ?: "Grupo"   // ✅ salva na variável da classe
+        nomeGrupo = intent.getStringExtra("nomeGrupo") ?: "Grupo"
 
         if (grupoId.isEmpty()) {
             Toast.makeText(this, "Grupo não encontrado", Toast.LENGTH_SHORT).show(); finish(); return
@@ -289,28 +288,66 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    private fun montarUpdatesNaoLidas(): Map<String, Any> {
-        return membrosGrupoCache.associate { email -> "naoLidas.$email" to FieldValue.increment(1) }
+    // ============================================================
+    // ✅ INCREMENTAR naoLidas via Map (sem notação de ponto)
+    // ============================================================
+    private suspend fun incrementarNaoLidasGrupo() {
+        try {
+            val grupoDoc = db.collection("grupos").document(grupoId).get().await()
+            val naoLidasAtual = (grupoDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
+            val naoLidasNovo = naoLidasAtual.toMutableMap()
+
+            membrosGrupoCache.forEach { membro ->
+                val valorAtual = (naoLidasNovo[membro] as? Number)?.toLong() ?: 0L
+                naoLidasNovo[membro] = valorAtual + 1
+            }
+
+            db.collection("grupos").document(grupoId)
+                .update("naoLidas", naoLidasNovo).await()
+
+            Log.d("CHAT_GRUPO", "✅ naoLidas atualizado: $naoLidasNovo")
+        } catch (e: Exception) {
+            Log.e("CHAT_GRUPO", "❌ Erro incrementar: ${e.message}")
+        }
     }
 
+    // ============================================================
+    // ✅ MARCAR COMO LIDAS — zera naoLidas via Map
+    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (grupoId.isEmpty()) return
         lifecycleScope.launch {
             try {
                 val msgs = db.collection("grupos").document(grupoId).collection("mensagens")
                     .whereEqualTo("lida", false).get().await()
+
                 if (msgs.isEmpty) {
-                    // ✅ Mesmo sem msgs, zera o resumo
+                    val grupoDoc = db.collection("grupos").document(grupoId).get().await()
+                    val naoLidasAtual = (grupoDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
+                    val naoLidasNovo = naoLidasAtual.toMutableMap()
+                    naoLidasNovo[emailUsuario] = 0L
+
+                    db.collection("grupos").document(grupoId)
+                        .update("naoLidas", naoLidasNovo).await()
+
                     ChatResumoHelper.zerarNaoLidas(emailUsuario, grupoId)
                     return@launch
                 }
+
                 val batch = db.batch()
                 msgs.documents.forEach { doc ->
                     if ((doc.getString("remetente") ?: "") != emailUsuario) batch.update(doc.reference, "lida", true)
                 }
                 batch.commit().await()
 
-                // ✅ Zera o badge no resumo
+                val grupoDoc = db.collection("grupos").document(grupoId).get().await()
+                val naoLidasAtual = (grupoDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
+                val naoLidasNovo = naoLidasAtual.toMutableMap()
+                naoLidasNovo[emailUsuario] = 0L
+
+                db.collection("grupos").document(grupoId)
+                    .update("naoLidas", naoLidasNovo).await()
+
                 ChatResumoHelper.zerarNaoLidas(emailUsuario, grupoId)
             } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
         }
@@ -351,52 +388,7 @@ class ChatGrupoActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // ✅ ATUALIZAR RESUMO (só o MEU)
-    // ============================================================
-    private suspend fun atualizarResumoGrupo(ultimaMsg: String, ts: Long) {
-        try {
-            ChatResumoHelper.atualizarResumo(
-                emailUsuario = emailUsuario,
-                chatId = grupoId,
-                nome = nomeGrupo,
-                ultimaMsg = ultimaMsg,
-                timestamp = ts,
-                tipo = "grupo",
-                incrementarNaoLidas = false
-            )
-        } catch (e: Exception) {
-            Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}")
-        }
-    }
-
-    private fun confirmarSairGrupo() {
-        lifecycleScope.launch {
-            try {
-                val gd = db.collection("grupos").document(grupoId).get().await()
-                if (gd.getString("criadorEmail") == emailUsuario) {
-                    Toast.makeText(this@ChatGrupoActivity, "Você é o criador. Só pode excluir.", Toast.LENGTH_LONG).show()
-                    return@launch
-                }
-                AlertDialog.Builder(this@ChatGrupoActivity)
-                    .setTitle("Sair do grupo").setMessage("Tem certeza?")
-                    .setPositiveButton("Sair") { _, _ ->
-                        lifecycleScope.launch {
-                            try {
-                                val membros = gd.get("membros") as? List<*> ?: emptyList<Any>()
-                                db.collection("grupos").document(grupoId)
-                                    .update("membros", membros.filter { it != emailUsuario }).await()
-                                removerGrupoIdDoUsuario(emailUsuario, grupoId)
-                                ChatResumoHelper.removerResumo(emailUsuario, grupoId)
-                                Toast.makeText(this@ChatGrupoActivity, "Você saiu", Toast.LENGTH_SHORT).show(); finish()
-                            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
-                        }
-                    }.setNegativeButton(R.string.cancelar, null).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
-        }
-    }
-
-    // ============================================================
-    // ✅ ENVIAR MENSAGEM
+    // ✅ ENVIAR MENSAGEM (SEM batch.update com notação de ponto)
     // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
@@ -407,24 +399,38 @@ class ChatGrupoActivity : AppCompatActivity() {
                     "texto" to texto, "tipo" to "texto", "timestamp" to ts, "lida" to false
                 )
                 adicionarResposta(m)
-                val batch = db.batch()
+
+                // 1. Salva mensagem
                 val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
-                batch.set(msgRef, m)
+                msgRef.set(m).await()
+
+                // 2. Atualiza preview
                 val preview = hashMapOf<String, Any>(
                     "texto" to texto, "autorNome" to nomeUsuario, "tipo" to "texto", "timestamp" to ts
                 )
-                val chatUpdates = hashMapOf<String, Any>(
-                    "ultimaMensagem" to texto, "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
-                )
-                chatUpdates.putAll(montarUpdatesNaoLidas())
-                batch.set(
-                    db.collection("grupos").document(grupoId),
-                    chatUpdates,
-                    SetOptions.merge()
-                )
-                batch.commit().await()
+                db.collection("grupos").document(grupoId).update(
+                    mapOf(
+                        "ultimaMensagem" to texto,
+                        "ultimaMensagemPreview" to preview,
+                        "atualizadoEm" to ts
+                    )
+                ).await()
 
-                atualizarResumoGrupo(texto, ts)
+                // 3. Incrementa naoLidas via Map
+                incrementarNaoLidasGrupo()
+
+                // 4. Atualiza resumo (só do meu)
+                try {
+                    ChatResumoHelper.atualizarResumo(
+                        emailUsuario = emailUsuario,
+                        chatId = grupoId,
+                        nome = nomeGrupo,
+                        ultimaMsg = texto,
+                        timestamp = ts,
+                        tipo = "grupo",
+                        incrementarNaoLidas = false
+                    )
+                } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}") }
 
                 typingHelper?.limpar(); cancelarResposta()
             } catch (e: Exception) {
@@ -452,27 +458,32 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 "texto" to legenda, "fotoUrl" to url, "tipo" to "foto", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            val batch = db.batch()
+
                             val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
-                            batch.set(msgRef, m)
+                            msgRef.set(m).await()
+
                             val preview = hashMapOf<String, Any>(
                                 "texto" to legenda.ifEmpty { "Foto" }, "autorNome" to nomeUsuario,
                                 "tipo" to "foto", "timestamp" to ts
                             )
-                            val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda",
-                                "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
-                            )
-                            chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.set(
-                                db.collection("grupos").document(grupoId),
-                                chatUpdates,
-                                SetOptions.merge()
-                            )
-                            batch.commit().await()
+                            val textoPreview = if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda"
+                            db.collection("grupos").document(grupoId).update(
+                                mapOf(
+                                    "ultimaMensagem" to textoPreview,
+                                    "ultimaMensagemPreview" to preview,
+                                    "atualizadoEm" to ts
+                                )
+                            ).await()
 
-                            val textoResumo = if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda"
-                            atualizarResumoGrupo(textoResumo, ts)
+                            incrementarNaoLidasGrupo()
+
+                            try {
+                                ChatResumoHelper.atualizarResumo(
+                                    emailUsuario = emailUsuario, chatId = grupoId, nome = nomeGrupo,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "grupo",
+                                    incrementarNaoLidas = false
+                                )
+                            } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}") }
 
                             Toast.makeText(this@ChatGrupoActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
@@ -508,28 +519,32 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 "texto" to legenda, "videoUrl" to url, "tipo" to "video", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            val batch = db.batch()
+
                             val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
-                            batch.set(msgRef, m)
+                            msgRef.set(m).await()
+
                             val preview = hashMapOf<String, Any>(
                                 "texto" to legenda.ifEmpty { "Vídeo" }, "autorNome" to nomeUsuario,
                                 "tipo" to "video", "timestamp" to ts
                             )
-                            val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda",
-                                "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
-                            )
-                            chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.set(
-                                db.collection("grupos").document(grupoId),
-                                chatUpdates,
-                                SetOptions.merge()
-                            )
-                            batch.commit().await()
+                            val textoPreview = if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda"
+                            db.collection("grupos").document(grupoId).update(
+                                mapOf(
+                                    "ultimaMensagem" to textoPreview,
+                                    "ultimaMensagemPreview" to preview,
+                                    "atualizadoEm" to ts
+                                )
+                            ).await()
 
-                            // ✅ TEXTO CORRETO: 🎥 Vídeo (não 📷 Foto)
-                            val textoResumo = if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda"
-                            atualizarResumoGrupo(textoResumo, ts)
+                            incrementarNaoLidasGrupo()
+
+                            try {
+                                ChatResumoHelper.atualizarResumo(
+                                    emailUsuario = emailUsuario, chatId = grupoId, nome = nomeGrupo,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "grupo",
+                                    incrementarNaoLidas = false
+                                )
+                            } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}") }
 
                             Toast.makeText(this@ChatGrupoActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
@@ -581,27 +596,32 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 "tipo" to "arquivo", "timestamp" to ts, "lida" to false
                             )
                             adicionarResposta(m)
-                            val batch = db.batch()
+
                             val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
-                            batch.set(msgRef, m)
+                            msgRef.set(m).await()
+
                             val preview = hashMapOf<String, Any>(
                                 "texto" to legenda.ifEmpty { nF }, "autorNome" to nomeUsuario,
                                 "tipo" to "arquivo", "timestamp" to ts
                             )
-                            val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda",
-                                "ultimaMensagemPreview" to preview, "atualizadoEm" to ts
-                            )
-                            chatUpdates.putAll(montarUpdatesNaoLidas())
-                            batch.set(
-                                db.collection("grupos").document(grupoId),
-                                chatUpdates,
-                                SetOptions.merge()
-                            )
-                            batch.commit().await()
+                            val textoPreview = if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda"
+                            db.collection("grupos").document(grupoId).update(
+                                mapOf(
+                                    "ultimaMensagem" to textoPreview,
+                                    "ultimaMensagemPreview" to preview,
+                                    "atualizadoEm" to ts
+                                )
+                            ).await()
 
-                            val textoResumo = if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda"
-                            atualizarResumoGrupo(textoResumo, ts)
+                            incrementarNaoLidasGrupo()
+
+                            try {
+                                ChatResumoHelper.atualizarResumo(
+                                    emailUsuario = emailUsuario, chatId = grupoId, nome = nomeGrupo,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "grupo",
+                                    incrementarNaoLidas = false
+                                )
+                            } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}") }
 
                             Toast.makeText(this@ChatGrupoActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
@@ -615,6 +635,32 @@ class ChatGrupoActivity : AppCompatActivity() {
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             }).dispatch()
+    }
+
+    private fun confirmarSairGrupo() {
+        lifecycleScope.launch {
+            try {
+                val gd = db.collection("grupos").document(grupoId).get().await()
+                if (gd.getString("criadorEmail") == emailUsuario) {
+                    Toast.makeText(this@ChatGrupoActivity, "Você é o criador. Só pode excluir.", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                AlertDialog.Builder(this@ChatGrupoActivity)
+                    .setTitle("Sair do grupo").setMessage("Tem certeza?")
+                    .setPositiveButton("Sair") { _, _ ->
+                        lifecycleScope.launch {
+                            try {
+                                val membros = gd.get("membros") as? List<*> ?: emptyList<Any>()
+                                db.collection("grupos").document(grupoId)
+                                    .update("membros", membros.filter { it != emailUsuario }).await()
+                                removerGrupoIdDoUsuario(emailUsuario, grupoId)
+                                ChatResumoHelper.removerResumo(emailUsuario, grupoId)
+                                Toast.makeText(this@ChatGrupoActivity, "Você saiu", Toast.LENGTH_SHORT).show(); finish()
+                            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                        }
+                    }.setNegativeButton(R.string.cancelar, null).show()
+            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+        }
     }
 
     private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, nomeRem: String, ehRem: Boolean) {
@@ -731,15 +777,10 @@ class ChatGrupoActivity : AppCompatActivity() {
                 db.collection("grupos").document(grupoId).collection("mensagens").document(msgId)
                     .update(
                         mapOf(
-                            "apagada" to true,
-                            "texto" to "🚫 Mensagem apagada",
-                            "fotoUrl" to null,
-                            "videoUrl" to null,
-                            "arquivoUrl" to null,
-                            "nomeArquivo" to null,
-                            "tamanhoArquivo" to null,
-                            "mimeType" to null,
-                            "respostaPara" to null
+                            "apagada" to true, "texto" to "🚫 Mensagem apagada",
+                            "fotoUrl" to null, "videoUrl" to null, "arquivoUrl" to null,
+                            "nomeArquivo" to null, "tamanhoArquivo" to null,
+                            "mimeType" to null, "respostaPara" to null
                         )
                     ).await()
                 Toast.makeText(this@ChatGrupoActivity, "Mensagem apagada", Toast.LENGTH_SHORT).show()
@@ -775,12 +816,8 @@ class ChatGrupoActivity : AppCompatActivity() {
             append("Lida: ${if (msg.lida) "✅" else "❌"}\n")
             append("Tipo: ${msg.tipo}\n")
             if (msg.nomeArquivo != null) append("Arquivo: ${msg.nomeArquivo}\n")
-            if (msg.tamanhoArquivo > 0) {
-                append("Tamanho: ${formatarTamanhoInfo(msg.tamanhoArquivo)}\n")
-            }
-            if (msg.respostaPara != null) {
-                append("Resposta a: ${msg.respostaPara.nomeRemetente}\n")
-            }
+            if (msg.tamanhoArquivo > 0) append("Tamanho: ${formatarTamanhoInfo(msg.tamanhoArquivo)}\n")
+            if (msg.respostaPara != null) append("Resposta a: ${msg.respostaPara.nomeRemetente}\n")
         }
         AlertDialog.Builder(this)
             .setTitle("ℹ️ Informações da mensagem")

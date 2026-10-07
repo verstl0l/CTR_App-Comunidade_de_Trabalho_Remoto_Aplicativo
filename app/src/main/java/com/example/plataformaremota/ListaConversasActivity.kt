@@ -140,14 +140,25 @@ class ListaConversasActivity : BaseActivity() {
                 // ========== CHATS PV ==========
                 for (chatId in chatsIds) {
                     try {
-                        val chatDoc = db.collection("chats").document(chatId).get().await()
+                        val chatDoc = db.collection("chats").document(chatId)
+                            .get(com.google.firebase.firestore.Source.SERVER).await()
                         if (!chatDoc.exists()) continue
 
                         val timestampChat = chatDoc.getLong("atualizadoEm") ?: 0L
                         val resumoExistente = resumos.find { it["chatId"] == chatId }
                         val timestampResumo = resumoExistente?.get("timestamp") as? Long ?: 0L
 
-                        if (timestampChat > timestampResumo) {
+                        // ✅ Lê o naoLidas do CHAT (fonte da verdade)
+                        val naoLidasMapAtual = chatDoc.get("naoLidas") as? Map<*, *>
+                        val naoLidasChat = (naoLidasMapAtual?.get(emailUsuario) as? Number)?.toLong() ?: 0L
+
+                        // ✅ Lê o naoLidas do RESUMO atual
+                        val naoLidasResumo = (resumoExistente?.get("naoLidas") as? Number)?.toLong() ?: 0L
+
+                        Log.d("LISTA_CONVERSAS", "📊 Chat $chatId: emailUsuario='$emailUsuario', naoLidasMap=$naoLidasMapAtual")
+
+                        // ✅ CORREÇÃO: atualiza se o chat for mais novo OU se o naoLidas for diferente
+                        if (timestampChat > timestampResumo || naoLidasChat != naoLidasResumo) {
                             val participantes = chatDoc.get("participantes") as? List<*>
                             val outroEmail = participantes?.firstOrNull { it != emailUsuario } as? String ?: continue
 
@@ -155,8 +166,6 @@ class ListaConversasActivity : BaseActivity() {
                             val nomeOutro = outroUser.getString("nome") ?: outroEmail
 
                             val ultimaMsg = chatDoc.getString("ultimaMensagem") ?: ""
-                            val naoLidasMap = chatDoc.get("naoLidas") as? Map<*, *>
-                            val naoLidas = (naoLidasMap?.get(emailUsuario) as? Number)?.toLong() ?: 0L
 
                             resumos.removeAll { it["chatId"] == chatId }
                             resumos.add(
@@ -164,16 +173,15 @@ class ListaConversasActivity : BaseActivity() {
                                     "chatId" to chatId,
                                     "nome" to nomeOutro,
                                     "ultimaMsg" to ultimaMsg,
-                                    "timestamp" to timestampChat,
-                                    "naoLidas" to naoLidas,
+                                    "timestamp" to maxOf(timestampChat, timestampResumo),
+                                    "naoLidas" to naoLidasChat,
                                     "tipo" to "pv"
                                 )
                             )
                             alterou = true
-                            Log.d("LISTA_CONVERSAS", "🔄 Sincronizado chat: $chatId")
+                            Log.d("LISTA_CONVERSAS", "🔄 Sincronizado chat: $chatId (naoLidas=$naoLidasChat)")
                         }
                     } catch (e: Exception) {
-                        // ✅ Silencia PERMISSION_DENIED (chat que não é seu)
                         if (e.message?.contains("PERMISSION_DENIED") == true) {
                             Log.d("LISTA_CONVERSAS", "Chat $chatId não acessível, ignorando")
                         } else {
@@ -192,11 +200,19 @@ class ListaConversasActivity : BaseActivity() {
                         val resumoExistente = resumos.find { it["chatId"] == grupoId }
                         val timestampResumo = resumoExistente?.get("timestamp") as? Long ?: 0L
 
-                        if (timestampGrupo > timestampResumo) {
+                        // ✅ Lê o naoLidas do GRUPO
+                        val naoLidasMapAtual = grupoDoc.get("naoLidas") as? Map<*, *>
+                        val naoLidasGrupo = (naoLidasMapAtual?.get(emailUsuario) as? Number)?.toLong() ?: 0L
+
+                        // ✅ Lê o naoLidas do RESUMO atual
+                        val naoLidasResumo = (resumoExistente?.get("naoLidas") as? Number)?.toLong() ?: 0L
+
+                        Log.d("LISTA_CONVERSAS", "📊 Grupo $grupoId: naoLidasGrupo=$naoLidasGrupo, naoLidasResumo=$naoLidasResumo")
+
+                        // ✅ Atualiza se o grupo for mais novo OU se o naoLidas for diferente
+                        if (timestampGrupo > timestampResumo || naoLidasGrupo != naoLidasResumo) {
                             val nomeGrupo = grupoDoc.getString("nomeGrupo") ?: "Grupo"
                             val ultimaMsg = grupoDoc.getString("ultimaMensagem") ?: ""
-                            val naoLidasMap = grupoDoc.get("naoLidas") as? Map<*, *>
-                            val naoLidas = (naoLidasMap?.get(emailUsuario) as? Number)?.toLong() ?: 0L
 
                             resumos.removeAll { it["chatId"] == grupoId }
                             resumos.add(
@@ -204,13 +220,13 @@ class ListaConversasActivity : BaseActivity() {
                                     "chatId" to grupoId,
                                     "nome" to nomeGrupo,
                                     "ultimaMsg" to ultimaMsg,
-                                    "timestamp" to timestampGrupo,
-                                    "naoLidas" to naoLidas,
+                                    "timestamp" to maxOf(timestampGrupo, timestampResumo),
+                                    "naoLidas" to naoLidasGrupo,
                                     "tipo" to "grupo"
                                 )
                             )
                             alterou = true
-                            Log.d("LISTA_CONVERSAS", "🔄 Sincronizado grupo: $grupoId")
+                            Log.d("LISTA_CONVERSAS", "🔄 Sincronizado grupo: $grupoId (naoLidas=$naoLidasGrupo)")
                         }
                     } catch (e: Exception) {
                         if (e.message?.contains("PERMISSION_DENIED") == true) {

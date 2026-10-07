@@ -24,12 +24,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import com.google.firebase.firestore.Source
 
 class ChatActivity : AppCompatActivity() {
 
@@ -127,7 +125,6 @@ class ChatActivity : AppCompatActivity() {
         }
 
         if (outroEmail.isEmpty() && chatId.isEmpty()) {
-            Log.e("CHAT", "ChatActivity aberta sem outroEmail e sem chatId")
             Toast.makeText(this, "Conversa inválida", Toast.LENGTH_SHORT).show()
             finish()
             return
@@ -156,7 +153,7 @@ class ChatActivity : AppCompatActivity() {
                     Log.d("CHAT_DEBUG", "✅ outroEmail corrigido: '$outroEmail'")
                     if (!isFinishing && !isDestroyed) configurarUI()
                 } catch (e: Exception) {
-                    Log.e("CHAT", "Erro ao buscar outro participante: ${e.message}")
+                    Log.e("CHAT", "Erro: ${e.message}")
                     Toast.makeText(this@ChatActivity, "Erro ao abrir conversa", Toast.LENGTH_LONG).show()
                     finish()
                 }
@@ -175,7 +172,7 @@ class ChatActivity : AppCompatActivity() {
                 if (!isFinishing && !isDestroyed) configurarUI()
             } catch (e: Exception) {
                 Log.e("CHAT", "Erro ao criar chat: ${e.message}")
-                Toast.makeText(this@ChatActivity, "Erro ao abrir conversa: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                 finish()
             }
         }
@@ -200,7 +197,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     // ============================================================
-    // MARCAR COMO LIDAS
+    // MARCAR COMO LIDAS — agora zera naoLidas no doc do chat
     // ============================================================
     private fun marcarMensagensComoLidas() {
         if (chatId.isEmpty()) return
@@ -208,15 +205,37 @@ class ChatActivity : AppCompatActivity() {
             try {
                 val msgs = db.collection("chats").document(chatId).collection("mensagens")
                     .whereEqualTo("lida", false).get().await()
+
                 if (msgs.isEmpty) {
+                    // ✅ Zera mesmo sem mensagens
+                    val chatDoc = db.collection("chats").document(chatId).get().await()
+                    val naoLidasAtual = (chatDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
+                    val naoLidasNovo = naoLidasAtual.toMutableMap()
+                    naoLidasNovo[emailUsuario] = 0L
+
+                    db.collection("chats").document(chatId)
+                        .update("naoLidas", naoLidasNovo).await()
+
                     ChatResumoHelper.zerarNaoLidas(emailUsuario, chatId)
                     return@launch
                 }
+
                 val batch = db.batch()
                 msgs.documents.forEach { doc ->
-                    if ((doc.getString("remetente") ?: "") != emailUsuario) batch.update(doc.reference, "lida", true)
+                    if ((doc.getString("remetente") ?: "") != emailUsuario) {
+                        batch.update(doc.reference, "lida", true)
+                    }
                 }
                 batch.commit().await()
+
+                // ✅ Zera naoLidas no doc do chat
+                val chatDoc = db.collection("chats").document(chatId).get().await()
+                val naoLidasAtual = (chatDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
+                val naoLidasNovo = naoLidasAtual.toMutableMap()
+                naoLidasNovo[emailUsuario] = 0L
+
+                db.collection("chats").document(chatId)
+                    .update("naoLidas", naoLidasNovo).await()
 
                 ChatResumoHelper.zerarNaoLidas(emailUsuario, chatId)
             } catch (e: Exception) {
@@ -383,7 +402,6 @@ class ChatActivity : AppCompatActivity() {
             onListaAtualizada = { todas, inseriuNoTopo ->
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
-
                     adapter.submitList(ItemChat.deMensagens(todas)) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) {
                             recycler.scrollToPosition(adapter.itemCount - 1)
@@ -417,8 +435,6 @@ class ChatActivity : AppCompatActivity() {
     // RECARREGAR MENSAGENS
     // ============================================================
     private fun recarregarMensagens() {
-        Log.d("CHAT_DEBUG", "🔄 recarregarMensagens() chamado")
-
         paginacaoHelper?.destruir()
         paginacaoHelper = null
 
@@ -456,9 +472,6 @@ class ChatActivity : AppCompatActivity() {
         paginacaoHelper?.iniciar()
     }
 
-    // ============================================================
-    // GARANTIR CAMPO DIGITANDO
-    // ============================================================
     private suspend fun garantirCampoDigitando() {
         try {
             val docRef = db.collection("chats").document(chatId)
@@ -471,17 +484,11 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // CANCELAR RESPOSTA
-    // ============================================================
     private fun cancelarResposta() {
         respostaAtiva = null
         findViewById<LinearLayout>(R.id.containerRespondendo).visibility = View.GONE
     }
 
-    // ============================================================
-    // VERIFICAR BLOQUEIO
-    // ============================================================
     private fun verificarBloqueio(edt: EditText, btn: Button) {
         lifecycleScope.launch {
             try {
@@ -500,9 +507,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // CRIAR OU BUSCAR CHAT
-    // ============================================================
     private suspend fun criarOuBuscarChat(): String {
         val existente = db.collection("chats").whereArrayContains("participantes", emailUsuario).get().await()
         val chatExistente = existente.documents.find { doc ->
@@ -515,7 +519,8 @@ class ChatActivity : AppCompatActivity() {
                 "participantes" to listOf(emailUsuario, outroEmail),
                 "ultimaMensagem" to "", "atualizadoEm" to System.currentTimeMillis(),
                 "tipo" to "individual",
-                "digitando" to emptyMap<String, Long>()
+                "digitando" to emptyMap<String, Long>(),
+                "naoLidas" to emptyMap<String, Long>()
             )
             val id = db.collection("chats").add(novo).await().id
             garantirChatsIdsDenormalizados(id); id
@@ -536,15 +541,32 @@ class ChatActivity : AppCompatActivity() {
         } catch (e: Exception) { Log.e("CHAT", "Erro denorm: ${e.message}") }
     }
 
-    // ============================================================
-    // ADICIONAR RESPOSTA
-    // ============================================================
     private fun adicionarResposta(m: HashMap<String, Any>) {
         respostaAtiva?.let { r ->
             m["respostaPara"] = hashMapOf(
                 "msgId" to r.msgId, "texto" to r.texto, "remetente" to r.remetente,
                 "nomeRemetente" to r.nomeRemetente, "tipo" to r.tipo
             )
+        }
+    }
+
+    // ============================================================
+    // ✅ ATUALIZAR naoLidas (usando Map, sem notação de ponto)
+    // ============================================================
+    private suspend fun incrementarNaoLidas(outro: String) {
+        try {
+            val chatDoc = db.collection("chats").document(chatId).get().await()
+            val naoLidasAtual = (chatDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
+            val naoLidasNovo = naoLidasAtual.toMutableMap()
+            val valorAtual = (naoLidasNovo[outro] as? Number)?.toLong() ?: 0L
+            naoLidasNovo[outro] = valorAtual + 1
+
+            db.collection("chats").document(chatId)
+                .update("naoLidas", naoLidasNovo).await()
+
+            Log.d("CHAT_DEBUG", "✅ naoLidas atualizado: $naoLidasNovo")
+        } catch (e: Exception) {
+            Log.e("CHAT_DEBUG", "❌ Erro incrementar naoLidas: ${e.message}")
         }
     }
 
@@ -561,60 +583,32 @@ class ChatActivity : AppCompatActivity() {
                 )
                 adicionarResposta(m)
 
-                // ✅ 1. Salva a mensagem
+                // 1. Salva a mensagem
                 val msgRef = db.collection("chats").document(chatId).collection("mensagens").document()
                 msgRef.set(m).await()
 
-                // ✅ 2. Prepara updates
+                // 2. Preview + updated_at
                 val preview = hashMapOf<String, Any>(
                     "texto" to texto,
                     "autorNome" to emailUsuario,
                     "tipo" to "texto",
                     "timestamp" to ts
                 )
-                val chatUpdates = hashMapOf<String, Any>(
-                    "ultimaMensagem" to texto,
-                    "ultimaMensagemPreview" to preview,
-                    "atualizadoEm" to ts,
-                    "naoLidas.$outroEmail" to FieldValue.increment(1)
-                )
+                db.collection("chats").document(chatId).update(
+                    mapOf(
+                        "ultimaMensagem" to texto,
+                        "ultimaMensagemPreview" to preview,
+                        "atualizadoEm" to ts
+                    )
+                ).await()
 
-                Log.d("CHAT_DEBUG", "🔵 chatUpdates = $chatUpdates")
-                Log.d("CHAT_DEBUG", "🔵 Vou chamar update no chat $chatId")
-
-                // ✅ 3. Update com try/catch e log
-                try {
-                    db.collection("chats").document(chatId).update(chatUpdates).await()
-                    Log.d("CHAT_DEBUG", "✅ Update do chat OK")
-                } catch (e: Exception) {
-                    Log.e("CHAT_DEBUG", "❌ Erro update: ${e.message}")
-                }
-
-                // ✅ 4. Lê o doc de volta pra confirmar
-                try {
-                    val chatDepois = db.collection("chats").document(chatId).get().await()
-                    val naoLidasDepois = chatDepois.get("naoLidas")
-                    Log.d("CHAT_DEBUG", "🔵 naoLidas depois do update: $naoLidasDepois")
-                } catch (e: Exception) {
-                    Log.e("CHAT_DEBUG", "❌ Erro ler chat: ${e.message}")
-                }
-
-                // ✅ NOVO: lê DIRETO DO SERVIDOR (2s depois)
-                delay(2000)
-                try {
-                    val chatServidor = db.collection("chats").document(chatId)
-                        .get(com.google.firebase.firestore.Source.SERVER).await()
-                    Log.d("CHAT_DEBUG", "🔵 SERVIDOR (2s depois): ${chatServidor.get("naoLidas")}")
-                } catch (e: Exception) {
-                    Log.e("CHAT_DEBUG", "❌ Erro ler servidor: ${e.message}")
-                }
+                // 3. Incrementa naoLidas do outro (via Map)
+                incrementarNaoLidas(outroEmail)
 
                 Log.d("CHAT_DEBUG", "=== ENVIAR MENSAGEM ===")
-                Log.d("CHAT_DEBUG", "emailUsuario='$emailUsuario'")
-                Log.d("CHAT_DEBUG", "outroEmail='$outroEmail'")
-                Log.d("CHAT_DEBUG", "chatId='$chatId'")
+                Log.d("CHAT_DEBUG", "emailUsuario='$emailUsuario' outroEmail='$outroEmail' chatId='$chatId'")
 
-                // ✅ 5. Atualiza resumo do OUTRO
+                // 4. Atualiza resumo do OUTRO
                 try {
                     ChatResumoHelper.atualizarResumo(
                         emailUsuario = outroEmail,
@@ -630,7 +624,7 @@ class ChatActivity : AppCompatActivity() {
                     Log.e("CHAT_DEBUG", "❌ Erro resumo OUTRO: ${e.message}")
                 }
 
-                // ✅ 6. Atualiza resumo MEU
+                // 5. Atualiza resumo MEU
                 try {
                     ChatResumoHelper.atualizarResumo(
                         emailUsuario = emailUsuario,
@@ -657,9 +651,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // DISPARAR RESPOSTA
-    // ============================================================
     private fun dispararResposta(msgId: String, texto: String, remetente: String, tipo: String = "texto") {
         lifecycleScope.launch {
             try {
@@ -706,43 +697,34 @@ class ChatActivity : AppCompatActivity() {
                                 "tipo" to "foto",
                                 "timestamp" to ts
                             )
-                            val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda",
-                                "ultimaMensagemPreview" to preview,
-                                "atualizadoEm" to ts,
-                                "naoLidas.$outroEmail" to FieldValue.increment(1)
-                            )
-                            db.collection("chats").document(chatId).update(chatUpdates).await()
-                            Log.d("CHAT_DEBUG", "✅ Foto enviada + naoLidas incrementado")
+                            val textoPreview = if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda"
+                            db.collection("chats").document(chatId).update(
+                                mapOf(
+                                    "ultimaMensagem" to textoPreview,
+                                    "ultimaMensagemPreview" to preview,
+                                    "atualizadoEm" to ts
+                                )
+                            ).await()
 
-                            val textoResumo = if (legenda.isEmpty()) "📷 Foto" else "📷 $legenda"
+                            incrementarNaoLidas(outroEmail)
 
                             try {
                                 ChatResumoHelper.atualizarResumo(
-                                    emailUsuario = outroEmail,
-                                    chatId = chatId,
-                                    nome = emailUsuario,
-                                    ultimaMsg = textoResumo,
-                                    timestamp = ts,
-                                    tipo = "pv",
+                                    emailUsuario = outroEmail, chatId = chatId, nome = emailUsuario,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "pv",
                                     incrementarNaoLidas = true
                                 )
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo OUTRO: ${e.message}") }
 
                             try {
                                 ChatResumoHelper.atualizarResumo(
-                                    emailUsuario = emailUsuario,
-                                    chatId = chatId,
-                                    nome = outroEmail,
-                                    ultimaMsg = textoResumo,
-                                    timestamp = ts,
-                                    tipo = "pv",
+                                    emailUsuario = emailUsuario, chatId = chatId, nome = outroEmail,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "pv",
                                     incrementarNaoLidas = false
                                 )
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo MEU: ${e.message}") }
 
                             recarregarMensagens()
-
                             Toast.makeText(this@ChatActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
@@ -789,43 +771,34 @@ class ChatActivity : AppCompatActivity() {
                                 "tipo" to "video",
                                 "timestamp" to ts
                             )
-                            val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda",
-                                "ultimaMensagemPreview" to preview,
-                                "atualizadoEm" to ts,
-                                "naoLidas.$outroEmail" to FieldValue.increment(1)
-                            )
-                            db.collection("chats").document(chatId).update(chatUpdates).await()
-                            Log.d("CHAT_DEBUG", "✅ Vídeo enviado + naoLidas incrementado")
+                            val textoPreview = if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda"
+                            db.collection("chats").document(chatId).update(
+                                mapOf(
+                                    "ultimaMensagem" to textoPreview,
+                                    "ultimaMensagemPreview" to preview,
+                                    "atualizadoEm" to ts
+                                )
+                            ).await()
 
-                            val textoResumo = if (legenda.isEmpty()) "🎥 Vídeo" else "🎥 $legenda"
+                            incrementarNaoLidas(outroEmail)
 
                             try {
                                 ChatResumoHelper.atualizarResumo(
-                                    emailUsuario = outroEmail,
-                                    chatId = chatId,
-                                    nome = emailUsuario,
-                                    ultimaMsg = textoResumo,
-                                    timestamp = ts,
-                                    tipo = "pv",
+                                    emailUsuario = outroEmail, chatId = chatId, nome = emailUsuario,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "pv",
                                     incrementarNaoLidas = true
                                 )
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo OUTRO: ${e.message}") }
 
                             try {
                                 ChatResumoHelper.atualizarResumo(
-                                    emailUsuario = emailUsuario,
-                                    chatId = chatId,
-                                    nome = outroEmail,
-                                    ultimaMsg = textoResumo,
-                                    timestamp = ts,
-                                    tipo = "pv",
+                                    emailUsuario = emailUsuario, chatId = chatId, nome = outroEmail,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "pv",
                                     incrementarNaoLidas = false
                                 )
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo MEU: ${e.message}") }
 
                             recarregarMensagens()
-
                             Toast.makeText(this@ChatActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
@@ -887,43 +860,34 @@ class ChatActivity : AppCompatActivity() {
                                 "tipo" to "arquivo",
                                 "timestamp" to ts
                             )
-                            val chatUpdates = hashMapOf<String, Any>(
-                                "ultimaMensagem" to if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda",
-                                "ultimaMensagemPreview" to preview,
-                                "atualizadoEm" to ts,
-                                "naoLidas.$outroEmail" to FieldValue.increment(1)
-                            )
-                            db.collection("chats").document(chatId).update(chatUpdates).await()
-                            Log.d("CHAT_DEBUG", "✅ Arquivo enviado + naoLidas incrementado")
+                            val textoPreview = if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda"
+                            db.collection("chats").document(chatId).update(
+                                mapOf(
+                                    "ultimaMensagem" to textoPreview,
+                                    "ultimaMensagemPreview" to preview,
+                                    "atualizadoEm" to ts
+                                )
+                            ).await()
 
-                            val textoResumo = if (legenda.isEmpty()) "📎 $nF" else "📎 $legenda"
+                            incrementarNaoLidas(outroEmail)
 
                             try {
                                 ChatResumoHelper.atualizarResumo(
-                                    emailUsuario = outroEmail,
-                                    chatId = chatId,
-                                    nome = emailUsuario,
-                                    ultimaMsg = textoResumo,
-                                    timestamp = ts,
-                                    tipo = "pv",
+                                    emailUsuario = outroEmail, chatId = chatId, nome = emailUsuario,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "pv",
                                     incrementarNaoLidas = true
                                 )
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo OUTRO: ${e.message}") }
 
                             try {
                                 ChatResumoHelper.atualizarResumo(
-                                    emailUsuario = emailUsuario,
-                                    chatId = chatId,
-                                    nome = outroEmail,
-                                    ultimaMsg = textoResumo,
-                                    timestamp = ts,
-                                    tipo = "pv",
+                                    emailUsuario = emailUsuario, chatId = chatId, nome = outroEmail,
+                                    ultimaMsg = textoPreview, timestamp = ts, tipo = "pv",
                                     incrementarNaoLidas = false
                                 )
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo MEU: ${e.message}") }
 
                             recarregarMensagens()
-
                             Toast.makeText(this@ChatActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
@@ -940,9 +904,6 @@ class ChatActivity : AppCompatActivity() {
             }).dispatch()
     }
 
-    // ============================================================
-    // MOSTRAR OPÇÕES
-    // ============================================================
     private fun mostrarOpcaoMensagem(msgId: String, texto: String, remetente: String, ehRem: Boolean) {
         lifecycleScope.launch {
             try {
@@ -968,9 +929,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // MOSTRAR MENU DE MÍDIA
-    // ============================================================
     private fun mostrarMenuMidia(
         tipo: String, url: String, nomeArq: String, mime: String,
         msgId: String, ehRem: Boolean, texto: String, remetente: String
@@ -1015,9 +973,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // FAVORITAR / DESFAVORITAR
-    // ============================================================
     private fun favoritar(msgId: String, texto: String, remetente: String, tipoMidia: String) {
         lifecycleScope.launch {
             try {
@@ -1046,9 +1001,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ABRIR GALERIA / ARQUIVO / BAIXAR
-    // ============================================================
     private fun abrirGaleria(lista: List<Pair<String, String>>, pos: Int) {
         val urls = lista.map { it.second }.toTypedArray()
         val tipos = lista.map { it.first }.toTypedArray()
@@ -1080,9 +1032,6 @@ class ChatActivity : AppCompatActivity() {
         } catch (e: Exception) { Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
     }
 
-    // ============================================================
-    // APAGAR MENSAGEM
-    // ============================================================
     private fun apagarMensagem(msgId: String) {
         lifecycleScope.launch {
             try {
@@ -1107,9 +1056,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ABRIR INFO DA MENSAGEM
-    // ============================================================
     private fun abrirInfoMensagem(msgId: String) {
         val msg = adapter.currentList
             .filterIsInstance<ItemChat.MensagemItem>()
