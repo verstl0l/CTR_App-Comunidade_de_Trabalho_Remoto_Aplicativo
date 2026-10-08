@@ -193,7 +193,7 @@ O fluxo de autenticação utiliza o Firebase Authentication, enquanto os dados c
 
 Para otimização de leitura, o projeto usa denormalização: dados como o resumo dos chats (chatsResumo) ficam salvos no próprio documento do usuário, evitando o padrão N+1 em listagens.
 
-Estrutura do Projeto
+Estrutura do Projeto no Git Hub
 
 ```
 CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo/
