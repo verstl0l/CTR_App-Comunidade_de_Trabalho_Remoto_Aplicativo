@@ -54,11 +54,14 @@ class GerenciarEquipeActivity : AppCompatActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
-        // ✅ Clicar no campo abre lista de usuários disponíveis
+        //  Clicar no campo abre lista de usuários disponíveis
         edtEmailConvite.isFocusable = false
         edtEmailConvite.isClickable = true
         edtEmailConvite.setOnClickListener {
-            mostrarDialogUsuariosDisponiveis()
+            SeletorUsuarioHelper.abrir(this, email) { emailEscolhido, nome ->
+                edtEmailConvite.setText(emailEscolhido)
+                Toast.makeText(this, "Selecionado: $nome", Toast.LENGTH_SHORT).show()
+            }
         }
 
         lifecycleScope.launch {

@@ -45,11 +45,14 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
-        // ✅ Clicar no campo abre lista de usuários disponíveis
+        //  Clicar no campo abre lista de usuários disponíveis
         edtEmail.isFocusable = false
         edtEmail.isClickable = true
         edtEmail.setOnClickListener {
-            mostrarUsuariosDisponiveis()
+            SeletorUsuarioHelper.abrir(this, emailRemetente) { email, nome ->
+                edtEmail.setText(email)
+                Toast.makeText(this, "Selecionado: $nome", Toast.LENGTH_SHORT).show()
+            }
         }
 
         btnEnviar.setOnClickListener {

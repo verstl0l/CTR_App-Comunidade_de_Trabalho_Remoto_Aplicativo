@@ -719,69 +719,45 @@ class ListaConversasActivity : BaseActivity() {
     // NOVA CONVERSA
     // ============================================================
     private fun mostrarDialogNovaConversa() {
-        val edtEmail = EditText(this).apply {
-            hint = "Email do usuário"
-            setPadding(40, 30, 40, 30)
-        }
+        SeletorUsuarioHelper.abrir(this, emailUsuario) { email, nome ->
+            lifecycleScope.launch {
+                try {
+                    // Verifica se já existe chat
+                    val existente = db.collection("chats")
+                        .whereArrayContains("participantes", emailUsuario)
+                        .get().await()
 
-        AlertDialog.Builder(this)
-            .setTitle("Nova conversa")
-            .setView(edtEmail)
-            .setPositiveButton("Iniciar") { _, _ ->
-                val emailOutro = edtEmail.text.toString().trim().lowercase()
-                if (emailOutro.isEmpty()) return@setPositiveButton
-
-                if (emailOutro == emailUsuario) {
-                    Toast.makeText(this, "Você não pode conversar consigo mesmo", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                lifecycleScope.launch {
-                    try {
-                        val usuario = db.collection("usuarios").document(emailOutro).get().await()
-                        if (!usuario.exists()) {
-                            Toast.makeText(this@ListaConversasActivity, "Usuário não encontrado", Toast.LENGTH_SHORT).show()
-                            return@launch
-                        }
-
-                        val existente = db.collection("chats")
-                            .whereArrayContains("participantes", emailUsuario)
-                            .get().await()
-
-                        val chatExistente = existente.documents.find { doc ->
-                            val parts = doc.get("participantes") as? List<*>
-                            parts?.contains(emailOutro) == true
-                        }
-
-                        val chatId = if (chatExistente != null) {
-                            atualizarChatsIds(emailUsuario, chatExistente.id)
-                            atualizarChatsIds(emailOutro, chatExistente.id)
-                            chatExistente.id
-                        } else {
-                            val novoChat = hashMapOf(
-                                "participantes" to listOf(emailUsuario, emailOutro),
-                                "ultimaMensagem" to "",
-                                "atualizadoEm" to System.currentTimeMillis(),
-                                "tipo" to "individual"
-                            )
-                            val novoId = db.collection("chats").add(novoChat).await().id
-                            atualizarChatsIds(emailUsuario, novoId)
-                            atualizarChatsIds(emailOutro, novoId)
-                            novoId
-                        }
-
-                        val intent = Intent(this@ListaConversasActivity, ChatActivity::class.java)
-                        intent.putExtra("outroEmail", emailOutro)
-                        intent.putExtra("chatId", chatId)
-                        startActivity(intent)
-
-                    } catch (e: Exception) {
-                        Toast.makeText(this@ListaConversasActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
+                    val chatExistente = existente.documents.find { doc ->
+                        (doc.get("participantes") as? List<*>)?.contains(email) == true
                     }
+
+                    val chatId = if (chatExistente != null) {
+                        atualizarChatsIds(emailUsuario, chatExistente.id)
+                        atualizarChatsIds(email, chatExistente.id)
+                        chatExistente.id
+                    } else {
+                        val novoChat = hashMapOf(
+                            "participantes" to listOf(emailUsuario, email),
+                            "ultimaMensagem" to "",
+                            "atualizadoEm" to System.currentTimeMillis(),
+                            "tipo" to "individual",
+                            "naoLidas" to emptyMap<String, Long>()
+                        )
+                        val novoId = db.collection("chats").add(novoChat).await().id
+                        atualizarChatsIds(emailUsuario, novoId)
+                        atualizarChatsIds(email, novoId)
+                        novoId
+                    }
+
+                    val intent = Intent(this@ListaConversasActivity, ChatActivity::class.java)
+                    intent.putExtra("outroEmail", email)
+                    intent.putExtra("chatId", chatId)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this@ListaConversasActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
-            .setNegativeButton(R.string.cancelar, null)
-            .show()
+        }
     }
 
     private suspend fun atualizarChatsIds(email: String, chatId: String) {
