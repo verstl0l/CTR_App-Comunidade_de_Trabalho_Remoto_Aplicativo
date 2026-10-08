@@ -1,5 +1,7 @@
 # Plataforma Colaborativa de Trabalho Remoto
 
+![Android CI](https://github.com/verstl0l/CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo/actions/workflows/android.yml/badge.svg)
+
 <p align="center">
   Aplicativo mobile desenvolvido para auxiliar na organização,
   distribuição e acompanhamento de trabalhos realizados por
