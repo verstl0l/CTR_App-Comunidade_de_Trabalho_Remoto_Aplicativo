@@ -1,115 +1,198 @@
-# CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo
+# CTR — Comunidade de Trabalho Remoto
 
 ![Android CI](https://github.com/verstl0l/CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo/actions/workflows/android.yml/badge.svg)
 
-Aplicativo mobile Android da **Plataforma Colaborativa de Trabalho Remoto (CTR)**, desenvolvido para apoiar a organização, distribuição e acompanhamento de tarefas em equipes que trabalham remotamente.
+Aplicativo Android para **organização, comunicação e acompanhamento de tarefas** em equipes remotas. Combina gestão de equipes, chat em tempo real, envio de mídia, notificações e métricas de produtividade em um único app.
 
 ---
 
-## Descrição do Projeto
+## ✨ Funcionalidades
 
-A Plataforma Colaborativa de Trabalho Remoto (CTR) é um aplicativo mobile focado em apoiar a organização, distribuição e acompanhamento de tarefas para equipes que operam em regime de trabalho remoto. O projeto centraliza informações de fluxo de trabalho, facilitando a gestão de equipes, convites, tarefas e o monitoramento de atividades.
+### Autenticação e perfil
+- Cadastro e login (Firebase Auth — email/senha)
+- Perfil com avatar (upload via Cloudinary)
+- Links sociais (LinkedIn, GitHub, portfólio)
+- Edição de nome e profissão
 
-O sistema foi desenvolvido para a plataforma Android, utilizando Kotlin no Android Studio, com autenticação e banco de dados em nuvem através do Firebase (Authentication + Cloud Firestore).
+### Equipes
+- Criar, editar e excluir equipes
+- Equipes públicas ou privadas
+- Pedidos de entrada com motivos e especialidades
+- Aprovação/recusa de pedidos
+- Gerenciamento de membros (promover a admin, rebaixar, remover)
+- Exclusão em cascata (trabalhos, chats, membros, convites)
+
+### Trabalhos (tarefas)
+- Criar, editar e excluir trabalhos
+- Atribuição a membros da equipe
+- Status: pendente, em progresso, concluído
+- Prazos com data e hora
+- Comentários por trabalho
+- Anexos por trabalho (foto, vídeo, arquivo)
+- Convite de usuários específicos para um trabalho
+
+### Chat em tempo real
+- **Conversas 1-a-1 (PV)**
+- **Chat de equipe** (com hub: geral, grupos, individuais)
+- **Grupos dentro da equipe**
+- Mensagens de texto, foto, vídeo e arquivo
+- Responder mensagens (citação)
+- Swipe to reply
+- Indicador "digitando..."
+- Badge de mensagens não lidas em tempo real
+- Favoritar mensagens
+- Apagar mensagens (para todos)
+- Galeria de mídia com swipe
+
+### Notificações
+- Notificações in-app (Firestore)
+- Push notifications (OneSignal)
+- Badge no ícone de chat e notificações
+
+### Produtividade
+- Gráfico de pizza por status dos trabalhos
+- Gráfico de barras por membro
+- Taxa de conclusão
+- Filtros por status
+
+### Edição de mídia
+- Crop de imagem (uCrop)
+- Trim de vídeo (Android Video Trimmer)
+- Preview antes de enviar
+- Legendas em fotos, vídeos e arquivos
+
+### Outros
+- Busca inteligente de usuários (rolo de resultados com foto)
+- Bloqueio de usuários
+- Cache local + sincronização em background
+- Denormalização de dados (otimização de leitura no Firestore)
 
 ---
 
-## Objetivo
+## 🛠 Tecnologias
 
-Oferecer uma solução digital que reduza a dispersão de informações, organizando equipes, tarefas, prazos e prioridades, além de proporcionar a aplicação prática de conhecimentos em desenvolvimento mobile e integração com serviços em nuvem.
-
----
-
-## Funcionalidades Implementadas
-
-- RF01 — Cadastro e autenticação de usuários (Firebase Authentication)
-- RF02 — Criação e gerenciamento de equipes (nome, descrição, equipe privada)
-- RF03 — Criação, consulta e exclusão de trabalhos (tarefas)
-- RF04 — Convites por email para membros da equipe
-- RF05 — Acompanhamento do status das tarefas
-- RF06 — Registro de prazos
-- RF07 — Visualização das atividades de cada equipe
-- RF08 — Atualização dos dados da equipe
-- RF09 — Consulta do histórico de convites e membros
-- RF10 — Persistência em nuvem via Cloud Firestore
-
-### Funcionalidades extras
-
-- Pedidos de entrada em equipes (com motivos e especialidades)
-- Gerenciamento de membros (promover a administrador / remover)
-- Tela de perfil com dados do usuário e equipe atual
-- Notificações de convites pendentes
-- Exclusão de equipe em cascata (trabalhos, membros, convites, pedidos)
-- Equipes privadas (não recebem pedidos de entrada)
+| Camada | Tecnologia |
+|--------|-----------|
+| Linguagem | Kotlin |
+| IDE | Android Studio |
+| Auth | Firebase Authentication |
+| Banco | Cloud Firestore (NoSQL) |
+| Mídia | Cloudinary |
+| Push | OneSignal |
+| Imagens | Glide, PhotoView |
+| Gráficos | MPAndroidChart |
+| Crop | uCrop |
+| Trim de vídeo | Android Video Trimmer |
+| Assincronismo | Coroutines + Tasks (await) |
+| Cache | SharedPreferences |
+| Build | Gradle (KTS) |
+| CI/CD | GitHub Actions |
 
 ---
 
-## Tecnologias Utilizadas
+## 🗂 Estrutura do Firestore
 
-- Linguagem: Kotlin
-- IDE: Android Studio
-- Autenticação: Firebase Authentication (email/senha)
-- Banco de dados: Cloud Firestore (NoSQL, em nuvem)
-- Interface: Material Design Components
-- Assincronismo: Coroutines + Tasks (await())
-- Cache local: SharedPreferences
-- Arquitetura: MVC simplificado (Activity por tela)
+### Coleções raiz
+- `usuarios` — dados do usuário + `chatsResumo` (denormalizado)
+- `equipes` — dados da equipe
+- `membros_equipe` — relação user↔equipe
+- `convites_equipe` — convites para entrar em equipe
+- `pedidos_entrada` — pedidos de entrada em equipe
+- `trabalhos` — tarefas
+- `convites_trabalho` — convites para trabalhos específicos
+- `chats` — conversas PV
+- `chats_equipe` — chat geral da equipe
+- `grupos` — grupos dentro de uma equipe
+- `notificacoes` — notificações in-app
+- `favoritos` — mensagens favoritadas
+- `bloqueios` — bloqueios entre usuários
+
+### Subcoleções
+- `trabalhos/{id}/comentarios`
+- `trabalhos/{id}/anexos`
+- `chats/{id}/mensagens`
+- `chats_equipe/{id}/mensagens`
+- `grupos/{id}/mensagens`
 
 ---
 
-## Estrutura do Banco (Firestore)
+## 🚀 Como Rodar
 
-O projeto utiliza as seguintes coleções no Cloud Firestore:
+### 1. Clone o repositório
 
-- usuarios — dados do usuário (email, nome, profissão)
-- equipes — dados da equipe (nome, descrição, criador, privada)
-- membros_equipe — membros de cada equipe (email, nome, função)
-- convites_equipe — convites enviados (email convidado, remetente, status)
-- trabalhos — tarefas publicadas (título, descrição, categoria, prazo)
-- pedidos_entrada — pedidos de entrada em equipes (motivos, especialidades)
-
----
-
-## Configuração do Firebase
-
-Este projeto usa Firebase. Para rodar localmente, siga as instruções em [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
+git clone https://github.com/verstl0l/CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo.git
+2. Configure o Firebase
+Veja FIREBASE_SETUP.md.
 
 Resumo:
-1. Baixe o `google-services.json` no Firebase Console (projeto CTR-App).
-2. Coloque o arquivo em `app/google-services.json`.
-3. Sincronize o Gradle no Android Studio.
-4. Rode o app.
 
-O arquivo `app/google-services.json.example` é apenas um modelo.
+Baixe google-services.json no Firebase Console
 
----
+Coloque em app/google-services.json
 
-## Como Rodar o Projeto
+Sincronize o Gradle
 
-1. Clone o repositório:
-   git clone https://github.com/verstl0l/CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo.git
+3. Configure o Cloudinary
+Edita app/build.gradle.kts com suas credenciais Cloudinary (CLOUDINARY_CLOUD_NAME).
 
-2. Abra no Android Studio.
+4. Configure o OneSignal
+Edita app/build.gradle.kts com seu ONESIGNAL_APP_ID.
 
-3. Configure o Firebase (veja [FIREBASE_SETUP.md](FIREBASE_SETUP.md)).
+5. Rode
+Execute em um device/emulador Android 7.0+.
 
-4. Sincronize o Gradle.
 
-5. Execute o app em um dispositivo Android (Android 7.0+) ou emulador.
+```
+📁 Estrutura do Projeto
 
----
+app/src/main/java/com/example/plataformaremota/
+├── Activities/
+│   ├── MainActivity, LoginActivity, CadastroActivity, Splash
+│   ├── ListaConversasActivity, ChatActivity, ChatGrupoActivity, ChatEquipeActivity
+│   ├── MinhasEquipesActivity, GerenciarEquipeActivity, InfoEquipeActivity
+│   ├── ChatEquipeHubActivity, GerenciarMembrosGrupoActivity
+│   ├── CriarTrabalhoActivity, EntregarTrabalhoActivity, MeusTrabalhosActivity
+│   ├── ComentariosTrabalhoActivity, AnexosTrabalhoActivity, ConvidarTrabalhoActivity
+│   ├── NotificacoesActivity, MensagensFavoritasActivity
+│   ├── PerfilUsuarioActivity, perfil
+│   ├── ProdutividadeActivity, GruposActivity
+│   └── AceitarConviteActivity, PedirEntradaActivity, PedidosPendentesActivity
+│
+├── Helpers/
+│   ├── ChatResumoHelper, ChatPaginacaoHelper, TypingIndicatorHelper
+│   ├── AnexoHelper, ComentarioHelper, NotificacaoHelper
+│   ├── BadgeHelper, SessionHelper, SwipeToReplyHelper
+│   ├── SeletorUsuarioHelper, CloudinaryConfig
+│   └── NetworkUtils
+│
+└── Models/
+    ├── Mensagem, ItemChat, MensagemAdapter
+    └── ConversaItem
+```
 
-## Versão Web
+📸 Screenshots
+<!-- Adicione prints aqui -->
+Em breve
 
-Procurando a versão para Web? Acesse o repositório [CTR_Web-Comunidade_de_Trabalho_Remoto_Web](https://github.com/verstl0l/CTR_Web-Comunidade_de_Trabalho_Remoto_Web.git).
+🌐 Versão Web
+Acesse: CTR_Web-Comunidade_de_Trabalho_Remoto_Web
 
----
+📋 Status
+✅ Autenticação, cadastro e perfil
 
-## Status do Projeto
+✅ Equipes (criar, editar, excluir, convidar, gerenciar)
 
-- Em desenvolvimento (versão parcial funcional — 3º bimestre)
-- Próximas etapas: pedidos de entrada, melhorias de UI, testes finais
+✅ Trabalhos (CRUD, comentários, anexos, produtividade)
 
----
+✅ Chat completo (PV, grupo, equipe) com tempo real
 
-*Este projeto foi desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento de software.*
+✅ Notificações in-app e push
+
+✅ Edição de mídia
+
+⏳ Testes finais e refinamento de UI
+
+📄 Licença
+Projeto acadêmico — sem licença de uso comercial definida.
+
+Desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento mobile e integração com Firebase.
