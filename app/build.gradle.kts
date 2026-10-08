@@ -26,10 +26,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        // ✅ Expoe as chaves como BuildConfig (seguro)
+        //  Expoe as chaves como BuildConfig (seguro)
         buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${localProps["CLOUDINARY_CLOUD_NAME"] ?: ""}\"")
         buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"${localProps["CLOUDINARY_UPLOAD_PRESET"] ?: ""}\"")
         buildConfigField("String", "ONESIGNAL_APP_ID", "\"${localProps["ONESIGNAL_APP_ID"] ?: ""}\"")
+
+        //  Recursos de idioma
+        resourceConfigurations += listOf("pt", "en", "es", "fr", "ru", "zh")
+
     }
 
     buildTypes {

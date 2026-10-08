@@ -1,21 +1,18 @@
 package com.example.plataformaremota
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class PedirEntradaActivity : AppCompatActivity() {
+class PedirEntradaActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -37,7 +34,7 @@ class PedirEntradaActivity : AppCompatActivity() {
         val btnEnviar = findViewById<Button>(R.id.btnEnviarPedido)
         val btnVoltar = findViewById<Button>(R.id.btnVoltarPedir)
 
-        txtEquipe.text = "Equipe: $nomeEquipe"
+        txtEquipe.text = getString(R.string.pedir_entrada_equipe_prefixo, nomeEquipe)
 
         btnVoltar.setOnClickListener { finish() }
 
@@ -54,11 +51,11 @@ class PedirEntradaActivity : AppCompatActivity() {
                 if (!pedidos.isEmpty) {
                     Toast.makeText(
                         this@PedirEntradaActivity,
-                        "Você já enviou um pedido para esta equipe",
+                        getString(R.string.pedir_entrada_ja_enviado),
                         Toast.LENGTH_LONG
                     ).show()
                     btnEnviar.isEnabled = false
-                    btnEnviar.text = "PEDIDO JÁ ENVIADO"
+                    btnEnviar.text = getString(R.string.pedir_entrada_ja_enviado_botao)
                 }
             } catch (e: Exception) {
                 Log.e("PEDIR_ENTRADA", "Erro ao verificar: ${e.message}")
@@ -70,12 +67,12 @@ class PedirEntradaActivity : AppCompatActivity() {
             val especialidades = edtEspecialidades.text.toString().trim()
 
             if (motivos.isEmpty() || especialidades.isEmpty()) {
-                Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.erro_campos_vazios), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             btnEnviar.isEnabled = false
-            btnEnviar.text = "ENVIANDO..."
+            btnEnviar.text = getString(R.string.pedir_entrada_enviando)
 
             lifecycleScope.launch {
                 try {
@@ -90,17 +87,17 @@ class PedirEntradaActivity : AppCompatActivity() {
                     if (!jaExiste.isEmpty) {
                         Toast.makeText(
                             this@PedirEntradaActivity,
-                            "Você já enviou um pedido para esta equipe",
+                            getString(R.string.pedir_entrada_ja_enviado),
                             Toast.LENGTH_LONG
                         ).show()
                         btnEnviar.isEnabled = true
-                        btnEnviar.text = "ENVIAR PEDIDO"
+                        btnEnviar.text = getString(R.string.pedir_entrada_enviar)
                         return@launch
                     }
 
                     // Busca dados do solicitante
                     val usuarioDoc = db.collection("usuarios").document(emailSolicitante).get().await()
-                    val nomeSolicitante = usuarioDoc.getString("nome") ?: "Usuário"
+                    val nomeSolicitante = usuarioDoc.getString("nome") ?: getString(R.string.usuario_padrao)
                     val profissaoSolicitante = usuarioDoc.getString("profissao") ?: ""
 
                     // Cria o pedido
@@ -129,7 +126,7 @@ class PedirEntradaActivity : AppCompatActivity() {
 
                     Toast.makeText(
                         this@PedirEntradaActivity,
-                        "✅ Pedido enviado! Aguarde aprovação.",
+                        getString(R.string.pedir_entrada_sucesso),
                         Toast.LENGTH_SHORT
                     ).show()
 
@@ -139,16 +136,18 @@ class PedirEntradaActivity : AppCompatActivity() {
                     Log.e("PEDIR_ENTRADA", "Erro: ${e.message}")
                     Toast.makeText(
                         this@PedirEntradaActivity,
-                        "Erro: ${e.message}",
+                        getString(R.string.erro_generico, e.message ?: ""),
                         Toast.LENGTH_LONG
                     ).show()
                     btnEnviar.isEnabled = true
-                    btnEnviar.text = "ENVIAR PEDIDO"
+                    btnEnviar.text = getString(R.string.pedir_entrada_enviar)
                 }
             }
         }
 
-        configurarBottomNavigation()
+        // ✅ Usa o método do BaseActivity (que já cuida do locale + badges)
+        // Como "Pedir Entrada" não é uma aba, deixa null
+        configurarBottomNavigation(null)
     }
 
     // ============================================================
@@ -175,43 +174,6 @@ class PedirEntradaActivity : AppCompatActivity() {
             Log.d("PEDIR_ENTRADA", "✅ Dono notificado: $emailDono")
         } catch (e: Exception) {
             Log.e("PEDIR_ENTRADA", "Erro ao notificar dono: ${e.message}")
-        }
-    }
-
-    // ============================================================
-    // BOTTOM NAVIGATION
-    // ============================================================
-    private fun configurarBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_chat -> {
-                    startActivity(Intent(this, ListaConversasActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_notifications -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, perfil::class.java))
-                    finish()
-                    true
-                }
-                else -> false
-            }
         }
     }
 }

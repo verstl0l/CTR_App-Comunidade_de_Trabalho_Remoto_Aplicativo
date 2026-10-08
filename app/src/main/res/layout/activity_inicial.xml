@@ -20,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="CTR"
+            android:text="@string/app_name"
             android:textColor="@color/accent"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -31,7 +31,7 @@
             android:layout_height="32dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
-            android:contentDescription="Abrir chat"
+            android:contentDescription="@string/main_abrir_chat"
             android:focusable="true"
             android:src="@drawable/ic_chat"
             app:tint="@color/accent" />
@@ -57,40 +57,37 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="32dp"
                 android:gravity="center"
-                android:text="Bem-vindo ao CTR"
+                android:text="@string/main_bem_vindo"
                 android:textColor="@color/text_primary"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
-            <!-- ✅ ID semântico: btnCadastrar -->
             <Button
                 android:id="@+id/btnCadastrar"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="@color/accent"
-                android:text="CADASTRAR-SE"
+                android:text="@string/main_cadastrar_se"
                 android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 
-            <!-- ✅ ID semântico: btnEntrarEquipe -->
             <Button
                 android:id="@+id/btnEntrarEquipe"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="@color/accent"
-                android:text="ENTRAR EM EQUIPE"
+                android:text="@string/main_entrar_equipe"
                 android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 
-            <!-- ✅ ID semântico: btnCriarEquipe -->
             <Button
                 android:id="@+id/btnCriarEquipe"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:backgroundTint="@color/accent"
-                android:text="CRIAR EQUIPE"
+                android:text="@string/main_criar_equipe"
                 android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 

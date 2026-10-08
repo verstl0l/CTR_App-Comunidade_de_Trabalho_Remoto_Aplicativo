@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CTR</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_home">Главная</string>
+    <string name="nav_chat">Чат</string>
+    <string name="nav_groups">Команды</string>
+    <string name="nav_notifications">Уведомления</string>
+    <string name="nav_profile">Профиль</string>
+
+    <!-- Main -->
+    <string name="main_abrir_chat">Открыть чат</string>
+    <string name="main_bem_vindo">Добро пожаловать в CTR</string>
+    <string name="main_cadastrar_se">РЕГИСТРАЦИЯ</string>
+    <string name="main_entrar_equipe">ВОЙТИ В КОМАНДУ</string>
+    <string name="main_criar_equipe">СОЗДАТЬ КОМАНДУ</string>
+
+    <!-- Language -->
+    <string name="idioma">Язык</string>
+    <string name="selecione_idioma">Выберите язык</string>
+    <string name="idioma_portugues">Португальский</string>
+    <string name="idioma_ingles">Английский</string>
+    <string name="idioma_espanhol">Испанский</string>
+    <string name="idioma_frances">Французский</string>
+    <string name="idioma_russo">Русский</string>
+    <string name="idioma_chines">Китайский</string>
+
+    <!-- Login -->
+    <string name="login_titulo">CTR</string>
+    <string name="login_subtitulo">Сообщество удалённой работы</string>
+    <string name="login_instrucao">Войдите, чтобы продолжить</string>
+    <string name="login_email">Email</string>
+    <string name="login_senha">Пароль</string>
+    <string name="login_entrar">ВОЙТИ</string>
+    <string name="login_criar_conta">СОЗДАТЬ АККАУНТ</string>
+    <string name="login_entrando">ВХОД...</string>
+
+    <!-- Login (erros e mensagens) -->
+    <string name="login_erro_email_invalido">Неверный email</string>
+    <string name="login_erro_credenciais">Неверный email или пароль</string>
+    <string name="login_erro_conta_nao_encontrada">Аккаунт с таким email не найден</string>
+    <string name="login_erro_muitas_tentativas">Слишком много попыток. Повторите через несколько минут</string>
+    <string name="login_erro_email_formato">Неверный формат email</string>
+    <string name="login_erro_generico">Ошибка входа. Попробуйте снова.</string>
+    <string name="login_sucesso">✅ Вход выполнен!</string>
+
+    <!-- Signup -->
+    <string name="cadastro_titulo">Создать аккаунт</string>
+    <string name="cadastro_nome">Имя</string>
+    <string name="cadastro_email">Email</string>
+    <string name="cadastro_senha">Пароль</string>
+    <string name="cadastro_confirmar_senha">Подтвердите пароль</string>
+    <string name="cadastro_profissao">Профессия</string>
+    <string name="cadastro_botao">РЕГИСТРАЦИЯ</string>
+    <string name="cadastro_cadastrando">РЕГИСТРАЦИЯ...</string>
+    <string name="cadastro_sucesso">✅ Аккаунт создан!</string>
+    <string name="cadastro_erro_salvar">Аккаунт создан, но ошибка сохранения данных: %1$s</string>
+    <string name="cadastro_erro_senha_curta">Пароль должен содержать минимум 6 символов</string>
+    <string name="cadastro_erro_senhas_diferentes">Пароли не совпадают</string>
+
+    <!-- ===== CREATE TEAM ===== -->
+    <string name="voltar_seta">← НАЗАД</string>
+    <string name="criar_nova_equipe">Создать Новую Команду</string>
+    <string name="nome_da_equipe">Название Команды</string>
+    <string name="hint_ex_design_core">Напр.: Design Core</string>
+    <string name="descricao">Описание</string>
+    <string name="hint_objetivo_equipe">Расскажите о цели команды…</string>
+    <string name="criar_equipe">СОЗДАТЬ КОМАНДУ</string>
+    <string name="criando_equipe">СОЗДАНИЕ…</string>
+    <string name="salvar_equipe">СОХРАНИТЬ</string>
+    <string name="erro_nome_equipe_obrigatorio">Название команды обязательно</string>
+    <string name="equipe_criada_sucesso">✅ Команда успешно создана!</string>
+    <string name="erro_adicionar_membro">Команда создана, но не удалось добавить участника</string>
+    <string name="erro_criar_equipe">Ошибка при создании команды: %1$s</string>
+
+    <!-- Find Teams -->
+    <string name="buscar_equipes_titulo">Поиск команд</string>
+    <string name="buscar_equipes_hint">Поиск по названию...</string>
+    <string name="buscar_equipes_vazio">Публичные команды не найдены</string>
+    <string name="buscar_equipes_criado_por">Создано: %1$s</string>
+    <string name="buscar_equipes_pedido_ja_enviado">Вы уже отправили запрос в эту команду</string>
+    <string name="equipe_default_nome">Команда</string>
+    <string name="equipe_sem_descricao">Без описания</string>
+
+    <!-- ===== REQUEST TO JOIN ===== -->
+    <string name="pedir_entrada_titulo">Запрос на Вступление</string>
+    <string name="pedir_entrada_equipe_prefixo">Команда: %1$s</string>
+    <string name="pedir_entrada_equipe_placeholder">Команда: ...</string>
+    <string name="pedir_entrada_hint_motivos">Почему вы хотите вступить? (причины)</string>
+    <string name="pedir_entrada_hint_especialidades">Ваши специальности</string>
+    <string name="pedir_entrada_enviar">ОТПРАВИТЬ ЗАПРОС</string>
+    <string name="pedir_entrada_enviando">ОТПРАВКА…</string>
+    <string name="pedir_entrada_ja_enviado_botao">ЗАПРОС УЖЕ ОТПРАВЛЕН</string>
+    <string name="pedir_entrada_ja_enviado">Вы уже отправили запрос в эту команду</string>
+    <string name="pedir_entrada_sucesso">✅ Запрос отправлен! Ожидайте одобрения.</string>
+    <string name="usuario_padrao">Пользователь</string>
+
+    <!-- ===== CONVERSATIONS LIST ===== -->
+    <string name="lista_conversas_titulo">Беседы</string>
+    <string name="lista_conversas_nova">+ НОВАЯ БЕСЕДА</string>
+    <string name="lista_conversas_vazio">Бесед пока нет</string>
+    <string name="lista_conversas_apagar_conversa">Удалить беседу</string>
+    <string name="lista_conversas_apagar_mensagens">Удалить сообщения</string>
+    <string name="lista_conversas_apagar_inteira">Удалить всю беседу</string>
+    <string name="lista_conversas_ver_perfil">Просмотреть профиль</string>
+    <string name="lista_conversas_mensagens_apagadas">Сообщения удалены</string>
+    <string name="lista_conversas_conversa_apagada">Беседа удалена</string>
+    <string name="lista_conversas_hint_email">Эл. почта пользователя</string>
+    <string name="lista_conversas_iniciar">Начать</string>
+    <string name="lista_conversas_nao_consigo_mesmo">Вы не можете писать самому себе</string>
+    <string name="lista_conversas_usuario_nao_encontrado">Пользователь не найден</string>
+    <string name="conversa_padrao">Беседа</string>
+    <string name="grupo_padrao">Группа</string>
+
+    <!-- ===== MY TEAMS ===== -->
+    <string name="minhas_equipes_titulo">Мои Команды</string>
+    <string name="minhas_equipes_nova">+ НОВАЯ КОМАНДА</string>
+    <string name="minhas_equipes_vazio">Вы не состоите ни в одной команде</string>
+    <string name="minhas_equipes_papel_criador">Создатель</string>
+    <string name="minhas_equipes_papel_admin">Администратор</string>
+    <string name="minhas_equipes_papel_membro">Участник</string>
+
+    <plurals name="minhas_equipes_qtd_trabalhos">
+        <item quantity="one">%d работа</item>
+        <item quantity="few">%d работы</item>
+        <item quantity="many">%d работ</item>
+    </plurals>
+
+    <!-- ===== MANAGE TEAM ===== -->
+    <string name="gerenciar_titulo">Управление Командой</string>
+    <string name="gerenciar_hint_descricao">Описание Команды</string>
+    <string name="gerenciar_equipe_privada">Приватная Команда</string>
+    <string name="gerenciar_equipe_privada_info">Приватные команды не принимают заявки на вступление</string>
+    <string name="gerenciar_salvar_dados">СОХРАНИТЬ ДАННЫЕ КОМАНДЫ</string>
+    <string name="gerenciar_excluir_botao">УДАЛИТЬ КОМАНДУ</string>
+    <string name="gerenciar_convidar_email">Пригласить по Email</string>
+    <string name="gerenciar_enviar_convite">ОТПРАВИТЬ ПРИГЛАШЕНИЕ</string>
+    <string name="gerenciar_pedidos_entrada">Заявки на Вступление</string>
+    <string name="gerenciar_membros">Участники Команды</string>
+    <string name="gerenciar_trabalhos_publicados">Опубликованные Работы</string>
+
+    <!-- Manage Team — dialogs and toasts -->
+    <string name="gerenciar_dados_atualizados">Данные обновлены!</string>
+    <string name="gerenciar_selecione_usuario">Выберите пользователя</string>
+    <string name="gerenciar_nao_convidar_mesmo">Вы не можете пригласить себя</string>
+    <string name="gerenciar_equipe_nao_carregada">Команда ещё не загружена</string>
+    <string name="gerenciar_email_nao_cadastrado">Этот email не зарегистрирован</string>
+    <string name="gerenciar_ja_convidado">Этот пользователь уже приглашён</string>
+    <string name="gerenciar_convite_enviado">✅ Приглашение отправлено!</string>
+    <string name="gerenciar_excluir_titulo">Удалить Команду</string>
+    <string name="gerenciar_excluir_msg">Вы уверены? Все работы будут безвозвратно удалены.</string>
+    <string name="gerenciar_excluir_confirmar">Да, удалить</string>
+    <string name="gerenciar_equipe_excluida">🗑️ Команда удалена!</string>
+    <string name="gerenciar_todos_na_equipe">Все пользователи уже в команде</string>
+    <string name="gerenciar_selecionar_usuario">Выбрать пользователя (доступно: %1$d)</string>
+    <string name="gerenciar_selecionado">Выбрано: %1$s</string>
+    <string name="gerenciar_erro_usuarios">Ошибка загрузки пользователей: %1$s</string>
+    <string name="gerenciar_editar_trabalho">Редактировать Работу</string>
+    <string name="gerenciar_trabalho_atualizado">✅ Работа обновлена!</string>
+    <string name="gerenciar_sem_membros">Пока нет участников</string>
+    <string name="gerenciar_sem_pedidos">Нет ожидающих заявок</string>
+    <string name="gerenciar_sem_trabalhos">Пока нет опубликованных работ</string>
+    <string name="gerenciar_nome_dono">%1$s (Владелец)</string>
+    <string name="gerenciar_nome_admin">%1$s (Админ)</string>
+    <string name="gerenciar_nome_voce">%1$s ← ВЫ</string>
+    <string name="gerenciar_promover">Повысить до Администратора</string>
+    <string name="gerenciar_rebaixar">Понизить до Участника</string>
+    <string name="gerenciar_remover">Удалить из Команды</string>
+    <string name="gerenciar_nenhuma_acao">Нет доступных действий</string>
+    <string name="gerenciar_promovido">✅ Повышен</string>
+    <string name="gerenciar_rebaixado">✅ Понижен</string>
+    <string name="gerenciar_removido">✅ Удалён</string>
+    <string name="gerenciar_remover_titulo">Удалить участника</string>
+    <string name="gerenciar_remover_msg">Удалить %1$s из команды?</string>
+    <string name="gerenciar_remover_confirmar">Удалить</string>
+    <string name="gerenciar_pedido_resumo">Причины: %1$s\nСпециальности: %2$s</string>
+    <string name="gerenciar_pedido_titulo">Заявка от %1$s</string>
+    <string name="gerenciar_pedido_detalhe">Причины: %1$s\n\nСпециальности: %2$s</string>
+    <string name="gerenciar_aceitar">Принять</string>
+    <string name="gerenciar_recusar">Отклонить</string>
+    <string name="gerenciar_depois">Позже</string>
+    <string name="gerenciar_pedido_aceito">Заявка принята!</string>
+    <string name="gerenciar_pedido_recusado">Заявка отклонена</string>
+    <string name="gerenciar_notif_recusado_titulo">Заявка отклонена</string>
+    <string name="gerenciar_notif_recusado_msg">Ваша заявка на вступление в %1$s была отклонена</string>
+    <string name="gerenciar_excluir_trabalho_titulo">Удалить работу</string>
+    <string name="gerenciar_excluir_trabalho_msg">Вы уверены, что хотите удалить \'%1$s\'?</string>
+    <string name="gerenciar_trabalho_removido">Работа удалена!</string>
+
+    <string name="criar_trabalho_hint_titulo">Название</string>
+    <string name="criar_trabalho_hint_descricao">Описание</string>
+    <string name="criar_trabalho_hint_categoria">Категория</string>
+    <string name="criar_trabalho_hint_prazo">Срок</string>
+
+    <!-- ===== INVITE TO JOB ===== -->
+    <string name="convidar_trabalho_titulo">Пригласить к Работе</string>
+    <string name="convidar_trabalho_prefixo">Работа: %1$s</string>
+    <string name="convidar_trabalho_placeholder">Работа: ...</string>
+    <string name="convidar_trabalho_enviar">ОТПРАВИТЬ ПРИГЛАШЕНИЕ</string>
+    <string name="convidar_trabalho_enviado">✅ Приглашение отправлено %1$s</string>
+    <string name="convidar_trabalho_sem_disponiveis">Нет доступных пользователей для приглашения</string>
+    <string name="convidar_trabalho_erro_permissao">Это устройство имеет ограничение безопасности. Попробуйте снова или используйте другое устройство.</string>
+
+    <!-- ===== WORK ITEM (manage list) ===== -->
+    <string name="item_trabalho_placeholder_titulo">Название</string>
+    <string name="item_trabalho_placeholder_info">Категория - Срок</string>
+    <string name="item_trabalho_placeholder_descricao">Описание</string>
+    <string name="item_trabalho_zero">0</string>
+    <string name="item_trabalho_convidar">Пригласить</string>
+
+    <!-- ===== JOB COMMENTS ===== -->
+    <string name="comentarios_titulo">Комментарии</string>
+    <string name="comentarios_seta_voltar">←</string>
+    <string name="comentarios_trabalho_padrao">Работа</string>
+    <string name="comentarios_vazio_titulo">Нет комментариев</string>
+    <string name="comentarios_vazio_subtitulo">Будьте первым, кто оставит комментарий</string>
+    <string name="comentarios_hint_escreva">Напишите комментарий…</string>
+    <string name="comentarios_enviar">Отправить</string>
+    <string name="comentarios_avatar_desc">Аватар</string>
+    <string name="comentarios_inicial_placeholder">A</string>
+    <string name="comentarios_nome_placeholder">Имя</string>
+    <string name="comentarios_texto_placeholder">Текст комментария</string>
+    <string name="comentarios_editado">(изменено)</string>
+
+    <!-- Job Comments — actions and toasts -->
+    <string name="comentarios_nao_encontrado">Работа не найдена</string>
+    <string name="comentarios_voce">Вы</string>
+    <string name="comentarios_opcoes_titulo">Опции</string>
+    <string name="comentarios_opcao_editar">Изменить</string>
+    <string name="comentarios_opcao_excluir">Удалить</string>
+    <string name="comentarios_erro_enviar">Ошибка отправки</string>
+    <string name="comentarios_editar_titulo">Изменить комментарий</string>
+    <string name="comentarios_digite_texto">Введите текст</string>
+    <string name="comentarios_atualizado">Обновлено</string>
+    <string name="comentarios_erro_atualizar">Ошибка обновления</string>
+    <string name="comentarios_excluir_titulo">Удалить комментарий</string>
+    <string name="comentarios_excluir_msg">Вы уверены, что хотите удалить?</string>
+    <string name="comentarios_excluido">Удалено</string>
+    <string name="comentarios_erro_excluir">Ошибка удаления</string>
+
+    <!-- ===== RELATIVE TIME (shared) ===== -->
+    <string name="tempo_agora">Сейчас</string>
+    <string name="tempo_ha_min">%1$d мин назад</string>
+    <string name="tempo_ha_horas">%1$d ч назад</string>
+    <string name="tempo_ha_dias">%1$d дн назад</string>
+
+    <!-- Profile -->
+    <string name="perfil_titulo">Мой профиль</string>
+    <string name="perfil_links">Ссылки</string>
+    <string name="perfil_sem_links">Нет ссылок</string>
+    <string name="perfil_meus_trabalhos">МОИ ЗАДАЧИ</string>
+    <string name="perfil_favoritos">ИЗБРАННЫЕ СООБЩЕНИЯ</string>
+    <string name="perfil_sair">ВЫЙТИ</string>
+    <string name="perfil_configuracoes">Настройки</string>
+
+    <!-- Settings -->
+    <string name="config_titulo">Настройки</string>
+    <string name="config_idioma">Язык</string>
+    <string name="config_sair">Выйти</string>
+    <string name="config_excluir_conta">Удалить аккаунт</string>
+    <string name="config_excluir_conta_msg">Вы уверены? Все ваши данные будут удалены навсегда.</string>
+    <string name="config_excluir_confirmar">Да, удалить</string>
+
+    <!-- Actions -->
+    <string name="voltar">← НАЗАД</string>
+    <string name="cancelar">Отмена</string>
+    <string name="salvar">Сохранить</string>
+    <string name="excluir">Удалить</string>
+    <string name="favoritar">⭐ В избранное</string>
+    <string name="desfavoritar">⭐ Убрать из избранного</string>
+    <string name="apagar">🗑 Удалить</string>
+    <string name="baixar">⬇ Скачать</string>
+    <string name="abrir">📂 Открыть</string>
+    <string name="opcoes">Опции</string>
+
+    <!-- Errors -->
+    <string name="erro_generico">Ошибка: %1$s</string>
+    <string name="erro_campos_vazios">Заполните все поля</string>
+    <string name="erro_sem_conexao">⚠️ Нет подключения к интернету.</string>
+
+    <!-- Favorites -->
+    <string name="favoritos_titulo">⭐ Избранные сообщения</string>
+    <string name="favoritos_vazio">Пока нет избранных сообщений</string>
+    <string name="favoritos_remover">Убрать из избранного</string>
+    <string name="favoritos_remover_msg">Убрать это сообщение из избранного?</string>
+</resources>

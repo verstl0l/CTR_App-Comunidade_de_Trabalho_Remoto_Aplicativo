@@ -1,6 +1,5 @@
 package com.example.plataformaremota
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -8,15 +7,13 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class ConvidarTrabalhoActivity : AppCompatActivity() {
+class ConvidarTrabalhoActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -41,7 +38,7 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
         val btnEnviar = findViewById<Button>(R.id.btnEnviarConviteTrabalho)
         val btnVoltar = findViewById<Button>(R.id.btnVoltarConvidar)
 
-        txtTitulo.text = "Trabalho: $tituloTrabalho"
+        txtTitulo.text = getString(R.string.convidar_trabalho_prefixo, tituloTrabalho)
 
         btnVoltar.setOnClickListener { finish() }
 
@@ -59,12 +56,12 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
             val emailConvidado = edtEmail.text.toString().trim().lowercase()
 
             if (emailConvidado.isEmpty()) {
-                Toast.makeText(this, "Selecione um usuário", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.gerenciar_selecione_usuario), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             btnEnviar.isEnabled = false
-            btnEnviar.text = "ENVIANDO..."
+            btnEnviar.text = getString(R.string.pedir_entrada_enviando)
 
             lifecycleScope.launch {
                 try {
@@ -75,8 +72,8 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
                         .await()
 
                     val nomeEquipe = if (!equipe.isEmpty) {
-                        equipe.documents[0].getString("nome") ?: "Equipe"
-                    } else "Equipe"
+                        equipe.documents[0].getString("nome") ?: getString(R.string.equipe_default_nome)
+                    } else getString(R.string.equipe_default_nome)
 
                     val convite = hashMapOf(
                         "trabalhoId" to trabalhoId,
@@ -92,7 +89,7 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
 
                     Toast.makeText(
                         this@ConvidarTrabalhoActivity,
-                        "✅ Convite enviado para $emailConvidado",
+                        getString(R.string.convidar_trabalho_enviado, emailConvidado),
                         Toast.LENGTH_SHORT
                     ).show()
 
@@ -100,14 +97,14 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
                     Log.e("CONVITE_TRABALHO", "Erro: ${e.message}")
-                    Toast.makeText(this@ConvidarTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@ConvidarTrabalhoActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
                     btnEnviar.isEnabled = true
-                    btnEnviar.text = "ENVIAR CONVITE"
+                    btnEnviar.text = getString(R.string.convidar_trabalho_enviar)
                 }
             }
         }
 
-        configurarBottomNavigation()
+        configurarBottomNavigation(null)
     }
 
     // ============================================================
@@ -142,7 +139,7 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
                 if (disponiveis.isEmpty()) {
                     Toast.makeText(
                         this@ConvidarTrabalhoActivity,
-                        "Nenhum usuário disponível para convidar",
+                        getString(R.string.convidar_trabalho_sem_disponiveis),
                         Toast.LENGTH_SHORT
                     ).show()
                     return@launch
@@ -151,27 +148,27 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
                 val nomes = disponiveis.map { "${it.second} (${it.first})" }.toTypedArray()
 
                 AlertDialog.Builder(this@ConvidarTrabalhoActivity)
-                    .setTitle("Selecionar usuário (${disponiveis.size} disponíveis)")
+                    .setTitle(getString(R.string.gerenciar_selecionar_usuario, disponiveis.size))
                     .setItems(nomes) { _, which ->
                         val (emailEscolhido, nomeEscolhido, _) = disponiveis[which]
                         val edtEmail = findViewById<EditText>(R.id.edtEmailConvidado)
                         edtEmail.setText(emailEscolhido)
                         Toast.makeText(
                             this@ConvidarTrabalhoActivity,
-                            "Selecionado: $nomeEscolhido",
+                            getString(R.string.gerenciar_selecionado, nomeEscolhido),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    .setNegativeButton("Cancelar", null)
+                    .setNegativeButton(R.string.cancelar, null)
                     .show()
 
             } catch (e: Exception) {
                 Log.e("CONVITE_TRABALHO", "Erro lista: ${e.message}")
 
                 val mensagem = if (e.message?.contains("PERMISSION_DENIED") == true) {
-                    "Este dispositivo tem uma limitação de segurança. Tente novamente ou use outro dispositivo."
+                    getString(R.string.convidar_trabalho_erro_permissao)
                 } else {
-                    "Erro ao carregar usuários: ${e.message}"
+                    getString(R.string.gerenciar_erro_usuarios, e.message ?: "")
                 }
 
                 Toast.makeText(
@@ -179,20 +176,6 @@ class ConvidarTrabalhoActivity : AppCompatActivity() {
                     mensagem,
                     Toast.LENGTH_LONG
                 ).show()
-            }
-        }
-    }
-
-    private fun configurarBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); finish(); true }
-                R.id.nav_chat -> { startActivity(Intent(this, ListaConversasActivity::class.java)); finish(); true }
-                R.id.nav_groups -> { startActivity(Intent(this, MinhasEquipesActivity::class.java)); finish(); true }
-                R.id.nav_notifications -> { startActivity(Intent(this, NotificacoesActivity::class.java)); finish(); true }
-                R.id.nav_profile -> { startActivity(Intent(this, perfil::class.java)); finish(); true }
-                else -> false
             }
         }
     }

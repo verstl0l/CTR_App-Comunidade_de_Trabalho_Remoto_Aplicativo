@@ -17,13 +17,13 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="← VOLTAR"
+            android:text="@string/voltar_seta"
             android:textColor="@android:color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Criar Nova Equipe"
+            android:text="@string/criar_nova_equipe"
             android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nome da Equipe"
+            android:text="@string/nome_da_equipe"
             android:textColor="#9E9E9E"
             android:textSize="12sp"
             android:layout_marginBottom="8dp"/>
@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="@drawable/edittext_bg"
-            android:hint="Ex: Design Core"
+            android:hint="@string/hint_ex_design_core"
             android:paddingHorizontal="16dp"
             android:textColor="@android:color/white"
             android:textColorHint="#555555"
@@ -52,7 +52,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Descrição"
+            android:text="@string/descricao"
             android:textColor="#9E9E9E"
             android:textSize="12sp"
             android:layout_marginBottom="8dp"/>
@@ -63,7 +63,7 @@
             android:layout_height="120dp"
             android:background="@drawable/edittext_bg"
             android:gravity="top"
-            android:hint="Fale sobre o objetivo da equipe..."
+            android:hint="@string/hint_objetivo_equipe"
             android:padding="16dp"
             android:textColor="@android:color/white"
             android:textColorHint="#555555"
@@ -73,7 +73,7 @@
             android:id="@+id/btnSalvarEquipe"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="CRIAR EQUIPE"
+            android:text="@string/criar_equipe"
             android:textStyle="bold"
             android:textColor="#1C1C1C"
             app:backgroundTint="#F5E6D0" />

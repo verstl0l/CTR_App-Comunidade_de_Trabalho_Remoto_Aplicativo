@@ -23,7 +23,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/voltar_seta"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -32,7 +32,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="Convidar para Trabalho"
+                android:text="@string/convidar_trabalho_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -42,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Trabalho: ..."
+                android:text="@string/convidar_trabalho_placeholder"
                 android:textColor="#F5E6D0"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 android:backgroundTint="#3D2B27"
-                android:hint="Email do usuário"
+                android:hint="@string/lista_conversas_hint_email"
                 android:inputType="textEmailAddress"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:backgroundTint="#F5E6D0"
-                android:text="ENVIAR CONVITE"
+                android:text="@string/convidar_trabalho_enviar"
                 android:textColor="#1C1311"
                 android:textStyle="bold" />
 

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CTR</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_home">首页</string>
+    <string name="nav_chat">聊天</string>
+    <string name="nav_groups">团队</string>
+    <string name="nav_notifications">通知</string>
+    <string name="nav_profile">个人资料</string>
+
+    <!-- Main -->
+    <string name="main_abrir_chat">打开聊天</string>
+    <string name="main_bem_vindo">欢迎来到CTR</string>
+    <string name="main_cadastrar_se">注册</string>
+    <string name="main_entrar_equipe">加入团队</string>
+    <string name="main_criar_equipe">创建团队</string>
+
+    <!-- Language -->
+    <string name="idioma">语言</string>
+    <string name="selecione_idioma">选择语言</string>
+    <string name="idioma_portugues">葡萄牙语</string>
+    <string name="idioma_ingles">英语</string>
+    <string name="idioma_espanhol">西班牙语</string>
+    <string name="idioma_frances">法语</string>
+    <string name="idioma_russo">俄语</string>
+    <string name="idioma_chines">中文</string>
+
+    <!-- Login -->
+    <string name="login_titulo">CTR</string>
+    <string name="login_subtitulo">远程工作社区</string>
+    <string name="login_instrucao">登录以继续</string>
+    <string name="login_email">邮箱</string>
+    <string name="login_senha">密码</string>
+    <string name="login_entrar">登录</string>
+    <string name="login_criar_conta">创建账户</string>
+    <string name="login_entrando">登录中...</string>
+
+    <!-- Login (erros e mensagens) -->
+    <string name="login_erro_email_invalido">邮箱无效</string>
+    <string name="login_erro_credenciais">邮箱或密码错误</string>
+    <string name="login_erro_conta_nao_encontrada">未找到该邮箱对应的账户</string>
+    <string name="login_erro_muitas_tentativas">尝试次数过多。请在几分钟后重试</string>
+    <string name="login_erro_email_formato">邮箱格式无效</string>
+    <string name="login_erro_generico">登录错误。请重试。</string>
+    <string name="login_sucesso">✅ 登录成功！</string>
+
+    <!-- Signup -->
+    <string name="cadastro_titulo">创建账户</string>
+    <string name="cadastro_nome">姓名</string>
+    <string name="cadastro_email">邮箱</string>
+    <string name="cadastro_senha">密码</string>
+    <string name="cadastro_confirmar_senha">确认密码</string>
+    <string name="cadastro_profissao">职业</string>
+    <string name="cadastro_botao">注册</string>
+    <string name="cadastro_cadastrando">注册中...</string>
+    <string name="cadastro_sucesso">✅ 账户已创建！</string>
+    <string name="cadastro_erro_salvar">账户已创建，但保存数据时出错：%1$s</string>
+    <string name="cadastro_erro_senha_curta">密码必须至少包含6个字符</string>
+    <string name="cadastro_erro_senhas_diferentes">密码不匹配</string>
+
+    <!-- ===== CREATE TEAM ===== -->
+    <string name="voltar_seta">← 返回</string>
+    <string name="criar_nova_equipe">创建新团队</string>
+    <string name="nome_da_equipe">团队名称</string>
+    <string name="hint_ex_design_core">例如：设计核心</string>
+    <string name="descricao">描述</string>
+    <string name="hint_objetivo_equipe">介绍一下团队的目标……</string>
+    <string name="criar_equipe">创建团队</string>
+    <string name="criando_equipe">创建中……</string>
+    <string name="salvar_equipe">保存</string>
+    <string name="erro_nome_equipe_obrigatorio">团队名称为必填项</string>
+    <string name="equipe_criada_sucesso">✅ 团队创建成功！</string>
+    <string name="erro_adicionar_membro">团队已创建，但添加成员失败</string>
+    <string name="erro_criar_equipe">创建团队出错：%1$s</string>
+
+    <!-- Find Teams -->
+    <string name="buscar_equipes_titulo">搜索团队</string>
+    <string name="buscar_equipes_hint">按名称搜索...</string>
+    <string name="buscar_equipes_vazio">未找到公开团队</string>
+    <string name="buscar_equipes_criado_por">创建者：%1$s</string>
+    <string name="buscar_equipes_pedido_ja_enviado">您已向此团队发送请求</string>
+    <string name="equipe_default_nome">团队</string>
+    <string name="equipe_sem_descricao">无描述</string>
+
+    <!-- ===== REQUEST TO JOIN ===== -->
+    <string name="pedir_entrada_titulo">申请加入</string>
+    <string name="pedir_entrada_equipe_prefixo">团队：%1$s</string>
+    <string name="pedir_entrada_equipe_placeholder">团队：...</string>
+    <string name="pedir_entrada_hint_motivos">为什么想加入？（理由）</string>
+    <string name="pedir_entrada_hint_especialidades">您的专长</string>
+    <string name="pedir_entrada_enviar">发送申请</string>
+    <string name="pedir_entrada_enviando">发送中……</string>
+    <string name="pedir_entrada_ja_enviado_botao">申请已发送</string>
+    <string name="pedir_entrada_ja_enviado">您已向该团队发送过申请</string>
+    <string name="pedir_entrada_sucesso">✅ 申请已发送！请等待批准。</string>
+    <string name="usuario_padrao">用户</string>
+
+    <!-- ===== CONVERSATIONS LIST ===== -->
+    <string name="lista_conversas_titulo">会话</string>
+    <string name="lista_conversas_nova">+ 新会话</string>
+    <string name="lista_conversas_vazio">还没有会话</string>
+    <string name="lista_conversas_apagar_conversa">删除会话</string>
+    <string name="lista_conversas_apagar_mensagens">删除消息</string>
+    <string name="lista_conversas_apagar_inteira">删除整个会话</string>
+    <string name="lista_conversas_ver_perfil">查看资料</string>
+    <string name="lista_conversas_mensagens_apagadas">消息已删除</string>
+    <string name="lista_conversas_conversa_apagada">会话已删除</string>
+    <string name="lista_conversas_hint_email">用户邮箱</string>
+    <string name="lista_conversas_iniciar">开始</string>
+    <string name="lista_conversas_nao_consigo_mesmo">您不能与自己聊天</string>
+    <string name="lista_conversas_usuario_nao_encontrado">未找到用户</string>
+    <string name="conversa_padrao">会话</string>
+    <string name="grupo_padrao">群组</string>
+
+    <!-- ===== MY TEAMS ===== -->
+    <string name="minhas_equipes_titulo">我的团队</string>
+    <string name="minhas_equipes_nova">+ 新团队</string>
+    <string name="minhas_equipes_vazio">您还没有加入任何团队</string>
+    <string name="minhas_equipes_papel_criador">创建者</string>
+    <string name="minhas_equipes_papel_admin">管理员</string>
+    <string name="minhas_equipes_papel_membro">成员</string>
+
+    <plurals name="minhas_equipes_qtd_trabalhos">
+        <item quantity="other">%d 个工作</item>
+    </plurals>
+
+    <!-- ===== MANAGE TEAM ===== -->
+    <string name="gerenciar_titulo">管理团队</string>
+    <string name="gerenciar_hint_descricao">团队描述</string>
+    <string name="gerenciar_equipe_privada">私密团队</string>
+    <string name="gerenciar_equipe_privada_info">私密团队不会接收加入请求</string>
+    <string name="gerenciar_salvar_dados">保存团队数据</string>
+    <string name="gerenciar_excluir_botao">删除团队</string>
+    <string name="gerenciar_convidar_email">通过邮箱邀请</string>
+    <string name="gerenciar_enviar_convite">发送邀请</string>
+    <string name="gerenciar_pedidos_entrada">加入请求</string>
+    <string name="gerenciar_membros">团队成员</string>
+    <string name="gerenciar_trabalhos_publicados">已发布工作</string>
+
+    <!-- Manage Team — dialogs and toasts -->
+    <string name="gerenciar_dados_atualizados">数据已更新！</string>
+    <string name="gerenciar_selecione_usuario">选择用户</string>
+    <string name="gerenciar_nao_convidar_mesmo">您不能邀请自己</string>
+    <string name="gerenciar_equipe_nao_carregada">团队尚未加载</string>
+    <string name="gerenciar_email_nao_cadastrado">该邮箱未注册</string>
+    <string name="gerenciar_ja_convidado">该用户已被邀请</string>
+    <string name="gerenciar_convite_enviado">✅ 邀请已发送！</string>
+    <string name="gerenciar_excluir_titulo">删除团队</string>
+    <string name="gerenciar_excluir_msg">确定吗？所有工作将被永久删除。</string>
+    <string name="gerenciar_excluir_confirmar">是，删除</string>
+    <string name="gerenciar_equipe_excluida">🗑️ 团队已删除！</string>
+    <string name="gerenciar_todos_na_equipe">所有用户都已在团队中</string>
+    <string name="gerenciar_selecionar_usuario">选择用户（%1$d 位可用）</string>
+    <string name="gerenciar_selecionado">已选择：%1$s</string>
+    <string name="gerenciar_erro_usuarios">加载用户出错：%1$s</string>
+    <string name="gerenciar_editar_trabalho">编辑工作</string>
+    <string name="gerenciar_trabalho_atualizado">✅ 工作已更新！</string>
+    <string name="gerenciar_sem_membros">还没有成员</string>
+    <string name="gerenciar_sem_pedidos">没有待处理的请求</string>
+    <string name="gerenciar_sem_trabalhos">还没有发布的工作</string>
+    <string name="gerenciar_nome_dono">%1$s（所有者）</string>
+    <string name="gerenciar_nome_admin">%1$s（管理员）</string>
+    <string name="gerenciar_nome_voce">%1$s ← 您</string>
+    <string name="gerenciar_promover">提升为管理员</string>
+    <string name="gerenciar_rebaixar">降为成员</string>
+    <string name="gerenciar_remover">从团队移除</string>
+    <string name="gerenciar_nenhuma_acao">没有可用的操作</string>
+    <string name="gerenciar_promovido">✅ 已提升</string>
+    <string name="gerenciar_rebaixado">✅ 已降级</string>
+    <string name="gerenciar_removido">✅ 已移除</string>
+    <string name="gerenciar_remover_titulo">移除成员</string>
+    <string name="gerenciar_remover_msg">将 %1$s 从团队中移除？</string>
+    <string name="gerenciar_remover_confirmar">移除</string>
+    <string name="gerenciar_pedido_resumo">理由：%1$s\n专长：%2$s</string>
+    <string name="gerenciar_pedido_titulo">来自 %1$s 的请求</string>
+    <string name="gerenciar_pedido_detalhe">理由：%1$s\n\n专长：%2$s</string>
+    <string name="gerenciar_aceitar">接受</string>
+    <string name="gerenciar_recusar">拒绝</string>
+    <string name="gerenciar_depois">稍后</string>
+    <string name="gerenciar_pedido_aceito">请求已接受！</string>
+    <string name="gerenciar_pedido_recusado">请求已拒绝</string>
+    <string name="gerenciar_notif_recusado_titulo">请求被拒绝</string>
+    <string name="gerenciar_notif_recusado_msg">您加入 %1$s 的请求被拒绝了</string>
+    <string name="gerenciar_excluir_trabalho_titulo">删除工作</string>
+    <string name="gerenciar_excluir_trabalho_msg">确定要删除“%1$s”吗？</string>
+    <string name="gerenciar_trabalho_removido">工作已删除！</string>
+
+    <string name="criar_trabalho_hint_titulo">标题</string>
+    <string name="criar_trabalho_hint_descricao">描述</string>
+    <string name="criar_trabalho_hint_categoria">类别</string>
+    <string name="criar_trabalho_hint_prazo">截止日期</string>
+
+    <!-- ===== INVITE TO JOB ===== -->
+    <string name="convidar_trabalho_titulo">邀请参与工作</string>
+    <string name="convidar_trabalho_prefixo">工作：%1$s</string>
+    <string name="convidar_trabalho_placeholder">工作：...</string>
+    <string name="convidar_trabalho_enviar">发送邀请</string>
+    <string name="convidar_trabalho_enviado">✅ 邀请已发送给 %1$s</string>
+    <string name="convidar_trabalho_sem_disponiveis">没有可邀请的用户</string>
+    <string name="convidar_trabalho_erro_permissao">此设备存在安全限制。请重试或使用其他设备。</string>
+
+    <!-- ===== WORK ITEM (manage list) ===== -->
+    <string name="item_trabalho_placeholder_titulo">标题</string>
+    <string name="item_trabalho_placeholder_info">类别 - 截止日期</string>
+    <string name="item_trabalho_placeholder_descricao">描述</string>
+    <string name="item_trabalho_zero">0</string>
+    <string name="item_trabalho_convidar">邀请</string>
+
+    <!-- ===== JOB COMMENTS ===== -->
+    <string name="comentarios_titulo">评论</string>
+    <string name="comentarios_seta_voltar">←</string>
+    <string name="comentarios_trabalho_padrao">工作</string>
+    <string name="comentarios_vazio_titulo">暂无评论</string>
+    <string name="comentarios_vazio_subtitulo">成为第一个评论此工作的人</string>
+    <string name="comentarios_hint_escreva">写评论……</string>
+    <string name="comentarios_enviar">发送</string>
+    <string name="comentarios_avatar_desc">头像</string>
+    <string name="comentarios_inicial_placeholder">A</string>
+    <string name="comentarios_nome_placeholder">姓名</string>
+    <string name="comentarios_texto_placeholder">评论文本</string>
+    <string name="comentarios_editado">（已编辑）</string>
+
+    <!-- Job Comments — actions and toasts -->
+    <string name="comentarios_nao_encontrado">未找到工作</string>
+    <string name="comentarios_voce">您</string>
+    <string name="comentarios_opcoes_titulo">选项</string>
+    <string name="comentarios_opcao_editar">编辑</string>
+    <string name="comentarios_opcao_excluir">删除</string>
+    <string name="comentarios_erro_enviar">发送出错</string>
+    <string name="comentarios_editar_titulo">编辑评论</string>
+    <string name="comentarios_digite_texto">请输入文字</string>
+    <string name="comentarios_atualizado">已更新</string>
+    <string name="comentarios_erro_atualizar">更新出错</string>
+    <string name="comentarios_excluir_titulo">删除评论</string>
+    <string name="comentarios_excluir_msg">确定要删除吗？</string>
+    <string name="comentarios_excluido">已删除</string>
+    <string name="comentarios_erro_excluir">删除出错</string>
+
+    <!-- ===== RELATIVE TIME (shared) ===== -->
+    <string name="tempo_agora">刚刚</string>
+    <string name="tempo_ha_min">%1$d 分钟前</string>
+    <string name="tempo_ha_horas">%1$d 小时前</string>
+    <string name="tempo_ha_dias">%1$d 天前</string>
+
+    <!-- Profile -->
+    <string name="perfil_titulo">我的资料</string>
+    <string name="perfil_links">链接</string>
+    <string name="perfil_sem_links">暂无链接</string>
+    <string name="perfil_meus_trabalhos">我的任务</string>
+    <string name="perfil_favoritos">收藏消息</string>
+    <string name="perfil_sair">退出登录</string>
+    <string name="perfil_configuracoes">设置</string>
+
+    <!-- Settings -->
+    <string name="config_titulo">设置</string>
+    <string name="config_idioma">语言</string>
+    <string name="config_sair">退出登录</string>
+    <string name="config_excluir_conta">删除账户</string>
+    <string name="config_excluir_conta_msg">您确定吗？您的所有数据将被永久删除。</string>
+    <string name="config_excluir_confirmar">是，删除</string>
+
+    <!-- Actions -->
+    <string name="voltar">← 返回</string>
+    <string name="cancelar">取消</string>
+    <string name="salvar">保存</string>
+    <string name="excluir">删除</string>
+    <string name="favoritar">⭐ 收藏</string>
+    <string name="desfavoritar">⭐ 取消收藏</string>
+    <string name="apagar">🗑 删除</string>
+    <string name="baixar">⬇ 下载</string>
+    <string name="abrir">📂 打开</string>
+    <string name="opcoes">选项</string>
+
+    <!-- Errors -->
+    <string name="erro_generico">错误：%1$s</string>
+    <string name="erro_campos_vazios">请填写所有字段</string>
+    <string name="erro_sem_conexao">⚠️ 无网络连接。请检查网络后重试。</string>
+
+    <!-- Favorites -->
+    <string name="favoritos_titulo">⭐ 收藏消息</string>
+    <string name="favoritos_vazio">暂无收藏消息</string>
+    <string name="favoritos_remover">取消收藏</string>
+    <string name="favoritos_remover_msg">确定要取消收藏此消息吗？</string>
+</resources>

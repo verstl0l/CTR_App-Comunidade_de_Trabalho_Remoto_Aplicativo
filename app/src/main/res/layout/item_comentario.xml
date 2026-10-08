@@ -31,7 +31,7 @@
                     android:id="@+id/imgAvatarComentario"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="Avatar"
+                    android:contentDescription="@string/comentarios_avatar_desc"
                     android:scaleType="centerCrop"
                     android:visibility="gone" />
 
@@ -40,7 +40,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:text="A"
+                    android:text="@string/comentarios_inicial_placeholder"
                     android:textColor="@color/accent_dark"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -71,7 +71,7 @@
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Nome"
+                    android:text="@string/comentarios_nome_placeholder"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -81,7 +81,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Agora"
+                    android:text="@string/tempo_agora"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
 
@@ -92,7 +92,7 @@
                 android:id="@+id/txtEditado"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(editado)"
+                android:text="@string/comentarios_editado"
                 android:textColor="@color/text_secondary"
                 android:textSize="10sp"
                 android:textStyle="italic"
@@ -104,7 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Texto do comentario"
+                android:text="@string/comentarios_texto_placeholder"
                 android:textColor="@color/text_tertiary"
                 android:textSize="14sp" />
 

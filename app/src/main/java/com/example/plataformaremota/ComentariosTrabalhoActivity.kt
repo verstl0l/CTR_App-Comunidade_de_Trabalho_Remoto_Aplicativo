@@ -12,7 +12,6 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -26,16 +25,16 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-class ComentariosTrabalhoActivity : AppCompatActivity() {
+class ComentariosTrabalhoActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
-    private var nomeUsuario: String = "Usuario"
+    private var nomeUsuario: String = ""
     private var fotoUsuario: String = ""
 
     private var trabalhoId: String = ""
-    private var tituloTrabalho: String = "Trabalho"
+    private var tituloTrabalho: String = ""
     private var equipeId: String = ""
 
     // Verifica se pode excluir comentarios dos outros (dono ou admin)
@@ -49,11 +48,13 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
         trabalhoId = intent.getStringExtra("trabalhoId") ?: ""
-        tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: "Trabalho"
+        tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: getString(R.string.comentarios_trabalho_padrao)
         equipeId = intent.getStringExtra("equipeId") ?: ""
 
+        nomeUsuario = getString(R.string.usuario_padrao)
+
         if (trabalhoId.isEmpty()) {
-            Toast.makeText(this, "Trabalho nao encontrado", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.comentarios_trabalho_nao_encontrado), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -89,7 +90,6 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
         if (equipeId.isEmpty()) return
 
         try {
-            // 1. Verifica se e dono
             val equipeDoc = db.collection("equipes").document(equipeId).get().await()
             val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
 
@@ -98,7 +98,6 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                 return
             }
 
-            // 2. Verifica se e admin
             val membro = db.collection("membros_equipe")
                 .whereEqualTo("equipeId", equipeId)
                 .whereEqualTo("email", emailUsuario)
@@ -121,7 +120,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
     private suspend fun carregarDadosUsuario() {
         try {
             val doc = db.collection("usuarios").document(emailUsuario).get().await()
-            nomeUsuario = doc.getString("nome") ?: "Usuario"
+            nomeUsuario = doc.getString("nome") ?: getString(R.string.usuario_padrao)
             fotoUsuario = doc.getString("fotoUrl") ?: ""
         } catch (e: Exception) {
             Log.e("COMENTARIOS", "Erro ao carregar usuario: ${e.message}")
@@ -162,7 +161,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                 snapshots.documents.forEach { doc ->
                     val comentarioId = doc.id
                     val autorEmail = doc.getString("autorEmail") ?: ""
-                    val autorNome = doc.getString("autorNome") ?: "Usuario"
+                    val autorNome = doc.getString("autorNome") ?: getString(R.string.usuario_padrao)
                     val autorFotoUrl = doc.getString("autorFotoUrl") ?: ""
                     val texto = doc.getString("texto") ?: ""
                     val criadoEm = doc.getLong("criadoEm") ?: 0L
@@ -181,7 +180,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                     val txtEditado = view.findViewById<TextView>(R.id.txtEditado)
                     val txtTexto = view.findViewById<TextView>(R.id.txtTextoComentario)
 
-                    txtNome.text = if (ehAutor) "Voce" else autorNome
+                    txtNome.text = if (ehAutor) getString(R.string.comentarios_voce) else autorNome
                     txtData.text = formatarDataRelativa(criadoEm)
                     txtTexto.text = texto
 
@@ -193,19 +192,21 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
 
                     configurarAvatar(cardAvatar, imgAvatar, txtIniciais, autorNome, autorFotoUrl)
 
-                    // Long press no comentario
                     if (podeApagar) {
                         view.setOnLongClickListener {
                             val opcoes = mutableListOf<String>()
-                            if (ehAutor) opcoes.add("Editar")
-                            opcoes.add("Excluir")
+                            if (ehAutor) opcoes.add(getString(R.string.comentarios_opcao_editar))
+                            opcoes.add(getString(R.string.comentarios_opcao_excluir))
+
+                            val editarStr = getString(R.string.comentarios_opcao_editar)
+                            val excluirStr = getString(R.string.comentarios_opcao_excluir)
 
                             AlertDialog.Builder(this@ComentariosTrabalhoActivity)
-                                .setTitle("Opcoes")
+                                .setTitle(getString(R.string.comentarios_opcoes_titulo))
                                 .setItems(opcoes.toTypedArray()) { _, which ->
                                     when (opcoes[which]) {
-                                        "Editar" -> abrirDialogEdicao(comentarioId, texto)
-                                        "Excluir" -> confirmarExclusao(comentarioId)
+                                        editarStr -> abrirDialogEdicao(comentarioId, texto)
+                                        excluirStr -> confirmarExclusao(comentarioId)
                                     }
                                 }
                                 .show()
@@ -269,7 +270,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                 )
 
                 if (id == null) {
-                    Toast.makeText(this@ComentariosTrabalhoActivity, "Erro ao enviar", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ComentariosTrabalhoActivity, getString(R.string.comentarios_erro_enviar), Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
@@ -280,7 +281,7 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                     autorNome = nomeUsuario
                 )
             } catch (e: Exception) {
-                Toast.makeText(this@ComentariosTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@ComentariosTrabalhoActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -296,12 +297,12 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Editar comentario")
+            .setTitle(getString(R.string.comentarios_editar_titulo))
             .setView(edtEdit)
-            .setPositiveButton("Salvar") { _, _ ->
+            .setPositiveButton(R.string.salvar) { _, _ ->
                 val novoTexto = edtEdit.text.toString().trim()
                 if (novoTexto.isEmpty()) {
-                    Toast.makeText(this, "Digite um texto", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.comentarios_digite_texto), Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 if (novoTexto == textoAtual) return@setPositiveButton
@@ -309,9 +310,9 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     val ok = ComentarioHelper.editar(trabalhoId, comentarioId, novoTexto)
                     if (ok) {
-                        Toast.makeText(this@ComentariosTrabalhoActivity, "Atualizado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, getString(R.string.comentarios_atualizado), Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(this@ComentariosTrabalhoActivity, "Erro ao atualizar", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, getString(R.string.comentarios_erro_atualizar), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -324,15 +325,15 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
     // ============================================================
     private fun confirmarExclusao(comentarioId: String) {
         AlertDialog.Builder(this)
-            .setTitle("Excluir comentario")
-            .setMessage("Tem certeza que deseja excluir?")
-            .setPositiveButton("Excluir") { _, _ ->
+            .setTitle(getString(R.string.comentarios_excluir_titulo))
+            .setMessage(getString(R.string.comentarios_excluir_msg))
+            .setPositiveButton(R.string.excluir) { _, _ ->
                 lifecycleScope.launch {
                     val ok = ComentarioHelper.remover(trabalhoId, comentarioId)
                     if (ok) {
-                        Toast.makeText(this@ComentariosTrabalhoActivity, "Excluido", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, getString(R.string.comentarios_excluido), Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(this@ComentariosTrabalhoActivity, "Erro ao excluir", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ComentariosTrabalhoActivity, getString(R.string.comentarios_erro_excluir), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -350,21 +351,22 @@ class ComentariosTrabalhoActivity : AppCompatActivity() {
         val diff = agora - timestamp
 
         return when {
-            diff < 60_000 -> "Agora"
+            diff < 60_000 -> getString(R.string.tempo_agora)
             diff < 3_600_000 -> {
                 val min = TimeUnit.MILLISECONDS.toMinutes(diff)
-                "Ha ${min}min"
+                getString(R.string.tempo_ha_min, min)
             }
             diff < 86_400_000 -> {
                 val horas = TimeUnit.MILLISECONDS.toHours(diff)
-                "Ha ${horas}h"
+                getString(R.string.tempo_ha_horas, horas)
             }
             diff < 604_800_000 -> {
                 val dias = TimeUnit.MILLISECONDS.toDays(diff)
-                "Ha ${dias}d"
+                getString(R.string.tempo_ha_dias, dias)
             }
             else -> {
-                val formato = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+                val locale = Locale.getDefault()
+                val formato = SimpleDateFormat("dd/MM/yyyy", locale)
                 formato.format(Date(timestamp))
             }
         }

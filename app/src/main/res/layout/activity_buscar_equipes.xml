@@ -23,7 +23,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/voltar"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -32,23 +32,21 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
-                android:text="Buscar Equipes"
+                android:text="@string/buscar_equipes_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <!-- Campo de busca -->
             <EditText
                 android:id="@+id/edtBuscarEquipe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:backgroundTint="#3D2B27"
-                android:hint="Buscar por nome..."
+                android:hint="@string/buscar_equipes_hint"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
 
-            <!-- Container das equipes -->
             <LinearLayout
                 android:id="@+id/containerEquipes"
                 android:layout_width="match_parent"

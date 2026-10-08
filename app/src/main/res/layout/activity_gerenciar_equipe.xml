@@ -24,7 +24,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/voltar_seta"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -33,7 +33,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="Gerenciar Equipe"
+                android:text="@string/gerenciar_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -44,7 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#3D2B27"
-                android:hint="Nome da Equipe"
+                android:hint="@string/nome_da_equipe"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E"
                 android:textSize="16sp"
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="#3D2B27"
-                android:hint="Descrição da Equipe"
+                android:hint="@string/gerenciar_hint_descricao"
                 android:textColor="#9E9E9E"
                 android:textColorHint="#555555"
                 android:textSize="14sp" />
@@ -73,7 +73,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Equipe Privada"
+                    android:text="@string/gerenciar_equipe_privada"
                     android:textColor="@android:color/white"
                     android:textSize="16sp" />
 
@@ -88,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Equipes privadas não recebem pedidos de entrada"
+                android:text="@string/gerenciar_equipe_privada_info"
                 android:textColor="#9E9E9E"
                 android:textSize="12sp" />
 
@@ -96,7 +96,7 @@
                 android:id="@+id/btnSalvarAlteracoesEquipe"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="SALVAR DADOS DA EQUIPE"
+                android:text="@string/gerenciar_salvar_dados"
                 android:textSize="12sp"
                 app:backgroundTint="#3D2B27" />
 
@@ -107,7 +107,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="24dp"
-                android:text="EXCLUIR EQUIPE"
+                android:text="@string/gerenciar_excluir_botao"
                 android:textColor="#FF6B6B"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -126,7 +126,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Convidar por Email"
+                android:text="@string/gerenciar_convidar_email"
                 android:textColor="#9E9E9E"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -137,7 +137,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="#3D2B27"
-                android:hint="Email do usuário"
+                android:hint="@string/lista_conversas_hint_email"
                 android:inputType="textEmailAddress"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
@@ -147,7 +147,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginBottom="24dp"
-                android:text="ENVIAR CONVITE"
+                android:text="@string/gerenciar_enviar_convite"
                 android:textColor="#1C1311"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -164,7 +164,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Pedidos de Entrada"
+                android:text="@string/gerenciar_pedidos_entrada"
                 android:textColor="#9E9E9E"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -187,7 +187,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Membros da Equipe"
+                android:text="@string/gerenciar_membros"
                 android:textColor="#9E9E9E"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -210,7 +210,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Trabalhos Publicados"
+                android:text="@string/gerenciar_trabalhos_publicados"
                 android:textColor="#9E9E9E"
                 android:textSize="14sp"
                 android:textStyle="bold" />

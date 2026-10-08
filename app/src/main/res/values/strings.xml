@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CTR</string>
 
@@ -8,12 +9,258 @@
     <string name="nav_notifications">Notificações</string>
     <string name="nav_profile">Perfil</string>
 
+    <!-- Main -->
+    <string name="main_abrir_chat">Abrir chat</string>
+    <string name="main_bem_vindo">Bem-vindo ao CTR</string>
+    <string name="main_cadastrar_se">CADASTRAR-SE</string>
+    <string name="main_entrar_equipe">ENTRAR EM EQUIPE</string>
+    <string name="main_criar_equipe">CRIAR EQUIPE</string>
+
+    <!-- Idioma -->
+    <string name="idioma">Idioma</string>
+    <string name="selecione_idioma">Selecione o idioma</string>
+    <string name="idioma_portugues">Português</string>
+    <string name="idioma_ingles">Inglês</string>
+    <string name="idioma_espanhol">Espanhol</string>
+    <string name="idioma_frances">Francês</string>
+    <string name="idioma_russo">Russo</string>
+    <string name="idioma_chines">Chinês</string>
+
+    <!-- Login -->
+    <string name="login_titulo">CTR</string>
+    <string name="login_subtitulo">Comunidade de Trabalho Remoto</string>
+    <string name="login_instrucao">Faça login para continuar</string>
+    <string name="login_email">E-mail</string>
+    <string name="login_senha">Senha</string>
+    <string name="login_entrar">ENTRAR</string>
+    <string name="login_criar_conta">CRIAR CONTA</string>
+    <string name="login_entrando">ENTRANDO...</string>
+
+    <!-- Login (erros e mensagens) -->
+    <string name="login_erro_email_invalido">E-mail inválido</string>
+    <string name="login_erro_credenciais">E-mail ou senha incorretos</string>
+    <string name="login_erro_conta_nao_encontrada">Nenhuma conta encontrada com este e-mail</string>
+    <string name="login_erro_muitas_tentativas">Muitas tentativas. Tente novamente em alguns minutos</string>
+    <string name="login_erro_email_formato">E-mail em formato inválido</string>
+    <string name="login_erro_generico">Erro ao fazer login. Tente novamente.</string>
+    <string name="login_sucesso">✅ Login realizado!</string>
+
+    <!-- Cadastro -->
+    <string name="cadastro_titulo">Criar conta</string>
+    <string name="cadastro_nome">Nome</string>
+    <string name="cadastro_email">E-mail</string>
+    <string name="cadastro_senha">Senha</string>
+    <string name="cadastro_confirmar_senha">Confirmar Senha</string>
+    <string name="cadastro_profissao">Profissão</string>
+    <string name="cadastro_botao">CADASTRAR</string>
+    <string name="cadastro_cadastrando">CADASTRANDO...</string>
+    <string name="cadastro_sucesso">✅ Cadastro realizado!</string>
+    <string name="cadastro_erro_salvar">Cadastro criado, mas erro ao salvar dados: %1$s</string>
+    <string name="cadastro_erro_senha_curta">A senha deve ter pelo menos 6 caracteres</string>
+    <string name="cadastro_erro_senhas_diferentes">As senhas não coincidem</string>
+
+    <!-- Criar Equipe -->
+    <string name="voltar_seta">← VOLTAR</string>
+    <string name="criar_nova_equipe">Criar Nova Equipe</string>
+    <string name="nome_da_equipe">Nome da Equipe</string>
+    <string name="hint_ex_design_core">Ex: Design Core</string>
+    <string name="descricao">Descrição</string>
+    <string name="hint_objetivo_equipe">Fale sobre o objetivo da equipe…</string>
+    <string name="criar_equipe">CRIAR EQUIPE</string>
+    <string name="criando_equipe">CRIANDO…</string>
+    <string name="salvar_equipe">SALVAR</string>
+    <string name="erro_nome_equipe_obrigatorio">O nome da equipe é obrigatório</string>
+    <string name="equipe_criada_sucesso">✅ Equipe criada com sucesso!</string>
+    <string name="erro_adicionar_membro">Equipe criada, mas erro ao adicionar membro</string>
+    <string name="erro_criar_equipe">Erro ao criar equipe: %1$s</string>
+
+    <!-- Buscar Equipes -->
+    <string name="buscar_equipes_titulo">Buscar Equipes</string>
+    <string name="buscar_equipes_hint">Buscar por nome...</string>
+    <string name="buscar_equipes_vazio">Nenhuma equipe pública encontrada</string>
+    <string name="buscar_equipes_criado_por">Criado por: %1$s</string>
+    <string name="buscar_equipes_pedido_ja_enviado">Você já enviou um pedido para esta equipe</string>
+    <string name="equipe_default_nome">Equipe</string>
+    <string name="equipe_sem_descricao">Sem descrição</string>
+
+    <!-- ===== REQUEST TO JOIN ===== -->
+    <string name="pedir_entrada_titulo">Pedir para Entrar</string>
+    <string name="pedir_entrada_equipe_prefixo">Equipe: %1$s</string>
+    <string name="pedir_entrada_equipe_placeholder">Equipe: ...</string>
+    <string name="pedir_entrada_hint_motivos">Por que quer entrar? (motivos)</string>
+    <string name="pedir_entrada_hint_especialidades">Suas especialidades</string>
+    <string name="pedir_entrada_enviar">ENVIAR PEDIDO</string>
+    <string name="pedir_entrada_enviando">ENVIANDO…</string>
+    <string name="pedir_entrada_ja_enviado_botao">PEDIDO JÁ ENVIADO</string>
+    <string name="pedir_entrada_ja_enviado">Você já enviou um pedido para esta equipe</string>
+    <string name="pedir_entrada_sucesso">✅ Pedido enviado! Aguarde aprovação.</string>
+    <string name="usuario_padrao">Usuário</string>
+
+    <!-- ===== CONVERSATIONS LIST ===== -->
+    <string name="lista_conversas_titulo">Conversas</string>
+    <string name="lista_conversas_nova">+ NOVA CONVERSA</string>
+    <string name="lista_conversas_vazio">Nenhuma conversa ainda</string>
+    <string name="lista_conversas_apagar_conversa">Apagar conversa</string>
+    <string name="lista_conversas_apagar_mensagens">Apagar mensagens</string>
+    <string name="lista_conversas_apagar_inteira">Apagar conversa inteira</string>
+    <string name="lista_conversas_ver_perfil">Ver perfil</string>
+    <string name="lista_conversas_mensagens_apagadas">Mensagens apagadas</string>
+    <string name="lista_conversas_conversa_apagada">Conversa apagada</string>
+    <string name="lista_conversas_hint_email">Email do usuário</string>
+    <string name="lista_conversas_iniciar">Iniciar</string>
+    <string name="lista_conversas_nao_consigo_mesmo">Você não pode conversar consigo mesmo</string>
+    <string name="lista_conversas_usuario_nao_encontrado">Usuário não encontrado</string>
+    <string name="conversa_padrao">Conversa</string>
+    <string name="grupo_padrao">Grupo</string>
+
+    <!-- ===== MY TEAMS ===== -->
+    <string name="minhas_equipes_titulo">Minhas Equipes</string>
+    <string name="minhas_equipes_nova">+ NOVA EQUIPE</string>
+    <string name="minhas_equipes_vazio">Você não está em nenhuma equipe</string>
+    <string name="minhas_equipes_papel_criador">Criador</string>
+    <string name="minhas_equipes_papel_admin">Administrador</string>
+    <string name="minhas_equipes_papel_membro">Membro</string>
+
+    <plurals name="minhas_equipes_qtd_trabalhos">
+        <item quantity="one">%d trabalho</item>
+        <item quantity="other">%d trabalhos</item>
+    </plurals>
+
+    <!-- ===== MANAGE TEAM ===== -->
+    <string name="gerenciar_titulo">Gerenciar Equipe</string>
+    <string name="gerenciar_hint_descricao">Descrição da Equipe</string>
+    <string name="gerenciar_equipe_privada">Equipe Privada</string>
+    <string name="gerenciar_equipe_privada_info">Equipes privadas não recebem pedidos de entrada</string>
+    <string name="gerenciar_salvar_dados">SALVAR DADOS DA EQUIPE</string>
+    <string name="gerenciar_excluir_botao">EXCLUIR EQUIPE</string>
+    <string name="gerenciar_convidar_email">Convidar por Email</string>
+    <string name="gerenciar_enviar_convite">ENVIAR CONVITE</string>
+    <string name="gerenciar_pedidos_entrada">Pedidos de Entrada</string>
+    <string name="gerenciar_membros">Membros da Equipe</string>
+    <string name="gerenciar_trabalhos_publicados">Trabalhos Publicados</string>
+
+    <!-- Manage Team — dialogs and toasts -->
+    <string name="gerenciar_dados_atualizados">Dados atualizados!</string>
+    <string name="gerenciar_selecione_usuario">Selecione um usuário</string>
+    <string name="gerenciar_nao_convidar_mesmo">Você não pode convidar a si mesmo</string>
+    <string name="gerenciar_equipe_nao_carregada">Equipe não carregada ainda</string>
+    <string name="gerenciar_email_nao_cadastrado">Este email não está cadastrado</string>
+    <string name="gerenciar_ja_convidado">Este usuário já foi convidado</string>
+    <string name="gerenciar_convite_enviado">✅ Convite enviado!</string>
+    <string name="gerenciar_excluir_titulo">Excluir Equipe</string>
+    <string name="gerenciar_excluir_msg">Tem certeza? Todos os trabalhos serão removidos permanentemente.</string>
+    <string name="gerenciar_excluir_confirmar">Sim, excluir</string>
+    <string name="gerenciar_equipe_excluida">🗑️ Equipe excluída!</string>
+    <string name="gerenciar_todos_na_equipe">Todos os usuários já estão na equipe</string>
+    <string name="gerenciar_selecionar_usuario">Selecionar usuário (%1$d disponíveis)</string>
+    <string name="gerenciar_selecionado">Selecionado: %1$s</string>
+    <string name="gerenciar_erro_usuarios">Erro ao carregar usuários: %1$s</string>
+    <string name="gerenciar_editar_trabalho">Editar Trabalho</string>
+    <string name="gerenciar_trabalho_atualizado">✅ Trabalho atualizado!</string>
+    <string name="gerenciar_sem_membros">Nenhum membro ainda</string>
+    <string name="gerenciar_sem_pedidos">Nenhum pedido pendente</string>
+    <string name="gerenciar_sem_trabalhos">Nenhum trabalho publicado ainda</string>
+    <string name="gerenciar_nome_dono">%1$s (Dono)</string>
+    <string name="gerenciar_nome_admin">%1$s (Admin)</string>
+    <string name="gerenciar_nome_voce">%1$s ← VOCÊ</string>
+    <string name="gerenciar_promover">Promover a Administrador</string>
+    <string name="gerenciar_rebaixar">Rebaixar a Membro</string>
+    <string name="gerenciar_remover">Remover da Equipe</string>
+    <string name="gerenciar_nenhuma_acao">Nenhuma ação disponível</string>
+    <string name="gerenciar_promovido">✅ Promovido</string>
+    <string name="gerenciar_rebaixado">✅ Rebaixado</string>
+    <string name="gerenciar_removido">✅ Removido</string>
+    <string name="gerenciar_remover_titulo">Remover membro</string>
+    <string name="gerenciar_remover_msg">Remover %1$s da equipe?</string>
+    <string name="gerenciar_remover_confirmar">Remover</string>
+    <string name="gerenciar_pedido_resumo">Motivos: %1$s\nEspecialidades: %2$s</string>
+    <string name="gerenciar_pedido_titulo">Pedido de %1$s</string>
+    <string name="gerenciar_pedido_detalhe">Motivos: %1$s\n\nEspecialidades: %2$s</string>
+    <string name="gerenciar_aceitar">Aceitar</string>
+    <string name="gerenciar_recusar">Recusar</string>
+    <string name="gerenciar_depois">Depois</string>
+    <string name="gerenciar_pedido_aceito">Pedido aceito!</string>
+    <string name="gerenciar_pedido_recusado">Pedido recusado</string>
+    <string name="gerenciar_notif_recusado_titulo">Pedido recusado</string>
+    <string name="gerenciar_notif_recusado_msg">Seu pedido para entrar em %1$s foi recusado</string>
+    <string name="gerenciar_excluir_trabalho_titulo">Excluir trabalho</string>
+    <string name="gerenciar_excluir_trabalho_msg">Tem certeza que deseja excluir \'%1$s\'?</string>
+    <string name="gerenciar_trabalho_removido">Trabalho removido!</string>
+
+    <!-- ⚠️ Só adicione se ainda NÃO existirem (vieram de Criar Trabalho) -->
+    <string name="criar_trabalho_hint_titulo">Título</string>
+    <string name="criar_trabalho_hint_descricao">Descrição</string>
+    <string name="criar_trabalho_hint_categoria">Categoria</string>
+    <string name="criar_trabalho_hint_prazo">Prazo</string>
+
+    <!-- ===== INVITE TO JOB ===== -->
+    <string name="convidar_trabalho_titulo">Convidar para Trabalho</string>
+    <string name="convidar_trabalho_prefixo">Trabalho: %1$s</string>
+    <string name="convidar_trabalho_placeholder">Trabalho: ...</string>
+    <string name="convidar_trabalho_enviar">ENVIAR CONVITE</string>
+    <string name="convidar_trabalho_enviado">✅ Convite enviado para %1$s</string>
+    <string name="convidar_trabalho_sem_disponiveis">Nenhum usuário disponível para convidar</string>
+    <string name="convidar_trabalho_erro_permissao">Este dispositivo tem uma limitação de segurança. Tente novamente ou use outro dispositivo.</string>
+
+    <!-- ===== WORK ITEM (manage list) ===== -->
+    <string name="item_trabalho_placeholder_titulo">Título</string>
+    <string name="item_trabalho_placeholder_info">Categoria - Prazo</string>
+    <string name="item_trabalho_placeholder_descricao">Descrição</string>
+    <string name="item_trabalho_zero">0</string>
+    <string name="item_trabalho_convidar">Convidar</string>
+
+    <!-- ===== JOB COMMENTS ===== -->
+    <string name="comentarios_titulo">Comentários</string>
+    <string name="comentarios_seta_voltar">←</string>
+    <string name="comentarios_trabalho_padrao">Trabalho</string>
+    <string name="comentarios_vazio_titulo">Nenhum comentário</string>
+    <string name="comentarios_vazio_subtitulo">Seja o primeiro a comentar neste trabalho</string>
+    <string name="comentarios_hint_escreva">Escreva um comentário…</string>
+    <string name="comentarios_enviar">Enviar</string>
+    <string name="comentarios_avatar_desc">Avatar</string>
+    <string name="comentarios_inicial_placeholder">A</string>
+    <string name="comentarios_nome_placeholder">Nome</string>
+    <string name="comentarios_texto_placeholder">Texto do comentário</string>
+    <string name="comentarios_editado">(editado)</string>
+
+    <!-- Job Comments — actions and toasts -->
+    <string name="comentarios_nao_encontrado">Trabalho não encontrado</string>
+    <string name="comentarios_voce">Você</string>
+    <string name="comentarios_opcoes_titulo">Opções</string>
+    <string name="comentarios_opcao_editar">Editar</string>
+    <string name="comentarios_opcao_excluir">Excluir</string>
+    <string name="comentarios_erro_enviar">Erro ao enviar</string>
+    <string name="comentarios_editar_titulo">Editar comentário</string>
+    <string name="comentarios_digite_texto">Digite um texto</string>
+    <string name="comentarios_atualizado">Atualizado</string>
+    <string name="comentarios_erro_atualizar">Erro ao atualizar</string>
+    <string name="comentarios_excluir_titulo">Excluir comentário</string>
+    <string name="comentarios_excluir_msg">Tem certeza que deseja excluir?</string>
+    <string name="comentarios_excluido">Excluído</string>
+    <string name="comentarios_erro_excluir">Erro ao excluir</string>
+
+    <!-- ===== RELATIVE TIME (shared) ===== -->
+    <string name="tempo_agora">Agora</string>
+    <string name="tempo_ha_min">Há %1$dmin</string>
+    <string name="tempo_ha_horas">Há %1$dh</string>
+    <string name="tempo_ha_dias">Há %1$dd</string>
+
+    <!-- Perfil -->
     <string name="perfil_titulo">Meu Perfil</string>
     <string name="perfil_links">Links</string>
     <string name="perfil_sem_links">Nenhum link cadastrado</string>
     <string name="perfil_meus_trabalhos">MEUS TRABALHOS</string>
     <string name="perfil_favoritos">MENSAGENS FAVORITAS</string>
     <string name="perfil_sair">SAIR DA CONTA</string>
+    <string name="perfil_configuracoes">Configurações</string>
+
+    <!-- Configurações -->
+    <string name="config_titulo">Configurações</string>
+    <string name="config_idioma">Idioma</string>
+    <string name="config_sair">Sair da conta</string>
+    <string name="config_excluir_conta">Excluir conta</string>
+    <string name="config_excluir_conta_msg">Tem certeza? Todos os seus dados serão removidos permanentemente.</string>
+    <string name="config_excluir_confirmar">Sim, excluir</string>
 
     <!-- Ações -->
     <string name="voltar">← VOLTAR</string>

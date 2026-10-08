@@ -23,7 +23,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/voltar_seta"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -32,7 +32,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="Pedir para Entrar"
+                android:text="@string/pedir_entrada_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -42,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:text="Equipe: ..."
+                android:text="@string/pedir_entrada_equipe_placeholder"
                 android:textColor="#F5E6D0"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -54,7 +54,7 @@
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="#3D2B27"
                 android:gravity="top"
-                android:hint="Por que quer entrar? (motivos)"
+                android:hint="@string/pedir_entrada_hint_motivos"
                 android:inputType="textMultiLine"
                 android:minLines="3"
                 android:textColor="@android:color/white"
@@ -67,7 +67,7 @@
                 android:layout_marginBottom="24dp"
                 android:backgroundTint="#3D2B27"
                 android:gravity="top"
-                android:hint="Suas especialidades"
+                android:hint="@string/pedir_entrada_hint_especialidades"
                 android:inputType="textMultiLine"
                 android:minLines="2"
                 android:textColor="@android:color/white"
@@ -78,7 +78,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:backgroundTint="#F5E6D0"
-                android:text="ENVIAR PEDIDO"
+                android:text="@string/pedir_entrada_enviar"
                 android:textColor="#1C1311"
                 android:textStyle="bold" />
 

@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:layout_marginTop="88dp"
-            android:text="Criar conta"
+            android:text="@string/cadastro_titulo"
             android:textColor="@android:color/white"
             android:textSize="28sp"
             android:textStyle="bold"
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:backgroundTint="@android:color/white"
-            android:hint="Nome"
+            android:hint="@string/cadastro_nome"
             android:textColor="@android:color/white"
             android:textColorHint="#888888"
             app:layout_constraintEnd_toEndOf="parent"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:backgroundTint="@android:color/white"
-            android:hint="E-mail"
+            android:hint="@string/cadastro_email"
             android:inputType="textEmailAddress"
             android:textColor="@android:color/white"
             android:textColorHint="#888888"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:backgroundTint="@android:color/white"
-            android:hint="Senha"
+            android:hint="@string/cadastro_senha"
             android:inputType="textPassword"
             android:textColor="@android:color/white"
             android:textColorHint="#888888"
@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:backgroundTint="@android:color/white"
-            android:hint="Confirmar Senha"
+            android:hint="@string/cadastro_confirmar_senha"
             android:inputType="textPassword"
             android:textColor="@android:color/white"
             android:textColorHint="#888888"
@@ -86,14 +86,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:backgroundTint="@android:color/white"
-            android:hint="Profissão"
+            android:hint="@string/cadastro_profissao"
             android:textColor="@android:color/white"
             android:textColorHint="#888888"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edtConfSenha" />
-
-
 
         <Button
             android:id="@+id/btnSalvar"
@@ -101,7 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:backgroundTint="#3D2B27"
-            android:text="CADASTRAR"
+            android:text="@string/cadastro_botao"
             android:textColor="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -109,4 +107,3 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
-

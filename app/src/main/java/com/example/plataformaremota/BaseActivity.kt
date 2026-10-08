@@ -7,6 +7,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import android.content.Context
 
 /**
  * Activity base que centraliza:
@@ -22,6 +23,10 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // ✅ Opção B: barra de status visível, mas conteúdo respeita
         WindowCompat.setDecorFitsSystemWindows(window, true)
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.aplicarIdioma(newBase))
     }
 
     /**

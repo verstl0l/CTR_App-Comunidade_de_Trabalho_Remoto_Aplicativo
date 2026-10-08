@@ -1,6 +1,6 @@
 package com.example.plataformaremota
 
-import android.content.Intent
+import  android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class CriarEquipeActivity : AppCompatActivity() {
+class CriarEquipeActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -36,12 +36,12 @@ class CriarEquipeActivity : AppCompatActivity() {
             val descricao = edtDescricao.text.toString().trim()
 
             if (nome.isEmpty()) {
-                Toast.makeText(this, "O nome da equipe é obrigatório", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.erro_nome_equipe_obrigatorio), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             btnSalvar.isEnabled = false
-            btnSalvar.text = "CRIANDO..."
+            btnSalvar.text = getString(R.string.criando_equipe)
 
             val equipe = hashMapOf(
                 "nome" to nome,
@@ -72,7 +72,7 @@ class CriarEquipeActivity : AppCompatActivity() {
                         .document(membroId)
                         .set(membro)
                         .addOnSuccessListener {
-                            Toast.makeText(this, "✅ Equipe criada com sucesso!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.equipe_criada_sucesso), Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this, produtos::class.java))
                             finish()
                         }
@@ -80,7 +80,7 @@ class CriarEquipeActivity : AppCompatActivity() {
                             Log.e("CRIAR_EQUIPE", "Erro ao adicionar membro: ${e.message}")
                             Toast.makeText(
                                 this,
-                                "Equipe criada, mas erro ao adicionar membro",
+                                getString(R.string.erro_adicionar_membro),
                                 Toast.LENGTH_LONG
                             ).show()
                             startActivity(Intent(this, produtos::class.java))
@@ -89,9 +89,9 @@ class CriarEquipeActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { e ->
                     Log.e("CRIAR_EQUIPE", "❌ Erro: ${e.message}")
-                    Toast.makeText(this, "Erro ao criar equipe: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.erro_criar_equipe, e.message ?: ""), Toast.LENGTH_LONG).show()
                     btnSalvar.isEnabled = true
-                    btnSalvar.text = "SALVAR"
+                    btnSalvar.text = getString(R.string.salvar_equipe)
                 }
         }
     }

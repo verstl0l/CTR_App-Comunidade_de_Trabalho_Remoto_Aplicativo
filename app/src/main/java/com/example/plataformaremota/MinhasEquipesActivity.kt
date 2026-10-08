@@ -8,15 +8,13 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class MinhasEquipesActivity : AppCompatActivity() {
+class MinhasEquipesActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -42,7 +40,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
         }
 
         // ✅ NAO chama carregarEquipes aqui — o onResume cuida
-        configurarBottomNavigation()
+        configurarBottomNavigation(R.id.nav_groups)
     }
 
     override fun onResume() {
@@ -73,8 +71,8 @@ class MinhasEquipesActivity : AppCompatActivity() {
 
                 for (doc in equipesCriador.documents) {
                     val equipeId = doc.id
-                    val nome = doc.getString("nome") ?: "Equipe"
-                    val descricao = doc.getString("descricao") ?: "Sem descricao"
+                    val nome = doc.getString("nome") ?: getString(R.string.equipe_default_nome)
+                    val descricao = doc.getString("descricao") ?: getString(R.string.equipe_sem_descricao)
 
                     val trabalhos = db.collection("trabalhos")
                         .whereEqualTo("equipeId", equipeId)
@@ -86,7 +84,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
                             equipeId = equipeId,
                             nome = nome,
                             descricao = descricao,
-                            papel = "Criador",
+                            papel = getString(R.string.minhas_equipes_papel_criador),
                             totalTrabalhos = trabalhos.size(),
                             ehDono = true
                         )
@@ -108,8 +106,8 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                     if (!equipeDoc.exists()) continue
 
-                    val nome = equipeDoc.getString("nome") ?: "Equipe"
-                    val descricao = equipeDoc.getString("descricao") ?: "Sem descricao"
+                    val nome = equipeDoc.getString("nome") ?: getString(R.string.equipe_default_nome)
+                    val descricao = equipeDoc.getString("descricao") ?: getString(R.string.equipe_sem_descricao)
 
                     val trabalhos = db.collection("trabalhos")
                         .whereEqualTo("equipeId", equipeId)
@@ -121,7 +119,11 @@ class MinhasEquipesActivity : AppCompatActivity() {
                             equipeId = equipeId,
                             nome = nome,
                             descricao = descricao,
-                            papel = if (funcao == "administrador") "Administrador" else "Membro",
+                            papel = if (funcao == "administrador") {
+                                getString(R.string.minhas_equipes_papel_admin)
+                            } else {
+                                getString(R.string.minhas_equipes_papel_membro)
+                            },
                             totalTrabalhos = trabalhos.size(),
                             ehDono = false
                         )
@@ -131,7 +133,7 @@ class MinhasEquipesActivity : AppCompatActivity() {
                 // 3. Mostra na tela
                 if (equipes.isEmpty()) {
                     val txtVazio = TextView(this@MinhasEquipesActivity).apply {
-                        text = "Voce nao esta em nenhuma equipe"
+                        text = getString(R.string.minhas_equipes_vazio)
                         setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
                         textSize = 14f
                         setPadding(0, 60, 0, 60)
@@ -154,7 +156,11 @@ class MinhasEquipesActivity : AppCompatActivity() {
                     txtNome.text = equipe.nome
                     txtDescricao.text = equipe.descricao
                     txtPapel.text = equipe.papel
-                    txtTrabalhos.text = "${equipe.totalTrabalhos} trabalhos"
+                    txtTrabalhos.text = resources.getQuantityString(
+                        R.plurals.minhas_equipes_qtd_trabalhos,
+                        equipe.totalTrabalhos,
+                        equipe.totalTrabalhos
+                    )
 
                     if (equipe.ehDono) {
                         txtPapel.setTextColor(android.graphics.Color.parseColor("#F5E6D0"))
@@ -179,45 +185,15 @@ class MinhasEquipesActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 Log.e("MINHAS_EQUIPES", "Erro: ${e.message}")
-                Toast.makeText(this@MinhasEquipesActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@MinhasEquipesActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
                 // ✅ Libera o guard
                 carregando = false
             }
-        }
-    }
-
-    private fun configurarBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_chat -> {
-                    startActivity(Intent(this, ListaConversasActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_groups -> true  // Ja estamos aqui
-                R.id.nav_notifications -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, perfil::class.java))
-                    finish()
-                    true
-                }
-                else -> false
-            }
-        }
-
-        lifecycleScope.launch {
-            BadgeHelper.atualizarBadgeChat(this@MinhasEquipesActivity, bottomNav)
         }
     }
 

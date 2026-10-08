@@ -26,9 +26,21 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var edtSenha: EditText
     private lateinit var btnEntrar: Button
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.aplicarIdioma(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // Seletor de idioma
+        findViewById<Button>(R.id.btnSeletorIdioma).setOnClickListener {
+            LocaleHelper.mostrarSeletorIdioma(this) {
+                // Quando o user escolhe, recria a activity pra aplicar
+                recreate()
+            }
+        }
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -62,15 +74,15 @@ class LoginActivity : AppCompatActivity() {
 
         // Validacoes
         if (email.isEmpty() || senha.isEmpty()) {
-            Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.erro_campos_vazios), Toast.LENGTH_SHORT).show()
             return
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "E-mail invalido", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.login_erro_email_invalido), Toast.LENGTH_SHORT).show()
             return
         }
         if (senha.length < 6) {
-            Toast.makeText(this, "A senha deve ter pelo menos 6 caracteres", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.cadastro_erro_senha_curta), Toast.LENGTH_SHORT).show()
             return
         }
         if (!NetworkUtils.isOnline(this)) {
@@ -79,7 +91,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnEntrar.isEnabled = false
-        btnEntrar.text = "ENTRANDO..."
+        btnEntrar.text = getString(R.string.login_entrando)
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
@@ -116,7 +128,7 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@LoginActivity, "✅ Login realizado!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, getString(R.string.login_sucesso), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 }
@@ -127,7 +139,7 @@ class LoginActivity : AppCompatActivity() {
                     val mensagem = traduzirErro(e.message ?: "")
                     Toast.makeText(this@LoginActivity, mensagem, Toast.LENGTH_LONG).show()
                     btnEntrar.isEnabled = true
-                    btnEntrar.text = "ENTRAR"
+                    btnEntrar.text = getString(R.string.login_entrar)
                 }
             }
         }
@@ -140,24 +152,24 @@ class LoginActivity : AppCompatActivity() {
         return when {
             msg.contains("password is invalid", ignoreCase = true) ||
                     msg.contains("INVALID_LOGIN_CREDENTIALS", ignoreCase = true) ->
-                "E-mail ou senha incorretos"
+                getString(R.string.login_erro_credenciais)
 
             msg.contains("no user record", ignoreCase = true) ->
-                "Nenhuma conta encontrada com este e-mail"
+                getString(R.string.login_erro_conta_nao_encontrada)
 
             msg.contains("network", ignoreCase = true) ||
                     msg.contains("timeout", ignoreCase = true) ->
                 getString(R.string.erro_sem_conexao)
 
             msg.contains("too many", ignoreCase = true) ->
-                "Muitas tentativas. Tente novamente em alguns minutos"
+                getString(R.string.login_erro_muitas_tentativas)
 
             msg.contains("badly formatted", ignoreCase = true) ->
-                "E-mail em formato invalido"
+                getString(R.string.login_erro_email_formato)
 
-            msg.isBlank() -> "Erro ao fazer login. Tente novamente."
+            msg.isBlank() -> getString(R.string.login_erro_generico)
 
-            else -> "Erro: $msg"
+            else -> getString(R.string.erro_generico, msg)
         }
     }
 }

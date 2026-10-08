@@ -1,5 +1,6 @@
 package com.example.plataformaremota
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -25,6 +26,10 @@ class BuscarEquipesActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
     private var todasEquipes: List<com.google.firebase.firestore.DocumentSnapshot> = emptyList()
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.aplicarIdioma(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +74,7 @@ class BuscarEquipesActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 Log.e("BUSCAR_EQUIPES", "Erro: ${e.message}")
-                Toast.makeText(this@BuscarEquipesActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@BuscarEquipesActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -94,7 +99,7 @@ class BuscarEquipesActivity : AppCompatActivity() {
 
         if (equipes.isEmpty()) {
             val txtVazio = TextView(this).apply {
-                text = "Nenhuma equipe pública encontrada"
+                text = getString(R.string.buscar_equipes_vazio)
                 setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
                 textSize = 14f
                 setPadding(0, 60, 0, 60)
@@ -108,15 +113,15 @@ class BuscarEquipesActivity : AppCompatActivity() {
 
         equipes.forEach { doc ->
             val equipeId = doc.id
-            val nome = doc.getString("nome") ?: "Equipe"
-            val descricao = doc.getString("descricao") ?: "Sem descrição"
+            val nome = doc.getString("nome") ?: getString(R.string.equipe_default_nome)
+            val descricao = doc.getString("descricao") ?: getString(R.string.equipe_sem_descricao)
             val criador = doc.getString("criadorEmail") ?: ""
 
             val view = inflater.inflate(R.layout.item_equipe, container, false)
 
             view.findViewById<TextView>(R.id.txtNomeEquipeItem).text = nome
             view.findViewById<TextView>(R.id.txtDescricaoEquipeItem).text = descricao
-            view.findViewById<TextView>(R.id.txtCriadorEquipeItem).text = "Criado por: $criador"
+            view.findViewById<TextView>(R.id.txtCriadorEquipeItem).text = getString(R.string.buscar_equipes_criado_por, criador)
 
             view.findViewById<Button>(R.id.btnPedirEntrar).setOnClickListener {
                 verificarPedidoExistente(equipeId, nome)
@@ -140,7 +145,7 @@ class BuscarEquipesActivity : AppCompatActivity() {
                 }
 
                 if (pendente) {
-                    Toast.makeText(this@BuscarEquipesActivity, "Você já enviou um pedido para esta equipe", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@BuscarEquipesActivity, getString(R.string.buscar_equipes_pedido_ja_enviado), Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
@@ -150,7 +155,7 @@ class BuscarEquipesActivity : AppCompatActivity() {
                 startActivity(intent)
 
             } catch (e: Exception) {
-                Toast.makeText(this@BuscarEquipesActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@BuscarEquipesActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -164,12 +169,12 @@ class BuscarEquipesActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_chat -> {                                    // ✅ CORRIGIDO: faltava
+                R.id.nav_chat -> {
                     startActivity(Intent(this, ListaConversasActivity::class.java))
                     finish()
                     true
                 }
-                R.id.nav_groups -> {                                  // ✅ CORRIGIDO: era produtos
+                R.id.nav_groups -> {
                     startActivity(Intent(this, MinhasEquipesActivity::class.java))
                     finish()
                     true

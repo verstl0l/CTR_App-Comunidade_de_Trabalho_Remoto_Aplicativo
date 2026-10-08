@@ -1,5 +1,6 @@
 package com.example.plataformaremota
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,10 @@ class CadastroActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.aplicarIdioma(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +39,7 @@ class CadastroActivity : AppCompatActivity() {
             if (!NetworkUtils.isOnline(this)) {
                 Toast.makeText(
                     this,
-                    "⚠️ Sem conexão com a internet. Verifique sua rede e tente novamente.",
+                    getString(R.string.erro_sem_conexao),
                     Toast.LENGTH_LONG
                 ).show()
                 return@setOnClickListener
@@ -47,22 +52,22 @@ class CadastroActivity : AppCompatActivity() {
             val profissao = edtProfissao.text.toString().trim()
 
             if (nome.isEmpty() || email.isEmpty() || senha.isEmpty() || confSenha.isEmpty() || profissao.isEmpty()) {
-                Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.erro_campos_vazios), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (senha.length < 6) {
-                Toast.makeText(this, "A senha deve ter pelo menos 6 caracteres", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cadastro_erro_senha_curta), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (senha != confSenha) {
-                Toast.makeText(this, "As senhas não coincidem", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.cadastro_erro_senhas_diferentes), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             btnSalvar.isEnabled = false
-            btnSalvar.text = "CADASTRANDO..."
+            btnSalvar.text = getString(R.string.cadastro_cadastrando)
 
             auth.createUserWithEmailAndPassword(email, senha)
                 .addOnCompleteListener(this) { task ->
@@ -87,7 +92,7 @@ class CadastroActivity : AppCompatActivity() {
                                     .putBoolean("logado", true)
                                     .apply()
 
-                                Toast.makeText(this, "✅ Cadastro realizado!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, getString(R.string.cadastro_sucesso), Toast.LENGTH_SHORT).show()
                                 startActivity(Intent(this, MainActivity::class.java))
                                 finish()
                             }
@@ -95,20 +100,20 @@ class CadastroActivity : AppCompatActivity() {
                                 Log.e("CADASTRO", "❌ Erro ao salvar no Firestore: ${e.message}")
                                 Toast.makeText(
                                     this,
-                                    "Cadastro criado, mas erro ao salvar dados: ${e.message}",
+                                    getString(R.string.cadastro_erro_salvar, e.message ?: ""),
                                     Toast.LENGTH_LONG
                                 ).show()
                                 btnSalvar.isEnabled = true
-                                btnSalvar.text = "SALVAR"
+                                btnSalvar.text = getString(R.string.cadastro_botao)
                             }
                     } else {
                         Toast.makeText(
                             this,
-                            "Erro: ${task.exception?.message}",
+                            getString(R.string.erro_generico, task.exception?.message ?: ""),
                             Toast.LENGTH_LONG
                         ).show()
                         btnSalvar.isEnabled = true
-                        btnSalvar.text = "SALVAR"
+                        btnSalvar.text = getString(R.string.cadastro_botao)
                     }
                 }
         }

@@ -24,7 +24,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
-                android:text="Conversas"
+                android:text="@string/lista_conversas_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -35,7 +35,7 @@
                 android:layout_height="48dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="#F5E6D0"
-                android:text="+ NOVA CONVERSA"
+                android:text="@string/lista_conversas_nova"
                 android:textColor="#1C1311"
                 android:textStyle="bold" />
 

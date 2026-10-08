@@ -8,24 +8,24 @@
     android:padding="24dp"
     tools:context=".LoginActivity">
 
-    <TextView
-        android:id="@+id/txtSubtitulo2"
+    <!-- ✅ Seletor de idioma no canto superior direito -->
+    <Button
+        android:id="@+id/btnSeletorIdioma"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="136dp"
-        android:text="Faça login para continuar"
-        android:textColor="#888888"
-        android:textSize="16sp"
+        android:minWidth="0dp"
+        android:text="🌐"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtTituloLogin" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/txtTituloLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="CTR"
+        android:text="@string/login_titulo"
         android:textColor="@android:color/white"
         android:textSize="32sp"
         android:textStyle="bold"
@@ -38,27 +38,38 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Comunidade de Trabalho Remoto"
+        android:text="@string/login_subtitulo"
         android:textColor="#888888"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtTituloLogin" />
 
+    <TextView
+        android:id="@+id/txtSubtitulo2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/login_instrucao"
+        android:textColor="#888888"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtSubtitulo" />
+
     <EditText
         android:id="@+id/edtEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="136dp"
+        android:layout_marginTop="80dp"
         android:backgroundTint="@android:color/white"
-        android:hint="E-mail"
+        android:hint="@string/login_email"
         android:inputType="textEmailAddress"
         android:textColor="@android:color/white"
         android:textColorHint="#888888"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtSubtitulo" />
+        app:layout_constraintTop_toBottomOf="@+id/txtSubtitulo2" />
 
     <EditText
         android:id="@+id/edtSenha"
@@ -66,7 +77,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:backgroundTint="@android:color/white"
-        android:hint="Senha"
+        android:hint="@string/login_senha"
         android:inputType="textPassword"
         android:textColor="@android:color/white"
         android:textColorHint="#888888"
@@ -80,7 +91,7 @@
         android:layout_height="58dp"
         android:layout_marginTop="40dp"
         android:backgroundTint="#3D2B27"
-        android:text="ENTRAR"
+        android:text="@string/login_entrar"
         android:textColor="@android:color/white"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -94,7 +105,7 @@
         android:layout_height="58dp"
         android:layout_marginTop="16dp"
         android:backgroundTint="#1C1C1C"
-        android:text="CRIAR CONTA"
+        android:text="@string/login_criar_conta"
         android:textColor="@android:color/white"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -104,4 +115,3 @@
         app:strokeWidth="1dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
-            android:text="←"
+            android:text="@string/comentarios_seta_voltar"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
 
@@ -35,7 +35,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Comentarios"
+                android:text="@string/comentarios_titulo"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Trabalho"
+                android:text="@string/comentarios_trabalho_padrao"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
@@ -84,7 +84,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nenhum comentario"
+            android:text="@string/comentarios_vazio_titulo"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -94,7 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="center"
-            android:text="Seja o primeiro a comentar neste trabalho"
+            android:text="@string/comentarios_vazio_subtitulo"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -116,7 +116,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@color/bg_surface_hover"
-            android:hint="Escreva um comentario..."
+            android:hint="@string/comentarios_hint_escreva"
             android:inputType="textMultiLine"
             android:maxLines="4"
             android:padding="10dp"
@@ -131,7 +131,7 @@
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/accent"
             android:minWidth="0dp"
-            android:text="Enviar"
+            android:text="@string/comentarios_enviar"
             android:textColor="@color/accent_dark"
             android:textSize="13sp"
             android:textStyle="bold" />

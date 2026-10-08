@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CTR</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_home">Home</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_groups">Teams</string>
+    <string name="nav_notifications">Notifications</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Main -->
+    <string name="main_abrir_chat">Abrir chat</string>
+    <string name="main_bem_vindo">Bienvenido a CTR</string>
+    <string name="main_cadastrar_se">REGISTRARSE</string>
+    <string name="main_entrar_equipe">UNIRSE A EQUIPO</string>
+    <string name="main_criar_equipe">CREAR EQUIPO</string>
+
+    <!-- Language -->
+    <string name="idioma">Language</string>
+    <string name="selecione_idioma">Select language</string>
+    <string name="idioma_portugues">Portuguese</string>
+    <string name="idioma_ingles">English</string>
+    <string name="idioma_espanhol">Spanish</string>
+    <string name="idioma_frances">French</string>
+    <string name="idioma_russo">Russian</string>
+    <string name="idioma_chines">Chinese</string>
+
+    <!-- Login -->
+    <string name="login_titulo">CTR</string>
+    <string name="login_subtitulo">Remote Work Community</string>
+    <string name="login_instrucao">Sign in to continue</string>
+    <string name="login_email">Email</string>
+    <string name="login_senha">Password</string>
+    <string name="login_entrar">SIGN IN</string>
+    <string name="login_criar_conta">CREATE ACCOUNT</string>
+    <string name="login_entrando">SIGNING IN...</string>
+
+    <!-- Login (erros e mensagens) -->
+    <string name="login_erro_email_invalido">Invalid email</string>
+    <string name="login_erro_credenciais">Incorrect email or password</string>
+    <string name="login_erro_conta_nao_encontrada">No account found with this email</string>
+    <string name="login_erro_muitas_tentativas">Too many attempts. Try again in a few minutes</string>
+    <string name="login_erro_email_formato">Invalid email format</string>
+    <string name="login_erro_generico">Login error. Please try again.</string>
+    <string name="login_sucesso">✅ Login successful!</string>
+
+    <!-- Signup -->
+    <string name="cadastro_titulo">Create account</string>
+    <string name="cadastro_nome">Name</string>
+    <string name="cadastro_email">Email</string>
+    <string name="cadastro_senha">Password</string>
+    <string name="cadastro_confirmar_senha">Confirm Password</string>
+    <string name="cadastro_profissao">Profession</string>
+    <string name="cadastro_botao">SIGN UP</string>
+    <string name="cadastro_cadastrando">SIGNING UP...</string>
+    <string name="cadastro_sucesso">✅ Account created!</string>
+    <string name="cadastro_erro_salvar">Account created, but error saving data: %1$s</string>
+    <string name="cadastro_erro_senha_curta">Password must be at least 6 characters</string>
+    <string name="cadastro_erro_senhas_diferentes">Passwords don\'t match</string>
+
+    <!-- ===== CREATE TEAM ===== -->
+    <string name="voltar_seta">← BACK</string>
+    <string name="criar_nova_equipe">Create New Team</string>
+    <string name="nome_da_equipe">Team Name</string>
+    <string name="hint_ex_design_core">Ex: Design Core</string>
+    <string name="descricao">Description</string>
+    <string name="hint_objetivo_equipe">Tell us about the team\'s goal…</string>
+    <string name="criar_equipe">CREATE TEAM</string>
+    <string name="criando_equipe">CREATING…</string>
+    <string name="salvar_equipe">SAVE</string>
+    <string name="erro_nome_equipe_obrigatorio">Team name is required</string>
+    <string name="equipe_criada_sucesso">✅ Team created successfully!</string>
+    <string name="erro_adicionar_membro">Team created, but failed to add member</string>
+    <string name="erro_criar_equipe">Error creating team: %1$s</string>
+
+    <!-- Find Teams -->
+    <string name="buscar_equipes_titulo">Find Teams</string>
+    <string name="buscar_equipes_hint">Search by name...</string>
+    <string name="buscar_equipes_vazio">No public teams found</string>
+    <string name="buscar_equipes_criado_por">Created by: %1$s</string>
+    <string name="buscar_equipes_pedido_ja_enviado">You already sent a request to this team</string>
+    <string name="equipe_default_nome">Team</string>
+    <string name="equipe_sem_descricao">No description</string>
+
+    <!-- ===== REQUEST TO JOIN ===== -->
+    <string name="pedir_entrada_titulo">Request to Join</string>
+    <string name="pedir_entrada_equipe_prefixo">Team: %1$s</string>
+    <string name="pedir_entrada_equipe_placeholder">Team: ...</string>
+    <string name="pedir_entrada_hint_motivos">Why do you want to join? (reasons)</string>
+    <string name="pedir_entrada_hint_especialidades">Your specialties</string>
+    <string name="pedir_entrada_enviar">SEND REQUEST</string>
+    <string name="pedir_entrada_enviando">SENDING…</string>
+    <string name="pedir_entrada_ja_enviado_botao">REQUEST ALREADY SENT</string>
+    <string name="pedir_entrada_ja_enviado">You have already sent a request to this team</string>
+    <string name="pedir_entrada_sucesso">✅ Request sent! Wait for approval.</string>
+    <string name="usuario_padrao">User</string>
+
+    <!-- ===== CONVERSATIONS LIST ===== -->
+    <string name="lista_conversas_titulo">Conversations</string>
+    <string name="lista_conversas_nova">+ NEW CONVERSATION</string>
+    <string name="lista_conversas_vazio">No conversations yet</string>
+    <string name="lista_conversas_apagar_conversa">Delete conversation</string>
+    <string name="lista_conversas_apagar_mensagens">Delete messages</string>
+    <string name="lista_conversas_apagar_inteira">Delete entire conversation</string>
+    <string name="lista_conversas_ver_perfil">View profile</string>
+    <string name="lista_conversas_mensagens_apagadas">Messages deleted</string>
+    <string name="lista_conversas_conversa_apagada">Conversation deleted</string>
+    <string name="lista_conversas_hint_email">User email</string>
+    <string name="lista_conversas_iniciar">Start</string>
+    <string name="lista_conversas_nao_consigo_mesmo">You can\'t chat with yourself</string>
+    <string name="lista_conversas_usuario_nao_encontrado">User not found</string>
+    <string name="conversa_padrao">Conversation</string>
+    <string name="grupo_padrao">Group</string>
+
+    <!-- ===== MY TEAMS ===== -->
+    <string name="minhas_equipes_titulo">My Teams</string>
+    <string name="minhas_equipes_nova">+ NEW TEAM</string>
+    <string name="minhas_equipes_vazio">You are not in any team</string>
+    <string name="minhas_equipes_papel_criador">Creator</string>
+    <string name="minhas_equipes_papel_admin">Admin</string>
+    <string name="minhas_equipes_papel_membro">Member</string>
+
+    <plurals name="minhas_equipes_qtd_trabalhos">
+        <item quantity="one">%d job</item>
+        <item quantity="other">%d jobs</item>
+    </plurals>
+
+    <!-- ===== MANAGE TEAM ===== -->
+    <string name="gerenciar_titulo">Manage Team</string>
+    <string name="gerenciar_hint_descricao">Team Description</string>
+    <string name="gerenciar_equipe_privada">Private Team</string>
+    <string name="gerenciar_equipe_privada_info">Private teams do not receive join requests</string>
+    <string name="gerenciar_salvar_dados">SAVE TEAM DATA</string>
+    <string name="gerenciar_excluir_botao">DELETE TEAM</string>
+    <string name="gerenciar_convidar_email">Invite by Email</string>
+    <string name="gerenciar_enviar_convite">SEND INVITE</string>
+    <string name="gerenciar_pedidos_entrada">Join Requests</string>
+    <string name="gerenciar_membros">Team Members</string>
+    <string name="gerenciar_trabalhos_publicados">Published Jobs</string>
+
+    <!-- Manage Team — dialogs and toasts -->
+    <string name="gerenciar_dados_atualizados">Data updated!</string>
+    <string name="gerenciar_selecione_usuario">Select a user</string>
+    <string name="gerenciar_nao_convidar_mesmo">You can\'t invite yourself</string>
+    <string name="gerenciar_equipe_nao_carregada">Team not loaded yet</string>
+    <string name="gerenciar_email_nao_cadastrado">This email is not registered</string>
+    <string name="gerenciar_ja_convidado">This user has already been invited</string>
+    <string name="gerenciar_convite_enviado">✅ Invite sent!</string>
+    <string name="gerenciar_excluir_titulo">Delete Team</string>
+    <string name="gerenciar_excluir_msg">Are you sure? All jobs will be permanently removed.</string>
+    <string name="gerenciar_excluir_confirmar">Yes, delete</string>
+    <string name="gerenciar_equipe_excluida">🗑️ Team deleted!</string>
+    <string name="gerenciar_todos_na_equipe">All users are already in the team</string>
+    <string name="gerenciar_selecionar_usuario">Select user (%1$d available)</string>
+    <string name="gerenciar_selecionado">Selected: %1$s</string>
+    <string name="gerenciar_erro_usuarios">Error loading users: %1$s</string>
+    <string name="gerenciar_editar_trabalho">Edit Job</string>
+    <string name="gerenciar_trabalho_atualizado">✅ Job updated!</string>
+    <string name="gerenciar_sem_membros">No members yet</string>
+    <string name="gerenciar_sem_pedidos">No pending requests</string>
+    <string name="gerenciar_sem_trabalhos">No jobs published yet</string>
+    <string name="gerenciar_nome_dono">%1$s (Owner)</string>
+    <string name="gerenciar_nome_admin">%1$s (Admin)</string>
+    <string name="gerenciar_nome_voce">%1$s ← YOU</string>
+    <string name="gerenciar_promover">Promote to Admin</string>
+    <string name="gerenciar_rebaixar">Demote to Member</string>
+    <string name="gerenciar_remover">Remove from Team</string>
+    <string name="gerenciar_nenhuma_acao">No action available</string>
+    <string name="gerenciar_promovido">✅ Promoted</string>
+    <string name="gerenciar_rebaixado">✅ Demoted</string>
+    <string name="gerenciar_removido">✅ Removed</string>
+    <string name="gerenciar_remover_titulo">Remove member</string>
+    <string name="gerenciar_remover_msg">Remove %1$s from the team?</string>
+    <string name="gerenciar_remover_confirmar">Remove</string>
+    <string name="gerenciar_pedido_resumo">Reasons: %1$s\nSpecialties: %2$s</string>
+    <string name="gerenciar_pedido_titulo">Request from %1$s</string>
+    <string name="gerenciar_pedido_detalhe">Reasons: %1$s\n\nSpecialties: %2$s</string>
+    <string name="gerenciar_aceitar">Accept</string>
+    <string name="gerenciar_recusar">Decline</string>
+    <string name="gerenciar_depois">Later</string>
+    <string name="gerenciar_pedido_aceito">Request accepted!</string>
+    <string name="gerenciar_pedido_recusado">Request declined</string>
+    <string name="gerenciar_notif_recusado_titulo">Request declined</string>
+    <string name="gerenciar_notif_recusado_msg">Your request to join %1$s was declined</string>
+    <string name="gerenciar_excluir_trabalho_titulo">Delete job</string>
+    <string name="gerenciar_excluir_trabalho_msg">Are you sure you want to delete \'%1$s\'?</string>
+    <string name="gerenciar_trabalho_removido">Job removed!</string>
+
+    <string name="criar_trabalho_hint_titulo">Title</string>
+    <string name="criar_trabalho_hint_descricao">Description</string>
+    <string name="criar_trabalho_hint_categoria">Category</string>
+    <string name="criar_trabalho_hint_prazo">Deadline</string>
+
+    <!-- ===== INVITE TO JOB ===== -->
+    <string name="convidar_trabalho_titulo">Invite to Job</string>
+    <string name="convidar_trabalho_prefixo">Job: %1$s</string>
+    <string name="convidar_trabalho_placeholder">Job: ...</string>
+    <string name="convidar_trabalho_enviar">SEND INVITE</string>
+    <string name="convidar_trabalho_enviado">✅ Invite sent to %1$s</string>
+    <string name="convidar_trabalho_sem_disponiveis">No users available to invite</string>
+    <string name="convidar_trabalho_erro_permissao">This device has a security restriction. Try again or use another device.</string>
+
+    <!-- ===== WORK ITEM (manage list) ===== -->
+    <string name="item_trabalho_placeholder_titulo">Title</string>
+    <string name="item_trabalho_placeholder_info">Category - Deadline</string>
+    <string name="item_trabalho_placeholder_descricao">Description</string>
+    <string name="item_trabalho_zero">0</string>
+    <string name="item_trabalho_convidar">Invite</string>
+
+    <!-- ===== JOB COMMENTS ===== -->
+    <string name="comentarios_titulo">Comments</string>
+    <string name="comentarios_seta_voltar">←</string>
+    <string name="comentarios_trabalho_padrao">Job</string>
+    <string name="comentarios_vazio_titulo">No comments</string>
+    <string name="comentarios_vazio_subtitulo">Be the first to comment on this job</string>
+    <string name="comentarios_hint_escreva">Write a comment…</string>
+    <string name="comentarios_enviar">Send</string>
+    <string name="comentarios_avatar_desc">Avatar</string>
+    <string name="comentarios_inicial_placeholder">A</string>
+    <string name="comentarios_nome_placeholder">Name</string>
+    <string name="comentarios_texto_placeholder">Comment text</string>
+    <string name="comentarios_editado">(edited)</string>
+
+    <!-- Job Comments — actions and toasts -->
+    <string name="comentarios_nao_encontrado">Job not found</string>
+    <string name="comentarios_voce">You</string>
+    <string name="comentarios_opcoes_titulo">Options</string>
+    <string name="comentarios_opcao_editar">Edit</string>
+    <string name="comentarios_opcao_excluir">Delete</string>
+    <string name="comentarios_erro_enviar">Error sending</string>
+    <string name="comentarios_editar_titulo">Edit comment</string>
+    <string name="comentarios_digite_texto">Type some text</string>
+    <string name="comentarios_atualizado">Updated</string>
+    <string name="comentarios_erro_atualizar">Error updating</string>
+    <string name="comentarios_excluir_titulo">Delete comment</string>
+    <string name="comentarios_excluir_msg">Are you sure you want to delete?</string>
+    <string name="comentarios_excluido">Deleted</string>
+    <string name="comentarios_erro_excluir">Error deleting</string>
+
+    <!-- ===== RELATIVE TIME (shared) ===== -->
+    <string name="tempo_agora">Now</string>
+    <string name="tempo_ha_min">%1$dm ago</string>
+    <string name="tempo_ha_horas">%1$dh ago</string>
+    <string name="tempo_ha_dias">%1$dd ago</string>
+
+    <!-- Profile -->
+    <string name="perfil_titulo">My Profile</string>
+    <string name="perfil_links">Links</string>
+    <string name="perfil_sem_links">No links yet</string>
+    <string name="perfil_meus_trabalhos">MY TASKS</string>
+    <string name="perfil_favoritos">FAVORITE MESSAGES</string>
+    <string name="perfil_sair">SIGN OUT</string>
+    <string name="perfil_configuracoes">Settings</string>
+
+    <!-- Settings -->
+    <string name="config_titulo">Settings</string>
+    <string name="config_idioma">Language</string>
+    <string name="config_sair">Sign out</string>
+    <string name="config_excluir_conta">Delete account</string>
+    <string name="config_excluir_conta_msg">Are you sure? All your data will be permanently deleted.</string>
+    <string name="config_excluir_confirmar">Yes, delete</string>
+
+    <!-- Actions -->
+    <string name="voltar">← BACK</string>
+    <string name="cancelar">Cancel</string>
+    <string name="salvar">Save</string>
+    <string name="excluir">Delete</string>
+    <string name="favoritar">⭐ Favorite</string>
+    <string name="desfavoritar">⭐ Remove from favorites</string>
+    <string name="apagar">🗑 Delete</string>
+    <string name="baixar">⬇ Download</string>
+    <string name="abrir">📂 Open</string>
+    <string name="opcoes">Options</string>
+
+    <!-- Errors -->
+    <string name="erro_generico">Error: %1$s</string>
+    <string name="erro_campos_vazios">Fill in all fields</string>
+    <string name="erro_sem_conexao">⚠️ No internet connection. Check your network and try again.</string>
+
+    <!-- Favorites -->
+    <string name="favoritos_titulo">⭐ Favorite Messages</string>
+    <string name="favoritos_vazio">No favorite messages yet</string>
+    <string name="favoritos_remover">Remove favorite</string>
+    <string name="favoritos_remover_msg">Do you want to remove this message from favorites?</string>
+</resources>
