@@ -1,30 +1,45 @@
-# CTR — Comunidade de Trabalho Remoto
+# Plataforma Colaborativa de Trabalho Remoto
 
-![Android CI](https://github.com/verstl0l/CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo/actions/workflows/android.yml/badge.svg)
-
-Aplicativo Android para **organização, comunicação e acompanhamento de tarefas** em equipes remotas. Combina gestão de equipes, chat em tempo real, envio de mídia, notificações e métricas de produtividade em um único app.
+<p align="center">
+  Aplicativo mobile desenvolvido para auxiliar na organização,
+  distribuição e acompanhamento de trabalhos realizados por
+  equipes em ambientes de trabalho remoto.
+</p>
 
 ---
 
-## ✨ Funcionalidades
+## Sobre o Projeto
+
+A Plataforma Colaborativa de Trabalho Remoto é um aplicativo mobile desenvolvido com o objetivo de centralizar informações relacionadas às atividades de equipes que trabalham remotamente.
+
+A aplicação permite o gerenciamento de usuários, equipes e trabalhos, proporcionando uma forma organizada de acompanhar as atividades e facilitar a colaboração entre os integrantes.
+
+Além disso, o app oferece **comunicação em tempo real** entre membros (chat 1-a-1, grupos e equipes), **envio de mídia** (fotos, vídeos, arquivos), **notificações** e **métricas de produtividade**.
+
+O projeto foi desenvolvido como Trabalho de Conclusão de Curso (TCC).
+
+---
+
+## Funcionalidades
 
 ### Autenticação e perfil
-- Cadastro e login (Firebase Auth — email/senha)
-- Perfil com avatar (upload via Cloudinary)
+- Cadastro de usuários (Firebase Authentication)
+- Autenticação por e-mail e senha
+- Gerenciamento de informações do usuário
+- Avatar (upload via Cloudinary)
 - Links sociais (LinkedIn, GitHub, portfólio)
-- Edição de nome e profissão
 
 ### Equipes
-- Criar, editar e excluir equipes
-- Equipes públicas ou privadas
-- Pedidos de entrada com motivos e especialidades
-- Aprovação/recusa de pedidos
-- Gerenciamento de membros (promover a admin, rebaixar, remover)
-- Exclusão em cascata (trabalhos, chats, membros, convites)
+- Criação e gerenciamento de equipes
+- Gerenciamento de membros das equipes
+- Envio e gerenciamento de convites
+- Solicitações de entrada em equipes (com motivos e especialidades)
+- Promoção a administrador / remoção de membros
+- Exclusão de equipe em cascata (trabalhos, membros, convites, pedidos, chats)
 
 ### Trabalhos (tarefas)
-- Criar, editar e excluir trabalhos
-- Atribuição a membros da equipe
+- Cadastro e gerenciamento de trabalhos
+- Acompanhamento das atividades
 - Status: pendente, em progresso, concluído
 - Prazos com data e hora
 - Comentários por trabalho
@@ -55,12 +70,6 @@ Aplicativo Android para **organização, comunicação e acompanhamento de taref
 - Taxa de conclusão
 - Filtros por status
 
-### Edição de mídia
-- Crop de imagem (uCrop)
-- Trim de vídeo (Android Video Trimmer)
-- Preview antes de enviar
-- Legendas em fotos, vídeos e arquivos
-
 ### Outros
 - Busca inteligente de usuários (rolo de resultados com foto)
 - Bloqueio de usuários
@@ -69,62 +78,158 @@ Aplicativo Android para **organização, comunicação e acompanhamento de taref
 
 ---
 
-## 🛠 Tecnologias
+## Demonstração
 
-| Camada | Tecnologia |
-|--------|-----------|
-| Linguagem | Kotlin |
-| IDE | Android Studio |
-| Auth | Firebase Authentication |
-| Banco | Cloud Firestore (NoSQL) |
-| Mídia | Cloudinary |
-| Push | OneSignal |
-| Imagens | Glide, PhotoView |
-| Gráficos | MPAndroidChart |
-| Crop | uCrop |
-| Trim de vídeo | Android Video Trimmer |
-| Assincronismo | Coroutines + Tasks (await) |
-| Cache | SharedPreferences |
-| Build | Gradle (KTS) |
-| CI/CD | GitHub Actions |
+### Autenticação
+O usuário pode realizar seu cadastro e acessar a plataforma utilizando e-mail e senha.
+
+<p align="center">
+  <img src="docs/gifs/login.gif" width="300">
+</p>
+
+### Cadastro
+O usuário pode realizar seu cadastro na plataforma informando seu nome, profissão, e-mail e senha.
+
+<p align="center">
+  <img src="docs/gifs/cadastro.gif" width="300">
+</p>
+
+### Tela Inicial
+Após a autenticação, o usuário é direcionado à tela principal da aplicação.
+
+<p align="center">
+  <img src="docs/gifs/tela-inicial.gif" width="300">
+</p>
+
+### Gerenciamento de Equipes
+O usuário pode criar e gerenciar equipes dentro da plataforma.
+
+<p align="center">
+  <img src="docs/gifs/gerenciamento.gif" width="300">
+</p>
+
+### Convites
+Os usuários podem enviar, receber e gerenciar convites relacionados às equipes.
+
+<p align="center">
+  <img src="docs/gifs/convites.gif" width="300">
+</p>
+
+### Gerenciamento de Trabalhos
+Os trabalhos podem ser cadastrados e gerenciados dentro das equipes.
+
+<p align="center">
+  <img src="docs/gifs/criar-trabalho.gif" width="300">
+</p>
+
+### Perfil do Usuário
+O usuário pode consultar e gerenciar suas informações pessoais cadastradas na plataforma.
+
+<p align="center">
+  <img src="docs/gifs/perfil.gif" width="300">
+</p>
 
 ---
 
-## 🗂 Estrutura do Firestore
+## Tecnologias Utilizadas
 
-### Coleções raiz
-- `usuarios` — dados do usuário + `chatsResumo` (denormalizado)
-- `equipes` — dados da equipe
-- `membros_equipe` — relação user↔equipe
-- `convites_equipe` — convites para entrar em equipe
-- `pedidos_entrada` — pedidos de entrada em equipe
-- `trabalhos` — tarefas
-- `convites_trabalho` — convites para trabalhos específicos
-- `chats` — conversas PV
-- `chats_equipe` — chat geral da equipe
-- `grupos` — grupos dentro de uma equipe
-- `notificacoes` — notificações in-app
-- `favoritos` — mensagens favoritadas
-- `bloqueios` — bloqueios entre usuários
+|                                                                     | Tecnologia              | Aplicação                               |
+| :-----------------------------------------------------------------: | ----------------------- | --------------------------------------- |
+|     <img src="https://skillicons.dev/icons?i=kotlin" width="30">    | Kotlin                  | Desenvolvimento da aplicação Android    |
+| <img src="https://skillicons.dev/icons?i=androidstudio" width="30"> | Android Studio          | Ambiente de desenvolvimento             |
+|    <img src="https://skillicons.dev/icons?i=firebase" width="30">   | Firebase Authentication | Autenticação dos usuários               |
+|    <img src="https://skillicons.dev/icons?i=firebase" width="30">   | Firebase Firestore      | Armazenamento e gerenciamento dos dados |
+|   <img src="https://skillicons.dev/icons?i=materialui" width="30">  | Material Design         | Desenvolvimento da interface            |
+|     <img src="https://skillicons.dev/icons?i=kotlin" width="30">    | Kotlin Coroutines       | Execução de operações assíncronas       |
+|    <img src="https://skillicons.dev/icons?i=cloudinary" width="30"> | Cloudinary              | Upload e armazenamento de mídia         |
+|    <img src="https://skillicons.dev/icons?i=github" width="30">     | GitHub Actions          | CI/CD (build automático)                |
 
-### Subcoleções
-- `trabalhos/{id}/comentarios`
-- `trabalhos/{id}/anexos`
-- `chats/{id}/mensagens`
-- `chats_equipe/{id}/mensagens`
-- `grupos/{id}/mensagens`
+### Bibliotecas adicionais
+- **Glide** — carregamento de imagens
+- **MPAndroidChart** — gráficos de produtividade
+- **PhotoView** — zoom em fotos
+- **uCrop** — crop de imagens
+- **Android Video Trimmer** — trim de vídeos
+- **OneSignal** — push notifications
 
 ---
 
-## 🚀 Como Rodar
+## Banco de Dados
 
-### 1. Clone o repositório
+A aplicação utiliza o Firebase Firestore como banco de dados não relacional.
 
+### Principais coleções
+
+```text
+usuarios
+equipes
+membros_equipe
+convites_equipe
+convites_trabalho
+trabalhos
+pedidos_entrada
+chats
+chats_equipe
+grupos
+notificacoes
+favoritos
+bloqueios
+Subcoleções
+text
+trabalhos/{id}/comentarios
+trabalhos/{id}/anexos
+chats/{id}/mensagens
+chats_equipe/{id}/mensagens
+grupos/{id}/mensagens
+
+```
+
+Arquitetura
+O projeto utiliza uma arquitetura baseada em um modelo MVC simplificado, no qual cada tela principal da aplicação é representada por uma Activity.
+
+A comunicação com o Firebase é realizada diretamente por meio dos SDKs disponibilizados pela plataforma, utilizando operações assíncronas com Kotlin Coroutines.
+
+O fluxo de autenticação utiliza o Firebase Authentication, enquanto os dados complementares dos usuários e demais informações da aplicação são armazenados no Firestore.
+
+Para otimização de leitura, o projeto usa denormalização: dados como o resumo dos chats (chatsResumo) ficam salvos no próprio documento do usuário, evitando o padrão N+1 em listagens.
+
+Estrutura do Projeto
+
+```
+CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo/
+│
+├── app/
+│   └── src/main/java/com/example/plataformaremota/
+│       ├── Activities/
+│       ├── Helpers/
+│       └── Models/
+│
+├── docs/
+│   ├── gifs/
+│   │   ├── login.gif
+│   │   ├── cadastro.gif
+│   │   ├── tela-inicial.gif
+│   │   ├── criar-equipe.gif
+│   │   ├── convites.gif
+│   │   ├── criar-trabalho.gif
+│   │   └── perfil.gif
+│   │
+│   └── manual/
+│       └── manual-do-usuario.md
+│
+├── firestore.rules
+├── README.md
+└── ...
+```
+
+Como Rodar
+Clone o repositório:
+
+```bash
 git clone https://github.com/verstl0l/CTR_App-Comunidade_de_Trabalho_Remoto_Aplicativo.git
-2. Configure o Firebase
-Veja FIREBASE_SETUP.md.
+Abra no Android Studio.
 
-Resumo:
+Configure o Firebase (veja FIREBASE_SETUP.md):
 
 Baixe google-services.json no Firebase Console
 
@@ -132,67 +237,27 @@ Coloque em app/google-services.json
 
 Sincronize o Gradle
 
-3. Configure o Cloudinary
-Edita app/build.gradle.kts com suas credenciais Cloudinary (CLOUDINARY_CLOUD_NAME).
+Configure o Cloudinary e o OneSignal no app/build.gradle.kts.
 
-4. Configure o OneSignal
-Edita app/build.gradle.kts com seu ONESIGNAL_APP_ID.
-
-5. Rode
-Execute em um device/emulador Android 7.0+.
-
-
-```
-📁 Estrutura do Projeto
-
-app/src/main/java/com/example/plataformaremota/
-├── Activities/
-│   ├── MainActivity, LoginActivity, CadastroActivity, Splash
-│   ├── ListaConversasActivity, ChatActivity, ChatGrupoActivity, ChatEquipeActivity
-│   ├── MinhasEquipesActivity, GerenciarEquipeActivity, InfoEquipeActivity
-│   ├── ChatEquipeHubActivity, GerenciarMembrosGrupoActivity
-│   ├── CriarTrabalhoActivity, EntregarTrabalhoActivity, MeusTrabalhosActivity
-│   ├── ComentariosTrabalhoActivity, AnexosTrabalhoActivity, ConvidarTrabalhoActivity
-│   ├── NotificacoesActivity, MensagensFavoritasActivity
-│   ├── PerfilUsuarioActivity, perfil
-│   ├── ProdutividadeActivity, GruposActivity
-│   └── AceitarConviteActivity, PedirEntradaActivity, PedidosPendentesActivity
-│
-├── Helpers/
-│   ├── ChatResumoHelper, ChatPaginacaoHelper, TypingIndicatorHelper
-│   ├── AnexoHelper, ComentarioHelper, NotificacaoHelper
-│   ├── BadgeHelper, SessionHelper, SwipeToReplyHelper
-│   ├── SeletorUsuarioHelper, CloudinaryConfig
-│   └── NetworkUtils
-│
-└── Models/
-    ├── Mensagem, ItemChat, MensagemAdapter
-    └── ConversaItem
+Rode o app em um dispositivo Android 7.0+ ou emulador.
 ```
 
-📸 Screenshots
-<!-- Adicione prints aqui -->
-Em breve
+Manual do Usuário
+O manual apresenta as principais funcionalidades da aplicação e fornece instruções para utilização do sistema.
 
-🌐 Versão Web
-Acesse: CTR_Web-Comunidade_de_Trabalho_Remoto_Web
+Manual do Usuário
 
-📋 Status
-✅ Autenticação, cadastro e perfil
+Versão Web
+Procurando a versão para Web? Acesse:
+CTR_Web-Comunidade_de_Trabalho_Remoto_Web
 
-✅ Equipes (criar, editar, excluir, convidar, gerenciar)
+Projeto Acadêmico
+Título: Plataforma Colaborativa de Trabalho Remoto
 
-✅ Trabalhos (CRUD, comentários, anexos, produtividade)
+Tipo: Trabalho de Conclusão de Curso
 
-✅ Chat completo (PV, grupo, equipe) com tempo real
+Plataforma: Android
 
-✅ Notificações in-app e push
+Linguagem: Kotlin
 
-✅ Edição de mídia
-
-⏳ Testes finais e refinamento de UI
-
-📄 Licença
-Projeto acadêmico — sem licença de uso comercial definida.
-
-Desenvolvido como parte de uma atividade acadêmica para a prática de desenvolvimento mobile e integração com Firebase.
+Banco de dados: Firebase Firestore
