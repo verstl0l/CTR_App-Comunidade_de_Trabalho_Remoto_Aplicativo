@@ -54,7 +54,7 @@ class ComentariosTrabalhoActivity : BaseActivity() {
         nomeUsuario = getString(R.string.usuario_padrao)
 
         if (trabalhoId.isEmpty()) {
-            Toast.makeText(this, getString(R.string.comentarios_trabalho_nao_encontrado), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.comentarios_nao_encontrado), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
