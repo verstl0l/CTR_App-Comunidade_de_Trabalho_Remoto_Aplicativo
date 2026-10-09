@@ -12,11 +12,11 @@
     <!-- Main -->
     <string name="main_abrir_chat">Открыть чат</string>
     <string name="main_bem_vindo">Добро пожаловать в CTR</string>
-    <string name="main_cadastrar_se">РЕГИСТРАЦИЯ</string>
+    <string name="main_cadastrar_se">ЗАРЕГИСТРИРОВАТЬСЯ</string>
     <string name="main_entrar_equipe">ВОЙТИ В КОМАНДУ</string>
     <string name="main_criar_equipe">СОЗДАТЬ КОМАНДУ</string>
 
-    <!-- Language -->
+    <!-- Язык -->
     <string name="idioma">Язык</string>
     <string name="selecione_idioma">Выберите язык</string>
     <string name="idioma_portugues">Португальский</string>
@@ -26,40 +26,40 @@
     <string name="idioma_russo">Русский</string>
     <string name="idioma_chines">Китайский</string>
 
-    <!-- Login -->
+    <!-- Вход -->
     <string name="login_titulo">CTR</string>
     <string name="login_subtitulo">Сообщество удалённой работы</string>
     <string name="login_instrucao">Войдите, чтобы продолжить</string>
-    <string name="login_email">Email</string>
+    <string name="login_email">Эл. почта</string>
     <string name="login_senha">Пароль</string>
     <string name="login_entrar">ВОЙТИ</string>
     <string name="login_criar_conta">СОЗДАТЬ АККАУНТ</string>
     <string name="login_entrando">ВХОД...</string>
 
-    <!-- Login (erros e mensagens) -->
+    <!-- Вход (ошибки и сообщения) -->
     <string name="login_erro_email_invalido">Неверный email</string>
     <string name="login_erro_credenciais">Неверный email или пароль</string>
     <string name="login_erro_conta_nao_encontrada">Аккаунт с таким email не найден</string>
-    <string name="login_erro_muitas_tentativas">Слишком много попыток. Повторите через несколько минут</string>
+    <string name="login_erro_muitas_tentativas">Слишком много попыток. Попробуйте через несколько минут</string>
     <string name="login_erro_email_formato">Неверный формат email</string>
     <string name="login_erro_generico">Ошибка входа. Попробуйте снова.</string>
     <string name="login_sucesso">✅ Вход выполнен!</string>
 
-    <!-- Signup -->
+    <!-- Регистрация -->
     <string name="cadastro_titulo">Создать аккаунт</string>
     <string name="cadastro_nome">Имя</string>
-    <string name="cadastro_email">Email</string>
+    <string name="cadastro_email">Эл. почта</string>
     <string name="cadastro_senha">Пароль</string>
     <string name="cadastro_confirmar_senha">Подтвердите пароль</string>
     <string name="cadastro_profissao">Профессия</string>
-    <string name="cadastro_botao">РЕГИСТРАЦИЯ</string>
+    <string name="cadastro_botao">ЗАРЕГИСТРИРОВАТЬСЯ</string>
     <string name="cadastro_cadastrando">РЕГИСТРАЦИЯ...</string>
     <string name="cadastro_sucesso">✅ Аккаунт создан!</string>
     <string name="cadastro_erro_salvar">Аккаунт создан, но ошибка сохранения данных: %1$s</string>
-    <string name="cadastro_erro_senha_curta">Пароль должен содержать минимум 6 символов</string>
+    <string name="cadastro_erro_senha_curta">Пароль должен содержать не менее 6 символов</string>
     <string name="cadastro_erro_senhas_diferentes">Пароли не совпадают</string>
 
-    <!-- ===== CREATE TEAM ===== -->
+    <!-- Создать команду -->
     <string name="voltar_seta">← НАЗАД</string>
     <string name="criar_nova_equipe">Создать Новую Команду</string>
     <string name="nome_da_equipe">Название Команды</string>
@@ -74,11 +74,11 @@
     <string name="erro_adicionar_membro">Команда создана, но не удалось добавить участника</string>
     <string name="erro_criar_equipe">Ошибка при создании команды: %1$s</string>
 
-    <!-- Find Teams -->
-    <string name="buscar_equipes_titulo">Поиск команд</string>
+    <!-- Поиск команд -->
+    <string name="buscar_equipes_titulo">Поиск Команд</string>
     <string name="buscar_equipes_hint">Поиск по названию...</string>
     <string name="buscar_equipes_vazio">Публичные команды не найдены</string>
-    <string name="buscar_equipes_criado_por">Создано: %1$s</string>
+    <string name="buscar_equipes_criado_por">Создатель: %1$s</string>
     <string name="buscar_equipes_pedido_ja_enviado">Вы уже отправили запрос в эту команду</string>
     <string name="equipe_default_nome">Команда</string>
     <string name="equipe_sem_descricao">Без описания</string>
@@ -188,6 +188,7 @@
     <string name="gerenciar_excluir_trabalho_msg">Вы уверены, что хотите удалить \'%1$s\'?</string>
     <string name="gerenciar_trabalho_removido">Работа удалена!</string>
 
+    <!-- Create Job (hints) -->
     <string name="criar_trabalho_hint_titulo">Название</string>
     <string name="criar_trabalho_hint_descricao">Описание</string>
     <string name="criar_trabalho_hint_categoria">Категория</string>
@@ -239,30 +240,191 @@
     <string name="comentarios_excluido">Удалено</string>
     <string name="comentarios_erro_excluir">Ошибка удаления</string>
 
+    <!-- ===== ATTACHMENTS ===== -->
+    <string name="anexos_titulo">Вложения</string>
+    <string name="anexos_trabalho_padrao">Работа</string>
+    <string name="anexos_nao_encontrado">Работа не найдена</string>
+    <string name="anexos_enviando">Отправка…</string>
+    <string name="anexos_adicionar">+ ДОБАВИТЬ ВЛОЖЕНИЕ</string>
+    <string name="anexos_adicionado">Вложение добавлено</string>
+    <string name="anexos_vazio_titulo">Нет вложений</string>
+    <string name="anexos_vazio_subtitulo">Добавьте файлы, фото или документы к работе</string>
+
+    <!-- Attachment actions -->
+    <string name="anexo_acao_abrir">Открыть</string>
+    <string name="anexo_acao_baixar">Скачать</string>
+    <string name="anexo_acao_remover">Удалить</string>
+    <string name="anexo_remover_titulo">Удалить вложение</string>
+    <string name="anexo_remover_msg">Удалить \'%1$s\'?</string>
+    <string name="anexo_removido">Вложение удалено</string>
+    <string name="anexo_erro_remover">Ошибка при удалении</string>
+
+    <!-- Attachment info -->
+    <string name="anexo_info_formato">%1$s - от %2$s</string>
+    <string name="anexo_sem_app">Нет приложения для открытия \'%1$s\'</string>
+    <string name="anexo_baixando_do_ctr">Загрузка из CTR…</string>
+    <string name="anexo_baixando">Загрузка…</string>
+
+    <!-- Attachment errors (AnexoHelper) -->
+    <string name="anexo_nome_arquivo_padrao">файл</string>
+    <string name="anexo_erro_url">URL не получен от Cloudinary</string>
+    <string name="anexo_erro_salvar">Ошибка сохранения: %1$s</string>
+    <string name="anexo_erro_upload_desconhecido">Неизвестная ошибка загрузки</string>
+
+    <!-- Attachment notification -->
+    <string name="anexo_notif_titulo">Новое вложение в %1$s</string>
+    <string name="anexo_notif_msg">%1$s добавил(а) вложение</string>
+
+    <!-- Attachment item placeholders (preview only) -->
+    <string name="item_anexo_placeholder_icone">A</string>
+    <string name="item_anexo_placeholder_nome">файл.pdf</string>
+    <string name="item_anexo_placeholder_info">1.2 MB - от Ana</string>
+    <string name="item_anexo_placeholder_menu">...</string>
+
+    <!-- ===== CHAT ITEMS (shared) ===== -->
+    <string name="chat_responder_desc">Ответить</string>
+    <string name="item_mensagem_nome_placeholder">Имя</string>
+    <string name="item_mensagem_citacao_placeholder">Исходное сообщение…</string>
+    <string name="item_mensagem_texto_placeholder">Сообщение</string>
+    <string name="item_mensagem_play_simbolo">▶</string>
+    <string name="item_mensagem_arquivo_emoji">📎</string>
+    <string name="item_mensagem_arquivo_tamanho_placeholder">0 KB</string>
+
+    <!-- ===== CHAT (shared) ===== -->
+
+    <!-- Errors and validation -->
+    <string name="chat_sessao_expirada">Сессия истекла. Войдите снова.</string>
+    <string name="chat_conversa_invalida">Недействительный диалог</string>
+    <string name="chat_conversa_nao_encontrada">Беседа не найдена</string>
+    <string name="chat_erro_abrir_conversa">Ошибка открытия беседы</string>
+    <string name="chat_grupo_nao_encontrado">Группа не найдена</string>
+    <string name="chat_equipe_nao_encontrada">Команда не найдена</string>
+    <string name="chat_nenhum_app">Нет приложения</string>
+    <string name="chat_msg_nao_encontrada">Сообщение не найдено</string>
+    <string name="chat_perfil_indisponivel">Невозможно просмотреть профиль</string>
+
+    <!-- Blocking -->
+    <string name="chat_voce_bloqueou">Вы заблокировали этого пользователя</string>
+    <string name="chat_voce_foi_bloqueado">Этот пользователь заблокировал вас</string>
+
+    <!-- Typing indicator -->
+    <string name="chat_digitando">%1$s печатает…</string>
+
+    <!-- Responding -->
+    <string name="chat_respondendo_a">Ответ %1$s</string>
+    <string name="chat_tipo_foto">📷 Фото</string>
+    <string name="chat_tipo_video">🎥 Видео</string>
+    <string name="chat_tipo_arquivo">📎 Файл</string>
+
+    <!-- Upload toasts -->
+    <string name="chat_enviando_foto">📤 Отправка фото…</string>
+    <string name="chat_enviando_video">📤 Отправка видео…</string>
+    <string name="chat_enviando_arquivo">📤 Отправка файла…</string>
+    <string name="chat_foto_enviada">✅ Фото отправлено!</string>
+    <string name="chat_video_enviado">✅ Видео отправлено!</string>
+    <string name="chat_arquivo_enviado">✅ Файл отправлен!</string>
+
+    <!-- Previews (Firestore + UI) -->
+    <string name="chat_preview_foto">📷 Фото</string>
+    <string name="chat_preview_video">🎥 Видео</string>
+    <string name="chat_preview_arquivo">📎 %1$s</string>
+
+    <!-- Message options -->
+    <string name="chat_responder">💬 Ответить</string>
+    <string name="chat_favoritar">⭐ В избранное</string>
+    <string name="chat_desfavoritar">⭐ Убрать из избранного</string>
+    <string name="chat_informacoes">ℹ️ Информация</string>
+    <string name="chat_apagar_todos">🗑 Удалить для всех</string>
+    <string name="chat_apagar">🗑 Удалить</string>
+    <string name="chat_baixar">⬇ Скачать</string>
+    <string name="chat_abrir">📂 Открыть</string>
+    <string name="chat_opcoes_titulo">Опции</string>
+
+    <!-- Favorites -->
+    <string name="chat_favoritado">⭐ Добавлено в избранное</string>
+    <string name="chat_removido_favoritos">Удалено</string>
+
+    <!-- Download -->
+    <string name="chat_baixando">⬇ Загрузка…</string>
+    <string name="chat_baixando_do_ctr">Загрузка из CTR…</string>
+
+    <!-- Delete message -->
+    <string name="chat_msg_apagada_toast">Сообщение удалено</string>
+
+    <!-- Message info -->
+    <string name="chat_info_titulo">ℹ️ Информация о сообщении</string>
+    <string name="chat_info_enviada">Отправлено: %1$s</string>
+    <string name="chat_info_lida_sim">Прочитано: ✅</string>
+    <string name="chat_info_lida_nao">Прочитано: ❌</string>
+    <string name="chat_info_tipo">Тип: %1$s</string>
+    <string name="chat_info_arquivo">Файл: %1$s</string>
+    <string name="chat_info_tamanho">Размер: %1$s</string>
+    <string name="chat_info_resposta_a">Ответ на: %1$s</string>
+    <string name="chat_info_data_formato">dd.MM.yyyy \'в\' HH:mm</string>
+    <string name="chat_info_ok">ОК</string>
+
+    <!-- Hub -->
+    <string name="chat_hub_titulo">Чат Команды</string>
+    <string name="chat_hub_secao_geral">ОБЩИЙ</string>
+    <string name="chat_hub_secao_grupos">ГРУППЫ</string>
+    <string name="chat_hub_secao_individuais">ЛИЧНЫЕ СООБЩЕНИЯ</string>
+    <string name="chat_hub_chat_geral">Общий Чат</string>
+    <string name="chat_hub_novo_grupo">+ НОВАЯ ГРУППА</string>
+    <string name="chat_hub_sem_mensagem">Сообщений пока нет</string>
+    <string name="chat_hub_toque_iniciar">Нажмите, чтобы начать беседу</string>
+    <string name="chat_hub_sem_outro_membro">В команде нет других участников</string>
+    <string name="chat_hub_msg_apagada">Сообщение удалено</string>
+    <string name="chat_hub_foto">Фото</string>
+    <string name="chat_hub_video">Видео</string>
+    <string name="chat_hub_arquivo">Файл</string>
+
+    <!-- Hub: create group dialog -->
+    <string name="chat_hub_novo_grupo_titulo">Новая Группа</string>
+    <string name="chat_hub_novo_grupo_hint">Название группы</string>
+    <string name="chat_hub_novo_grupo_criar">Создать</string>
+    <string name="chat_hub_grupo_criado">Группа создана!</string>
+
+    <!-- Group: leave -->
+    <string name="chat_grupo_sair_titulo">Покинуть группу</string>
+    <string name="chat_grupo_sair_msg">Вы уверены?</string>
+    <string name="chat_grupo_sair_confirmar">Покинуть</string>
+    <string name="chat_grupo_criador_aviso">Вы создатель. Можно только удалить.</string>
+    <string name="chat_grupo_saiu">Вы вышли</string>
+
+    <!-- Chat UI placeholders -->
+    <string name="chat_hint_digite">Введите…</string>
+    <string name="chat_placeholder_conversa">Беседа</string>
+    <string name="chat_placeholder_mensagem">Сообщение</string>
+    <string name="chat_placeholder_usuario">Пользователь</string>
+
+    <!-- ===== CONVERSATION ITEM ===== -->
+    <string name="item_conversa_icone_usuario">👤</string>
+    <string name="item_conversa_ultima_msg_placeholder">Последнее сообщение</string>
+
     <!-- ===== RELATIVE TIME (shared) ===== -->
     <string name="tempo_agora">Сейчас</string>
     <string name="tempo_ha_min">%1$d мин назад</string>
     <string name="tempo_ha_horas">%1$d ч назад</string>
     <string name="tempo_ha_dias">%1$d дн назад</string>
 
-    <!-- Profile -->
-    <string name="perfil_titulo">Мой профиль</string>
+    <!-- Профиль -->
+    <string name="perfil_titulo">Мой Профиль</string>
     <string name="perfil_links">Ссылки</string>
-    <string name="perfil_sem_links">Нет ссылок</string>
-    <string name="perfil_meus_trabalhos">МОИ ЗАДАЧИ</string>
+    <string name="perfil_sem_links">Ссылки не добавлены</string>
+    <string name="perfil_meus_trabalhos">МОИ РАБОТЫ</string>
     <string name="perfil_favoritos">ИЗБРАННЫЕ СООБЩЕНИЯ</string>
-    <string name="perfil_sair">ВЫЙТИ</string>
+    <string name="perfil_sair">ВЫЙТИ ИЗ АККАУНТА</string>
     <string name="perfil_configuracoes">Настройки</string>
 
-    <!-- Settings -->
+    <!-- Настройки -->
     <string name="config_titulo">Настройки</string>
     <string name="config_idioma">Язык</string>
-    <string name="config_sair">Выйти</string>
+    <string name="config_sair">Выйти из аккаунта</string>
     <string name="config_excluir_conta">Удалить аккаунт</string>
-    <string name="config_excluir_conta_msg">Вы уверены? Все ваши данные будут удалены навсегда.</string>
+    <string name="config_excluir_conta_msg">Вы уверены? Все ваши данные будут безвозвратно удалены.</string>
     <string name="config_excluir_confirmar">Да, удалить</string>
 
-    <!-- Actions -->
+    <!-- Действия -->
     <string name="voltar">← НАЗАД</string>
     <string name="cancelar">Отмена</string>
     <string name="salvar">Сохранить</string>
@@ -274,14 +436,14 @@
     <string name="abrir">📂 Открыть</string>
     <string name="opcoes">Опции</string>
 
-    <!-- Errors -->
+    <!-- Ошибки -->
     <string name="erro_generico">Ошибка: %1$s</string>
     <string name="erro_campos_vazios">Заполните все поля</string>
-    <string name="erro_sem_conexao">⚠️ Нет подключения к интернету.</string>
+    <string name="erro_sem_conexao">⚠️ Нет подключения к интернету. Проверьте сеть и повторите попытку.</string>
 
-    <!-- Favorites -->
-    <string name="favoritos_titulo">⭐ Избранные сообщения</string>
-    <string name="favoritos_vazio">Пока нет избранных сообщений</string>
+    <!-- Избранное -->
+    <string name="favoritos_titulo">⭐ Избранные Сообщения</string>
+    <string name="favoritos_vazio">Избранных сообщений пока нет</string>
     <string name="favoritos_remover">Убрать из избранного</string>
     <string name="favoritos_remover_msg">Убрать это сообщение из избранного?</string>
 </resources>

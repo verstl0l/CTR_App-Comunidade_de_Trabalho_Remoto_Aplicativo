@@ -187,7 +187,7 @@
     <string name="gerenciar_excluir_trabalho_msg">Tem certeza que deseja excluir \'%1$s\'?</string>
     <string name="gerenciar_trabalho_removido">Trabalho removido!</string>
 
-    <!-- ⚠️ Só adicione se ainda NÃO existirem (vieram de Criar Trabalho) -->
+    <!-- Criar Trabalho (hints) -->
     <string name="criar_trabalho_hint_titulo">Título</string>
     <string name="criar_trabalho_hint_descricao">Descrição</string>
     <string name="criar_trabalho_hint_categoria">Categoria</string>
@@ -238,6 +238,167 @@
     <string name="comentarios_excluir_msg">Tem certeza que deseja excluir?</string>
     <string name="comentarios_excluido">Excluído</string>
     <string name="comentarios_erro_excluir">Erro ao excluir</string>
+
+    <!-- ===== ATTACHMENTS ===== -->
+    <string name="anexos_titulo">Anexos</string>
+    <string name="anexos_trabalho_padrao">Trabalho</string>
+    <string name="anexos_nao_encontrado">Trabalho não encontrado</string>
+    <string name="anexos_enviando">Enviando…</string>
+    <string name="anexos_adicionar">+ ADICIONAR ANEXO</string>
+    <string name="anexos_adicionado">Anexo adicionado</string>
+    <string name="anexos_vazio_titulo">Nenhum anexo</string>
+    <string name="anexos_vazio_subtitulo">Adicione arquivos, fotos ou documentos ao trabalho</string>
+
+    <!-- Attachment actions -->
+    <string name="anexo_acao_abrir">Abrir</string>
+    <string name="anexo_acao_baixar">Baixar</string>
+    <string name="anexo_acao_remover">Remover</string>
+    <string name="anexo_remover_titulo">Remover anexo</string>
+    <string name="anexo_remover_msg">Deseja remover \'%1$s\'?</string>
+    <string name="anexo_removido">Anexo removido</string>
+    <string name="anexo_erro_remover">Erro ao remover</string>
+
+    <!-- Attachment info -->
+    <string name="anexo_info_formato">%1$s - por %2$s</string>
+    <string name="anexo_sem_app">Nenhum app para abrir \'%1$s\'</string>
+    <string name="anexo_baixando_do_ctr">Baixando do CTR…</string>
+    <string name="anexo_baixando">Baixando…</string>
+
+    <!-- Attachment errors (AnexoHelper) -->
+    <string name="anexo_nome_arquivo_padrao">arquivo</string>
+    <string name="anexo_erro_url">URL não retornada pelo Cloudinary</string>
+    <string name="anexo_erro_salvar">Erro ao salvar: %1$s</string>
+    <string name="anexo_erro_upload_desconhecido">Erro desconhecido no upload</string>
+
+    <!-- Attachment notification -->
+    <string name="anexo_notif_titulo">Novo anexo em %1$s</string>
+    <string name="anexo_notif_msg">%1$s adicionou um anexo</string>
+
+    <!-- Attachment item placeholders (preview only) -->
+    <string name="item_anexo_placeholder_icone">A</string>
+    <string name="item_anexo_placeholder_nome">arquivo.pdf</string>
+    <string name="item_anexo_placeholder_info">1.2 MB - por Ana</string>
+    <string name="item_anexo_placeholder_menu">...</string>
+
+    <!-- ===== CHAT ITEMS (shared) ===== -->
+    <string name="chat_responder_desc">Responder</string>
+    <string name="item_mensagem_nome_placeholder">Nome</string>
+    <string name="item_mensagem_citacao_placeholder">Mensagem original…</string>
+    <string name="item_mensagem_texto_placeholder">Mensagem</string>
+    <string name="item_mensagem_play_simbolo">▶</string>
+    <string name="item_mensagem_arquivo_emoji">📎</string>
+    <string name="item_mensagem_arquivo_tamanho_placeholder">0 KB</string>
+
+    <!-- ===== CHAT (shared across ChatActivity, ChatEquipeActivity, ChatGrupoActivity, ChatEquipeHubActivity) ===== -->
+
+    <!-- Errors and validation -->
+    <string name="chat_sessao_expirada">Sessão expirada. Faça login novamente.</string>
+    <string name="chat_conversa_invalida">Conversa inválida</string>
+    <string name="chat_conversa_nao_encontrada">Conversa não encontrada</string>
+    <string name="chat_erro_abrir_conversa">Erro ao abrir conversa</string>
+    <string name="chat_grupo_nao_encontrado">Grupo não encontrado</string>
+    <string name="chat_equipe_nao_encontrada">Equipe não encontrada</string>
+    <string name="chat_nenhum_app">Nenhum app</string>
+    <string name="chat_msg_nao_encontrada">Mensagem não encontrada</string>
+    <string name="chat_perfil_indisponivel">Não é possível ver o perfil</string>
+
+    <!-- Blocking -->
+    <string name="chat_voce_bloqueou">Você bloqueou este usuário</string>
+    <string name="chat_voce_foi_bloqueado">Você foi bloqueado por este usuário</string>
+
+    <!-- Typing indicator -->
+    <string name="chat_digitando">%1$s está digitando…</string>
+
+    <!-- Responding -->
+    <string name="chat_respondendo_a">Respondendo a %1$s</string>
+    <string name="chat_tipo_foto">📷 Foto</string>
+    <string name="chat_tipo_video">🎥 Vídeo</string>
+    <string name="chat_tipo_arquivo">📎 Arquivo</string>
+
+    <!-- Upload toasts -->
+    <string name="chat_enviando_foto">📤 Enviando foto…</string>
+    <string name="chat_enviando_video">📤 Enviando vídeo…</string>
+    <string name="chat_enviando_arquivo">📤 Enviando arquivo…</string>
+    <string name="chat_foto_enviada">✅ Foto enviada!</string>
+    <string name="chat_video_enviado">✅ Vídeo enviado!</string>
+    <string name="chat_arquivo_enviado">✅ Arquivo enviado!</string>
+
+    <!-- Previews (Firestore + UI) -->
+    <string name="chat_preview_foto">📷 Foto</string>
+    <string name="chat_preview_video">🎥 Vídeo</string>
+    <string name="chat_preview_arquivo">📎 %1$s</string>
+
+    <!-- Message options -->
+    <string name="chat_responder">💬 Responder</string>
+    <string name="chat_favoritar">⭐ Favoritar</string>
+    <string name="chat_desfavoritar">⭐ Remover dos favoritos</string>
+    <string name="chat_informacoes">ℹ️ Informações</string>
+    <string name="chat_apagar_todos">🗑 Apagar para todos</string>
+    <string name="chat_apagar">🗑 Apagar</string>
+    <string name="chat_baixar">⬇ Baixar</string>
+    <string name="chat_abrir">📂 Abrir</string>
+    <string name="chat_opcoes_titulo">Opções</string>
+
+    <!-- Favorites -->
+    <string name="chat_favoritado">⭐ Favoritado</string>
+    <string name="chat_removido_favoritos">Removido</string>
+
+    <!-- Download -->
+    <string name="chat_baixando">⬇ Baixando…</string>
+    <string name="chat_baixando_do_ctr">Baixando do CTR…</string>
+
+    <!-- Delete message -->
+    <string name="chat_msg_apagada_toast">Mensagem apagada</string>
+
+    <!-- Message info -->
+    <string name="chat_info_titulo">ℹ️ Informações da mensagem</string>
+    <string name="chat_info_enviada">Enviada: %1$s</string>
+    <string name="chat_info_lida_sim">Lida: ✅</string>
+    <string name="chat_info_lida_nao">Lida: ❌</string>
+    <string name="chat_info_tipo">Tipo: %1$s</string>
+    <string name="chat_info_arquivo">Arquivo: %1$s</string>
+    <string name="chat_info_tamanho">Tamanho: %1$s</string>
+    <string name="chat_info_resposta_a">Resposta a: %1$s</string>
+    <string name="chat_info_data_formato">dd/MM/yyyy \'às\' HH:mm</string>
+    <string name="chat_info_ok">OK</string>
+
+    <!-- Hub: chat geral, grupos, individuais -->
+    <string name="chat_hub_titulo">Chat da Equipe</string>
+    <string name="chat_hub_secao_geral">GERAL</string>
+    <string name="chat_hub_secao_grupos">GRUPOS</string>
+    <string name="chat_hub_secao_individuais">CONVERSAS INDIVIDUAIS</string>
+    <string name="chat_hub_chat_geral">Chat Geral</string>
+    <string name="chat_hub_novo_grupo">+ NOVO GRUPO</string>
+    <string name="chat_hub_sem_mensagem">Nenhuma mensagem ainda</string>
+    <string name="chat_hub_toque_iniciar">Toque para iniciar conversa</string>
+    <string name="chat_hub_sem_outro_membro">Nenhum outro membro na equipe</string>
+    <string name="chat_hub_msg_apagada">Mensagem apagada</string>
+    <string name="chat_hub_foto">Foto</string>
+    <string name="chat_hub_video">Vídeo</string>
+    <string name="chat_hub_arquivo">Arquivo</string>
+
+    <!-- Hub: create group dialog -->
+    <string name="chat_hub_novo_grupo_titulo">Novo Grupo</string>
+    <string name="chat_hub_novo_grupo_hint">Nome do grupo</string>
+    <string name="chat_hub_novo_grupo_criar">Criar</string>
+    <string name="chat_hub_grupo_criado">Grupo criado!</string>
+
+    <!-- Group: leave -->
+    <string name="chat_grupo_sair_titulo">Sair do grupo</string>
+    <string name="chat_grupo_sair_msg">Tem certeza?</string>
+    <string name="chat_grupo_sair_confirmar">Sair</string>
+    <string name="chat_grupo_criador_aviso">Você é o criador. Só pode excluir.</string>
+    <string name="chat_grupo_saiu">Você saiu</string>
+
+    <!-- Chat UI placeholders -->
+    <string name="chat_hint_digite">Digite…</string>
+    <string name="chat_placeholder_conversa">Conversa</string>
+    <string name="chat_placeholder_mensagem">Mensagem</string>
+    <string name="chat_placeholder_usuario">Usuário</string>
+
+    <!-- ===== CONVERSATION ITEM ===== -->
+    <string name="item_conversa_icone_usuario">👤</string>
+    <string name="item_conversa_ultima_msg_placeholder">Última mensagem</string>
 
     <!-- ===== RELATIVE TIME (shared) ===== -->
     <string name="tempo_agora">Agora</string>

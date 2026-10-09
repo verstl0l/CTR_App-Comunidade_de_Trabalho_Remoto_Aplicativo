@@ -29,7 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class ChatActivity : AppCompatActivity() {
+class ChatActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -119,13 +119,13 @@ class ChatActivity : AppCompatActivity() {
         chatId = intent.getStringExtra("chatId")?.trim() ?: ""
 
         if (emailUsuario.isEmpty()) {
-            Toast.makeText(this, "Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.chat_sessao_expirada), Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
         if (outroEmail.isEmpty() && chatId.isEmpty()) {
-            Toast.makeText(this, "Conversa inválida", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.chat_conversa_invalida), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -135,7 +135,7 @@ class ChatActivity : AppCompatActivity() {
                 try {
                     val chatDoc = db.collection("chats").document(chatId).get().await()
                     if (!chatDoc.exists()) {
-                        Toast.makeText(this@ChatActivity, "Conversa não encontrada", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ChatActivity, getString(R.string.chat_conversa_nao_encontrada), Toast.LENGTH_SHORT).show()
                         finish()
                         return@launch
                     }
@@ -144,7 +144,7 @@ class ChatActivity : AppCompatActivity() {
                     val outro = participantes?.firstOrNull { it != emailUsuario } as? String
 
                     if (outro.isNullOrEmpty()) {
-                        Toast.makeText(this@ChatActivity, "Conversa inválida", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ChatActivity, getString(R.string.chat_conversa_invalida), Toast.LENGTH_SHORT).show()
                         finish()
                         return@launch
                     }
@@ -154,7 +154,7 @@ class ChatActivity : AppCompatActivity() {
                     if (!isFinishing && !isDestroyed) configurarUI()
                 } catch (e: Exception) {
                     Log.e("CHAT", "Erro: ${e.message}")
-                    Toast.makeText(this@ChatActivity, "Erro ao abrir conversa", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@ChatActivity, getString(R.string.chat_erro_abrir_conversa), Toast.LENGTH_LONG).show()
                     finish()
                 }
             }
@@ -172,7 +172,11 @@ class ChatActivity : AppCompatActivity() {
                 if (!isFinishing && !isDestroyed) configurarUI()
             } catch (e: Exception) {
                 Log.e("CHAT", "Erro ao criar chat: ${e.message}")
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show()
                 finish()
             }
         }
@@ -263,7 +267,7 @@ class ChatActivity : AppCompatActivity() {
 
         btnVerPerfil.setOnClickListener {
             if (outroEmail.isEmpty()) {
-                Toast.makeText(this, "Não é possível ver o perfil", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.chat_perfil_indisponivel), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             val i = Intent(this, PerfilUsuarioActivity::class.java)
@@ -281,7 +285,7 @@ class ChatActivity : AppCompatActivity() {
                 }
             }
         } else {
-            txtNomeOutro.text = "Conversa"
+            txtNomeOutro.text = getString(R.string.chat_placeholder_conversa)
         }
 
         verificarBloqueio(edtMensagem, btnEnviar)
@@ -317,7 +321,7 @@ class ChatActivity : AppCompatActivity() {
                     runOnUiThread {
                         if (isFinishing || isDestroyed) return@runOnUiThread
                         if (estaDigitando) {
-                            txtDigitando.text = "$nome está digitando..."
+                            txtDigitando.text = getString(R.string.chat_digitando, nome)
                             txtDigitando.visibility = View.VISIBLE
                         } else {
                             txtDigitando.visibility = View.GONE
@@ -499,9 +503,9 @@ class ChatActivity : AppCompatActivity() {
                     .whereEqualTo("bloqueadorEmail", outroEmail)
                     .whereEqualTo("bloqueadoEmail", emailUsuario).limit(1).get().await()
                 if (!euBloqueei.isEmpty) {
-                    edt.isEnabled = false; edt.hint = "Você bloqueou este usuário"; btn.isEnabled = false
+                    edt.isEnabled = false; edt.hint = getString(R.string.chat_voce_bloqueou); btn.isEnabled = false
                 } else if (!eleMeBloqueou.isEmpty) {
-                    edt.isEnabled = false; edt.hint = "Você foi bloqueado por este usuário"; btn.isEnabled = false
+                    edt.isEnabled = false; edt.hint = getString(R.string.chat_voce_foi_bloqueado); btn.isEnabled = false
                 }
             } catch (e: Exception) { Log.e("CHAT", "Erro bloqueio: ${e.message}") }
         }
@@ -646,7 +650,11 @@ class ChatActivity : AppCompatActivity() {
                 cancelarResposta()
             } catch (e: Exception) {
                 Log.e("CHAT_DEBUG", "❌ Erro enviarMensagem: ${e.message}")
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show()
             }
         }
     }
@@ -654,13 +662,16 @@ class ChatActivity : AppCompatActivity() {
     private fun dispararResposta(msgId: String, texto: String, remetente: String, tipo: String = "texto") {
         lifecycleScope.launch {
             try {
-                val nomeRem = if (remetente == emailUsuario) "Você" else {
+                val nomeRem = if (remetente == emailUsuario) getString(R.string.comentarios_voce) else {
                     db.collection("usuarios").document(remetente).get().await().getString("nome") ?: remetente
                 }
                 respostaAtiva = RespostaInfo(msgId, texto, remetente, nomeRem, tipo)
-                findViewById<TextView>(R.id.txtRespondendoA).text = "Respondendo a $nomeRem"
+                findViewById<TextView>(R.id.txtRespondendoA).text = getString(R.string.chat_respondendo_a, nomeRem)
                 findViewById<TextView>(R.id.txtTextoRespondendo).text = when (tipo) {
-                    "foto" -> "📷 Foto"; "video" -> "🎥 Vídeo"; "arquivo" -> "📎 Arquivo"; else -> texto
+                    "foto" -> getString(R.string.chat_tipo_foto)
+                    "video" -> getString(R.string.chat_tipo_video)
+                    "arquivo" -> getString(R.string.chat_tipo_arquivo)
+                    else -> texto
                 }
                 findViewById<LinearLayout>(R.id.containerRespondendo).visibility = View.VISIBLE
                 findViewById<EditText>(R.id.edtMensagem).requestFocus()
@@ -672,8 +683,8 @@ class ChatActivity : AppCompatActivity() {
     // ✅ ENVIAR FOTO
     // ============================================================
     private fun enviarFoto(uri: Uri, legenda: String = "") {
-        Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
-        MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/")
+        Toast.makeText(this, getString(R.string.chat_enviando_foto), Toast.LENGTH_SHORT).show()
+MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
@@ -725,17 +736,27 @@ class ChatActivity : AppCompatActivity() {
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo MEU: ${e.message}") }
 
                             recarregarMensagens()
-                            Toast.makeText(this@ChatActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ChatActivity, getString(R.string.chat_foto_enviada), Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
                         } catch (e: Exception) {
                             Log.e("CHAT_DEBUG", "Erro enviarFoto: ${e.message}")
-                            Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show()
                         }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread { Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ChatActivity,
+                            getString(R.string.erro_generico, error?.description ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             }).dispatch()
@@ -745,7 +766,7 @@ class ChatActivity : AppCompatActivity() {
     // ✅ ENVIAR VÍDEO
     // ============================================================
     private fun enviarVideo(uri: Uri, legenda: String = "") {
-        Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.chat_enviando_video), Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
             .option("resource_type", "video").option("folder", "chats_videos/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
@@ -799,17 +820,27 @@ class ChatActivity : AppCompatActivity() {
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo MEU: ${e.message}") }
 
                             recarregarMensagens()
-                            Toast.makeText(this@ChatActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ChatActivity, getString(R.string.chat_video_enviado), Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
                         } catch (e: Exception) {
                             Log.e("CHAT_DEBUG", "Erro enviarVideo: ${e.message}")
-                            Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show()
                         }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread { Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ChatActivity,
+                            getString(R.string.erro_generico, error?.description ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             }).dispatch()
@@ -819,7 +850,7 @@ class ChatActivity : AppCompatActivity() {
     // ✅ ENVIAR ARQUIVO
     // ============================================================
     private fun enviarArquivo(uri: Uri, legenda: String = "") {
-        Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.chat_enviando_arquivo), Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
         try {
             contentResolver.query(uri, null, null, null, null)?.use { c ->
@@ -888,17 +919,27 @@ class ChatActivity : AppCompatActivity() {
                             } catch (e: Exception) { Log.e("CHAT_DEBUG", "Erro resumo MEU: ${e.message}") }
 
                             recarregarMensagens()
-                            Toast.makeText(this@ChatActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ChatActivity, getString(R.string.chat_arquivo_enviado), Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar()
                             cancelarResposta()
                         } catch (e: Exception) {
                             Log.e("CHAT_DEBUG", "Erro enviarArquivo: ${e.message}")
-                            Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show()
                         }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread { Toast.makeText(this@ChatActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ChatActivity,
+                            getString(R.string.erro_generico, error?.description ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             }).dispatch()
@@ -910,22 +951,36 @@ class ChatActivity : AppCompatActivity() {
                 val jaFav = db.collection("favoritos")
                     .whereEqualTo("usuarioEmail", emailUsuario).whereEqualTo("mensagemId", msgId)
                     .limit(1).get().await().let { !it.isEmpty }
-                val opcoes = mutableListOf("💬 Responder")
-                opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
-                opcoes.add("ℹ️ Informações")
-                if (ehRem) opcoes.add("🗑 Apagar para todos")
 
-                AlertDialog.Builder(this@ChatActivity).setTitle("Opções")
+                val responder = getString(R.string.chat_responder)
+                val favoritar = getString(R.string.chat_favoritar)
+                val desfavoritar = getString(R.string.chat_desfavoritar)
+                val info = getString(R.string.chat_informacoes)
+                val apagarTodos = getString(R.string.chat_apagar_todos)
+
+                val opcoes = mutableListOf(responder)
+                opcoes.add(if (jaFav) desfavoritar else favoritar)
+                opcoes.add(info)
+                if (ehRem) opcoes.add(apagarTodos)
+
+                AlertDialog.Builder(this@ChatActivity)
+                    .setTitle(getString(R.string.chat_opcoes_titulo))
                     .setItems(opcoes.toTypedArray()) { _, w ->
                         when (opcoes[w]) {
-                            "💬 Responder" -> dispararResposta(msgId, texto, remetente, "texto")
-                            "⭐ Favoritar" -> favoritar(msgId, texto, remetente, "texto")
-                            "⭐ Remover dos favoritos" -> desfavoritar(msgId)
-                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
-                            "🗑 Apagar para todos" -> apagarMensagem(msgId)
+                            responder -> dispararResposta(msgId, texto, remetente, "texto")
+                            favoritar -> favoritar(msgId, texto, remetente, "texto")
+                            desfavoritar -> desfavoritar(msgId)
+                            info -> abrirInfoMensagem(msgId)
+                            apagarTodos -> apagarMensagem(msgId)
                         }
                     }.show()
-            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -938,21 +993,29 @@ class ChatActivity : AppCompatActivity() {
                 val jaFav = db.collection("favoritos")
                     .whereEqualTo("usuarioEmail", emailUsuario).whereEqualTo("mensagemId", msgId)
                     .limit(1).get().await().let { !it.isEmpty }
-                val opcoes = mutableListOf("💬 Responder")
-                opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
-                opcoes.add("ℹ️ Informações")
-                opcoes.add("⬇ Baixar")
-                if (tipo == "arquivo") opcoes.add("📂 Abrir")
-                if (ehRem) opcoes.add("🗑 Apagar")
+                val responder = getString(R.string.chat_responder)
+                val favoritar = getString(R.string.chat_favoritar)
+                val desfavoritar = getString(R.string.chat_desfavoritar)
+                val info = getString(R.string.chat_informacoes)
+                val baixar = getString(R.string.chat_baixar)
+                val abrir = getString(R.string.chat_abrir)
+                val apagar = getString(R.string.chat_apagar)
 
-                AlertDialog.Builder(this@ChatActivity).setTitle("Opções")
+                val opcoes = mutableListOf(responder)
+                opcoes.add(if (jaFav) desfavoritar else favoritar)
+                opcoes.add(info)
+                opcoes.add(baixar)
+                if (tipo == "arquivo") opcoes.add(abrir)
+                if (ehRem) opcoes.add(apagar)
+
+                AlertDialog.Builder(this@ChatActivity).setTitle(getString(R.string.chat_opcoes_titulo))
                     .setItems(opcoes.toTypedArray()) { _, w ->
                         when (opcoes[w]) {
-                            "💬 Responder" -> dispararResposta(msgId, texto, remetente, tipo)
-                            "⭐ Favoritar" -> favoritar(msgId, texto, remetente, tipo)
-                            "⭐ Remover dos favoritos" -> desfavoritar(msgId)
-                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
-                            "⬇ Baixar" -> {
+                            responder -> dispararResposta(msgId, texto, remetente, tipo)
+                            favoritar -> favoritar(msgId, texto, remetente, tipo)
+                            desfavoritar -> desfavoritar(msgId)
+                            info -> abrirInfoMensagem(msgId)
+                            baixar -> {
                                 val nome = when (tipo) {
                                     "foto" -> "CTR_foto_${System.currentTimeMillis()}.jpg"
                                     "video" -> "CTR_video_${System.currentTimeMillis()}.mp4"
@@ -965,18 +1028,24 @@ class ChatActivity : AppCompatActivity() {
                                 }
                                 baixarArquivo(url, nome, pasta)
                             }
-                            "📂 Abrir" -> abrirArquivoExterno(url, mime, nomeArq)
-                            "🗑 Apagar" -> apagarMensagem(msgId)
+                            abrir -> abrirArquivoExterno(url, mime, nomeArq)
+                            apagar -> apagarMensagem(msgId)
                         }
                     }.show()
-            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
     private fun favoritar(msgId: String, texto: String, remetente: String, tipoMidia: String) {
         lifecycleScope.launch {
             try {
-                val nomeRem = if (remetente == emailUsuario) "Você" else {
+                val nomeRem = if (remetente == emailUsuario) getString(R.string.comentarios_voce) else {
                     db.collection("usuarios").document(remetente).get().await().getString("nome") ?: remetente
                 }
                 db.collection("favoritos").add(hashMapOf(
@@ -985,8 +1054,12 @@ class ChatActivity : AppCompatActivity() {
                     "nomeRemetente" to nomeRem, "tipoMidia" to tipoMidia,
                     "criadoEm" to System.currentTimeMillis()
                 )).await()
-                Toast.makeText(this@ChatActivity, "⭐ Favoritado", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                Toast.makeText(this@ChatActivity, getString(R.string.chat_favoritado), Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) { Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show() }
         }
     }
 
@@ -996,8 +1069,12 @@ class ChatActivity : AppCompatActivity() {
                 db.collection("favoritos").whereEqualTo("usuarioEmail", emailUsuario)
                     .whereEqualTo("mensagemId", msgId).get().await()
                     .documents.forEach { it.reference.delete().await() }
-                Toast.makeText(this@ChatActivity, "Removido", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                Toast.makeText(this@ChatActivity, getString(R.string.chat_removido_favoritos), Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) { Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show() }
         }
     }
 
@@ -1017,19 +1094,23 @@ class ChatActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             startActivity(i)
-        } catch (e: Exception) { Toast.makeText(this, "Nenhum app", Toast.LENGTH_LONG).show() }
+        } catch (e: Exception) {
+    Toast.makeText(this, getString(R.string.chat_nenhum_app), Toast.LENGTH_LONG).show()
+}
     }
 
     private fun baixarArquivo(url: String, nome: String, pasta: String) {
         try {
             val req = DownloadManager.Request(Uri.parse(url))
-            req.setTitle(nome); req.setDescription("Baixando do CTR...")
+            req.setTitle(nome); req.setDescription(getString(R.string.chat_baixando_do_ctr))
             req.allowScanningByMediaScanner()
             req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             req.setDestinationInExternalPublicDir(pasta, nome)
             (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(req)
-            Toast.makeText(this, "⬇ Baixando...", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) { Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            Toast.makeText(this, getString(R.string.chat_baixando), Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun apagarMensagem(msgId: String) {
@@ -1049,9 +1130,13 @@ class ChatActivity : AppCompatActivity() {
                             "respostaPara" to null
                         )
                     ).await()
-                Toast.makeText(this@ChatActivity, "Mensagem apagada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChatActivity, getString(R.string.chat_msg_apagada_toast), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(this@ChatActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+    this@ChatActivity,
+    getString(R.string.erro_generico, e.message ?: ""),
+    Toast.LENGTH_LONG
+).show()
             }
         }
     }
@@ -1063,27 +1148,34 @@ class ChatActivity : AppCompatActivity() {
             ?.mensagem
 
         if (msg == null) {
-            Toast.makeText(this, "Mensagem não encontrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.chat_msg_nao_encontrada), Toast.LENGTH_SHORT).show()
             return
         }
 
-        val sdf = java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", java.util.Locale("pt", "BR"))
+        val sdf = java.text.SimpleDateFormat(
+            getString(R.string.chat_info_data_formato),
+            java.util.Locale.getDefault()
+        )
+
         val info = buildString {
-            append("Enviada: ${sdf.format(java.util.Date(msg.timestamp))}\n")
-            append("Lida: ${if (msg.lida) "✅" else "❌"}\n")
-            append("Tipo: ${msg.tipo}\n")
-            if (msg.nomeArquivo != null) append("Arquivo: ${msg.nomeArquivo}\n")
+            append(getString(R.string.chat_info_enviada, sdf.format(java.util.Date(msg.timestamp))) + "\n")
+            append((if (msg.lida) getString(R.string.chat_info_lida_sim) else getString(R.string.chat_info_lida_nao)) + "\n")
+            append(getString(R.string.chat_info_tipo, msg.tipo) + "\n")
+            if (msg.nomeArquivo != null) {
+                append(getString(R.string.chat_info_arquivo, msg.nomeArquivo) + "\n")
+            }
             if (msg.tamanhoArquivo > 0) {
-                append("Tamanho: ${formatarTamanhoInfo(msg.tamanhoArquivo)}\n")
+                append(getString(R.string.chat_info_tamanho, formatarTamanhoInfo(msg.tamanhoArquivo)) + "\n")
             }
             if (msg.respostaPara != null) {
-                append("Resposta a: ${msg.respostaPara.nomeRemetente}\n")
+                append(getString(R.string.chat_info_resposta_a, msg.respostaPara.nomeRemetente) + "\n")
             }
         }
+
         AlertDialog.Builder(this)
-            .setTitle("ℹ️ Informações da mensagem")
+            .setTitle(getString(R.string.chat_info_titulo))
             .setMessage(info)
-            .setPositiveButton("OK", null)
+            .setPositiveButton(getString(R.string.chat_info_ok), null)
             .show()
     }
 

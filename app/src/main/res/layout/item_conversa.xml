@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="👤"
+            android:text="@string/item_conversa_icone_usuario"
             android:textSize="20sp" />
 
     </com.google.android.material.card.MaterialCardView>
@@ -37,7 +37,7 @@
             android:id="@+id/txtNomeConversa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nome"
+            android:text="@string/comentarios_nome_placeholder"
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Última mensagem"
+            android:text="@string/item_conversa_ultima_msg_placeholder"
             android:textColor="#9E9E9E"
             android:textSize="14sp" />
 
@@ -65,7 +65,7 @@
         android:paddingHorizontal="8dp"
         android:paddingVertical="4dp"
         android:gravity="center"
-        android:text="0"
+        android:text="@string/item_trabalho_zero"
         android:textColor="#1C1311"
         android:textSize="12sp"
         android:textStyle="bold"

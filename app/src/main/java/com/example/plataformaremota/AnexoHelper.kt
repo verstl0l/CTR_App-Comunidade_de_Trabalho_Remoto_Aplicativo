@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
  *   trabalhos/{trabalhoId}/anexos/{anexoId}
  *     - nome: "briefing.pdf"
  *     - url: "https://res.cloudinary.com/..."
- *     - tipo: "pdf" | "imagem" | "video" | "outro"
+ *     - tipo: "pdf" | "imagem" | "video" | "outro"   (CHAVES DE BANCO — NÃO TRADUZIR)
  *     - mimeType: "application/pdf"
  *     - tamanho: 1234567
  *     - enviadoPor: "ana@x.com"
@@ -47,7 +47,7 @@ object AnexoHelper {
         onSucesso: (String) -> Unit,
         onErro: (String) -> Unit
     ) {
-        var nomeArquivo = "arquivo"
+        var nomeArquivo = context.getString(R.string.anexo_nome_arquivo_padrao)
         var tamanhoArquivo = 0L
         var mimeType = "application/octet-stream"
 
@@ -56,7 +56,7 @@ object AnexoHelper {
                 if (cursor.moveToFirst()) {
                     val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                     val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                    if (nameIndex != -1) nomeArquivo = cursor.getString(nameIndex) ?: "arquivo"
+                    if (nameIndex != -1) nomeArquivo = cursor.getString(nameIndex) ?: context.getString(R.string.anexo_nome_arquivo_padrao)
                     if (sizeIndex != -1) tamanhoArquivo = cursor.getLong(sizeIndex)
                 }
             }
@@ -94,7 +94,7 @@ object AnexoHelper {
                 override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
                     val url = resultData?.get("secure_url") as? String
                     if (url == null) {
-                        onErro("URL nao retornada pelo Cloudinary")
+                        onErro(context.getString(R.string.anexo_erro_url))
                         return
                     }
 
@@ -122,7 +122,7 @@ object AnexoHelper {
                         } catch (e: Exception) {
                             Log.e(TAG, "Erro ao salvar anexo: ${e.message}")
                             withContext(Dispatchers.Main) {
-                                onErro("Erro ao salvar: ${e.message}")
+                                onErro(context.getString(R.string.anexo_erro_salvar, e.message ?: ""))
                             }
                         }
                     }
@@ -130,7 +130,7 @@ object AnexoHelper {
 
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
                     Log.e(TAG, "Erro no upload: ${error?.description}")
-                    onErro(error?.description ?: "Erro desconhecido no upload")
+                    onErro(error?.description ?: context.getString(R.string.anexo_erro_upload_desconhecido))
                 }
 
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
@@ -161,6 +161,7 @@ object AnexoHelper {
     // HELPERS
     // ============================================================
 
+    // ⚠️ Retorna chaves de banco — NÃO TRADUZIR (quebra dados existentes)
     internal fun detectarTipo(mimeType: String): String {
         return when {
             mimeType.startsWith("image/") -> "imagem"
@@ -176,6 +177,7 @@ object AnexoHelper {
         }
     }
 
+    // Unidades B/KB/MB/GB são padrão internacional, mantidas fixas
     fun formatarTamanho(bytes: Long): String {
         return when {
             bytes < 1024 -> "$bytes B"

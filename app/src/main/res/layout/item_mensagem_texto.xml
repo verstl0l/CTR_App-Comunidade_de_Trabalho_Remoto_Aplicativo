@@ -14,7 +14,7 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="12dp"
-        android:contentDescription="Responder"
+        android:contentDescription="@string/chat_responder_desc"
         android:src="@android:drawable/ic_menu_revert"
         android:visibility="gone"
         app:tint="@color/accent" />
@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:text="Nome"
+            android:text="@string/item_mensagem_nome_placeholder"
             android:textColor="@color/accent"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -55,7 +55,7 @@
                 android:id="@+id/txtNomeCitado"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nome"
+                android:text="@string/item_mensagem_nome_placeholder"
                 android:textColor="@color/accent"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -68,7 +68,7 @@
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:maxWidth="240dp"
-                android:text="Mensagem original..."
+                android:text="@string/item_mensagem_citacao_placeholder"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="280dp"
-            android:text="Mensagem"
+            android:text="@string/item_mensagem_texto_placeholder"
             android:textColor="@color/text_primary"
             android:textSize="15sp" />
 

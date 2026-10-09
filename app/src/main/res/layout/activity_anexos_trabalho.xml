@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Trabalho"
+                android:text="@string/anexos_trabalho_padrao"
                 android:textColor="@color/text_primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -44,7 +44,7 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
-                android:text="Anexos"
+                android:text="@string/anexos_titulo"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
@@ -63,7 +63,7 @@
                     android:id="@+id/txtProgressoStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Enviando..."
+                    android:text="@string/anexos_enviando"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
 
@@ -86,7 +86,7 @@
                 android:layout_height="48dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="@color/accent"
-                android:text="+ ADICIONAR ANEXO"
+                android:text="@string/anexos_adicionar"
                 android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 
@@ -103,7 +103,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nenhum anexo"
+                    android:text="@string/anexos_vazio_titulo"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -114,7 +114,7 @@
                     android:layout_marginTop="4dp"
                     android:gravity="center"
                     android:paddingHorizontal="32dp"
-                    android:text="Adicione arquivos, fotos ou documentos ao trabalho"
+                    android:text="@string/anexos_vazio_subtitulo"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 

@@ -11,12 +11,12 @@
 
     <!-- Main -->
     <string name="main_abrir_chat">打开聊天</string>
-    <string name="main_bem_vindo">欢迎来到CTR</string>
+    <string name="main_bem_vindo">欢迎来到 CTR</string>
     <string name="main_cadastrar_se">注册</string>
     <string name="main_entrar_equipe">加入团队</string>
     <string name="main_criar_equipe">创建团队</string>
 
-    <!-- Language -->
+    <!-- 语言 -->
     <string name="idioma">语言</string>
     <string name="selecione_idioma">选择语言</string>
     <string name="idioma_portugues">葡萄牙语</string>
@@ -26,40 +26,40 @@
     <string name="idioma_russo">俄语</string>
     <string name="idioma_chines">中文</string>
 
-    <!-- Login -->
+    <!-- 登录 -->
     <string name="login_titulo">CTR</string>
     <string name="login_subtitulo">远程工作社区</string>
     <string name="login_instrucao">登录以继续</string>
     <string name="login_email">邮箱</string>
     <string name="login_senha">密码</string>
     <string name="login_entrar">登录</string>
-    <string name="login_criar_conta">创建账户</string>
-    <string name="login_entrando">登录中...</string>
+    <string name="login_criar_conta">创建账号</string>
+    <string name="login_entrando">登录中……</string>
 
-    <!-- Login (erros e mensagens) -->
+    <!-- 登录（错误和消息） -->
     <string name="login_erro_email_invalido">邮箱无效</string>
     <string name="login_erro_credenciais">邮箱或密码错误</string>
-    <string name="login_erro_conta_nao_encontrada">未找到该邮箱对应的账户</string>
+    <string name="login_erro_conta_nao_encontrada">未找到使用此邮箱的账号</string>
     <string name="login_erro_muitas_tentativas">尝试次数过多。请在几分钟后重试</string>
     <string name="login_erro_email_formato">邮箱格式无效</string>
-    <string name="login_erro_generico">登录错误。请重试。</string>
+    <string name="login_erro_generico">登录失败。请重试。</string>
     <string name="login_sucesso">✅ 登录成功！</string>
 
-    <!-- Signup -->
-    <string name="cadastro_titulo">创建账户</string>
+    <!-- 注册 -->
+    <string name="cadastro_titulo">创建账号</string>
     <string name="cadastro_nome">姓名</string>
     <string name="cadastro_email">邮箱</string>
     <string name="cadastro_senha">密码</string>
     <string name="cadastro_confirmar_senha">确认密码</string>
     <string name="cadastro_profissao">职业</string>
     <string name="cadastro_botao">注册</string>
-    <string name="cadastro_cadastrando">注册中...</string>
-    <string name="cadastro_sucesso">✅ 账户已创建！</string>
-    <string name="cadastro_erro_salvar">账户已创建，但保存数据时出错：%1$s</string>
-    <string name="cadastro_erro_senha_curta">密码必须至少包含6个字符</string>
-    <string name="cadastro_erro_senhas_diferentes">密码不匹配</string>
+    <string name="cadastro_cadastrando">注册中……</string>
+    <string name="cadastro_sucesso">✅ 账号已创建！</string>
+    <string name="cadastro_erro_salvar">账号已创建，但保存数据时出错：%1$s</string>
+    <string name="cadastro_erro_senha_curta">密码必须至少为 6 个字符</string>
+    <string name="cadastro_erro_senhas_diferentes">密码不一致</string>
 
-    <!-- ===== CREATE TEAM ===== -->
+    <!-- 创建团队 -->
     <string name="voltar_seta">← 返回</string>
     <string name="criar_nova_equipe">创建新团队</string>
     <string name="nome_da_equipe">团队名称</string>
@@ -74,12 +74,12 @@
     <string name="erro_adicionar_membro">团队已创建，但添加成员失败</string>
     <string name="erro_criar_equipe">创建团队出错：%1$s</string>
 
-    <!-- Find Teams -->
+    <!-- 搜索团队 -->
     <string name="buscar_equipes_titulo">搜索团队</string>
-    <string name="buscar_equipes_hint">按名称搜索...</string>
+    <string name="buscar_equipes_hint">按名称搜索……</string>
     <string name="buscar_equipes_vazio">未找到公开团队</string>
     <string name="buscar_equipes_criado_por">创建者：%1$s</string>
-    <string name="buscar_equipes_pedido_ja_enviado">您已向此团队发送请求</string>
+    <string name="buscar_equipes_pedido_ja_enviado">您已向该团队发送过请求</string>
     <string name="equipe_default_nome">团队</string>
     <string name="equipe_sem_descricao">无描述</string>
 
@@ -186,6 +186,7 @@
     <string name="gerenciar_excluir_trabalho_msg">确定要删除“%1$s”吗？</string>
     <string name="gerenciar_trabalho_removido">工作已删除！</string>
 
+    <!-- Create Job (hints) -->
     <string name="criar_trabalho_hint_titulo">标题</string>
     <string name="criar_trabalho_hint_descricao">描述</string>
     <string name="criar_trabalho_hint_categoria">类别</string>
@@ -237,30 +238,191 @@
     <string name="comentarios_excluido">已删除</string>
     <string name="comentarios_erro_excluir">删除出错</string>
 
+    <!-- ===== ATTACHMENTS ===== -->
+    <string name="anexos_titulo">附件</string>
+    <string name="anexos_trabalho_padrao">工作</string>
+    <string name="anexos_nao_encontrado">未找到工作</string>
+    <string name="anexos_enviando">发送中……</string>
+    <string name="anexos_adicionar">+ 添加附件</string>
+    <string name="anexos_adicionado">附件已添加</string>
+    <string name="anexos_vazio_titulo">暂无附件</string>
+    <string name="anexos_vazio_subtitulo">向工作添加文件、照片或文档</string>
+
+    <!-- Attachment actions -->
+    <string name="anexo_acao_abrir">打开</string>
+    <string name="anexo_acao_baixar">下载</string>
+    <string name="anexo_acao_remover">删除</string>
+    <string name="anexo_remover_titulo">删除附件</string>
+    <string name="anexo_remover_msg">删除“%1$s”？</string>
+    <string name="anexo_removido">附件已删除</string>
+    <string name="anexo_erro_remover">删除出错</string>
+
+    <!-- Attachment info -->
+    <string name="anexo_info_formato">%1$s - 来自 %2$s</string>
+    <string name="anexo_sem_app">没有应用可以打开“%1$s”</string>
+    <string name="anexo_baixando_do_ctr">正在从 CTR 下载……</string>
+    <string name="anexo_baixando">下载中……</string>
+
+    <!-- Attachment errors (AnexoHelper) -->
+    <string name="anexo_nome_arquivo_padrao">文件</string>
+    <string name="anexo_erro_url">Cloudinary 未返回 URL</string>
+    <string name="anexo_erro_salvar">保存出错：%1$s</string>
+    <string name="anexo_erro_upload_desconhecido">未知的上传错误</string>
+
+    <!-- Attachment notification -->
+    <string name="anexo_notif_titulo">%1$s 中有新附件</string>
+    <string name="anexo_notif_msg">%1$s 添加了一个附件</string>
+
+    <!-- Attachment item placeholders (preview only) -->
+    <string name="item_anexo_placeholder_icone">A</string>
+    <string name="item_anexo_placeholder_nome">文件.pdf</string>
+    <string name="item_anexo_placeholder_info">1.2 MB - 来自 Ana</string>
+    <string name="item_anexo_placeholder_menu">...</string>
+
+    <!-- ===== CHAT ITEMS (shared) ===== -->
+    <string name="chat_responder_desc">回复</string>
+    <string name="item_mensagem_nome_placeholder">姓名</string>
+    <string name="item_mensagem_citacao_placeholder">原始消息……</string>
+    <string name="item_mensagem_texto_placeholder">消息</string>
+    <string name="item_mensagem_play_simbolo">▶</string>
+    <string name="item_mensagem_arquivo_emoji">📎</string>
+    <string name="item_mensagem_arquivo_tamanho_placeholder">0 KB</string>
+
+    <!-- ===== CHAT (shared) ===== -->
+
+    <!-- Errors and validation -->
+    <string name="chat_sessao_expirada">会话已过期。请重新登录。</string>
+    <string name="chat_conversa_invalida">无效会话</string>
+    <string name="chat_conversa_nao_encontrada">未找到会话</string>
+    <string name="chat_erro_abrir_conversa">打开会话出错</string>
+    <string name="chat_grupo_nao_encontrado">未找到群组</string>
+    <string name="chat_equipe_nao_encontrada">未找到团队</string>
+    <string name="chat_nenhum_app">没有应用</string>
+    <string name="chat_msg_nao_encontrada">未找到消息</string>
+    <string name="chat_perfil_indisponivel">无法查看资料</string>
+
+    <!-- Blocking -->
+    <string name="chat_voce_bloqueou">您已屏蔽该用户</string>
+    <string name="chat_voce_foi_bloqueado">您已被该用户屏蔽</string>
+
+    <!-- Typing indicator -->
+    <string name="chat_digitando">%1$s 正在输入……</string>
+
+    <!-- Responding -->
+    <string name="chat_respondendo_a">回复 %1$s</string>
+    <string name="chat_tipo_foto">📷 照片</string>
+    <string name="chat_tipo_video">🎥 视频</string>
+    <string name="chat_tipo_arquivo">📎 文件</string>
+
+    <!-- Upload toasts -->
+    <string name="chat_enviando_foto">📤 正在发送照片……</string>
+    <string name="chat_enviando_video">📤 正在发送视频……</string>
+    <string name="chat_enviando_arquivo">📤 正在发送文件……</string>
+    <string name="chat_foto_enviada">✅ 照片已发送！</string>
+    <string name="chat_video_enviado">✅ 视频已发送！</string>
+    <string name="chat_arquivo_enviado">✅ 文件已发送！</string>
+
+    <!-- Previews (Firestore + UI) -->
+    <string name="chat_preview_foto">📷 照片</string>
+    <string name="chat_preview_video">🎥 视频</string>
+    <string name="chat_preview_arquivo">📎 %1$s</string>
+
+    <!-- Message options -->
+    <string name="chat_responder">💬 回复</string>
+    <string name="chat_favoritar">⭐ 收藏</string>
+    <string name="chat_desfavoritar">⭐ 取消收藏</string>
+    <string name="chat_informacoes">ℹ️ 信息</string>
+    <string name="chat_apagar_todos">🗑 为所有人删除</string>
+    <string name="chat_apagar">🗑 删除</string>
+    <string name="chat_baixar">⬇ 下载</string>
+    <string name="chat_abrir">📂 打开</string>
+    <string name="chat_opcoes_titulo">选项</string>
+
+    <!-- Favorites -->
+    <string name="chat_favoritado">⭐ 已收藏</string>
+    <string name="chat_removido_favoritos">已移除</string>
+
+    <!-- Download -->
+    <string name="chat_baixando">⬇ 正在下载……</string>
+    <string name="chat_baixando_do_ctr">正在从 CTR 下载……</string>
+
+    <!-- Delete message -->
+    <string name="chat_msg_apagada_toast">消息已删除</string>
+
+    <!-- Message info -->
+    <string name="chat_info_titulo">ℹ️ 消息信息</string>
+    <string name="chat_info_enviada">已发送：%1$s</string>
+    <string name="chat_info_lida_sim">已读：✅</string>
+    <string name="chat_info_lida_nao">已读：❌</string>
+    <string name="chat_info_tipo">类型：%1$s</string>
+    <string name="chat_info_arquivo">文件：%1$s</string>
+    <string name="chat_info_tamanho">大小：%1$s</string>
+    <string name="chat_info_resposta_a">回复：%1$s</string>
+    <string name="chat_info_data_formato">yyyy/MM/dd \'于\' HH:mm</string>
+    <string name="chat_info_ok">确定</string>
+
+    <!-- Hub -->
+    <string name="chat_hub_titulo">团队聊天</string>
+    <string name="chat_hub_secao_geral">综合</string>
+    <string name="chat_hub_secao_grupos">群组</string>
+    <string name="chat_hub_secao_individuais">私聊</string>
+    <string name="chat_hub_chat_geral">综合聊天</string>
+    <string name="chat_hub_novo_grupo">+ 新建群组</string>
+    <string name="chat_hub_sem_mensagem">暂无消息</string>
+    <string name="chat_hub_toque_iniciar">点击开始对话</string>
+    <string name="chat_hub_sem_outro_membro">团队中没有其他成员</string>
+    <string name="chat_hub_msg_apagada">消息已删除</string>
+    <string name="chat_hub_foto">照片</string>
+    <string name="chat_hub_video">视频</string>
+    <string name="chat_hub_arquivo">文件</string>
+
+    <!-- Hub: create group dialog -->
+    <string name="chat_hub_novo_grupo_titulo">新建群组</string>
+    <string name="chat_hub_novo_grupo_hint">群组名称</string>
+    <string name="chat_hub_novo_grupo_criar">创建</string>
+    <string name="chat_hub_grupo_criado">群组已创建！</string>
+
+    <!-- Group: leave -->
+    <string name="chat_grupo_sair_titulo">退出群组</string>
+    <string name="chat_grupo_sair_msg">确定吗？</string>
+    <string name="chat_grupo_sair_confirmar">退出</string>
+    <string name="chat_grupo_criador_aviso">您是创建者。只能删除。</string>
+    <string name="chat_grupo_saiu">您已退出</string>
+
+    <!-- Chat UI placeholders -->
+    <string name="chat_hint_digite">输入……</string>
+    <string name="chat_placeholder_conversa">会话</string>
+    <string name="chat_placeholder_mensagem">消息</string>
+    <string name="chat_placeholder_usuario">用户</string>
+
+    <!-- ===== CONVERSATION ITEM ===== -->
+    <string name="item_conversa_icone_usuario">👤</string>
+    <string name="item_conversa_ultima_msg_placeholder">最后一条消息</string>
+
     <!-- ===== RELATIVE TIME (shared) ===== -->
     <string name="tempo_agora">刚刚</string>
     <string name="tempo_ha_min">%1$d 分钟前</string>
     <string name="tempo_ha_horas">%1$d 小时前</string>
     <string name="tempo_ha_dias">%1$d 天前</string>
 
-    <!-- Profile -->
+    <!-- 个人资料 -->
     <string name="perfil_titulo">我的资料</string>
     <string name="perfil_links">链接</string>
-    <string name="perfil_sem_links">暂无链接</string>
-    <string name="perfil_meus_trabalhos">我的任务</string>
+    <string name="perfil_sem_links">未添加链接</string>
+    <string name="perfil_meus_trabalhos">我的工作</string>
     <string name="perfil_favoritos">收藏消息</string>
-    <string name="perfil_sair">退出登录</string>
+    <string name="perfil_sair">退出账号</string>
     <string name="perfil_configuracoes">设置</string>
 
-    <!-- Settings -->
+    <!-- 设置 -->
     <string name="config_titulo">设置</string>
     <string name="config_idioma">语言</string>
-    <string name="config_sair">退出登录</string>
-    <string name="config_excluir_conta">删除账户</string>
-    <string name="config_excluir_conta_msg">您确定吗？您的所有数据将被永久删除。</string>
+    <string name="config_sair">退出账号</string>
+    <string name="config_excluir_conta">删除账号</string>
+    <string name="config_excluir_conta_msg">确定吗？您的所有数据将被永久删除。</string>
     <string name="config_excluir_confirmar">是，删除</string>
 
-    <!-- Actions -->
+    <!-- 操作 -->
     <string name="voltar">← 返回</string>
     <string name="cancelar">取消</string>
     <string name="salvar">保存</string>
@@ -272,14 +434,14 @@
     <string name="abrir">📂 打开</string>
     <string name="opcoes">选项</string>
 
-    <!-- Errors -->
+    <!-- 错误 -->
     <string name="erro_generico">错误：%1$s</string>
     <string name="erro_campos_vazios">请填写所有字段</string>
-    <string name="erro_sem_conexao">⚠️ 无网络连接。请检查网络后重试。</string>
+    <string name="erro_sem_conexao">⚠️ 无网络连接。请检查网络并重试。</string>
 
-    <!-- Favorites -->
-    <string name="favoritos_titulo">⭐ 收藏消息</string>
-    <string name="favoritos_vazio">暂无收藏消息</string>
+    <!-- 收藏 -->
+    <string name="favoritos_titulo">⭐ 收藏的消息</string>
+    <string name="favoritos_vazio">还没有收藏的消息</string>
     <string name="favoritos_remover">取消收藏</string>
-    <string name="favoritos_remover_msg">确定要取消收藏此消息吗？</string>
+    <string name="favoritos_remover_msg">将此消息从收藏中移除？</string>
 </resources>

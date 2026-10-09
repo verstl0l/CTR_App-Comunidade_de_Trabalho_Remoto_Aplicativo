@@ -13,7 +13,7 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="12dp"
-        android:contentDescription="Responder"
+        android:contentDescription="@string/chat_responder_desc"
         android:src="@android:drawable/ic_menu_revert"
         android:visibility="gone"
         app:tint="@color/accent" />
@@ -27,13 +27,12 @@
         android:orientation="vertical"
         android:padding="8dp">
 
-
         <TextView
             android:id="@+id/txtNomeFoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:text="Usuario"
+            android:text="@string/usuario_padrao"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 

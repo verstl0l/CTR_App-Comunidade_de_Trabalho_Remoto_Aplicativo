@@ -13,7 +13,7 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="12dp"
-        android:contentDescription="Responder"
+        android:contentDescription="@string/chat_responder_desc"
         android:src="@android:drawable/ic_menu_revert"
         android:visibility="gone"
         app:tint="@color/accent" />
@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:text="Usuario"
+            android:text="@string/usuario_padrao"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
@@ -65,7 +65,7 @@
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:backgroundTint="@color/accent"
-                android:text="▶"
+                android:text="@string/item_mensagem_play_simbolo"
                 android:textColor="@color/accent_dark"
                 android:textSize="24sp" />
 

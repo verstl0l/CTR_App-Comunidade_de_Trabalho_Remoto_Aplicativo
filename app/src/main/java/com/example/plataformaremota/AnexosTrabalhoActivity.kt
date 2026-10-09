@@ -17,7 +17,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
@@ -30,14 +29,14 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-class AnexosTrabalhoActivity : AppCompatActivity() {
+class AnexosTrabalhoActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
-    private var nomeUsuario: String = "Usuario"
+    private var nomeUsuario: String = ""
     private var trabalhoId: String = ""
-    private var tituloTrabalho: String = "Trabalho"
+    private var tituloTrabalho: String = ""
     private var equipeId: String = ""
 
     // Launcher para selecionar arquivo
@@ -58,10 +57,12 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
         trabalhoId = intent.getStringExtra("trabalhoId") ?: ""
-        tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: "Trabalho"
+        tituloTrabalho = intent.getStringExtra("tituloTrabalho") ?: getString(R.string.anexos_trabalho_padrao)
+
+        nomeUsuario = getString(R.string.usuario_padrao)
 
         if (trabalhoId.isEmpty()) {
-            Toast.makeText(this, "Trabalho nao encontrado", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.anexos_nao_encontrado), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -79,7 +80,7 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val userDoc = db.collection("usuarios").document(emailUsuario).get().await()
-                nomeUsuario = userDoc.getString("nome") ?: "Usuario"
+                nomeUsuario = userDoc.getString("nome") ?: getString(R.string.usuario_padrao)
 
                 val trabalhoDoc = db.collection("trabalhos").document(trabalhoId).get().await()
                 equipeId = trabalhoDoc.getString("equipeId") ?: ""
@@ -118,13 +119,13 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
 
                 anexos.documents.forEach { doc ->
                     val anexoId = doc.id
-                    val nome = doc.getString("nome") ?: "arquivo"
+                    val nome = doc.getString("nome") ?: getString(R.string.anexo_nome_arquivo_padrao)
                     val url = doc.getString("url") ?: ""
                     val tipo = doc.getString("tipo") ?: "outro"
                     val mimeType = doc.getString("mimeType") ?: "application/octet-stream"
                     val tamanho = doc.getLong("tamanho") ?: 0L
                     val enviadoPor = doc.getString("enviadoPor") ?: ""
-                    val nomeEnviadoPor = doc.getString("nomeEnviadoPor") ?: "Usuario"
+                    val nomeEnviadoPor = doc.getString("nomeEnviadoPor") ?: getString(R.string.usuario_padrao)
                     val enviadoEm = doc.getLong("enviadoEm") ?: 0L
 
                     val view = inflater.inflate(R.layout.item_anexo, container, false)
@@ -137,17 +138,19 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
                     val btnMenu = view.findViewById<Button>(R.id.btnMenuAnexo)
 
                     txtNome.text = nome
-                    txtInfo.text = "${AnexoHelper.formatarTamanho(tamanho)} - por $nomeEnviadoPor"
+                    txtInfo.text = getString(
+                        R.string.anexo_info_formato,
+                        AnexoHelper.formatarTamanho(tamanho),
+                        nomeEnviadoPor
+                    )
                     txtData.text = formatarDataRelativa(enviadoEm)
 
                     configurarIcone(cardIcone, txtIcone, tipo)
 
-                    // Clique no card = abrir/baixar
                     view.setOnClickListener {
                         abrirOuBaixar(url, mimeType, nome, tipo)
                     }
 
-                    // Menu de acoes
                     btnMenu.setOnClickListener {
                         val podeRemover = enviadoPor == emailUsuario
                         mostrarMenuAnexo(anexoId, url, mimeType, nome, tipo, podeRemover)
@@ -170,6 +173,7 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
         txtIcone: TextView,
         tipo: String
     ) {
+        // Siglas internacionais — NÃO TRADUZIR
         val texto = when (tipo) {
             "pdf" -> "PDF"
             "imagem" -> "IMG"
@@ -211,7 +215,7 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
         val progressBar = findViewById<ProgressBar>(R.id.progressUpload)
 
         containerProgresso.visibility = View.VISIBLE
-        txtStatus.text = "Enviando..."
+        txtStatus.text = getString(R.string.anexos_enviando)
         progressBar.progress = 0
 
         AnexoHelper.uploadAnexo(
@@ -225,10 +229,10 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
                     progressBar.progress = (progresso * 100).toInt()
                 }
             },
-            onSucesso = { anexoId ->
+            onSucesso = { _ ->
                 runOnUiThread {
                     containerProgresso.visibility = View.GONE
-                    Toast.makeText(this, "Anexo adicionado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.anexos_adicionado), Toast.LENGTH_SHORT).show()
                     carregarAnexos()
                     notificarMembros()
                 }
@@ -267,8 +271,8 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
                     NotificacaoHelper.criar(
                         destinatario = email,
                         tipo = "novo_anexo",
-                        titulo = "Novo anexo em $tituloTrabalho",
-                        mensagem = "$nomeUsuario adicionou um anexo",
+                        titulo = getString(R.string.anexo_notif_titulo, tituloTrabalho),
+                        mensagem = getString(R.string.anexo_notif_msg, nomeUsuario),
                         referenciaId = trabalhoId,
                         referenciaTipo = "trabalho",
                         remetente = emailUsuario,
@@ -292,18 +296,22 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
         tipo: String,
         podeRemover: Boolean
     ) {
+        val abrir = getString(R.string.anexo_acao_abrir)
+        val baixar = getString(R.string.anexo_acao_baixar)
+        val remover = getString(R.string.anexo_acao_remover)
+
         val opcoes = mutableListOf<String>()
-        opcoes.add("Abrir")
-        opcoes.add("Baixar")
-        if (podeRemover) opcoes.add("Remover")
+        opcoes.add(abrir)
+        opcoes.add(baixar)
+        if (podeRemover) opcoes.add(remover)
 
         AlertDialog.Builder(this)
             .setTitle(nome)
             .setItems(opcoes.toTypedArray()) { _, which ->
                 when (opcoes[which]) {
-                    "Abrir" -> abrirArquivo(url, mimeType, nome)
-                    "Baixar" -> baixarAnexo(url, nome, tipo)
-                    "Remover" -> confirmarRemocao(anexoId, nome)
+                    abrir -> abrirArquivo(url, mimeType, nome)
+                    baixar -> baixarAnexo(url, nome, tipo)
+                    remover -> confirmarRemocao(anexoId, nome)
                 }
             }
             .show()
@@ -313,7 +321,6 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
     // ABRIR / BAIXAR
     // ============================================================
     private fun abrirOuBaixar(url: String, mimeType: String, nome: String, tipo: String) {
-        // Tipos visualizaveis: abre direto. Outros: baixa.
         if (tipo in listOf("imagem", "video", "pdf")) {
             abrirArquivo(url, mimeType, nome)
         } else {
@@ -330,7 +337,7 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
             }
             startActivity(intent)
         } catch (e: Exception) {
-            Toast.makeText(this, "Nenhum app para abrir '$nome'", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.anexo_sem_app, nome), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -346,7 +353,7 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
 
             val request = DownloadManager.Request(Uri.parse(url))
             request.setTitle(nomeFinal)
-            request.setDescription("Baixando do CTR...")
+            request.setDescription(getString(R.string.anexo_baixando_do_ctr))
             request.allowScanningByMediaScanner()
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setDestinationInExternalPublicDir(pasta, nomeFinal)
@@ -354,7 +361,7 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
             val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             downloadManager.enqueue(request)
 
-            Toast.makeText(this, "Baixando...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.anexo_baixando), Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(
                 this,
@@ -384,22 +391,22 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
     // ============================================================
     private fun confirmarRemocao(anexoId: String, nome: String) {
         AlertDialog.Builder(this)
-            .setTitle("Remover anexo")
-            .setMessage("Deseja remover '$nome'?")
-            .setPositiveButton("Remover") { _, _ ->
+            .setTitle(getString(R.string.anexo_remover_titulo))
+            .setMessage(getString(R.string.anexo_remover_msg, nome))
+            .setPositiveButton(getString(R.string.anexo_acao_remover)) { _, _ ->
                 lifecycleScope.launch {
                     val ok = AnexoHelper.removerAnexo(trabalhoId, anexoId)
                     if (ok) {
                         Toast.makeText(
                             this@AnexosTrabalhoActivity,
-                            "Anexo removido",
+                            getString(R.string.anexo_removido),
                             Toast.LENGTH_SHORT
                         ).show()
                         carregarAnexos()
                     } else {
                         Toast.makeText(
                             this@AnexosTrabalhoActivity,
-                            "Erro ao remover",
+                            getString(R.string.anexo_erro_remover),
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -419,21 +426,21 @@ class AnexosTrabalhoActivity : AppCompatActivity() {
         val diff = agora - timestamp
 
         return when {
-            diff < 60_000 -> "Agora"
+            diff < 60_000 -> getString(R.string.tempo_agora)
             diff < 3_600_000 -> {
                 val min = TimeUnit.MILLISECONDS.toMinutes(diff)
-                "Ha ${min}min"
+                getString(R.string.tempo_ha_min, min)
             }
             diff < 86_400_000 -> {
                 val horas = TimeUnit.MILLISECONDS.toHours(diff)
-                "Ha ${horas}h"
+                getString(R.string.tempo_ha_horas, horas)
             }
             diff < 604_800_000 -> {
                 val dias = TimeUnit.MILLISECONDS.toDays(diff)
-                "Ha ${dias}d"
+                getString(R.string.tempo_ha_dias, dias)
             }
             else -> {
-                val formato = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+                val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 formato.format(Date(timestamp))
             }
         }
