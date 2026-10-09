@@ -434,6 +434,9 @@
     <string name="abrir">📂 打开</string>
     <string name="opcoes">选项</string>
 
+    <string name="chat_separador_hoje">今天</string>
+    <string name="chat_separador_ontem">昨天</string>
+
     <!-- 错误 -->
     <string name="erro_generico">错误：%1$s</string>
     <string name="erro_campos_vazios">请填写所有字段</string>

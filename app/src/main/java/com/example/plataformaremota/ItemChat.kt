@@ -1,5 +1,6 @@
 package com.example.plataformaremota
 
+import android.content.Context
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -22,8 +23,9 @@ sealed class ItemChat {
 
         /**
          * Recebe lista de Mensagem e injeta separadores de data onde o dia muda.
+         * Requer Context pra traduzir "HOJE"/"ONTEM".
          */
-        fun deMensagens(mensagens: List<Mensagem>): List<ItemChat> {
+        fun deMensagens(context: Context, mensagens: List<Mensagem>): List<ItemChat> {
             if (mensagens.isEmpty()) return emptyList()
 
             val itens = mutableListOf<ItemChat>()
@@ -35,7 +37,7 @@ sealed class ItemChat {
                 if (dia != ultimoDia) {
                     itens.add(
                         SeparadorData(
-                            texto = formatarSeparador(msg.timestamp),
+                            texto = formatarSeparador(context, msg.timestamp),
                             timestamp = msg.timestamp
                         )
                     )
@@ -50,12 +52,12 @@ sealed class ItemChat {
 
         /** Retorna "2026-09-30" pro cálculo de mudança de dia. */
         private fun diaDe(timestamp: Long): String {
-            val fmt = SimpleDateFormat("yyyy-MM-dd", Locale("pt", "BR"))
+            val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             return fmt.format(Date(timestamp))
         }
 
         /** Retorna "HOJE", "ONTEM" ou "30/09/2026". */
-        private fun formatarSeparador(timestamp: Long): String {
+        private fun formatarSeparador(context: Context, timestamp: Long): String {
             val agora = Calendar.getInstance()
             val data = Calendar.getInstance().apply { timeInMillis = timestamp }
 
@@ -63,17 +65,17 @@ sealed class ItemChat {
             val mesmoDia = mesmoAno &&
                     agora.get(Calendar.DAY_OF_YEAR) == data.get(Calendar.DAY_OF_YEAR)
 
-            if (mesmoDia) return "HOJE"
+            if (mesmoDia) return context.getString(R.string.chat_separador_hoje)
 
             // Ontem?
             val ontem = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
             val ehOntem = mesmoAno &&
                     ontem.get(Calendar.DAY_OF_YEAR) == data.get(Calendar.DAY_OF_YEAR)
 
-            if (ehOntem) return "ONTEM"
+            if (ehOntem) return context.getString(R.string.chat_separador_ontem)
 
             // Data completa
-            val fmt = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+            val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
             return fmt.format(Date(timestamp))
         }
     }

@@ -65,7 +65,7 @@ class MensagemAdapter(
         private const val TIPO_ARQUIVO = 3
         private const val TIPO_SEPARADOR = 4
 
-        private val fmtHora = SimpleDateFormat("HH:mm", Locale("pt", "BR"))
+        private val fmtHora = SimpleDateFormat("HH:mm", Locale.getDefault())
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -208,9 +208,9 @@ class MensagemAdapter(
             holder.containerCitacao.visibility = View.VISIBLE
             holder.txtNomeCitado.text = rp.nomeRemetente
             holder.txtTextoCitado.text = when (rp.tipo) {
-                "foto" -> "📷 Foto"
-                "video" -> "🎥 Vídeo"
-                "arquivo" -> "📎 Arquivo"
+                "foto" -> contexto.getString(R.string.chat_tipo_foto)
+                "video" -> contexto.getString(R.string.chat_tipo_video)
+                "arquivo" -> contexto.getString(R.string.chat_tipo_arquivo)
                 else -> rp.texto
             }
         } else {
@@ -230,7 +230,8 @@ class MensagemAdapter(
     private fun bindFoto(holder: FotoViewHolder, msg: Mensagem, ehRem: Boolean) {
         holder.img.visibility = View.VISIBLE
         holder.txtNome.visibility = View.VISIBLE
-        holder.txtNome.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
+        holder.txtNome.text = if (ehRem) contexto.getString(R.string.comentarios_voce)
+    else (msg.nomeRemetente ?: outroEmail.ifEmpty { contexto.getString(R.string.usuario_padrao) })
 
         if (msg.texto.isNotEmpty()) {
             holder.txtLegenda.text = msg.texto
@@ -272,7 +273,8 @@ class MensagemAdapter(
     private fun bindVideo(holder: VideoViewHolder, msg: Mensagem, ehRem: Boolean) {
         holder.videoView.visibility = View.VISIBLE
         holder.txtNome.visibility = View.VISIBLE
-        holder.txtNome.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
+        holder.txtNome.text = if (ehRem) contexto.getString(R.string.comentarios_voce)
+    else (msg.nomeRemetente ?: outroEmail.ifEmpty { contexto.getString(R.string.usuario_padrao) })
         aplicarAlinhamento(holder.containerBalao, ehRem)
 
         if (msg.texto.isNotEmpty()) {
@@ -335,8 +337,9 @@ class MensagemAdapter(
     private fun bindArquivo(holder: ArquivoViewHolder, msg: Mensagem, ehRem: Boolean) {
         holder.txtNomeRem.visibility = View.VISIBLE
         holder.txtTam.visibility = View.VISIBLE
-        holder.txtNomeRem.text = if (ehRem) "Você" else (msg.nomeRemetente ?: outroEmail.ifEmpty { "Usuário" })
-        holder.txtNomeArq.text = msg.nomeArquivo ?: "arquivo"
+        holder.txtNomeRem.text = if (ehRem) contexto.getString(R.string.comentarios_voce)
+        else (msg.nomeRemetente ?: outroEmail.ifEmpty { contexto.getString(R.string.usuario_padrao) })
+        holder.txtNomeArq.text = msg.nomeArquivo ?: contexto.getString(R.string.anexo_nome_arquivo_padrao)
         holder.txtNomeArq.setTextColor(ContextCompat.getColor(contexto, R.color.text_primary))
         holder.txtTam.text = formatarTamanho(msg.tamanhoArquivo)
         aplicarAlinhamento(holder.containerBalao, ehRem)

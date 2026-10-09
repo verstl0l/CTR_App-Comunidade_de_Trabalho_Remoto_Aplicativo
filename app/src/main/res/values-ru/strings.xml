@@ -436,6 +436,9 @@
     <string name="abrir">📂 Открыть</string>
     <string name="opcoes">Опции</string>
 
+    <string name="chat_separador_hoje">СЕГОДНЯ</string>
+    <string name="chat_separador_ontem">ВЧЕРА</string>
+
     <!-- Ошибки -->
     <string name="erro_generico">Ошибка: %1$s</string>
     <string name="erro_campos_vazios">Заполните все поля</string>

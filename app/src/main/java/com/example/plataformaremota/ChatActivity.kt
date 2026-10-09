@@ -406,7 +406,7 @@ class ChatActivity : BaseActivity() {
             onListaAtualizada = { todas, inseriuNoTopo ->
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
-                    adapter.submitList(ItemChat.deMensagens(todas)) {
+                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, todas)) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) {
                             recycler.scrollToPosition(adapter.itemCount - 1)
                         }
@@ -425,7 +425,7 @@ class ChatActivity : BaseActivity() {
                         .toMutableList()
 
                     mensagensAtuais.addAll(novas)
-                    adapter.submitList(ItemChat.deMensagens(mensagensAtuais)) {
+                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, mensagensAtuais)) {
                         if (estavaNoFim && adapter.itemCount > 0)
                             recycler.scrollToPosition(adapter.itemCount - 1)
                     }
@@ -449,7 +449,7 @@ class ChatActivity : BaseActivity() {
             onListaAtualizada = { todas, inseriuNoTopo ->
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
-                    adapter.submitList(ItemChat.deMensagens(todas)) {
+                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, todas)) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) {
                             recycler.scrollToPosition(adapter.itemCount - 1)
                         }
@@ -466,7 +466,7 @@ class ChatActivity : BaseActivity() {
                         .map { it.mensagem }
                         .toMutableList()
                     mensagensAtuais.addAll(novas)
-                    adapter.submitList(ItemChat.deMensagens(mensagensAtuais)) {
+                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, mensagensAtuais)) {
                         if (estavaNoFim && adapter.itemCount > 0)
                             recycler.scrollToPosition(adapter.itemCount - 1)
                     }

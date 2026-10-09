@@ -435,6 +435,9 @@
     <string name="abrir">📂 Abrir</string>
     <string name="opcoes">Opciones</string>
 
+    <string name="chat_separador_hoje">HOY</string>
+    <string name="chat_separador_ontem">AYER</string>
+
     <!-- Errores -->
     <string name="erro_generico">Error: %1$s</string>
     <string name="erro_campos_vazios">Rellena todos los campos</string>

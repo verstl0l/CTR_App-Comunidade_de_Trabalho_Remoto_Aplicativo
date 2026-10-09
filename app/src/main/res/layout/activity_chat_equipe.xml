@@ -182,7 +182,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@color/bg_surface_hover"
-            android:hint="Digite..."
+            android:hint="@string/chat_hint_digite"
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_secondary"
             android:inputType="textMultiLine|textCapSentences"

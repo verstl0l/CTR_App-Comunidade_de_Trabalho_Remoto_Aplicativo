@@ -11,7 +11,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
@@ -20,13 +19,13 @@ import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class ChatEquipeHubActivity : AppCompatActivity() {
+class ChatEquipeHubActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
     private var equipeId: String = ""
-    private var nomeEquipe: String = "Equipe"
+    private var nomeEquipe: String = ""
     private var ehDono: Boolean = false
 
     private var carregando = false
@@ -39,9 +38,10 @@ class ChatEquipeHubActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
         equipeId = intent.getStringExtra("equipeId") ?: ""
+        nomeEquipe = getString(R.string.equipe_default_nome)
 
         if (equipeId.isEmpty()) {
-            Toast.makeText(this, "Equipe não encontrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.chat_equipe_nao_encontrada), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -52,7 +52,6 @@ class ChatEquipeHubActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (equipeId.isNotEmpty()) {
-            // Forca recarregar ao voltar
             carregando = false
             carregarDados()
         }
@@ -69,7 +68,7 @@ class ChatEquipeHubActivity : AppCompatActivity() {
             try {
                 // 1. Dados da equipe
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-                nomeEquipe = equipeDoc.getString("nome") ?: "Equipe"
+                nomeEquipe = equipeDoc.getString("nome") ?: getString(R.string.equipe_default_nome)
                 val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
                 ehDono = criadorEmail.equals(emailUsuario, ignoreCase = true)
 
@@ -91,7 +90,11 @@ class ChatEquipeHubActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 Log.e("HUB", "Erro: ${e.message}")
-                Toast.makeText(this@ChatEquipeHubActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ChatEquipeHubActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
                 carregando = false
             }
@@ -109,15 +112,15 @@ class ChatEquipeHubActivity : AppCompatActivity() {
             val chatDoc = db.collection("chats_equipe").document(equipeId).get().await()
 
             val ultimaMsg = if (chatDoc.exists()) {
-                chatDoc.getString("ultimaMensagem") ?: "Nenhuma mensagem ainda"
-            } else "Nenhuma mensagem ainda"
+                chatDoc.getString("ultimaMensagem") ?: getString(R.string.chat_hub_sem_mensagem)
+            } else getString(R.string.chat_hub_sem_mensagem)
 
             val naoLidas = if (chatDoc.exists()) {
                 val mapa = chatDoc.get("naoLidas") as? Map<*, *>
                 (mapa?.get(emailUsuario) as? Long)?.toInt() ?: 0
             } else 0
 
-            val view = montarLinha("📢", "Chat Geral", ultimaMsg, naoLidas)
+            val view = montarLinha("📢", getString(R.string.chat_hub_chat_geral), ultimaMsg, naoLidas)
 
             view.setOnClickListener {
                 val i = Intent(this@ChatEquipeHubActivity, ChatEquipeActivity::class.java)
@@ -140,7 +143,6 @@ class ChatEquipeHubActivity : AppCompatActivity() {
             val section = findViewById<LinearLayout>(R.id.containerGruposSection)
             container.removeAllViews()
 
-            // ✅ Log pra debug
             Log.d("HUB", "Buscando grupos com equipeId=$equipeId")
 
             val grupos = db.collection("grupos")
@@ -159,7 +161,7 @@ class ChatEquipeHubActivity : AppCompatActivity() {
 
             grupos.documents.forEach { doc ->
                 val grupoId = doc.id
-                val nomeGrupo = doc.getString("nomeGrupo") ?: "Grupo"
+                val nomeGrupo = doc.getString("nomeGrupo") ?: getString(R.string.grupo_padrao)
 
                 val ultimaMsgDoc = doc.reference.collection("mensagens")
                     .orderBy("timestamp", Query.Direction.DESCENDING)
@@ -169,18 +171,18 @@ class ChatEquipeHubActivity : AppCompatActivity() {
 
                 val preview = if (!ultimaMsgDoc.isEmpty) {
                     val m = ultimaMsgDoc.documents[0]
-                    val nome = m.getString("nomeRemetente") ?: "Usuário"
+                    val nome = m.getString("nomeRemetente") ?: getString(R.string.usuario_padrao)
                     val texto = m.getString("texto") ?: ""
                     val tipo = m.getString("tipo") ?: "texto"
                     val apagada = m.getBoolean("apagada") ?: false
                     when {
-                        apagada -> "$nome: Mensagem apagada"
-                        tipo == "foto" -> "$nome: Foto"
-                        tipo == "video" -> "$nome: Vídeo"
-                        tipo == "arquivo" -> "$nome: Arquivo"
+                        apagada -> "$nome: ${getString(R.string.chat_hub_msg_apagada)}"
+                        tipo == "foto" -> "$nome: ${getString(R.string.chat_hub_foto)}"
+                        tipo == "video" -> "$nome: ${getString(R.string.chat_hub_video)}"
+                        tipo == "arquivo" -> "$nome: ${getString(R.string.chat_hub_arquivo)}"
                         else -> "$nome: $texto"
                     }
-                } else "Nenhuma mensagem ainda"
+                } else getString(R.string.chat_hub_sem_mensagem)
 
                 val naoLidas = doc.reference.collection("mensagens")
                     .whereEqualTo("lida", false)
@@ -229,7 +231,7 @@ class ChatEquipeHubActivity : AppCompatActivity() {
 
             if (outros.isEmpty()) {
                 val txtVazio = TextView(this@ChatEquipeHubActivity).apply {
-                    text = "Nenhum outro membro na equipe"
+                    text = getString(R.string.chat_hub_sem_outro_membro)
                     setTextColor(ContextCompat.getColor(this@ChatEquipeHubActivity, R.color.text_secondary))
                     textSize = 13f
                     setPadding(8, 16, 8, 16)
@@ -238,7 +240,6 @@ class ChatEquipeHubActivity : AppCompatActivity() {
                 return
             }
 
-            // Uma query só pra pegar todos os meus chats
             val todosMeusChats = db.collection("chats")
                 .whereArrayContains("participantes", emailUsuario)
                 .get()
@@ -251,8 +252,8 @@ class ChatEquipeHubActivity : AppCompatActivity() {
                 }
 
                 val preview = if (chatExistente != null) {
-                    chatExistente.getString("ultimaMensagem") ?: "Nenhuma mensagem"
-                } else "Toque para iniciar conversa"
+                    chatExistente.getString("ultimaMensagem") ?: getString(R.string.chat_hub_sem_mensagem)
+                } else getString(R.string.chat_hub_toque_iniciar)
 
                 val naoLidas = if (chatExistente != null) {
                     val mapa = chatExistente.get("naoLidas") as? Map<*, *>
@@ -300,14 +301,14 @@ class ChatEquipeHubActivity : AppCompatActivity() {
     // ============================================================
     private fun abrirDialogNovoGrupo() {
         val edtNome = EditText(this).apply {
-            hint = "Nome do grupo"
+            hint = getString(R.string.chat_hub_novo_grupo_hint)
             setPadding(40, 30, 40, 30)
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Novo Grupo")
+            .setTitle(getString(R.string.chat_hub_novo_grupo_titulo))
             .setView(edtNome)
-            .setPositiveButton("Criar") { _, _ ->
+            .setPositiveButton(getString(R.string.chat_hub_novo_grupo_criar)) { _, _ ->
                 val nome = edtNome.text.toString().trim()
                 if (nome.isEmpty()) return@setPositiveButton
 
@@ -324,7 +325,6 @@ class ChatEquipeHubActivity : AppCompatActivity() {
                         val grupoId = db.collection("grupos").add(grupo).await().id
                         Log.d("HUB", "Grupo criado: $grupoId")
 
-                        // Denormaliza gruposIds
                         val userRef = db.collection("usuarios").document(emailUsuario)
                         val userDoc = userRef.get().await()
                         val ids = (userDoc.get("gruposIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
@@ -332,18 +332,21 @@ class ChatEquipeHubActivity : AppCompatActivity() {
                             userRef.update("gruposIds", ids + grupoId).await()
                         }
 
-                        Toast.makeText(this@ChatEquipeHubActivity, "Grupo criado!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ChatEquipeHubActivity, getString(R.string.chat_hub_grupo_criado), Toast.LENGTH_SHORT).show()
 
-                        // ✅ Forca recarregar
                         carregando = false
                         carregarDados()
 
                     } catch (e: Exception) {
-                        Toast.makeText(this@ChatEquipeHubActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@ChatEquipeHubActivity,
+                            getString(R.string.erro_generico, e.message ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(R.string.cancelar, null)
             .show()
     }
 }

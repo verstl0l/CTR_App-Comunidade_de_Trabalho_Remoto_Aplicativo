@@ -193,6 +193,10 @@
     <string name="criar_trabalho_hint_categoria">Categoria</string>
     <string name="criar_trabalho_hint_prazo">Prazo</string>
 
+    <!-- ===== CHAT - DATE SEPARATOR ===== -->
+    <string name="chat_separador_hoje">HOJE</string>
+    <string name="chat_separador_ontem">ONTEM</string>
+
     <!-- ===== INVITE TO JOB ===== -->
     <string name="convidar_trabalho_titulo">Convidar para Trabalho</string>
     <string name="convidar_trabalho_prefixo">Trabalho: %1$s</string>

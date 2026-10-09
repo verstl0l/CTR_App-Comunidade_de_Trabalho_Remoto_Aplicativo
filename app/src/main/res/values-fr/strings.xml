@@ -435,6 +435,9 @@
     <string name="abrir">📂 Ouvrir</string>
     <string name="opcoes">Options</string>
 
+    <string name="chat_separador_hoje">AUJOURD\'HUI</string>
+    <string name="chat_separador_ontem">HIER</string>
+
     <!-- Erreurs -->
     <string name="erro_generico">Erreur : %1$s</string>
     <string name="erro_campos_vazios">Remplissez tous les champs</string>

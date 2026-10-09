@@ -13,7 +13,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,15 +23,15 @@ import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class ChatGrupoActivity : AppCompatActivity() {
+class ChatGrupoActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
-    private var nomeUsuario: String = "Usuário"
+    private var nomeUsuario: String = ""
     private var grupoId: String = ""
     private var equipeId: String = ""
-    private var nomeGrupo: String = "Grupo"
+    private var nomeGrupo: String = ""
 
     private var membrosGrupoCache: List<String> = emptyList()
 
@@ -115,16 +114,20 @@ class ChatGrupoActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
         grupoId = intent.getStringExtra("grupoId") ?: ""
-        nomeGrupo = intent.getStringExtra("nomeGrupo") ?: "Grupo"
+        nomeGrupo = intent.getStringExtra("nomeGrupo") ?: getString(R.string.grupo_padrao)
 
         if (grupoId.isEmpty()) {
-            Toast.makeText(this, "Grupo não encontrado", Toast.LENGTH_SHORT).show(); finish(); return
+            Toast.makeText(this, getString(R.string.chat_grupo_nao_encontrado), Toast.LENGTH_SHORT).show()
+            finish()
+            return
         }
 
         findViewById<Button>(R.id.btnSairGrupo).setOnClickListener { confirmarSairGrupo() }
         findViewById<Button>(R.id.btnGerenciarMembros).setOnClickListener {
             val i = Intent(this, GerenciarMembrosGrupoActivity::class.java)
-            i.putExtra("grupoId", grupoId); i.putExtra("equipeId", equipeId); startActivity(i)
+            i.putExtra("grupoId", grupoId)
+            i.putExtra("equipeId", equipeId)
+            startActivity(i)
         }
 
         val btnVoltar = findViewById<Button>(R.id.btnVoltarChatGrupo)
@@ -145,7 +148,8 @@ class ChatGrupoActivity : AppCompatActivity() {
         btnEnviar.setOnClickListener {
             val t = edtMensagem.text.toString().trim()
             if (t.isEmpty()) return@setOnClickListener
-            edtMensagem.text.clear(); enviarMensagem(t)
+            edtMensagem.text.clear()
+            enviarMensagem(t)
         }
         btnFoto.setOnClickListener {
             val i = Intent(Intent.ACTION_PICK); i.type = "image/*"; selecionarImagem.launch(i)
@@ -169,7 +173,7 @@ class ChatGrupoActivity : AppCompatActivity() {
                     runOnUiThread {
                         if (isFinishing || isDestroyed) return@runOnUiThread
                         if (estaDigitando) {
-                            txtDigitando.text = "$nome está digitando..."
+                            txtDigitando.text = getString(R.string.chat_digitando, nome)
                             txtDigitando.visibility = View.VISIBLE
                         } else {
                             txtDigitando.visibility = View.GONE
@@ -242,7 +246,7 @@ class ChatGrupoActivity : AppCompatActivity() {
             onListaAtualizada = { todas, inseriuNoTopo ->
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
-                    adapter.submitList(ItemChat.deMensagens(todas)) {
+                    adapter.submitList(ItemChat.deMensagens(this@ChatGrupoActivity, todas)) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) recycler.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
@@ -258,7 +262,8 @@ class ChatGrupoActivity : AppCompatActivity() {
                         .toMutableList()
 
                     mensagensAtuais.addAll(novas)
-                    adapter.submitList(ItemChat.deMensagens(mensagensAtuais)) {
+                    adapter.submitList(ItemChat.deMensagens(this@ChatGrupoActivity, mensagensAtuais)
+) {
                         if (estavaNoFim && adapter.itemCount > 0) recycler.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
@@ -283,14 +288,12 @@ class ChatGrupoActivity : AppCompatActivity() {
                 equipeId = grupoDoc.getString("equipeId") ?: ""
                 val membros = (grupoDoc.get("membros") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
                 membrosGrupoCache = membros.filter { it.isNotEmpty() && it != emailUsuario }
-                nomeUsuario = db.collection("usuarios").document(emailUsuario).get().await().getString("nome") ?: "Usuário"
+                nomeUsuario = db.collection("usuarios").document(emailUsuario).get().await().getString("nome")
+                    ?: getString(R.string.usuario_padrao)
             } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro: ${e.message}") }
         }
     }
 
-    // ============================================================
-    // ✅ INCREMENTAR naoLidas via Map (sem notação de ponto)
-    // ============================================================
     private suspend fun incrementarNaoLidasGrupo() {
         try {
             val grupoDoc = db.collection("grupos").document(grupoId).get().await()
@@ -311,9 +314,6 @@ class ChatGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ✅ MARCAR COMO LIDAS — zera naoLidas via Map
-    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (grupoId.isEmpty()) return
         lifecycleScope.launch {
@@ -379,17 +379,17 @@ class ChatGrupoActivity : AppCompatActivity() {
 
     private fun dispararResposta(msgId: String, texto: String, remetente: String, nomeRem: String, tipo: String = "texto") {
         respostaAtiva = RespostaInfo(msgId, texto, remetente, nomeRem, tipo)
-        findViewById<TextView>(R.id.txtRespondendoAGrupo).text = "Respondendo a $nomeRem"
+        findViewById<TextView>(R.id.txtRespondendoAGrupo).text = getString(R.string.chat_respondendo_a, nomeRem)
         findViewById<TextView>(R.id.txtTextoRespondendoGrupo).text = when (tipo) {
-            "foto" -> "📷 Foto"; "video" -> "🎥 Vídeo"; "arquivo" -> "📎 Arquivo"; else -> texto
+            "foto" -> getString(R.string.chat_tipo_foto)
+            "video" -> getString(R.string.chat_tipo_video)
+            "arquivo" -> getString(R.string.chat_tipo_arquivo)
+            else -> texto
         }
         findViewById<LinearLayout>(R.id.containerRespondendoGrupo).visibility = View.VISIBLE
         findViewById<EditText>(R.id.edtMensagemGrupo).requestFocus()
     }
 
-    // ============================================================
-    // ✅ ENVIAR MENSAGEM (SEM batch.update com notação de ponto)
-    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -400,11 +400,9 @@ class ChatGrupoActivity : AppCompatActivity() {
                 )
                 adicionarResposta(m)
 
-                // 1. Salva mensagem
                 val msgRef = db.collection("grupos").document(grupoId).collection("mensagens").document()
                 msgRef.set(m).await()
 
-                // 2. Atualiza preview
                 val preview = hashMapOf<String, Any>(
                     "texto" to texto, "autorNome" to nomeUsuario, "tipo" to "texto", "timestamp" to ts
                 )
@@ -416,10 +414,8 @@ class ChatGrupoActivity : AppCompatActivity() {
                     )
                 ).await()
 
-                // 3. Incrementa naoLidas via Map
                 incrementarNaoLidasGrupo()
 
-                // 4. Atualiza resumo (só do meu)
                 try {
                     ChatResumoHelper.atualizarResumo(
                         emailUsuario = emailUsuario,
@@ -434,16 +430,17 @@ class ChatGrupoActivity : AppCompatActivity() {
 
                 typingHelper?.limpar(); cancelarResposta()
             } catch (e: Exception) {
-                Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-    // ============================================================
-    // ✅ ENVIAR FOTO
-    // ============================================================
     private fun enviarFoto(uri: Uri, legenda: String = "") {
-        Toast.makeText(this, "📤 Enviando foto...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.chat_enviando_foto), Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_grupo/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {}
@@ -485,25 +482,32 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 )
                             } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}") }
 
-                            Toast.makeText(this@ChatGrupoActivity, "✅ Foto enviada!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ChatGrupoActivity, getString(R.string.chat_foto_enviada), Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
-                            Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                this@ChatGrupoActivity,
+                                getString(R.string.erro_generico, e.message ?: ""),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread { Toast.makeText(this@ChatGrupoActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ChatGrupoActivity,
+                            getString(R.string.erro_generico, error?.description ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             }).dispatch()
     }
 
-    // ============================================================
-    // ✅ ENVIAR VÍDEO
-    // ============================================================
     private fun enviarVideo(uri: Uri, legenda: String = "") {
-        Toast.makeText(this, "📤 Enviando vídeo...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.chat_enviando_video), Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
             .option("resource_type", "video").option("folder", "chats_grupo_videos/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
@@ -546,25 +550,32 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 )
                             } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}") }
 
-                            Toast.makeText(this@ChatGrupoActivity, "✅ Vídeo enviado!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ChatGrupoActivity, getString(R.string.chat_video_enviado), Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
-                            Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                this@ChatGrupoActivity,
+                                getString(R.string.erro_generico, e.message ?: ""),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread { Toast.makeText(this@ChatGrupoActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ChatGrupoActivity,
+                            getString(R.string.erro_generico, error?.description ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             }).dispatch()
     }
 
-    // ============================================================
-    // ✅ ENVIAR ARQUIVO
-    // ============================================================
     private fun enviarArquivo(uri: Uri, legenda: String = "") {
-        Toast.makeText(this, "📤 Enviando arquivo...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.chat_enviando_arquivo), Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
         try {
             contentResolver.query(uri, null, null, null, null)?.use { c ->
@@ -623,15 +634,25 @@ class ChatGrupoActivity : AppCompatActivity() {
                                 )
                             } catch (e: Exception) { Log.e("CHAT_GRUPO", "Erro resumo: ${e.message}") }
 
-                            Toast.makeText(this@ChatGrupoActivity, "✅ Arquivo enviado!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ChatGrupoActivity, getString(R.string.chat_arquivo_enviado), Toast.LENGTH_SHORT).show()
                             typingHelper?.limpar(); cancelarResposta()
                         } catch (e: Exception) {
-                            Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                this@ChatGrupoActivity,
+                                getString(R.string.erro_generico, e.message ?: ""),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     } }
                 }
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    runOnUiThread { Toast.makeText(this@ChatGrupoActivity, "Erro: ${error?.description}", Toast.LENGTH_LONG).show() }
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ChatGrupoActivity,
+                            getString(R.string.erro_generico, error?.description ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
                 override fun onReschedule(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {}
             }).dispatch()
@@ -642,12 +663,17 @@ class ChatGrupoActivity : AppCompatActivity() {
             try {
                 val gd = db.collection("grupos").document(grupoId).get().await()
                 if (gd.getString("criadorEmail") == emailUsuario) {
-                    Toast.makeText(this@ChatGrupoActivity, "Você é o criador. Só pode excluir.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@ChatGrupoActivity,
+                        getString(R.string.chat_grupo_criador_aviso),
+                        Toast.LENGTH_LONG
+                    ).show()
                     return@launch
                 }
                 AlertDialog.Builder(this@ChatGrupoActivity)
-                    .setTitle("Sair do grupo").setMessage("Tem certeza?")
-                    .setPositiveButton("Sair") { _, _ ->
+                    .setTitle(getString(R.string.chat_grupo_sair_titulo))
+                    .setMessage(getString(R.string.chat_grupo_sair_msg))
+                    .setPositiveButton(getString(R.string.chat_grupo_sair_confirmar)) { _, _ ->
                         lifecycleScope.launch {
                             try {
                                 val membros = gd.get("membros") as? List<*> ?: emptyList<Any>()
@@ -655,11 +681,28 @@ class ChatGrupoActivity : AppCompatActivity() {
                                     .update("membros", membros.filter { it != emailUsuario }).await()
                                 removerGrupoIdDoUsuario(emailUsuario, grupoId)
                                 ChatResumoHelper.removerResumo(emailUsuario, grupoId)
-                                Toast.makeText(this@ChatGrupoActivity, "Você saiu", Toast.LENGTH_SHORT).show(); finish()
-                            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                                Toast.makeText(
+                                    this@ChatGrupoActivity,
+                                    getString(R.string.chat_grupo_saiu),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                finish()
+                            } catch (e: Exception) {
+                                Toast.makeText(
+                                    this@ChatGrupoActivity,
+                                    getString(R.string.erro_generico, e.message ?: ""),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
                     }.setNegativeButton(R.string.cancelar, null).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -668,22 +711,36 @@ class ChatGrupoActivity : AppCompatActivity() {
             try {
                 val jaFav = db.collection("favoritos").whereEqualTo("usuarioEmail", emailUsuario)
                     .whereEqualTo("mensagemId", msgId).limit(1).get().await().let { !it.isEmpty }
-                val opcoes = mutableListOf("💬 Responder")
-                opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
-                opcoes.add("ℹ️ Informações")
-                if (ehRem) opcoes.add("🗑 Apagar para todos")
 
-                AlertDialog.Builder(this@ChatGrupoActivity).setTitle("Opções")
+                val responder = getString(R.string.chat_responder)
+                val favoritar = getString(R.string.chat_favoritar)
+                val desfavoritar = getString(R.string.chat_desfavoritar)
+                val info = getString(R.string.chat_informacoes)
+                val apagarTodos = getString(R.string.chat_apagar_todos)
+
+                val opcoes = mutableListOf(responder)
+                opcoes.add(if (jaFav) desfavoritar else favoritar)
+                opcoes.add(info)
+                if (ehRem) opcoes.add(apagarTodos)
+
+                AlertDialog.Builder(this@ChatGrupoActivity)
+                    .setTitle(getString(R.string.chat_opcoes_titulo))
                     .setItems(opcoes.toTypedArray()) { _, w ->
                         when (opcoes[w]) {
-                            "💬 Responder" -> dispararResposta(msgId, texto, remetente, nomeRem, "texto")
-                            "⭐ Favoritar" -> favoritar(msgId, texto, remetente, nomeRem, "texto")
-                            "⭐ Remover dos favoritos" -> desfavoritar(msgId)
-                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
-                            "🗑 Apagar para todos" -> apagarMensagem(msgId)
+                            responder -> dispararResposta(msgId, texto, remetente, nomeRem, "texto")
+                            favoritar -> favoritar(msgId, texto, remetente, nomeRem, "texto")
+                            desfavoritar -> desfavoritar(msgId)
+                            info -> abrirInfoMensagem(msgId)
+                            apagarTodos -> apagarMensagem(msgId)
                         }
                     }.show()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -695,22 +752,36 @@ class ChatGrupoActivity : AppCompatActivity() {
             try {
                 val jaFav = db.collection("favoritos").whereEqualTo("usuarioEmail", emailUsuario)
                     .whereEqualTo("mensagemId", msgId).limit(1).get().await().let { !it.isEmpty }
-                val opcoes = mutableListOf("💬 Responder")
-                opcoes.add(if (jaFav) "⭐ Remover dos favoritos" else "⭐ Favoritar")
-                opcoes.add("ℹ️ Informações")
-                opcoes.add("⬇ Baixar")
-                if (tipo == "arquivo") opcoes.add("📂 Abrir")
-                if (ehRem) opcoes.add("🗑 Apagar")
 
-                AlertDialog.Builder(this@ChatGrupoActivity).setTitle("Opções")
+                val responder = getString(R.string.chat_responder)
+                val favoritar = getString(R.string.chat_favoritar)
+                val desfavoritar = getString(R.string.chat_desfavoritar)
+                val info = getString(R.string.chat_informacoes)
+                val baixar = getString(R.string.chat_baixar)
+                val abrir = getString(R.string.chat_abrir)
+                val apagar = getString(R.string.chat_apagar)
+
+                val opcoes = mutableListOf(responder)
+                opcoes.add(if (jaFav) desfavoritar else favoritar)
+                opcoes.add(info)
+                opcoes.add(baixar)
+                if (tipo == "arquivo") opcoes.add(abrir)
+                if (ehRem) opcoes.add(apagar)
+
+                AlertDialog.Builder(this@ChatGrupoActivity)
+                    .setTitle(getString(R.string.chat_opcoes_titulo))
                     .setItems(opcoes.toTypedArray()) { _, w ->
                         when (opcoes[w]) {
-                            "💬 Responder" -> dispararResposta(msgId, texto, remetente, nomeRem, tipo)
-                            "⭐ Favoritar" -> favoritar(msgId, texto, remetente, nomeRem, tipo)
-                            "⭐ Remover dos favoritos" -> desfavoritar(msgId)
-                            "ℹ️ Informações" -> abrirInfoMensagem(msgId)
-                            "⬇ Baixar" -> Toast.makeText(this@ChatGrupoActivity, "⬇ Baixando...", Toast.LENGTH_SHORT).show()
-                            "📂 Abrir" -> {
+                            responder -> dispararResposta(msgId, texto, remetente, nomeRem, tipo)
+                            favoritar -> favoritar(msgId, texto, remetente, nomeRem, tipo)
+                            desfavoritar -> desfavoritar(msgId)
+                            info -> abrirInfoMensagem(msgId)
+                            baixar -> Toast.makeText(
+                                this@ChatGrupoActivity,
+                                getString(R.string.chat_baixando),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            abrir -> {
                                 try {
                                     val i = Intent(Intent.ACTION_VIEW).apply {
                                         setDataAndType(Uri.parse(url), mime.ifEmpty { "*/*" })
@@ -718,12 +789,24 @@ class ChatGrupoActivity : AppCompatActivity() {
                                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     }
                                     startActivity(i)
-                                } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Nenhum app", Toast.LENGTH_LONG).show() }
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        this@ChatGrupoActivity,
+                                        getString(R.string.chat_nenhum_app),
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
                             }
-                            "🗑 Apagar" -> apagarMensagem(msgId)
+                            apagar -> apagarMensagem(msgId)
                         }
                     }.show()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -736,8 +819,14 @@ class ChatGrupoActivity : AppCompatActivity() {
                     "nomeRemetente" to nomeRem, "tipoMidia" to tipoMidia,
                     "criadoEm" to System.currentTimeMillis()
                 )).await()
-                Toast.makeText(this@ChatGrupoActivity, "⭐ Favoritado", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                Toast.makeText(this@ChatGrupoActivity, getString(R.string.chat_favoritado), Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -747,8 +836,14 @@ class ChatGrupoActivity : AppCompatActivity() {
                 db.collection("favoritos").whereEqualTo("usuarioEmail", emailUsuario)
                     .whereEqualTo("mensagemId", msgId).get().await()
                     .documents.forEach { it.reference.delete().await() }
-                Toast.makeText(this@ChatGrupoActivity, "Removido", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) { Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show() }
+                Toast.makeText(this@ChatGrupoActivity, getString(R.string.chat_removido_favoritos), Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -768,7 +863,9 @@ class ChatGrupoActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             startActivity(i)
-        } catch (e: Exception) { Toast.makeText(this, "Nenhum app", Toast.LENGTH_LONG).show() }
+        } catch (e: Exception) {
+            Toast.makeText(this, getString(R.string.chat_nenhum_app), Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun apagarMensagem(msgId: String) {
@@ -783,9 +880,13 @@ class ChatGrupoActivity : AppCompatActivity() {
                             "mimeType" to null, "respostaPara" to null
                         )
                     ).await()
-                Toast.makeText(this@ChatGrupoActivity, "Mensagem apagada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChatGrupoActivity, getString(R.string.chat_msg_apagada_toast), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(this@ChatGrupoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ChatGrupoActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -806,23 +907,34 @@ class ChatGrupoActivity : AppCompatActivity() {
             ?.mensagem
 
         if (msg == null) {
-            Toast.makeText(this, "Mensagem não encontrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.chat_msg_nao_encontrada), Toast.LENGTH_SHORT).show()
             return
         }
 
-        val sdf = java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", java.util.Locale("pt", "BR"))
+        val sdf = java.text.SimpleDateFormat(
+            getString(R.string.chat_info_data_formato),
+            java.util.Locale.getDefault()
+        )
+
         val info = buildString {
-            append("Enviada: ${sdf.format(java.util.Date(msg.timestamp))}\n")
-            append("Lida: ${if (msg.lida) "✅" else "❌"}\n")
-            append("Tipo: ${msg.tipo}\n")
-            if (msg.nomeArquivo != null) append("Arquivo: ${msg.nomeArquivo}\n")
-            if (msg.tamanhoArquivo > 0) append("Tamanho: ${formatarTamanhoInfo(msg.tamanhoArquivo)}\n")
-            if (msg.respostaPara != null) append("Resposta a: ${msg.respostaPara.nomeRemetente}\n")
+            append(getString(R.string.chat_info_enviada, sdf.format(java.util.Date(msg.timestamp))) + "\n")
+            append((if (msg.lida) getString(R.string.chat_info_lida_sim) else getString(R.string.chat_info_lida_nao)) + "\n")
+            append(getString(R.string.chat_info_tipo, msg.tipo) + "\n")
+            if (msg.nomeArquivo != null) {
+                append(getString(R.string.chat_info_arquivo, msg.nomeArquivo) + "\n")
+            }
+            if (msg.tamanhoArquivo > 0) {
+                append(getString(R.string.chat_info_tamanho, formatarTamanhoInfo(msg.tamanhoArquivo)) + "\n")
+            }
+            if (msg.respostaPara != null) {
+                append(getString(R.string.chat_info_resposta_a, msg.respostaPara.nomeRemetente) + "\n")
+            }
         }
+
         AlertDialog.Builder(this)
-            .setTitle("ℹ️ Informações da mensagem")
+            .setTitle(getString(R.string.chat_info_titulo))
             .setMessage(info)
-            .setPositiveButton("OK", null)
+            .setPositiveButton(getString(R.string.chat_info_ok), null)
             .show()
     }
 

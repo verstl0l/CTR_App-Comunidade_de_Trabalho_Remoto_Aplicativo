@@ -347,6 +347,9 @@
     <string name="chat_baixando">⬇ Downloading…</string>
     <string name="chat_baixando_do_ctr">Downloading from CTR…</string>
 
+    <string name="chat_separador_hoje">TODAY</string>
+    <string name="chat_separador_ontem">YESTERDAY</string>
+
     <!-- Delete message -->
     <string name="chat_msg_apagada_toast">Message deleted</string>
 
