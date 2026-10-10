@@ -11,13 +11,13 @@
         android:layout_height="200dp"
         android:src="@drawable/ic_launcher_foreground"
         android:scaleType="fitCenter"
-        android:contentDescription="Logo do App" />
+        android:contentDescription="@string/splash_logo_content_description" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="CTR"
+        android:text="@string/splash_app_sigla"
         android:textColor="@android:color/white"
         android:textSize="32sp"
         android:textStyle="bold" />
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Plataforma Remota"
+        android:text="@string/splash_app_nome"
         android:textColor="#9E9E9E"
         android:textSize="16sp" />
 
@@ -37,5 +37,3 @@
         android:indeterminateTint="#F5E6D0" />
 
 </LinearLayout>
-
-

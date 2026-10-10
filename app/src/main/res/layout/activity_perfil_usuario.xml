@@ -21,7 +21,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/perfil_usuario_btn_voltar"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -30,7 +30,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="Perfil do Usuário"
+                android:text="@string/perfil_usuario_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -63,7 +63,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
-                            android:text="US"
+                            android:text="@string/perfil_usuario_iniciais_fallback"
                             android:textColor="#241614"
                             android:textSize="36sp"
                             android:textStyle="bold" />
@@ -79,7 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Nome"
+                android:text="@string/perfil_usuario_usuario_fallback"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -90,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="Profissão"
+                android:text="@string/perfil_usuario_profissao_fallback"
                 android:textColor="#9E9E9E"
                 android:textSize="14sp" />
 
@@ -105,7 +105,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="E-mail"
+                    android:text="@string/perfil_usuario_label_email"
                     android:textColor="#9E9E9E"
                     android:textSize="12sp" />
 
@@ -113,7 +113,7 @@
                     android:id="@+id/txtEmailPerfilUsuario"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="email@email.com"
+                    android:text="@string/perfil_usuario_email_placeholder"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
 
@@ -130,7 +130,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Links"
+                    android:text="@string/perfil_usuario_label_links"
                     android:textColor="@android:color/white"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -140,7 +140,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="LinkedIn não cadastrado"
+                    android:text="@string/perfil_usuario_linkedin_vazio"
                     android:textColor="#9E9E9E"
                     android:textSize="14sp" />
 
@@ -149,7 +149,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="GitHub não cadastrado"
+                    android:text="@string/perfil_usuario_github_vazio"
                     android:textColor="#9E9E9E"
                     android:textSize="14sp" />
 
@@ -158,7 +158,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Portfólio não cadastrado"
+                    android:text="@string/perfil_usuario_portfolio_vazio"
                     android:textColor="#9E9E9E"
                     android:textSize="14sp" />
 
@@ -170,7 +170,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="#F5E6D0"
-                android:text="CONVERSAR"
+                android:text="@string/perfil_usuario_btn_conversar"
                 android:textColor="#1C1311"
                 android:textStyle="bold" />
 
@@ -180,7 +180,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="#3D2B27"
-                android:text="APAGAR CONVERSA"
+                android:text="@string/perfil_usuario_btn_apagar_conversa"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
@@ -190,7 +190,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="24dp"
-                android:text="BLOQUEAR USUÁRIO"
+                android:text="@string/perfil_usuario_btn_bloquear"
                 android:textColor="#FF6B6B"
                 android:textSize="12sp"
                 android:textStyle="bold"

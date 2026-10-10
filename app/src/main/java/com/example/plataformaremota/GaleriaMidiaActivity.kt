@@ -12,7 +12,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import android.widget.VideoView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
@@ -20,7 +19,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.github.chrisbanes.photoview.PhotoView
 
-class GaleriaMidiaActivity : AppCompatActivity() {
+class GaleriaMidiaActivity : BaseActivity() {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var btnVoltar: Button
@@ -46,7 +45,11 @@ class GaleriaMidiaActivity : AppCompatActivity() {
         posicaoAtual = intent.getIntExtra("posicaoInicial", 0)
 
         if (urlsArray.isEmpty() || urlsArray.size != tiposArray.size) {
-            Toast.makeText(this, "Nenhuma mídia para mostrar", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.galeria_nenhuma_midia),
+                Toast.LENGTH_SHORT
+            ).show()
             finish()
             return
         }
@@ -90,7 +93,7 @@ class GaleriaMidiaActivity : AppCompatActivity() {
 
             val request = DownloadManager.Request(Uri.parse(url))
             request.setTitle(nome)
-            request.setDescription("Baixando do CTR...")
+            request.setDescription(getString(R.string.visualizar_midia_baixando_desc))
             request.allowScanningByMediaScanner()
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setDestinationInExternalPublicDir(pasta, nome)
@@ -98,9 +101,17 @@ class GaleriaMidiaActivity : AppCompatActivity() {
             val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             downloadManager.enqueue(request)
 
-            Toast.makeText(this, "⬇ Baixando...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.visualizar_midia_baixando_toast),
+                Toast.LENGTH_SHORT
+            ).show()
         } catch (e: Exception) {
-            Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                getString(R.string.erro_generico, e.message ?: ""),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -139,10 +150,8 @@ class GaleriaMidiaActivity : AppCompatActivity() {
                         .into(holder.photoView)
                 }
                 is VideoViewHolder -> {
-                    // ✅ Configura o vídeo
                     holder.videoView.setVideoURI(Uri.parse(item.url))
 
-                    // ✅ Botão central: play/pause
                     holder.btnPlayCentral.setOnClickListener {
                         if (holder.videoView.isPlaying) {
                             holder.videoView.pause()
@@ -153,7 +162,6 @@ class GaleriaMidiaActivity : AppCompatActivity() {
                         }
                     }
 
-                    // ✅ Tap na tela também dá play/pause
                     holder.videoView.setOnClickListener {
                         if (holder.videoView.isPlaying) {
                             holder.videoView.pause()
@@ -164,12 +172,10 @@ class GaleriaMidiaActivity : AppCompatActivity() {
                         }
                     }
 
-                    // ✅ Quando o vídeo terminar, mostra o botão de novo
                     holder.videoView.setOnCompletionListener {
                         holder.btnPlayCentral.visibility = View.VISIBLE
                     }
 
-                    // ✅ Auto-play quando o vídeo estiver pronto
                     holder.videoView.setOnPreparedListener {
                         holder.videoView.start()
                         holder.btnPlayCentral.visibility = View.GONE

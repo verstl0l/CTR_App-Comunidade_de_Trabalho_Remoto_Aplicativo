@@ -2,21 +2,45 @@
 <resources>
     <string name="app_name">CTR</string>
 
-    <!-- Bottom nav -->
+    <!-- ===== CLÉS GÉNÉRIQUES RÉUTILISABLES ===== -->
+    <string name="geral_equipe">Équipe</string>
+    <string name="geral_usuario">Utilisateur</string>
+    <string name="geral_grupo">Groupe</string>
+    <string name="geral_conversa">Conversation</string>
+    <string name="geral_trabalho">Tâche</string>
+    <string name="geral_sem_descricao">Sans description</string>
+    <string name="geral_admin">Admin</string>
+
+    <!-- ===== BOTTOM NAV ===== -->
     <string name="nav_home">Accueil</string>
     <string name="nav_chat">Chat</string>
     <string name="nav_groups">Équipes</string>
     <string name="nav_notifications">Notifications</string>
     <string name="nav_profile">Profil</string>
 
-    <!-- Main -->
-    <string name="main_abrir_chat">Ouvrir le chat</string>
-    <string name="main_bem_vindo">Bienvenue sur CTR</string>
-    <string name="main_cadastrar_se">S\'INSCRIRE</string>
-    <string name="main_entrar_equipe">REJOINDRE UNE ÉQUIPE</string>
-    <string name="main_criar_equipe">CRÉER UNE ÉQUIPE</string>
+    <!-- ===== ACTIONS GLOBALES ===== -->
+    <string name="voltar">← RETOUR</string>
+    <string name="cancelar">Annuler</string>
+    <string name="salvar">Enregistrer</string>
+    <string name="excluir">Supprimer</string>
+    <string name="favoritar">⭐ Favori</string>
+    <string name="desfavoritar">⭐ Retirer des favoris</string>
+    <string name="apagar">🗑 Supprimer</string>
+    <string name="baixar">⬇ Télécharger</string>
+    <string name="abrir">📂 Ouvrir</string>
+    <string name="opcoes">Options</string>
 
-    <!-- Langue -->
+    <!-- ===== ERREURS GLOBALES ===== -->
+    <string name="erro_generico">Erreur : %1$s</string>
+    <string name="erro_campos_vazios">Remplissez tous les champs</string>
+    <string name="erro_sem_conexao">⚠️ Pas de connexion internet. Vérifiez votre réseau et réessayez.</string>
+
+    <!-- ===== SPLASH ===== -->
+    <string name="splash_logo_content_description">Logo de l\'application CTR</string>
+    <string name="splash_app_sigla">CTR</string>
+    <string name="splash_app_nome">Plateforme à distance</string>
+
+    <!-- ===== LANGUE ===== -->
     <string name="idioma">Langue</string>
     <string name="selecione_idioma">Sélectionnez la langue</string>
     <string name="idioma_portugues">Portugais</string>
@@ -26,26 +50,25 @@
     <string name="idioma_russo">Russe</string>
     <string name="idioma_chines">Chinois</string>
 
-    <!-- Connexion -->
+    <!-- ===== CONNEXION ===== -->
     <string name="login_titulo">CTR</string>
-    <string name="login_subtitulo">Communauté de Travail à Distance</string>
+    <string name="login_subtitulo">Communauté de travail à distance</string>
     <string name="login_instrucao">Connectez-vous pour continuer</string>
     <string name="login_email">E-mail</string>
     <string name="login_senha">Mot de passe</string>
     <string name="login_entrar">SE CONNECTER</string>
     <string name="login_criar_conta">CRÉER UN COMPTE</string>
-    <string name="login_entrando">CONNEXION...</string>
+    <string name="login_entrando">CONNEXION…</string>
 
-    <!-- Connexion (erreurs et messages) -->
     <string name="login_erro_email_invalido">E-mail invalide</string>
     <string name="login_erro_credenciais">E-mail ou mot de passe incorrect</string>
     <string name="login_erro_conta_nao_encontrada">Aucun compte trouvé avec cet e-mail</string>
     <string name="login_erro_muitas_tentativas">Trop de tentatives. Réessayez dans quelques minutes</string>
-    <string name="login_erro_email_formato">Format d\'e-mail invalide</string>
+    <string name="login_erro_email_formato">E-mail au format invalide</string>
     <string name="login_erro_generico">Échec de la connexion. Réessayez.</string>
     <string name="login_sucesso">✅ Connexion réussie !</string>
 
-    <!-- Inscription -->
+    <!-- ===== INSCRIPTION ===== -->
     <string name="cadastro_titulo">Créer un compte</string>
     <string name="cadastro_nome">Nom</string>
     <string name="cadastro_email">E-mail</string>
@@ -53,20 +76,27 @@
     <string name="cadastro_confirmar_senha">Confirmer le mot de passe</string>
     <string name="cadastro_profissao">Profession</string>
     <string name="cadastro_botao">S\'INSCRIRE</string>
-    <string name="cadastro_cadastrando">INSCRIPTION...</string>
-    <string name="cadastro_sucesso">✅ Compte créé !</string>
+    <string name="cadastro_cadastrando">INSCRIPTION…</string>
+    <string name="cadastro_sucesso">✅ Inscription réussie !</string>
     <string name="cadastro_erro_salvar">Compte créé, mais erreur lors de l\'enregistrement : %1$s</string>
-    <string name="cadastro_erro_senha_curta">Le mot de passe doit comporter au moins 6 caractères</string>
+    <string name="cadastro_erro_senha_curta">Le mot de passe doit contenir au moins 6 caractères</string>
     <string name="cadastro_erro_senhas_diferentes">Les mots de passe ne correspondent pas</string>
 
-    <!-- Créer une Équipe -->
+    <!-- ===== MAIN ===== -->
+    <string name="main_abrir_chat">Ouvrir le chat</string>
+    <string name="main_bem_vindo">Bienvenue sur CTR</string>
+    <string name="main_cadastrar_se">S\'INSCRIRE</string>
+    <string name="main_entrar_equipe">REJOINDRE UNE ÉQUIPE</string>
+    <string name="main_criar_equipe">CRÉER UNE ÉQUIPE</string>
+
+    <!-- ===== CRÉER UNE ÉQUIPE ===== -->
     <string name="voltar_seta">← RETOUR</string>
-    <string name="criar_nova_equipe">Créer une Nouvelle Équipe</string>
-    <string name="nome_da_equipe">Nom de l\'Équipe</string>
+    <string name="criar_nova_equipe">Créer une nouvelle équipe</string>
+    <string name="nome_da_equipe">Nom de l\'équipe</string>
     <string name="hint_ex_design_core">Ex : Design Core</string>
     <string name="descricao">Description</string>
     <string name="hint_objetivo_equipe">Parlez de l\'objectif de l\'équipe…</string>
-    <string name="criar_equipe">CRÉER L\'ÉQUIPE</string>
+    <string name="criar_equipe">CRÉER UNE ÉQUIPE</string>
     <string name="criando_equipe">CRÉATION…</string>
     <string name="salvar_equipe">ENREGISTRER</string>
     <string name="erro_nome_equipe_obrigatorio">Le nom de l\'équipe est obligatoire</string>
@@ -74,20 +104,20 @@
     <string name="erro_adicionar_membro">Équipe créée, mais erreur lors de l\'ajout du membre</string>
     <string name="erro_criar_equipe">Erreur lors de la création de l\'équipe : %1$s</string>
 
-    <!-- Rechercher des Équipes -->
-    <string name="buscar_equipes_titulo">Rechercher des Équipes</string>
-    <string name="buscar_equipes_hint">Rechercher par nom...</string>
+    <!-- ===== RECHERCHER DES ÉQUIPES ===== -->
+    <string name="buscar_equipes_titulo">Rechercher des équipes</string>
+    <string name="buscar_equipes_hint">Rechercher par nom…</string>
     <string name="buscar_equipes_vazio">Aucune équipe publique trouvée</string>
-    <string name="buscar_equipes_criado_por">Créé par : %1$s</string>
+    <string name="buscar_equipes_criado_por">Créée par : %1$s</string>
     <string name="buscar_equipes_pedido_ja_enviado">Vous avez déjà envoyé une demande à cette équipe</string>
     <string name="equipe_default_nome">Équipe</string>
     <string name="equipe_sem_descricao">Sans description</string>
 
-    <!-- ===== REQUEST TO JOIN ===== -->
-    <string name="pedir_entrada_titulo">Demander à Rejoindre</string>
+    <!-- ===== DEMANDER À REJOINDRE ===== -->
+    <string name="pedir_entrada_titulo">Demander à rejoindre</string>
     <string name="pedir_entrada_equipe_prefixo">Équipe : %1$s</string>
-    <string name="pedir_entrada_equipe_placeholder">Équipe : ...</string>
-    <string name="pedir_entrada_hint_motivos">Pourquoi voulez-vous rejoindre ? (raisons)</string>
+    <string name="pedir_entrada_equipe_placeholder">Équipe : …</string>
+    <string name="pedir_entrada_hint_motivos">Pourquoi voulez-vous rejoindre ? (motifs)</string>
     <string name="pedir_entrada_hint_especialidades">Vos spécialités</string>
     <string name="pedir_entrada_enviar">ENVOYER LA DEMANDE</string>
     <string name="pedir_entrada_enviando">ENVOI…</string>
@@ -96,10 +126,10 @@
     <string name="pedir_entrada_sucesso">✅ Demande envoyée ! Attendez l\'approbation.</string>
     <string name="usuario_padrao">Utilisateur</string>
 
-    <!-- ===== CONVERSATIONS LIST ===== -->
+    <!-- ===== LISTE DES CONVERSATIONS ===== -->
     <string name="lista_conversas_titulo">Conversations</string>
     <string name="lista_conversas_nova">+ NOUVELLE CONVERSATION</string>
-    <string name="lista_conversas_vazio">Aucune conversation pour le moment</string>
+    <string name="lista_conversas_vazio">Aucune conversation pour l\'instant</string>
     <string name="lista_conversas_apagar_conversa">Supprimer la conversation</string>
     <string name="lista_conversas_apagar_mensagens">Supprimer les messages</string>
     <string name="lista_conversas_apagar_inteira">Supprimer toute la conversation</string>
@@ -113,7 +143,7 @@
     <string name="conversa_padrao">Conversation</string>
     <string name="grupo_padrao">Groupe</string>
 
-    <!-- ===== MY TEAMS ===== -->
+    <!-- ===== MES ÉQUIPES ===== -->
     <string name="minhas_equipes_titulo">Mes Équipes</string>
     <string name="minhas_equipes_nova">+ NOUVELLE ÉQUIPE</string>
     <string name="minhas_equipes_vazio">Vous n\'êtes dans aucune équipe</string>
@@ -122,50 +152,49 @@
     <string name="minhas_equipes_papel_membro">Membre</string>
 
     <plurals name="minhas_equipes_qtd_trabalhos">
-        <item quantity="one">%d travail</item>
-        <item quantity="other">%d travaux</item>
+        <item quantity="one">%d tâche</item>
+        <item quantity="other">%d tâches</item>
     </plurals>
 
-    <!-- ===== MANAGE TEAM ===== -->
-    <string name="gerenciar_titulo">Gérer l\'Équipe</string>
-    <string name="gerenciar_hint_descricao">Description de l\'Équipe</string>
-    <string name="gerenciar_equipe_privada">Équipe Privée</string>
+    <!-- ===== GÉRER L\'ÉQUIPE ===== -->
+    <string name="gerenciar_titulo">Gérer l\'équipe</string>
+    <string name="gerenciar_hint_descricao">Description de l\'équipe</string>
+    <string name="gerenciar_equipe_privada">Équipe privée</string>
     <string name="gerenciar_equipe_privada_info">Les équipes privées ne reçoivent pas de demandes d\'adhésion</string>
-    <string name="gerenciar_salvar_dados">ENREGISTRER LES DONNÉES</string>
+    <string name="gerenciar_salvar_dados">ENREGISTRER LES DONNÉES DE L\'ÉQUIPE</string>
     <string name="gerenciar_excluir_botao">SUPPRIMER L\'ÉQUIPE</string>
-    <string name="gerenciar_convidar_email">Inviter par Email</string>
+    <string name="gerenciar_convidar_email">Inviter par e-mail</string>
     <string name="gerenciar_enviar_convite">ENVOYER L\'INVITATION</string>
-    <string name="gerenciar_pedidos_entrada">Demandes d\'Adhésion</string>
-    <string name="gerenciar_membros">Membres de l\'Équipe</string>
-    <string name="gerenciar_trabalhos_publicados">Travaux Publiés</string>
+    <string name="gerenciar_pedidos_entrada">Demandes d\'adhésion</string>
+    <string name="gerenciar_membros">Membres de l\'équipe</string>
+    <string name="gerenciar_trabalhos_publicados">Tâches publiées</string>
 
-    <!-- Manage Team — dialogs and toasts -->
     <string name="gerenciar_dados_atualizados">Données mises à jour !</string>
     <string name="gerenciar_selecione_usuario">Sélectionnez un utilisateur</string>
-    <string name="gerenciar_nao_convidar_mesmo">Vous ne pouvez pas vous inviter</string>
+    <string name="gerenciar_nao_convidar_mesmo">Vous ne pouvez pas vous inviter vous-même</string>
     <string name="gerenciar_equipe_nao_carregada">Équipe pas encore chargée</string>
-    <string name="gerenciar_email_nao_cadastrado">Cet email n\'est pas enregistré</string>
+    <string name="gerenciar_email_nao_cadastrado">Cet e-mail n\'est pas enregistré</string>
     <string name="gerenciar_ja_convidado">Cet utilisateur a déjà été invité</string>
     <string name="gerenciar_convite_enviado">✅ Invitation envoyée !</string>
-    <string name="gerenciar_excluir_titulo">Supprimer l\'Équipe</string>
-    <string name="gerenciar_excluir_msg">Êtes-vous sûr ? Tous les travaux seront définitivement supprimés.</string>
+    <string name="gerenciar_excluir_titulo">Supprimer l\'équipe</string>
+    <string name="gerenciar_excluir_msg">Êtes-vous sûr ? Toutes les tâches seront définitivement supprimées.</string>
     <string name="gerenciar_excluir_confirmar">Oui, supprimer</string>
     <string name="gerenciar_equipe_excluida">🗑️ Équipe supprimée !</string>
     <string name="gerenciar_todos_na_equipe">Tous les utilisateurs sont déjà dans l\'équipe</string>
     <string name="gerenciar_selecionar_usuario">Sélectionner un utilisateur (%1$d disponibles)</string>
     <string name="gerenciar_selecionado">Sélectionné : %1$s</string>
-    <string name="gerenciar_erro_usuarios">Erreur lors du chargement des utilisateurs : %1$s</string>
-    <string name="gerenciar_editar_trabalho">Modifier le Travail</string>
-    <string name="gerenciar_trabalho_atualizado">✅ Travail mis à jour !</string>
-    <string name="gerenciar_sem_membros">Aucun membre pour le moment</string>
+    <string name="gerenciar_erro_usuarios">Erreur de chargement des utilisateurs : %1$s</string>
+    <string name="gerenciar_editar_trabalho">Modifier la tâche</string>
+    <string name="gerenciar_trabalho_atualizado">✅ Tâche mise à jour !</string>
+    <string name="gerenciar_sem_membros">Aucun membre pour l\'instant</string>
     <string name="gerenciar_sem_pedidos">Aucune demande en attente</string>
-    <string name="gerenciar_sem_trabalhos">Aucun travail publié pour le moment</string>
+    <string name="gerenciar_sem_trabalhos">Aucune tâche publiée pour l\'instant</string>
     <string name="gerenciar_nome_dono">%1$s (Propriétaire)</string>
     <string name="gerenciar_nome_admin">%1$s (Admin)</string>
     <string name="gerenciar_nome_voce">%1$s ← VOUS</string>
-    <string name="gerenciar_promover">Promouvoir Administrateur</string>
-    <string name="gerenciar_rebaixar">Rétrograder Membre</string>
-    <string name="gerenciar_remover">Retirer de l\'Équipe</string>
+    <string name="gerenciar_promover">Promouvoir au rang d\'administrateur</string>
+    <string name="gerenciar_rebaixar">Rétrograder au rang de membre</string>
+    <string name="gerenciar_remover">Retirer de l\'équipe</string>
     <string name="gerenciar_nenhuma_acao">Aucune action disponible</string>
     <string name="gerenciar_promovido">✅ Promu</string>
     <string name="gerenciar_rebaixado">✅ Rétrogradé</string>
@@ -173,9 +202,9 @@
     <string name="gerenciar_remover_titulo">Retirer le membre</string>
     <string name="gerenciar_remover_msg">Retirer %1$s de l\'équipe ?</string>
     <string name="gerenciar_remover_confirmar">Retirer</string>
-    <string name="gerenciar_pedido_resumo">Raisons : %1$s\nSpécialités : %2$s</string>
+    <string name="gerenciar_pedido_resumo">Motifs : %1$s\nSpécialités : %2$s</string>
     <string name="gerenciar_pedido_titulo">Demande de %1$s</string>
-    <string name="gerenciar_pedido_detalhe">Raisons : %1$s\n\nSpécialités : %2$s</string>
+    <string name="gerenciar_pedido_detalhe">Motifs : %1$s\n\nSpécialités : %2$s</string>
     <string name="gerenciar_aceitar">Accepter</string>
     <string name="gerenciar_recusar">Refuser</string>
     <string name="gerenciar_depois">Plus tard</string>
@@ -183,38 +212,286 @@
     <string name="gerenciar_pedido_recusado">Demande refusée</string>
     <string name="gerenciar_notif_recusado_titulo">Demande refusée</string>
     <string name="gerenciar_notif_recusado_msg">Votre demande pour rejoindre %1$s a été refusée</string>
-    <string name="gerenciar_excluir_trabalho_titulo">Supprimer le travail</string>
+    <string name="gerenciar_excluir_trabalho_titulo">Supprimer la tâche</string>
     <string name="gerenciar_excluir_trabalho_msg">Voulez-vous vraiment supprimer \'%1$s\' ?</string>
-    <string name="gerenciar_trabalho_removido">Travail supprimé !</string>
+    <string name="gerenciar_trabalho_removido">Tâche supprimée !</string>
 
-    <!-- Create Job (hints) -->
-    <string name="criar_trabalho_hint_titulo">Titre</string>
-    <string name="criar_trabalho_hint_descricao">Description</string>
+    <!-- ===== CRÉER UNE TÂCHE ===== -->
+    <string name="criar_trabalho_titulo">Créer une tâche</string>
+    <string name="criar_trabalho_btn_voltar">← RETOUR</string>
+
+    <string name="criar_trabalho_hint_titulo">Titre de la tâche</string>
+    <string name="criar_trabalho_hint_descricao">Description de la tâche</string>
     <string name="criar_trabalho_hint_categoria">Catégorie</string>
     <string name="criar_trabalho_hint_prazo">Échéance</string>
 
-    <!-- ===== INVITE TO JOB ===== -->
-    <string name="convidar_trabalho_titulo">Inviter au Travail</string>
-    <string name="convidar_trabalho_prefixo">Travail : %1$s</string>
-    <string name="convidar_trabalho_placeholder">Travail : ...</string>
+    <string name="criar_trabalho_btn_publicar">PUBLIER LA TÂCHE</string>
+    <string name="criar_trabalho_publicando">PUBLICATION…</string>
+
+    <string name="criar_trabalho_preencher_campos">Remplissez tous les champs</string>
+    <string name="criar_trabalho_criar_equipe_primeiro">Créez d\'abord une équipe</string>
+    <string name="criar_trabalho_publicado_sucesso">Tâche publiée !</string>
+    <string name="criar_trabalho_equipe_fallback">Équipe</string>
+
+    <string name="criar_trabalho_data_hora_formato">%1$s à %2$s</string>
+
+    <!-- ===== INFOS ÉQUIPE ===== -->
+    <string name="info_equipe_nao_encontrada">Équipe introuvable</string>
+    <string name="info_equipe_nome_fallback">Équipe</string>
+    <string name="info_equipe_sem_descricao">Sans description</string>
+    <string name="info_equipe_usuario_fallback">Utilisateur</string>
+    <string name="info_equipe_nenhum_membro">Aucun membre pour l\'instant</string>
+    <string name="info_equipe_funcao_admin">Administrateur</string>
+    <string name="info_equipe_funcao_membro">Membre</string>
+    <string name="info_equipe_avatar_letra">U</string>
+    <string name="info_equipe_nome_placeholder">Nom de l\'équipe</string>
+    <string name="info_equipe_descricao_placeholder">Description</string>
+    <string name="info_equipe_membros_titulo">Membres</string>
+
+    <string name="info_equipe_btn_voltar">← RETOUR</string>
+    <string name="info_equipe_btn_criar_grupo">CRÉER UN GROUPE</string>
+    <string name="info_equipe_btn_ver_grupos">VOIR LES GROUPES</string>
+    <string name="info_equipe_btn_sair">QUITTER L\'ÉQUIPE</string>
+    <string name="info_equipe_btn_excluir">SUPPRIMER L\'ÉQUIPE</string>
+
+    <string name="info_equipe_op_conversar_pv">Discuter en privé</string>
+    <string name="info_equipe_op_ver_perfil">Voir le profil</string>
+    <string name="info_equipe_op_ver_meu_perfil">Voir mon profil</string>
+
+    <string name="info_equipe_sair_titulo">Quitter l\'équipe</string>
+    <string name="info_equipe_sair_mensagem">Voulez-vous vraiment quitter l\'équipe %1$s ?</string>
+    <string name="info_equipe_sair_confirmar">Quitter</string>
+    <string name="info_equipe_saiu_sucesso">Vous avez quitté l\'équipe</string>
+
+    <string name="info_equipe_excluir_titulo">Supprimer l\'équipe</string>
+    <string name="info_equipe_excluir_mensagem">Êtes-vous sûr ? Toutes les données seront définitivement supprimées.</string>
+    <string name="info_equipe_excluir_confirmar">Supprimer</string>
+    <string name="info_equipe_excluida_sucesso">Équipe supprimée !</string>
+
+    <string name="info_equipe_cancelar">Annuler</string>
+
+    <!-- ===== GROUPES ===== -->
+    <string name="grupos_titulo">Groupes</string>
+    <string name="grupos_btn_novo">+ NOUVEAU GROUPE</string>
+    <string name="grupos_hint_nome">Nom du groupe</string>
+    <string name="grupos_dialog_novo_titulo">Nouveau groupe</string>
+    <string name="grupos_dialog_criar">Créer</string>
+    <string name="grupos_nenhum_criado">Aucun groupe créé pour l\'instant</string>
+    <string name="grupos_nome_fallback">Groupe</string>
+    <string name="grupos_sem_permissao_criar">Seul le propriétaire ou l\'administrateur peut créer des groupes</string>
+    <string name="grupos_criado_sucesso">Groupe créé !</string>
+
+    <plurals name="grupos_qtd_membros">
+        <item quantity="one">%1$d membre</item>
+        <item quantity="other">%1$d membres</item>
+    </plurals>
+
+    <!-- ===== MES TÂCHES ===== -->
+    <string name="meus_trabalhos_titulo">Mes Tâches</string>
+    <string name="meus_trabalhos_btn_voltar">←</string>
+    <string name="meus_trabalhos_sessao_expirada">Session expirée. Veuillez vous reconnecter.</string>
+
+    <string name="meus_trabalhos_filtro_todos">Toutes</string>
+    <string name="meus_trabalhos_filtro_pendente">En attente</string>
+    <string name="meus_trabalhos_filtro_em_progresso">En cours</string>
+    <string name="meus_trabalhos_filtro_concluido">Terminée</string>
+
+    <string name="meus_trabalhos_vazio_titulo">Aucune tâche trouvée</string>
+    <string name="meus_trabalhos_vazio_subtitulo">Lorsque vous serez assigné à une tâche, elle apparaîtra ici</string>
+
+    <string name="meus_trabalhos_equipe_fallback">Équipe</string>
+    <string name="meus_trabalhos_sem_titulo">Sans titre</string>
+    <string name="meus_trabalhos_sem_descricao">Sans description</string>
+    <string name="meus_trabalhos_sem_prazo">Sans délai</string>
+
+    <string name="meus_trabalhos_entrega_prefixo">Échéance :</string>
+    <string name="meus_trabalhos_entrega_formatado">Échéance : %1$s</string>
+
+    <string name="meus_trabalhos_item_titulo_placeholder">Titre de la tâche</string>
+    <string name="meus_trabalhos_equipe_placeholder">Équipe</string>
+    <string name="meus_trabalhos_prazo_placeholder">Échéance : Date</string>
+    <string name="meus_trabalhos_descricao_placeholder">Description de la tâche…</string>
+
+    <!-- ===== STATUT RÉUTILISABLE ===== -->
+    <string name="status_pendente">En attente</string>
+    <string name="status_em_progresso">En cours</string>
+    <string name="status_concluido">Terminée</string>
+
+    <!-- ===== PRODUCTIVITÉ ===== -->
+    <string name="produtividade_titulo">📊 Productivité</string>
+    <string name="produtividade_equipe_nao_encontrada">Équipe introuvable</string>
+
+    <string name="produtividade_total_trabalhos">TOTAL DES TÂCHES</string>
+    <string name="produtividade_distribuicao_status">RÉPARTITION PAR STATUT</string>
+    <string name="produtividade_por_membro_grafico">PRODUCTIVITÉ PAR MEMBRE</string>
+    <string name="produtividade_por_status">PAR STATUT</string>
+    <string name="produtividade_taxa_conclusao">TAUX D\'ACHÈVEMENT</string>
+    <string name="produtividade_por_membro">PAR MEMBRE</string>
+
+    <string name="produtividade_taxa_percentual">%1$d%%</string>
+    <string name="produtividade_detalhe_taxa_placeholder">0 sur 0 tâches</string>
+
+    <string name="produtividade_pizza_sem_dados">Aucune tâche pour l\'instant</string>
+    <string name="produtividade_barras_sem_dados">Aucun membre avec des tâches</string>
+    <string name="produtividade_barras_label">Tâches</string>
+    <string name="produtividade_item_nome_placeholder">Nom</string>
+
+    <plurals name="produtividade_detalhe_taxa">
+        <item quantity="one">%1$d sur %2$d tâche</item>
+        <item quantity="other">%1$d sur %2$d tâches</item>
+    </plurals>
+
+    <!-- ===== MESSAGES FAVORIS ===== -->
+    <string name="favoritos_sem_texto">(sans texte)</string>
+    <string name="favoritos_usuario_fallback">Vous</string>
+    <string name="favoritos_texto_placeholder">Message…</string>
+    <string name="favoritos_chat_nao_encontrado">Chat introuvable</string>
+
+    <string name="favoritos_tipo_foto">Photo</string>
+    <string name="favoritos_tipo_video">Vidéo</string>
+    <string name="favoritos_tipo_arquivo">Fichier</string>
+
+    <string name="favoritos_ctx_grupo">Groupe</string>
+    <string name="favoritos_ctx_equipe">Chat d\'équipe</string>
+    <string name="favoritos_ctx_privado">Chat privé</string>
+
+    <string name="favoritos_remover_confirmar">Supprimer</string>
+    <string name="favoritos_removido_sucesso">Supprimé</string>
+
+    <!-- ===== NOTIFICATIONS ===== -->
+    <string name="notificacoes_titulo">Notifications</string>
+    <string name="notificacoes_btn_marcar_todas">Tout marquer comme lu</string>
+    <string name="notificacoes_vazio_titulo">Aucune notification</string>
+    <string name="notificacoes_vazio_subtitulo">Vos invitations, tâches et nouveautés apparaîtront ici</string>
+    <string name="notificacoes_icone_content_description">Icône de notification</string>
+
+    <string name="notificacoes_titulo_fallback">Notification</string>
+    <string name="notificacoes_mensagem_placeholder">Message</string>
+    <string name="notificacoes_equipe_fallback">Équipe</string>
+    <string name="notificacoes_sem_descricao">Sans description</string>
+    <string name="notificacoes_usuario_fallback">Utilisateur</string>
+    <string name="notificacoes_trabalho_fallback">Tâche</string>
+
+    <string name="notificacoes_apagar_titulo">Supprimer la notification</string>
+    <string name="notificacoes_apagar_msg">Voulez-vous supprimer cette notification ?</string>
+    <string name="notificacoes_apagar_confirmar">Supprimer</string>
+    <string name="notificacoes_apagada_sucesso">Notification supprimée</string>
+    <string name="notificacoes_todas_lidas">Toutes marquées comme lues</string>
+
+    <string name="notificacoes_agora">À l\'instant</string>
+
+    <plurals name="notificacoes_minutos_atras">
+        <item quantity="one">Il y a %1$d minute</item>
+        <item quantity="other">Il y a %1$d minutes</item>
+    </plurals>
+
+    <plurals name="notificacoes_horas_atras">
+        <item quantity="one">Il y a %1$d heure</item>
+        <item quantity="other">Il y a %1$d heures</item>
+    </plurals>
+
+    <plurals name="notificacoes_dias_atras">
+        <item quantity="one">Il y a %1$d jour</item>
+        <item quantity="other">Il y a %1$d jours</item>
+    </plurals>
+
+    <!-- ===== DEMANDES EN ATTENTE ===== -->
+    <string name="pedidos_titulo">Demandes d\'adhésion</string>
+    <string name="pedidos_btn_voltar">←</string>
+    <string name="pedidos_equipe_nao_encontrada">Équipe introuvable</string>
+    <string name="pedidos_equipe_fallback">Équipe</string>
+    <string name="pedidos_usuario_fallback">Utilisateur</string>
+
+    <string name="pedidos_vazio_titulo">Aucune demande en attente</string>
+    <string name="pedidos_vazio_subtitulo">Lorsque quelqu\'un demandera à rejoindre votre équipe, cela apparaîtra ici</string>
+
+    <string name="pedidos_email_placeholder">email@x.com</string>
+    <string name="pedidos_profissao_placeholder">Profession</string>
+    <string name="pedidos_label_motivos">MOTIFS</string>
+    <string name="pedidos_motivos_placeholder">Motifs…</string>
+    <string name="pedidos_label_especialidades">SPÉCIALITÉS</string>
+    <string name="pedidos_especialidades_placeholder">Spécialités…</string>
+
+    <string name="pedidos_btn_perfil">PROFIL</string>
+    <string name="pedidos_btn_recusar">REFUSER</string>
+    <string name="pedidos_btn_aceitar">ACCEPTER</string>
+
+    <string name="pedidos_aceitar_titulo">Accepter la demande</string>
+    <string name="pedidos_aceitar_msg">Accepter %1$s dans l\'équipe %2$s ?</string>
+    <string name="pedidos_aceitar_confirmar">Accepter</string>
+    <string name="pedidos_aceito_sucesso">%1$s a rejoint l\'équipe !</string>
+
+    <string name="pedidos_recusar_titulo">Refuser la demande</string>
+    <string name="pedidos_recusar_msg">Refuser la demande de %1$s ?</string>
+    <string name="pedidos_recusar_confirmar">Refuser</string>
+    <string name="pedidos_recusado_sucesso">Demande de %1$s refusée</string>
+
+    <string name="pedidos_erro_carregar">Erreur lors du chargement des demandes : %1$s</string>
+
+    <string name="pedidos_nome_remetente_admin">Admin</string>
+
+    <string name="pedidos_notif_recusado_titulo">Demande refusée</string>
+    <string name="pedidos_notif_recusado_msg">Votre demande pour rejoindre %1$s a été refusée</string>
+
+    <!-- ===== PROFIL UTILISATEUR ===== -->
+    <string name="perfil_usuario_titulo">Profil de l\'utilisateur</string>
+    <string name="perfil_usuario_btn_voltar">← RETOUR</string>
+    <string name="perfil_usuario_nao_encontrado">Utilisateur introuvable</string>
+
+    <string name="perfil_usuario_usuario_fallback">Utilisateur</string>
+    <string name="perfil_usuario_profissao_fallback">Profession</string>
+    <string name="perfil_usuario_iniciais_fallback">U</string>
+    <string name="perfil_usuario_email_placeholder">email@email.com</string>
+
+    <string name="perfil_usuario_label_email">E-mail</string>
+    <string name="perfil_usuario_label_links">Liens</string>
+
+    <string name="perfil_usuario_linkedin_vazio">LinkedIn non renseigné</string>
+    <string name="perfil_usuario_github_vazio">GitHub non renseigné</string>
+    <string name="perfil_usuario_portfolio_vazio">Portfolio non renseigné</string>
+
+    <string name="perfil_usuario_link_invalido">Lien invalide</string>
+    <string name="perfil_usuario_sem_conversa">Aucune conversation trouvée</string>
+
+    <string name="perfil_usuario_btn_conversar">DISCUTER</string>
+    <string name="perfil_usuario_btn_apagar_conversa">SUPPRIMER LA CONVERSATION</string>
+    <string name="perfil_usuario_btn_bloquear">BLOQUER L\'UTILISATEUR</string>
+    <string name="perfil_usuario_btn_desbloquear">DÉBLOQUER L\'UTILISATEUR</string>
+
+    <string name="perfil_usuario_apagar_conversa_titulo">Supprimer la conversation</string>
+    <string name="perfil_usuario_apagar_mensagens">Supprimer les messages</string>
+    <string name="perfil_usuario_apagar_conversa_inteira">Supprimer toute la conversation</string>
+    <string name="perfil_usuario_mensagens_apagadas">Messages supprimés</string>
+    <string name="perfil_usuario_conversa_apagada">Conversation supprimée</string>
+
+    <string name="perfil_usuario_bloquear_titulo">Bloquer l\'utilisateur</string>
+    <string name="perfil_usuario_bloquear_msg">Êtes-vous sûr ? Il ne pourra plus vous envoyer de messages.</string>
+    <string name="perfil_usuario_bloquear_confirmar">Bloquer</string>
+    <string name="perfil_usuario_bloqueado_sucesso">Utilisateur bloqué</string>
+    <string name="perfil_usuario_desbloqueado_sucesso">Débloqué</string>
+
+    <!-- ===== INVITER À UNE TÂCHE ===== -->
+    <string name="convidar_trabalho_titulo">Inviter à une tâche</string>
+    <string name="convidar_trabalho_prefixo">Tâche : %1$s</string>
+    <string name="convidar_trabalho_placeholder">Tâche : …</string>
     <string name="convidar_trabalho_enviar">ENVOYER L\'INVITATION</string>
     <string name="convidar_trabalho_enviado">✅ Invitation envoyée à %1$s</string>
     <string name="convidar_trabalho_sem_disponiveis">Aucun utilisateur disponible pour inviter</string>
-    <string name="convidar_trabalho_erro_permissao">Cet appareil a une restriction de sécurité. Réessayez ou utilisez un autre appareil.</string>
+    <string name="convidar_trabalho_erro_permissao">Cet appareil a une limitation de sécurité. Réessayez ou utilisez un autre appareil.</string>
 
-    <!-- ===== WORK ITEM (manage list) ===== -->
+    <!-- ===== ÉLÉMENT DE TÂCHE ===== -->
     <string name="item_trabalho_placeholder_titulo">Titre</string>
     <string name="item_trabalho_placeholder_info">Catégorie - Échéance</string>
     <string name="item_trabalho_placeholder_descricao">Description</string>
     <string name="item_trabalho_zero">0</string>
     <string name="item_trabalho_convidar">Inviter</string>
 
-    <!-- ===== JOB COMMENTS ===== -->
+    <!-- ===== COMMENTAIRES ===== -->
     <string name="comentarios_titulo">Commentaires</string>
     <string name="comentarios_seta_voltar">←</string>
-    <string name="comentarios_trabalho_padrao">Travail</string>
+    <string name="comentarios_trabalho_padrao">Tâche</string>
     <string name="comentarios_vazio_titulo">Aucun commentaire</string>
-    <string name="comentarios_vazio_subtitulo">Soyez le premier à commenter ce travail</string>
+    <string name="comentarios_vazio_subtitulo">Soyez le premier à commenter cette tâche</string>
     <string name="comentarios_hint_escreva">Écrivez un commentaire…</string>
     <string name="comentarios_enviar">Envoyer</string>
     <string name="comentarios_avatar_desc">Avatar</string>
@@ -223,64 +500,58 @@
     <string name="comentarios_texto_placeholder">Texte du commentaire</string>
     <string name="comentarios_editado">(modifié)</string>
 
-    <!-- Job Comments — actions and toasts -->
-    <string name="comentarios_nao_encontrado">Travail introuvable</string>
+    <string name="comentarios_nao_encontrado">Tâche introuvable</string>
     <string name="comentarios_voce">Vous</string>
     <string name="comentarios_opcoes_titulo">Options</string>
     <string name="comentarios_opcao_editar">Modifier</string>
     <string name="comentarios_opcao_excluir">Supprimer</string>
-    <string name="comentarios_erro_enviar">Erreur lors de l\'envoi</string>
+    <string name="comentarios_erro_enviar">Erreur d\'envoi</string>
     <string name="comentarios_editar_titulo">Modifier le commentaire</string>
     <string name="comentarios_digite_texto">Saisissez un texte</string>
     <string name="comentarios_atualizado">Mis à jour</string>
-    <string name="comentarios_erro_atualizar">Erreur lors de la mise à jour</string>
+    <string name="comentarios_erro_atualizar">Erreur de mise à jour</string>
     <string name="comentarios_excluir_titulo">Supprimer le commentaire</string>
     <string name="comentarios_excluir_msg">Voulez-vous vraiment supprimer ?</string>
     <string name="comentarios_excluido">Supprimé</string>
-    <string name="comentarios_erro_excluir">Erreur lors de la suppression</string>
+    <string name="comentarios_erro_excluir">Erreur de suppression</string>
 
-    <!-- ===== ATTACHMENTS ===== -->
+    <!-- ===== PIÈCES JOINTES ===== -->
     <string name="anexos_titulo">Pièces jointes</string>
-    <string name="anexos_trabalho_padrao">Travail</string>
-    <string name="anexos_nao_encontrado">Travail introuvable</string>
+    <string name="anexos_trabalho_padrao">Tâche</string>
+    <string name="anexos_nao_encontrado">Tâche introuvable</string>
     <string name="anexos_enviando">Envoi…</string>
     <string name="anexos_adicionar">+ AJOUTER UNE PIÈCE JOINTE</string>
     <string name="anexos_adicionado">Pièce jointe ajoutée</string>
     <string name="anexos_vazio_titulo">Aucune pièce jointe</string>
-    <string name="anexos_vazio_subtitulo">Ajoutez des fichiers, photos ou documents au travail</string>
+    <string name="anexos_vazio_subtitulo">Ajoutez des fichiers, photos ou documents à la tâche</string>
 
-    <!-- Attachment actions -->
     <string name="anexo_acao_abrir">Ouvrir</string>
     <string name="anexo_acao_baixar">Télécharger</string>
     <string name="anexo_acao_remover">Supprimer</string>
     <string name="anexo_remover_titulo">Supprimer la pièce jointe</string>
     <string name="anexo_remover_msg">Supprimer \'%1$s\' ?</string>
     <string name="anexo_removido">Pièce jointe supprimée</string>
-    <string name="anexo_erro_remover">Erreur lors de la suppression</string>
+    <string name="anexo_erro_remover">Erreur de suppression</string>
 
-    <!-- Attachment info -->
     <string name="anexo_info_formato">%1$s - par %2$s</string>
-    <string name="anexo_sem_app">Aucune application pour ouvrir \'%1$s\'</string>
+    <string name="anexo_sem_app">Aucune app pour ouvrir \'%1$s\'</string>
     <string name="anexo_baixando_do_ctr">Téléchargement depuis CTR…</string>
     <string name="anexo_baixando">Téléchargement…</string>
 
-    <!-- Attachment errors (AnexoHelper) -->
     <string name="anexo_nome_arquivo_padrao">fichier</string>
     <string name="anexo_erro_url">URL non renvoyée par Cloudinary</string>
-    <string name="anexo_erro_salvar">Erreur lors de l\'enregistrement : %1$s</string>
-    <string name="anexo_erro_upload_desconhecido">Erreur de téléversement inconnue</string>
+    <string name="anexo_erro_salvar">Erreur d\'enregistrement : %1$s</string>
+    <string name="anexo_erro_upload_desconhecido">Erreur inconnue lors du téléversement</string>
 
-    <!-- Attachment notification -->
     <string name="anexo_notif_titulo">Nouvelle pièce jointe dans %1$s</string>
     <string name="anexo_notif_msg">%1$s a ajouté une pièce jointe</string>
 
-    <!-- Attachment item placeholders (preview only) -->
     <string name="item_anexo_placeholder_icone">A</string>
     <string name="item_anexo_placeholder_nome">fichier.pdf</string>
     <string name="item_anexo_placeholder_info">1.2 MB - par Ana</string>
     <string name="item_anexo_placeholder_menu">...</string>
 
-    <!-- ===== CHAT ITEMS (shared) ===== -->
+    <!-- ===== CHAT — ÉLÉMENTS PARTAGÉS ===== -->
     <string name="chat_responder_desc">Répondre</string>
     <string name="item_mensagem_nome_placeholder">Nom</string>
     <string name="item_mensagem_citacao_placeholder">Message original…</string>
@@ -289,33 +560,27 @@
     <string name="item_mensagem_arquivo_emoji">📎</string>
     <string name="item_mensagem_arquivo_tamanho_placeholder">0 KB</string>
 
-    <!-- ===== CHAT (shared) ===== -->
-
-    <!-- Errors and validation -->
-    <string name="chat_sessao_expirada">Session expirée. Reconnectez-vous.</string>
+    <!-- ===== CHAT — PARTAGÉ ===== -->
+    <string name="chat_sessao_expirada">Session expirée. Veuillez vous reconnecter.</string>
     <string name="chat_conversa_invalida">Conversation invalide</string>
     <string name="chat_conversa_nao_encontrada">Conversation introuvable</string>
-    <string name="chat_erro_abrir_conversa">Erreur à l\'ouverture de la conversation</string>
+    <string name="chat_erro_abrir_conversa">Erreur d\'ouverture de la conversation</string>
     <string name="chat_grupo_nao_encontrado">Groupe introuvable</string>
     <string name="chat_equipe_nao_encontrada">Équipe introuvable</string>
-    <string name="chat_nenhum_app">Aucune application</string>
+    <string name="chat_nenhum_app">Aucune app</string>
     <string name="chat_msg_nao_encontrada">Message introuvable</string>
     <string name="chat_perfil_indisponivel">Impossible de voir le profil</string>
 
-    <!-- Blocking -->
     <string name="chat_voce_bloqueou">Vous avez bloqué cet utilisateur</string>
     <string name="chat_voce_foi_bloqueado">Vous avez été bloqué par cet utilisateur</string>
 
-    <!-- Typing indicator -->
     <string name="chat_digitando">%1$s est en train d\'écrire…</string>
 
-    <!-- Responding -->
     <string name="chat_respondendo_a">En réponse à %1$s</string>
     <string name="chat_tipo_foto">📷 Photo</string>
     <string name="chat_tipo_video">🎥 Vidéo</string>
     <string name="chat_tipo_arquivo">📎 Fichier</string>
 
-    <!-- Upload toasts -->
     <string name="chat_enviando_foto">📤 Envoi de la photo…</string>
     <string name="chat_enviando_video">📤 Envoi de la vidéo…</string>
     <string name="chat_enviando_arquivo">📤 Envoi du fichier…</string>
@@ -323,12 +588,10 @@
     <string name="chat_video_enviado">✅ Vidéo envoyée !</string>
     <string name="chat_arquivo_enviado">✅ Fichier envoyé !</string>
 
-    <!-- Previews (Firestore + UI) -->
     <string name="chat_preview_foto">📷 Photo</string>
     <string name="chat_preview_video">🎥 Vidéo</string>
     <string name="chat_preview_arquivo">📎 %1$s</string>
 
-    <!-- Message options -->
     <string name="chat_responder">💬 Répondre</string>
     <string name="chat_favoritar">⭐ Favori</string>
     <string name="chat_desfavoritar">⭐ Retirer des favoris</string>
@@ -339,18 +602,14 @@
     <string name="chat_abrir">📂 Ouvrir</string>
     <string name="chat_opcoes_titulo">Options</string>
 
-    <!-- Favorites -->
-    <string name="chat_favoritado">⭐ Ajouté aux favoris</string>
-    <string name="chat_removido_favoritos">Retiré</string>
+    <string name="chat_favoritado">⭐ Favori</string>
+    <string name="chat_removido_favoritos">Supprimé</string>
 
-    <!-- Download -->
     <string name="chat_baixando">⬇ Téléchargement…</string>
     <string name="chat_baixando_do_ctr">Téléchargement depuis CTR…</string>
 
-    <!-- Delete message -->
     <string name="chat_msg_apagada_toast">Message supprimé</string>
 
-    <!-- Message info -->
     <string name="chat_info_titulo">ℹ️ Informations du message</string>
     <string name="chat_info_enviada">Envoyé : %1$s</string>
     <string name="chat_info_lida_sim">Lu : ✅</string>
@@ -359,63 +618,210 @@
     <string name="chat_info_arquivo">Fichier : %1$s</string>
     <string name="chat_info_tamanho">Taille : %1$s</string>
     <string name="chat_info_resposta_a">Réponse à : %1$s</string>
-    <string name="chat_info_data_formato">dd/MM/yyyy \'à\' HH:mm</string>
+    <string name="chat_info_data_formato">dd/MM/yyyy \'às\' HH:mm</string>
     <string name="chat_info_ok">OK</string>
 
-    <!-- Hub -->
-    <string name="chat_hub_titulo">Chat d\'Équipe</string>
+    <!-- ===== ENTREGAR TRABALHO ===== -->
+    <string name="entregar_nao_membro">Vous n\'êtes membre d\'aucune équipe</string>
+    <string name="entregar_equipe_fallback">Équipe</string>
+    <string name="entregar_nenhum_trabalho">Aucune tâche trouvée</string>
+    <string name="entregar_contador_zero">0</string>
+
+    <string name="entregar_avatar_sigla">MT</string>
+    <string name="entregar_participante">Participant</string>
+    <string name="entregar_btn_chat_equipe">CHAT D\'ÉQUIPE</string>
+    <string name="entregar_meus_trabalhos">Mes Tâches</string>
+
+    <string name="entregar_btn_iniciar">DÉMARRER</string>
+    <string name="entregar_btn_concluir">TERMINER</string>
+    <string name="entregar_btn_reabrir">ROUVRIR</string>
+
+    <string name="entregar_alterar_status_titulo">Changer le statut</string>
+    <string name="entregar_status_atualizado">Statut mis à jour !</string>
+
+    <!-- ===== GERENCIAR MEMBROS GRUPO ===== -->
+    <string name="gerenciar_membros_grupo_titulo">Membres du groupe</string>
+    <string name="gerenciar_membros_grupo_btn_adicionar">+ AJOUTER UN MEMBRE</string>
+    <string name="gerenciar_membros_grupo_dica_long_press">Appui long pour supprimer</string>
+    <string name="gerenciar_membros_grupo_nao_encontrado">Groupe introuvable</string>
+    <string name="gerenciar_membros_grupo_sem_permissao">Vous n\'avez pas la permission</string>
+    <string name="gerenciar_membros_grupo_nenhum_membro">Aucun membre dans le groupe</string>
+    <string name="gerenciar_membros_grupo_usuario_fallback">Utilisateur</string>
+    <string name="gerenciar_membros_grupo_grupo_fallback">Groupe</string>
+
+    <string name="gerenciar_membros_grupo_remover_titulo">Supprimer le membre</string>
+    <string name="gerenciar_membros_grupo_remover_msg">Supprimer %1$s du groupe ?</string>
+    <string name="gerenciar_membros_grupo_remover_confirmar">Supprimer</string>
+    <string name="gerenciar_membros_grupo_removido_sucesso">Membre supprimé</string>
+
+    <string name="gerenciar_membros_grupo_adicionar_titulo">Ajouter un membre</string>
+    <string name="gerenciar_membros_grupo_todos_no_grupo">Tous les membres sont déjà dans le groupe</string>
+    <string name="gerenciar_membros_grupo_adicionado_sucesso">Membre ajouté</string>
+
+    <!-- ===== PREVIEW MIDIA ===== -->
+    <string name="preview_midia_invalida">Média invalide</string>
+    <string name="preview_midia_imagem_cortada">Image recadrée</string>
+    <string name="preview_midia_video_cortado">Vidéo recadrée</string>
+    <string name="preview_midia_cortar_titulo">Recadrer l\'image</string>
+
+    <string name="preview_midia_erro_cortar">Erreur de recadrage : %1$s</string>
+    <string name="preview_midia_erro_preparar_crop">Erreur de préparation du recadrage</string>
+    <string name="preview_midia_erro_abrir_editor">Erreur d\'ouverture de l\'éditeur</string>
+    <string name="preview_midia_erro_abrir_editor_video">Erreur d\'ouverture de l\'éditeur vidéo</string>
+
+    <string name="preview_midia_arquivo_fallback">fichier</string>
+    <string name="preview_midia_arquivo_placeholder">fichier.pdf</string>
+    <string name="preview_midia_legenda_hint">Ajouter une légende…</string>
+
+    <string name="preview_midia_sigla_pdf">PDF</string>
+    <string name="preview_midia_sigla_doc">DOC</string>
+    <string name="preview_midia_sigla_xls">XLS</string>
+    <string name="preview_midia_sigla_ppt">PPT</string>
+    <string name="preview_midia_sigla_img">IMG</string>
+    <string name="preview_midia_sigla_vid">VID</string>
+    <string name="preview_midia_sigla_aud">AUD</string>
+    <string name="preview_midia_sigla_zip">ZIP</string>
+    <string name="preview_midia_sigla_arq">FICH</string>
+
+    <!-- ===== VISUALIZAR MIDIA ===== -->
+    <string name="visualizar_midia_btn_voltar">← RETOUR</string>
+    <string name="visualizar_midia_btn_baixar">⬇ TÉLÉCHARGER</string>
+
+    <string name="visualizar_midia_nao_encontrada">Média introuvable</string>
+    <string name="visualizar_midia_baixando_desc">Téléchargement depuis CTR…</string>
+    <string name="visualizar_midia_baixando_toast">⬇ Téléchargement…</string>
+    <string name="visualizar_midia_erro_baixar">Erreur de téléchargement : %1$s</string>
+
+    <!-- ===== GALERIA MIDIA ===== -->
+    <string name="galeria_btn_fechar">✕</string>
+    <string name="galeria_btn_baixar">⬇</string>
+    <string name="galeria_nenhuma_midia">Aucun média à afficher</string>
+
+    <!-- ===== SELETOR USUARIO (helper reutilizável) ===== -->
+    <string name="seletor_usuario_titulo">Sélectionner un utilisateur</string>
+    <string name="seletor_usuario_buscar_hint">Rechercher par nom ou e-mail…</string>
+    <string name="seletor_usuario_nome_fallback">Utilisateur</string>
+
+    <!-- (adicionar ao bloco SELETOR USUARIO) -->
+    <string name="seletor_usuario_inicial_placeholder">A</string>
+    <string name="seletor_usuario_email_placeholder">email@email.com</string>
+
+    <!-- ===== PERFIL (MINHA CONTA) ===== -->
+    <string name="perfil_carregando">Chargement…</string>
+    <string name="perfil_saindo">Déconnexion…</string>
+    <string name="perfil_enviando_foto">Envoi de la photo…</string>
+    <string name="perfil_foto_atualizada">Photo mise à jour</string>
+
+    <string name="perfil_nome_fallback">Utilisateur</string>
+    <string name="perfil_profissao_fallback">Profession</string>
+    <string name="perfil_iniciais_fallback">ME</string>
+    <string name="perfil_nenhuma_equipe">Aucune équipe</string>
+    <string name="perfil_erro_carregar">Erreur de chargement</string>
+
+    <string name="perfil_avatar_desc">Photo de profil</string>
+    <string name="perfil_btn_camera_simbolo">+</string>
+    <string name="perfil_btn_adicionar_simbolo">+</string>
+    <string name="perfil_equipe_label">Équipe actuelle :</string>
+
+    <string name="perfil_erro_url_nao_encontrada">Erreur : URL introuvable</string>
+    <string name="perfil_erro_upload">Erreur de téléversement : %1$s</string>
+
+    <string name="perfil_link_invalido">Lien invalide</string>
+    <string name="perfil_remover_link_titulo">Supprimer le lien</string>
+    <string name="perfil_remover_link_msg">Supprimer ce lien ?</string>
+    <string name="perfil_remover_link_sim">Oui</string>
+
+    <string name="perfil_link_titulo">Ajouter un lien</string>
+    <string name="perfil_link_instrucao">Collez l\'URL du lien :</string>
+    <string name="perfil_link_hint">https://…</string>
+    <string name="perfil_link_digite_url">Saisissez une URL</string>
+    <string name="perfil_link_formato_invalido">L\'URL doit commencer par http:// ou https://</string>
+    <string name="perfil_link_adicionado">Lien ajouté</string>
+    <string name="perfil_link_nao_encontrado">Lien introuvable</string>
+    <string name="perfil_link_removido">Lien supprimé</string>
+
+    <!-- ===== PRODUTOS / DASHBOARD EQUIPE ===== -->
+    <string name="produtos_logo_fallback">EQ</string>
+    <string name="produtos_equipe_fallback">Équipe</string>
+    <string name="produtos_usuario_fallback">Utilisateur</string>
+    <string name="produtos_sem_descricao">Aucune description</string>
+
+    <string name="produtos_criado_por">Créé par %1$s</string>
+    <string name="produtos_criado_por_placeholder">Créé par</string>
+    <string name="produtos_config_desc">Paramètres de l\'équipe</string>
+    <string name="produtos_descricao_label">Description</string>
+
+    <string name="produtos_delegar_tarefa_titulo">Déléguer une tâche</string>
+    <string name="produtos_delegar_tarefa_msg">Créez une nouvelle tâche, définissez l\'échéance, assignez-la aux membres et suivez la productivité.</string>
+
+    <string name="produtos_btn_ver_produtividade">📊 VOIR LA PRODUCTIVITÉ</string>
+    <string name="produtos_btn_criar_trabalho">CRÉER UNE TÂCHE</string>
+    <string name="produtos_btn_chat_equipe">CHAT D\'ÉQUIPE</string>
+
+    <string name="produtos_trabalhos_recentes">Tâches récentes</string>
+
+    <string name="produtos_vazio_titulo">Vous n\'avez pas encore d\'équipe</string>
+    <string name="produtos_vazio_subtitulo">Créez une équipe pour commencer à gérer les tâches</string>
+    <string name="produtos_vazio_btn_criar">CRÉER UNE ÉQUIPE</string>
+
+    <!-- ===== GERENCIAR EQUIPE (adicional) ===== -->
+    <string name="gerenciar_usuario_selecionado">Sélectionné : %1$s</string>
+    <string name="gerenciar_pedido_linha">%1$s (%2$s)</string>
+    <string name="item_trabalho_info_formato">%1$s - %2$s</string>
+    <string name="produtividade_item_zero">0</string>
+
+    <!-- ===== CHAT HUB ===== -->
+    <string name="chat_hub_titulo">Chat d\'équipe</string>
     <string name="chat_hub_secao_geral">GÉNÉRAL</string>
     <string name="chat_hub_secao_grupos">GROUPES</string>
-    <string name="chat_hub_secao_individuais">MESSAGES DIRECTS</string>
-    <string name="chat_hub_chat_geral">Chat Général</string>
+    <string name="chat_hub_secao_individuais">CONVERSATIONS PRIVÉES</string>
+    <string name="chat_hub_chat_geral">Chat général</string>
     <string name="chat_hub_novo_grupo">+ NOUVEAU GROUPE</string>
-    <string name="chat_hub_sem_mensagem">Aucun message pour le moment</string>
-    <string name="chat_hub_toque_iniciar">Touchez pour démarrer une conversation</string>
+    <string name="chat_hub_sem_mensagem">Aucun message pour l\'instant</string>
+    <string name="chat_hub_toque_iniciar">Appuyez pour démarrer une conversation</string>
     <string name="chat_hub_sem_outro_membro">Aucun autre membre dans l\'équipe</string>
     <string name="chat_hub_msg_apagada">Message supprimé</string>
     <string name="chat_hub_foto">Photo</string>
     <string name="chat_hub_video">Vidéo</string>
     <string name="chat_hub_arquivo">Fichier</string>
 
-    <!-- Hub: create group dialog -->
-    <string name="chat_hub_novo_grupo_titulo">Nouveau Groupe</string>
+    <string name="chat_hub_novo_grupo_titulo">Nouveau groupe</string>
     <string name="chat_hub_novo_grupo_hint">Nom du groupe</string>
     <string name="chat_hub_novo_grupo_criar">Créer</string>
     <string name="chat_hub_grupo_criado">Groupe créé !</string>
 
-    <!-- Group: leave -->
+    <!-- ===== CHAT DE GROUPE ===== -->
     <string name="chat_grupo_sair_titulo">Quitter le groupe</string>
     <string name="chat_grupo_sair_msg">Êtes-vous sûr ?</string>
     <string name="chat_grupo_sair_confirmar">Quitter</string>
-    <string name="chat_grupo_criador_aviso">Vous êtes le créateur. Vous pouvez seulement le supprimer.</string>
+    <string name="chat_grupo_criador_aviso">Vous êtes le créateur. Vous pouvez seulement supprimer.</string>
     <string name="chat_grupo_saiu">Vous avez quitté</string>
 
-    <!-- Chat UI placeholders -->
     <string name="chat_hint_digite">Écrivez…</string>
     <string name="chat_placeholder_conversa">Conversation</string>
     <string name="chat_placeholder_mensagem">Message</string>
     <string name="chat_placeholder_usuario">Utilisateur</string>
 
-    <!-- ===== CONVERSATION ITEM ===== -->
+    <!-- ===== ÉLÉMENT DE CONVERSATION ===== -->
     <string name="item_conversa_icone_usuario">👤</string>
     <string name="item_conversa_ultima_msg_placeholder">Dernier message</string>
 
-    <!-- ===== RELATIVE TIME (shared) ===== -->
-    <string name="tempo_agora">Maintenant</string>
+    <!-- ===== TEMPS RELATIF (partagé) ===== -->
+    <string name="tempo_agora">À l\'instant</string>
     <string name="tempo_ha_min">Il y a %1$dmin</string>
     <string name="tempo_ha_horas">Il y a %1$dh</string>
     <string name="tempo_ha_dias">Il y a %1$dj</string>
 
-    <!-- Profil -->
+    <!-- ===== PROFIL ===== -->
     <string name="perfil_titulo">Mon Profil</string>
     <string name="perfil_links">Liens</string>
-    <string name="perfil_sem_links">Aucun lien ajouté</string>
-    <string name="perfil_meus_trabalhos">MES TRAVAUX</string>
+    <string name="perfil_sem_links">Aucun lien enregistré</string>
+    <string name="perfil_meus_trabalhos">MES TÂCHES</string>
     <string name="perfil_favoritos">MESSAGES FAVORIS</string>
     <string name="perfil_sair">SE DÉCONNECTER</string>
     <string name="perfil_configuracoes">Paramètres</string>
 
-    <!-- Paramètres -->
+    <!-- ===== PARAMÈTRES ===== -->
     <string name="config_titulo">Paramètres</string>
     <string name="config_idioma">Langue</string>
     <string name="config_sair">Se déconnecter</string>
@@ -423,29 +829,14 @@
     <string name="config_excluir_conta_msg">Êtes-vous sûr ? Toutes vos données seront définitivement supprimées.</string>
     <string name="config_excluir_confirmar">Oui, supprimer</string>
 
-    <!-- Actions -->
-    <string name="voltar">← RETOUR</string>
-    <string name="cancelar">Annuler</string>
-    <string name="salvar">Enregistrer</string>
-    <string name="excluir">Supprimer</string>
-    <string name="favoritar">⭐ Favori</string>
-    <string name="desfavoritar">⭐ Retirer des favoris</string>
-    <string name="apagar">🗑 Supprimer</string>
-    <string name="baixar">⬇ Télécharger</string>
-    <string name="abrir">📂 Ouvrir</string>
-    <string name="opcoes">Options</string>
+    <!-- ===== FAVORIS (écran) ===== -->
+    <string name="favoritos_titulo">⭐ Messages favoris</string>
+    <string name="favoritos_vazio">Aucun message favori pour l\'instant</string>
+    <string name="favoritos_remover">Retirer le favori</string>
+    <string name="favoritos_remover_msg">Retirer ce message des favoris ?</string>
 
+    <!-- ===== CHAT — SÉPARATEUR DE DATE ===== -->
     <string name="chat_separador_hoje">AUJOURD\'HUI</string>
     <string name="chat_separador_ontem">HIER</string>
 
-    <!-- Erreurs -->
-    <string name="erro_generico">Erreur : %1$s</string>
-    <string name="erro_campos_vazios">Remplissez tous les champs</string>
-    <string name="erro_sem_conexao">⚠️ Pas de connexion internet. Vérifiez votre réseau et réessayez.</string>
-
-    <!-- Favoris -->
-    <string name="favoritos_titulo">⭐ Messages Favoris</string>
-    <string name="favoritos_vazio">Aucun message favori pour le moment</string>
-    <string name="favoritos_remover">Retirer des favoris</string>
-    <string name="favoritos_remover_msg">Retirer ce message des favoris ?</string>
 </resources>

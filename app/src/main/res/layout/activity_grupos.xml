@@ -21,7 +21,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/voltar"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -30,7 +30,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
-                android:text="Grupos"
+                android:text="@string/grupos_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -41,7 +41,7 @@
                 android:layout_height="48dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="#F5E6D0"
-                android:text="+ NOVO GRUPO"
+                android:text="@string/grupos_btn_novo"
                 android:textColor="#1C1311"
                 android:textStyle="bold" />
 

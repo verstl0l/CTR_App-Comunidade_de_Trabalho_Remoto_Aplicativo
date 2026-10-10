@@ -4,12 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -17,13 +17,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-
-class PerfilUsuarioActivity : AppCompatActivity() {
+class PerfilUsuarioActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
     private var emailOutro: String = ""
+
+    // ✅ Estado do bloqueio (substitui a comparação com texto do botão)
+    private var estaBloqueado: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +37,7 @@ class PerfilUsuarioActivity : AppCompatActivity() {
         emailOutro = intent.getStringExtra("emailOutro") ?: ""
 
         if (emailOutro.isEmpty()) {
-            Toast.makeText(this, "Usuário não encontrado", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.perfil_usuario_nao_encontrado), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -54,11 +56,12 @@ class PerfilUsuarioActivity : AppCompatActivity() {
             abrirConversa()
         }
 
+        // ✅ Comparação via estado booleano — funciona em qualquer idioma
         btnBloquear.setOnClickListener {
-            if (btnBloquear.text == "BLOQUEAR USUÁRIO") {
-                confirmarBloqueio()
-            } else {
+            if (estaBloqueado) {
                 desbloquear()
+            } else {
+                confirmarBloqueio()
             }
         }
 
@@ -67,22 +70,17 @@ class PerfilUsuarioActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ✅ BUG CORRIGIDO: lê da lista "links" nova (com fallback)
-    // ============================================================
     private fun carregarDados() {
         lifecycleScope.launch {
             try {
                 val usuarioDoc = db.collection("usuarios").document(emailOutro).get().await()
 
-                val nome = usuarioDoc.getString("nome") ?: "Usuário"
-                val profissao = usuarioDoc.getString("profissao") ?: "Profissão"
+                val nome = usuarioDoc.getString("nome") ?: getString(R.string.perfil_usuario_usuario_fallback)
+                val profissao = usuarioDoc.getString("profissao") ?: getString(R.string.perfil_usuario_profissao_fallback)
                 val fotoUrl = usuarioDoc.getString("fotoUrl") ?: ""
 
-                // ✅ Lê da lista nova
                 val links = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
 
-                // 🔄 Fallback: se não tiver lista, tenta os campos antigos
                 val linkedin = links.find { it["tipo"] == "linkedin" }?.get("url")
                     ?: usuarioDoc.getString("linkedin") ?: ""
                 val github = links.find { it["tipo"] == "github" }?.get("url")
@@ -99,21 +97,35 @@ class PerfilUsuarioActivity : AppCompatActivity() {
 
                 if (fotoUrl.isNotEmpty()) {
                     Glide.with(this@PerfilUsuarioActivity).load(fotoUrl).circleCrop().into(imgAvatar)
-                    txtIniciais.visibility = android.view.View.GONE
+                    txtIniciais.visibility = View.GONE
                 } else {
                     val iniciais = nome.split(" ").take(2)
                         .map { it.firstOrNull()?.uppercase() ?: "" }
                         .joinToString("")
-                    txtIniciais.text = iniciais.ifEmpty { "US" }
-                    txtIniciais.visibility = android.view.View.VISIBLE
+                    txtIniciais.text = iniciais.ifEmpty {
+                        getString(R.string.perfil_usuario_iniciais_fallback)
+                    }
+                    txtIniciais.visibility = View.VISIBLE
                 }
 
-                configurarLink(findViewById(R.id.txtLinkedinUsuario), linkedin, "LinkedIn não cadastrado")
-                configurarLink(findViewById(R.id.txtGithubUsuario), github, "GitHub não cadastrado")
-                configurarLink(findViewById(R.id.txtPortfolioUsuario), portfolio, "Portfólio não cadastrado")
+                configurarLink(
+                    findViewById(R.id.txtLinkedinUsuario),
+                    linkedin,
+                    getString(R.string.perfil_usuario_linkedin_vazio)
+                )
+                configurarLink(
+                    findViewById(R.id.txtGithubUsuario),
+                    github,
+                    getString(R.string.perfil_usuario_github_vazio)
+                )
+                configurarLink(
+                    findViewById(R.id.txtPortfolioUsuario),
+                    portfolio,
+                    getString(R.string.perfil_usuario_portfolio_vazio)
+                )
 
             } catch (e: Exception) {
-                Log.e("PERFIL_USUARIO", "Erro: ${e.message}")
+                Log.e(TAG, "Erro: ${e.message}")
             }
         }
     }
@@ -130,15 +142,16 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                 try {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Link inválido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.perfil_usuario_link_invalido),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
     }
 
-    // ============================================================
-    // ✅ Abre/cria conversa PV corretamente (reutiliza lógica existente)
-    // ============================================================
     private fun abrirConversa() {
         lifecycleScope.launch {
             try {
@@ -168,12 +181,15 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                 startActivity(intent)
 
             } catch (e: Exception) {
-                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-    // ========== APAGAR CONVERSA ==========
     private fun abrirDialogApagarConversa() {
         lifecycleScope.launch {
             try {
@@ -188,25 +204,38 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                 }
 
                 if (chat == null) {
-                    Toast.makeText(this@PerfilUsuarioActivity, "Nenhuma conversa encontrada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@PerfilUsuarioActivity,
+                        getString(R.string.perfil_usuario_sem_conversa),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@launch
                 }
 
                 val chatId = chat.id
 
+                val opcoes = arrayOf(
+                    getString(R.string.perfil_usuario_apagar_mensagens),
+                    getString(R.string.perfil_usuario_apagar_conversa_inteira)
+                )
+
                 AlertDialog.Builder(this@PerfilUsuarioActivity)
-                    .setTitle("Apagar conversa")
-                    .setItems(arrayOf("Apagar mensagens", "Apagar conversa inteira")) { _, which ->
+                    .setTitle(getString(R.string.perfil_usuario_apagar_conversa_titulo))
+                    .setItems(opcoes) { _, which ->
                         when (which) {
                             0 -> apagarSomenteMensagens(chatId)
                             1 -> apagarConversaInteira(chatId)
                         }
                     }
-                    .setNegativeButton("Cancelar", null)
+                    .setNegativeButton(R.string.cancelar, null)
                     .show()
 
             } catch (e: Exception) {
-                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -229,10 +258,18 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                     )
                 ).await()
 
-                Toast.makeText(this@PerfilUsuarioActivity, "Mensagens apagadas", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.perfil_usuario_mensagens_apagadas),
+                    Toast.LENGTH_SHORT
+                ).show()
 
             } catch (e: Exception) {
-                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -250,15 +287,22 @@ class PerfilUsuarioActivity : AppCompatActivity() {
 
                 db.collection("chats").document(chatId).delete().await()
 
-                Toast.makeText(this@PerfilUsuarioActivity, "Conversa apagada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.perfil_usuario_conversa_apagada),
+                    Toast.LENGTH_SHORT
+                ).show()
 
             } catch (e: Exception) {
-                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-    // ========== BLOQUEAR / DESBLOQUEAR ==========
     private fun verificarBloqueio() {
         lifecycleScope.launch {
             try {
@@ -268,24 +312,29 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                     .limit(1)
                     .get().await()
 
-                val btnBloquear = findViewById<Button>(R.id.btnBloquear)
-                if (!bloqueio.isEmpty) {
-                    btnBloquear.text = "DESBLOQUEAR USUÁRIO"
-                } else {
-                    btnBloquear.text = "BLOQUEAR USUÁRIO"
-                }
+                estaBloqueado = !bloqueio.isEmpty
+                atualizarBotaoBloqueio()
             } catch (e: Exception) {
-                Log.e("PERFIL_USUARIO", "Erro: ${e.message}")
+                Log.e(TAG, "Erro: ${e.message}")
             }
+        }
+    }
+
+    private fun atualizarBotaoBloqueio() {
+        val btnBloquear = findViewById<Button>(R.id.btnBloquear)
+        btnBloquear.text = if (estaBloqueado) {
+            getString(R.string.perfil_usuario_btn_desbloquear)
+        } else {
+            getString(R.string.perfil_usuario_btn_bloquear)
         }
     }
 
     private fun confirmarBloqueio() {
         AlertDialog.Builder(this)
-            .setTitle("Bloquear usuário")
-            .setMessage("Tem certeza? Ele não poderá mais enviar mensagens para você.")
-            .setPositiveButton("Bloquear") { _, _ -> bloquear() }
-            .setNegativeButton("Cancelar", null)
+            .setTitle(getString(R.string.perfil_usuario_bloquear_titulo))
+            .setMessage(getString(R.string.perfil_usuario_bloquear_msg))
+            .setPositiveButton(getString(R.string.perfil_usuario_bloquear_confirmar)) { _, _ -> bloquear() }
+            .setNegativeButton(R.string.cancelar, null)
             .show()
     }
 
@@ -298,10 +347,18 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                     "criadoEm" to System.currentTimeMillis()
                 )
                 db.collection("bloqueios").add(bloqueio).await()
-                Toast.makeText(this@PerfilUsuarioActivity, "✅ Usuário bloqueado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.perfil_usuario_bloqueado_sucesso),
+                    Toast.LENGTH_SHORT
+                ).show()
                 verificarBloqueio()
             } catch (e: Exception) {
-                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -318,11 +375,23 @@ class PerfilUsuarioActivity : AppCompatActivity() {
                     db.collection("bloqueios").document(doc.id).delete().await()
                 }
 
-                Toast.makeText(this@PerfilUsuarioActivity, "✅ Desbloqueado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.perfil_usuario_desbloqueado_sucesso),
+                    Toast.LENGTH_SHORT
+                ).show()
                 verificarBloqueio()
             } catch (e: Exception) {
-                Toast.makeText(this@PerfilUsuarioActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@PerfilUsuarioActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "PERFIL_USUARIO"
     }
 }

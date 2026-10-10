@@ -32,7 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="A"
+                android:text="@string/seletor_usuario_inicial_placeholder"
                 android:textColor="@color/accent_dark"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Nome"
+            android:text="@string/seletor_usuario_nome_fallback"
             android:textColor="@color/text_primary"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -66,7 +66,7 @@
             android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="email@email.com"
+            android:text="@string/seletor_usuario_email_placeholder"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 

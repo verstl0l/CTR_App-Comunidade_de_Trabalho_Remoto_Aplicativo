@@ -17,7 +17,7 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Nome"
+            android:text="@string/produtividade_item_nome_placeholder"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold" />

@@ -16,7 +16,6 @@
         android:orientation="horizontal"
         android:padding="12dp">
 
-        <!-- Icone -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardIconeNotificacao"
             android:layout_width="44dp"
@@ -30,13 +29,12 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
-                android:contentDescription="Icone"
+                android:contentDescription="@string/notificacoes_icone_content_description"
                 android:src="@drawable/ic_notification_convite"
                 app:tint="@color/accent" />
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Texto -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -50,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:text="Titulo"
+                android:text="@string/notificacoes_titulo_fallback"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -62,7 +60,7 @@
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:text="Mensagem"
+                android:text="@string/notificacoes_mensagem_placeholder"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
@@ -71,13 +69,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Agora"
+                android:text="@string/notificacoes_agora"
                 android:textColor="@color/text_secondary"
                 android:textSize="10sp" />
 
         </LinearLayout>
 
-        <!-- Indicador de nao lida -->
         <View
             android:id="@+id/indicadorNaoLida"
             android:layout_width="10dp"

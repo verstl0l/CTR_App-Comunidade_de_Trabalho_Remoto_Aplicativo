@@ -14,12 +14,11 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Nome + Email -->
         <TextView
             android:id="@+id/txtNomeSolicitante"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nome"
+            android:text="@string/pedidos_usuario_fallback"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -29,11 +28,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="email@x.com"
+            android:text="@string/pedidos_email_placeholder"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
-        <!-- Profissão -->
         <TextView
             android:id="@+id/txtProfissaoSolicitante"
             android:layout_width="wrap_content"
@@ -42,17 +40,16 @@
             android:background="@color/bg_surface_hover"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:text="Profissão"
+            android:text="@string/pedidos_profissao_placeholder"
             android:textColor="@color/accent"
             android:textSize="11sp"
             android:textStyle="bold" />
 
-        <!-- Motivos -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="MOTIVOS"
+            android:text="@string/pedidos_label_motivos"
             android:textColor="@color/text_secondary"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -62,16 +59,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Motivos..."
+            android:text="@string/pedidos_motivos_placeholder"
             android:textColor="@color/text_tertiary"
             android:textSize="14sp" />
 
-        <!-- Especialidades -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="ESPECIALIDADES"
+            android:text="@string/pedidos_label_especialidades"
             android:textColor="@color/text_secondary"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -81,11 +77,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Especialidades..."
+            android:text="@string/pedidos_especialidades_placeholder"
             android:textColor="@color/text_tertiary"
             android:textSize="14sp" />
 
-        <!-- Botões -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,7 +93,7 @@
                 android:layout_height="44dp"
                 android:layout_marginEnd="8dp"
                 android:backgroundTint="@color/bg_surface_hover"
-                android:text="PERFIL"
+                android:text="@string/pedidos_btn_perfil"
                 android:textColor="@color/text_primary"
                 android:textSize="12sp" />
 
@@ -113,7 +108,7 @@
                 android:layout_height="44dp"
                 android:layout_marginEnd="8dp"
                 android:backgroundTint="@color/bg_surface_hover"
-                android:text="RECUSAR"
+                android:text="@string/pedidos_btn_recusar"
                 android:textColor="@color/status_erro"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -125,7 +120,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:backgroundTint="@color/accent"
-                android:text="ACEITAR"
+                android:text="@string/pedidos_btn_aceitar"
                 android:textColor="@color/accent_dark"
                 android:textSize="12sp"
                 android:textStyle="bold" />

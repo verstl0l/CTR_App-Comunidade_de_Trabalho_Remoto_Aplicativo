@@ -54,10 +54,9 @@ class perfil : BaseActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
-        email = auth.currentUser?.email ?: prefs.getString("emailUsuario", "") ?: ""
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        email = auth.currentUser?.email ?: prefs.getString(KEY_EMAIL_USUARIO, "") ?: ""
 
-        // Referencias das views
         val txtNomePerfil = findViewById<TextView>(R.id.txtNomePerfil)
         val txtProfissaoPerfil = findViewById<TextView>(R.id.txtProfissaoPerfil)
         val txtEmailPerfil = findViewById<TextView>(R.id.txtEmailPerfil)
@@ -71,10 +70,10 @@ class perfil : BaseActivity() {
         txtIniciais = findViewById(R.id.txtIniciais)
 
         txtEmailPerfil.text = email
-        txtNomePerfil.text = "Carregando..."
+        txtNomePerfil.text = getString(R.string.perfil_carregando)
         txtProfissaoPerfil.text = ""
         txtProfissaoCard.text = ""
-        txtEquipeCard.text = "Carregando..."
+        txtEquipeCard.text = getString(R.string.perfil_carregando)
 
         cardAvatar.setOnClickListener { abrirGaleria() }
         cardCamera.setOnClickListener { abrirGaleria() }
@@ -104,24 +103,26 @@ class perfil : BaseActivity() {
             auth.signOut()
             prefs.edit()
                 .putBoolean("logado", false)
-                .remove("emailUsuario")
+                .remove(KEY_EMAIL_USUARIO)
                 .remove("nomeUsuario")
                 .remove("profissaoUsuario")
                 .apply()
-            Toast.makeText(this, "Saindo da conta...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.perfil_saindo),
+                Toast.LENGTH_SHORT
+            ).show()
             startActivity(Intent(this, LoginActivity::class.java))
             finishAffinity()
         }
 
         configurarBottomNavigation(R.id.nav_profile)
 
-        // ✅ Aguarda o Firebase Auth restaurar (sem travar a UI)
         lifecycleScope.launch {
-            // Usa o SessionHelper se existir; senao, espera simples
             val emailConfirmado = try {
                 SessionHelper.aguardarFirebaseAuth(this@perfil)
             } catch (e: Exception) {
-                Log.e("PERFIL", "SessionHelper falhou: ${e.message}")
+                Log.e(TAG, "SessionHelper falhou: ${e.message}")
                 email
             }
 
@@ -130,34 +131,31 @@ class perfil : BaseActivity() {
                 txtEmailPerfil.text = email
             }
 
-            // Agora carrega com RETRY
             carregarDados(txtNomePerfil, txtProfissaoPerfil, txtProfissaoCard, txtEquipeCard)
             carregarLinksComRetry()
             carregarFotoPerfilComRetry()
         }
     }
 
-    // ============================================================
-    // ABRIR GALERIA
-    // ============================================================
     private fun abrirGaleria() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         selecionarImagem.launch(intent)
     }
 
-    // ============================================================
-    // UPLOAD DA FOTO
-    // ============================================================
     private fun fazerUploadImagem(uri: Uri) {
-        Toast.makeText(this, "Enviando foto...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            this,
+            getString(R.string.perfil_enviando_foto),
+            Toast.LENGTH_SHORT
+        ).show()
 
         MediaManager.get().upload(uri)
             .unsigned("fqb729sb")
             .option("folder", "avatares/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {
-                    Log.d("UPLOAD", "Iniciando upload...")
+                    Log.d(TAG_UPLOAD, "Iniciando upload...")
                 }
 
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
@@ -168,15 +166,23 @@ class perfil : BaseActivity() {
                         runOnUiThread { salvarUrlNoFirestore(url) }
                     } else {
                         runOnUiThread {
-                            Toast.makeText(this@perfil, "Erro: URL nao encontrada", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                this@perfil,
+                                getString(R.string.perfil_erro_url_nao_encontrada),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }
 
                 override fun onError(requestId: String?, error: com.cloudinary.android.callback.ErrorInfo?) {
-                    Log.e("UPLOAD", "Erro: ${error?.description}")
+                    Log.e(TAG_UPLOAD, "Erro: ${error?.description}")
                     runOnUiThread {
-                        Toast.makeText(this@perfil, "Erro no upload: ${error?.description}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@perfil,
+                            getString(R.string.perfil_erro_upload, error?.description ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
 
@@ -185,9 +191,6 @@ class perfil : BaseActivity() {
             .dispatch()
     }
 
-    // ============================================================
-    // SALVA URL NO FIRESTORE
-    // ============================================================
     private fun salvarUrlNoFirestore(url: String) {
         lifecycleScope.launch {
             try {
@@ -198,7 +201,11 @@ class perfil : BaseActivity() {
                     .circleCrop()
                     .into(imgAvatar)
                 txtIniciais.visibility = View.GONE
-                Toast.makeText(this@perfil, "Foto atualizada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@perfil,
+                    getString(R.string.perfil_foto_atualizada),
+                    Toast.LENGTH_SHORT
+                ).show()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@perfil,
@@ -209,19 +216,17 @@ class perfil : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // CARREGA FOTO DO PERFIL (com retry)
-    // ============================================================
     private fun carregarFotoPerfilComRetry() {
         lifecycleScope.launch {
             var tentativas = 0
             val maxTentativas = 10
+            val fallbackIniciais = getString(R.string.perfil_iniciais_fallback)
 
             while (tentativas < maxTentativas) {
                 try {
                     val usuarioDoc = db.collection("usuarios").document(email).get().await()
                     val fotoUrl = usuarioDoc.getString("fotoUrl") ?: ""
-                    val nome = usuarioDoc.getString("nome") ?: "ME"
+                    val nome = usuarioDoc.getString("nome") ?: fallbackIniciais
 
                     if (fotoUrl.isNotEmpty()) {
                         Glide.with(this@perfil)
@@ -235,7 +240,7 @@ class perfil : BaseActivity() {
                             .take(2)
                             .map { it.firstOrNull()?.uppercase() ?: "" }
                             .joinToString("")
-                        txtIniciais.text = iniciais.ifEmpty { "ME" }
+                        txtIniciais.text = iniciais.ifEmpty { fallbackIniciais }
                         txtIniciais.visibility = View.VISIBLE
                         imgAvatar.setImageDrawable(null)
                     }
@@ -243,7 +248,7 @@ class perfil : BaseActivity() {
 
                 } catch (e: Exception) {
                     tentativas++
-                    Log.w("PERFIL", "Foto tentativa $tentativas falhou: ${e.message}")
+                    Log.w(TAG, "Foto tentativa $tentativas falhou: ${e.message}")
                     if (tentativas >= maxTentativas) return@launch
                     delay(2000)
                 }
@@ -251,9 +256,6 @@ class perfil : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // CARREGA DADOS DO USUARIO (com retry)
-    // ============================================================
     private fun carregarDados(
         txtNomePerfil: TextView,
         txtProfissaoPerfil: TextView,
@@ -261,19 +263,24 @@ class perfil : BaseActivity() {
         txtEquipeCard: TextView
     ) {
         lifecycleScope.launch {
-            //  LOGS DE DIAGNOSTICO
-            Log.e("PERFIL", "===== DEBUG AUTH =====")
-            Log.e("PERFIL", "auth.currentUser: ${auth.currentUser?.email}")
-            Log.e("PERFIL", "auth.currentUser?.uid: ${auth.currentUser?.uid}")
-            Log.e("PERFIL", "FirebaseApp: ${com.google.firebase.FirebaseApp.getInstance().name}")
+            Log.e(TAG, "===== DEBUG AUTH =====")
+            Log.e(TAG, "auth.currentUser: ${auth.currentUser?.email}")
+            Log.e(TAG, "auth.currentUser?.uid: ${auth.currentUser?.uid}")
+
             var tentativas = 0
             val maxTentativas = 10
+
+            // ✅ Fallbacks traduzidos capturados UMA VEZ
+            val fallbackNome = getString(R.string.perfil_nome_fallback)
+            val fallbackProfissao = getString(R.string.perfil_profissao_fallback)
+            val fallbackNenhumaEquipe = getString(R.string.perfil_nenhuma_equipe)
+            val fallbackErro = getString(R.string.perfil_erro_carregar)
 
             while (tentativas < maxTentativas) {
                 try {
                     val usuarioDoc = db.collection("usuarios").document(email).get().await()
-                    val nome = usuarioDoc.getString("nome") ?: "Usuário"
-                    val profissao = usuarioDoc.getString("profissao") ?: "Profissão"
+                    val nome = usuarioDoc.getString("nome") ?: fallbackNome
+                    val profissao = usuarioDoc.getString("profissao") ?: fallbackProfissao
 
                     txtNomePerfil.text = nome
                     txtProfissaoPerfil.text = profissao
@@ -297,23 +304,23 @@ class perfil : BaseActivity() {
                         if (!membro.isEmpty) {
                             val equipeId = membro.documents[0].getString("equipeId") ?: ""
                             val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-                            txtEquipeCard.text = equipeDoc.getString("nome") ?: "Nenhuma equipe"
+                            txtEquipeCard.text = equipeDoc.getString("nome") ?: fallbackNenhumaEquipe
                         } else {
-                            txtEquipeCard.text = "Nenhuma equipe"
+                            txtEquipeCard.text = fallbackNenhumaEquipe
                         }
                     }
 
-                    Log.d("PERFIL", "✅ Dados carregados na tentativa ${tentativas + 1}")
+                    Log.d(TAG, "Dados carregados na tentativa ${tentativas + 1}")
                     return@launch
 
                 } catch (e: Exception) {
                     tentativas++
-                    Log.w("PERFIL", "Dados tentativa $tentativas falhou: ${e.message}")
+                    Log.w(TAG, "Dados tentativa $tentativas falhou: ${e.message}")
 
                     if (tentativas >= maxTentativas) {
-                        txtNomePerfil.text = "Erro ao carregar"
+                        txtNomePerfil.text = fallbackErro
                         txtProfissaoPerfil.text = "-"
-                        txtEquipeCard.text = "Erro ao carregar"
+                        txtEquipeCard.text = fallbackErro
                         return@launch
                     }
                     delay(2000)
@@ -322,9 +329,6 @@ class perfil : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // CARREGA OS LINKS (com retry)
-    // ============================================================
     private fun carregarLinksComRetry() {
         lifecycleScope.launch {
             var tentativas = 0
@@ -336,7 +340,7 @@ class perfil : BaseActivity() {
                     return@launch
                 } catch (e: Exception) {
                     tentativas++
-                    Log.w("PERFIL", "Links tentativa $tentativas falhou: ${e.message}")
+                    Log.w(TAG, "Links tentativa $tentativas falhou: ${e.message}")
                     if (tentativas >= maxTentativas) return@launch
                     delay(2000)
                 }
@@ -387,6 +391,12 @@ class perfil : BaseActivity() {
 
         val inflater = LayoutInflater.from(this@perfil)
 
+        // ✅ Strings capturadas UMA VEZ
+        val msgLinkInvalido = getString(R.string.perfil_link_invalido)
+        val removerTitulo = getString(R.string.perfil_remover_link_titulo)
+        val removerMsg = getString(R.string.perfil_remover_link_msg)
+        val removerSim = getString(R.string.perfil_remover_link_sim)
+
         linksMigrados.forEachIndexed { index, link ->
             val tipo = link["tipo"] ?: "outro"
             val url = link["url"] ?: ""
@@ -412,15 +422,15 @@ class perfil : BaseActivity() {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                     startActivity(intent)
                 } catch (e: Exception) {
-                    Toast.makeText(this@perfil, "Link inválido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@perfil, msgLinkInvalido, Toast.LENGTH_SHORT).show()
                 }
             }
 
             btnRemover.setOnClickListener {
                 AlertDialog.Builder(this@perfil)
-                    .setTitle("Remover link")
-                    .setMessage("Deseja remover este link?")
-                    .setPositiveButton("Sim") { _, _ ->
+                    .setTitle(removerTitulo)
+                    .setMessage(removerMsg)
+                    .setPositiveButton(removerSim) { _, _ ->
                         removerLink(index)
                     }
                     .setNegativeButton(R.string.cancelar, null)
@@ -431,9 +441,6 @@ class perfil : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // IDENTIFICA A LOGO
-    // ============================================================
     private fun identificarLogo(url: String, tipo: String): Triple<String, String, String> {
         val urlLower = url.lowercase()
 
@@ -463,9 +470,6 @@ class perfil : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // ENCURTA URL
-    // ============================================================
     private fun encurtarUrl(url: String): String {
         return try {
             val uri = Uri.parse(url)
@@ -478,9 +482,6 @@ class perfil : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // DIALOGO ADICIONAR LINK
-    // ============================================================
     private fun abrirDialogAdicionarLink() {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -488,14 +489,14 @@ class perfil : BaseActivity() {
         }
 
         val txtTitulo = TextView(this).apply {
-            text = "Cole a URL do link:"
+            text = getString(R.string.perfil_link_instrucao)
             setTextColor(Color.parseColor("#666666"))
             textSize = 14f
             setPadding(0, 0, 0, 20)
         }
 
         val edtUrl = EditText(this).apply {
-            hint = "https://..."
+            hint = getString(R.string.perfil_link_hint)
             inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
         }
 
@@ -503,18 +504,26 @@ class perfil : BaseActivity() {
         layout.addView(edtUrl)
 
         AlertDialog.Builder(this)
-            .setTitle("Adicionar Link")
+            .setTitle(getString(R.string.perfil_link_titulo))
             .setView(layout)
             .setPositiveButton(R.string.salvar) { _, _ ->
                 val url = edtUrl.text.toString().trim()
 
                 if (url.isEmpty()) {
-                    Toast.makeText(this, "Digite uma URL", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.perfil_link_digite_url),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setPositiveButton
                 }
 
                 if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                    Toast.makeText(this, "A URL deve comecar com http:// ou https://", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.perfil_link_formato_invalido),
+                        Toast.LENGTH_LONG
+                    ).show()
                     return@setPositiveButton
                 }
 
@@ -524,9 +533,6 @@ class perfil : BaseActivity() {
             .show()
     }
 
-    // ============================================================
-    // SALVA LINK
-    // ============================================================
     private fun salvarLink(url: String) {
         val urlLower = url.lowercase()
 
@@ -558,7 +564,11 @@ class perfil : BaseActivity() {
                 db.collection("usuarios").document(email)
                     .update("links", novosLinks).await()
 
-                Toast.makeText(this@perfil, "Link adicionado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@perfil,
+                    getString(R.string.perfil_link_adicionado),
+                    Toast.LENGTH_SHORT
+                ).show()
                 carregarLinksComRetry()
             } catch (e: Exception) {
                 Toast.makeText(
@@ -570,9 +580,6 @@ class perfil : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // REMOVE LINK
-    // ============================================================
     private fun removerLink(index: Int) {
         lifecycleScope.launch {
             try {
@@ -580,7 +587,11 @@ class perfil : BaseActivity() {
                 val linksAtuais = usuarioDoc.get("links") as? List<Map<String, String>> ?: emptyList()
 
                 if (index !in linksAtuais.indices) {
-                    Toast.makeText(this@perfil, "Link nao encontrado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@perfil,
+                        getString(R.string.perfil_link_nao_encontrado),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@launch
                 }
 
@@ -589,7 +600,11 @@ class perfil : BaseActivity() {
                 db.collection("usuarios").document(email)
                     .update("links", novosLinks).await()
 
-                Toast.makeText(this@perfil, "Link removido", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@perfil,
+                    getString(R.string.perfil_link_removido),
+                    Toast.LENGTH_SHORT
+                ).show()
                 carregarLinksComRetry()
             } catch (e: Exception) {
                 Toast.makeText(
@@ -599,5 +614,12 @@ class perfil : BaseActivity() {
                 ).show()
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "PERFIL"
+        private const val TAG_UPLOAD = "UPLOAD"
+        private const val PREFS_NAME = "CTR_PREFS"
+        private const val KEY_EMAIL_USUARIO = "emailUsuario"
     }
 }

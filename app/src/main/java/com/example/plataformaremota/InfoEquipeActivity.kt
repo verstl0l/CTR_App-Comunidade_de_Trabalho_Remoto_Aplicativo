@@ -10,14 +10,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class InfoEquipeActivity : AppCompatActivity() {
+class InfoEquipeActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -38,7 +37,7 @@ class InfoEquipeActivity : AppCompatActivity() {
         equipeId = intent.getStringExtra("equipeId") ?: ""
 
         if (equipeId.isEmpty()) {
-            Toast.makeText(this, "Equipe não encontrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.info_equipe_nao_encontrada), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -78,13 +77,13 @@ class InfoEquipeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-                nomeEquipe = equipeDoc.getString("nome") ?: "Equipe"
+                nomeEquipe = equipeDoc.getString("nome") ?: getString(R.string.info_equipe_nome_fallback)
                 criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
                 ehDono = criadorEmail == emailUsuario
 
                 findViewById<TextView>(R.id.txtNomeEquipeInfo).text = nomeEquipe
                 findViewById<TextView>(R.id.txtDescricaoEquipeInfo).text =
-                    equipeDoc.getString("descricao") ?: "Sem descrição"
+                    equipeDoc.getString("descricao") ?: getString(R.string.info_equipe_sem_descricao)
 
                 val membro = db.collection("membros_equipe")
                     .whereEqualTo("equipeId", equipeId)
@@ -117,7 +116,7 @@ class InfoEquipeActivity : AppCompatActivity() {
                 carregarMembros()
 
             } catch (e: Exception) {
-                Log.e("INFO_EQUIPE", "Erro: ${e.message}")
+                Log.e(TAG, "Erro: ${e.message}")
             }
         }
     }
@@ -137,7 +136,7 @@ class InfoEquipeActivity : AppCompatActivity() {
 
                 if (membros.isEmpty) {
                     val txtVazio = TextView(this@InfoEquipeActivity).apply {
-                        text = "Nenhum membro ainda"
+                        text = getString(R.string.info_equipe_nenhum_membro)
                         setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
                         textSize = 14f
                         setPadding(0, 16, 0, 16)
@@ -146,9 +145,14 @@ class InfoEquipeActivity : AppCompatActivity() {
                     return@launch
                 }
 
+                // ✅ Captura strings traduzidas UMA VEZ
+                val labelAdmin = getString(R.string.info_equipe_funcao_admin)
+                val labelMembro = getString(R.string.info_equipe_funcao_membro)
+                val nomeFallback = getString(R.string.info_equipe_usuario_fallback)
+
                 membros.documents.forEach { doc ->
                     val emailMembro = doc.getString("email") ?: ""
-                    val nomeMembro = doc.getString("nome") ?: "Usuário"
+                    val nomeMembro = doc.getString("nome") ?: nomeFallback
                     val funcao = doc.getString("funcao") ?: "membro"
 
                     val view = inflater.inflate(R.layout.item_membro_info, container, false)
@@ -157,7 +161,7 @@ class InfoEquipeActivity : AppCompatActivity() {
                     val txtFuncao = view.findViewById<TextView>(R.id.txtFuncaoMembro)
 
                     txtNome.text = nomeMembro
-                    txtFuncao.text = if (funcao == "administrador") "Administrador" else "Membro"
+                    txtFuncao.text = if (funcao == "administrador") labelAdmin else labelMembro
 
                     view.setOnClickListener {
                         mostrarOpcoesMembro(emailMembro, nomeMembro)
@@ -167,30 +171,33 @@ class InfoEquipeActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("INFO_EQUIPE", "Erro membros: ${e.message}")
+                Log.e(TAG, "Erro membros: ${e.message}")
             }
         }
     }
 
     private fun mostrarOpcoesMembro(email: String, nome: String) {
+        // ✅ Captura strings traduzidas ANTES do when
+        val opConversar = getString(R.string.info_equipe_op_conversar_pv)
+        val opVerPerfil = getString(R.string.info_equipe_op_ver_perfil)
+        val opVerMeuPerfil = getString(R.string.info_equipe_op_ver_meu_perfil)
+
         val opcoes = mutableListOf<String>()
 
         if (email != emailUsuario) {
-            opcoes.add("Conversar no PV")
-            opcoes.add("Ver perfil")
+            opcoes.add(opConversar)
+            opcoes.add(opVerPerfil)
         } else {
-            opcoes.add("Ver meu perfil")
+            opcoes.add(opVerMeuPerfil)
         }
 
         AlertDialog.Builder(this)
             .setTitle(nome)
             .setItems(opcoes.toTypedArray()) { _, which ->
                 when (opcoes[which]) {
-                    "Conversar no PV" -> abrirChatPV(email)
-                    "Ver perfil" -> abrirPerfil(email)
-                    "Ver meu perfil" -> {
-                        startActivity(Intent(this, perfil::class.java))
-                    }
+                    opConversar -> abrirChatPV(email)
+                    opVerPerfil -> abrirPerfil(email)
+                    opVerMeuPerfil -> startActivity(Intent(this, perfil::class.java))
                 }
             }
             .show()
@@ -226,7 +233,11 @@ class InfoEquipeActivity : AppCompatActivity() {
                 startActivity(intent)
 
             } catch (e: Exception) {
-                Toast.makeText(this@InfoEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@InfoEquipeActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -239,9 +250,9 @@ class InfoEquipeActivity : AppCompatActivity() {
 
     private fun confirmarSairEquipe() {
         AlertDialog.Builder(this)
-            .setTitle("Sair da equipe")
-            .setMessage("Tem certeza que deseja sair da equipe $nomeEquipe?")
-            .setPositiveButton("Sair") { _, _ ->
+            .setTitle(getString(R.string.info_equipe_sair_titulo))
+            .setMessage(getString(R.string.info_equipe_sair_mensagem, nomeEquipe))
+            .setPositiveButton(getString(R.string.info_equipe_sair_confirmar)) { _, _ ->
                 lifecycleScope.launch {
                     try {
                         val membro = db.collection("membros_equipe")
@@ -253,42 +264,41 @@ class InfoEquipeActivity : AppCompatActivity() {
                             db.collection("membros_equipe").document(doc.id).delete().await()
                         }
 
-                        Toast.makeText(this@InfoEquipeActivity, "Você saiu da equipe", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@InfoEquipeActivity,
+                            getString(R.string.info_equipe_saiu_sucesso),
+                            Toast.LENGTH_SHORT
+                        ).show()
                         startActivity(Intent(this@InfoEquipeActivity, MainActivity::class.java))
                         finishAffinity()
                     } catch (e: Exception) {
-                        Toast.makeText(this@InfoEquipeActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@InfoEquipeActivity,
+                            getString(R.string.erro_generico, e.message ?: ""),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.info_equipe_cancelar), null)
             .show()
     }
 
-    // ============================================================
-    // ✅ BUG CORRIGIDO: deleta subcoleções antes do doc raiz
-    // ============================================================
     private fun confirmarExcluirEquipe() {
         AlertDialog.Builder(this)
-            .setTitle("Excluir equipe")
-            .setMessage("Tem certeza? Todos os dados serão removidos permanentemente.")
-            .setPositiveButton("Excluir") { _, _ ->
+            .setTitle(getString(R.string.info_equipe_excluir_titulo))
+            .setMessage(getString(R.string.info_equipe_excluir_mensagem))
+            .setPositiveButton(getString(R.string.info_equipe_excluir_confirmar)) { _, _ ->
                 lifecycleScope.launch {
                     try {
-                        // 1. Anexos e comentarios dos trabalhos (deletar ANTES dos trabalhos)
+                        // 1. Anexos e comentarios dos trabalhos
                         val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", equipeId).get().await()
                         for (trabalho in trabalhos.documents) {
-                            // Anexos
                             val anexos = trabalho.reference.collection("anexos").get().await()
-                            anexos.documents.forEach { anexo ->
-                                anexo.reference.delete().await()
-                            }
+                            anexos.documents.forEach { anexo -> anexo.reference.delete().await() }
 
-                            // Comentarios
                             val comentarios = trabalho.reference.collection("comentarios").get().await()
-                            comentarios.documents.forEach { comentario ->
-                                comentario.reference.delete().await()
-                            }
+                            comentarios.documents.forEach { comentario -> comentario.reference.delete().await() }
                         }
 
                         // 2. Trabalhos
@@ -306,7 +316,7 @@ class InfoEquipeActivity : AppCompatActivity() {
                         val pedidos = db.collection("pedidos_entrada").whereEqualTo("equipeId", equipeId).get().await()
                         pedidos.documents.forEach { db.collection("pedidos_entrada").document(it.id).delete().await() }
 
-                        // 6. Mensagens do chat de equipe ANTES do doc raiz
+                        // 6. Mensagens do chat de equipe
                         val msgsEquipe = db.collection("chats_equipe").document(equipeId)
                             .collection("mensagens").get().await()
                         msgsEquipe.documents.forEach {
@@ -314,7 +324,7 @@ class InfoEquipeActivity : AppCompatActivity() {
                                 .collection("mensagens").document(it.id).delete().await()
                         }
 
-                        // 7. Grupos + suas mensagens
+                        // 7. Grupos + mensagens
                         val grupos = db.collection("grupos").whereEqualTo("equipeId", equipeId).get().await()
                         grupos.documents.forEach { grupoDoc ->
                             val msgsGrupo = grupoDoc.reference.collection("mensagens").get().await()
@@ -328,7 +338,11 @@ class InfoEquipeActivity : AppCompatActivity() {
                         // 9. Equipe
                         db.collection("equipes").document(equipeId).delete().await()
 
-                        Toast.makeText(this@InfoEquipeActivity, "Equipe excluída!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@InfoEquipeActivity,
+                            getString(R.string.info_equipe_excluida_sucesso),
+                            Toast.LENGTH_SHORT
+                        ).show()
                         startActivity(Intent(this@InfoEquipeActivity, MainActivity::class.java))
                         finishAffinity()
 
@@ -341,7 +355,11 @@ class InfoEquipeActivity : AppCompatActivity() {
                     }
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.info_equipe_cancelar), null)
             .show()
+    }
+
+    companion object {
+        private const val TAG = "INFO_EQUIPE"
     }
 }

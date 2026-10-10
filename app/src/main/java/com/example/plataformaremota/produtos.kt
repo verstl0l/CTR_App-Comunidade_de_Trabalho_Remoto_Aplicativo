@@ -9,30 +9,24 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class produtos : AppCompatActivity() {
+class produtos : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var equipeIdAtual: String? = null
     private var filtroAtual: String = "todos"
 
-    // ✅ Cache local de trabalhos
     private var todosTrabalhos: List<DocumentSnapshot> = emptyList()
-
-    // ✅ Listener pra atualizar em tempo real
     private var listenerTrabalhos: ListenerRegistration? = null
 
-    // ✅ Referência do container (pra reusar)
     private lateinit var containerTrabalhos: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +44,7 @@ class produtos : AppCompatActivity() {
                     equipeIdAtual = equipeIdIntent
                     setContentView(R.layout.activity_produtos)
                     configurarDashboard(email)
-                    configurarBottomNavigation()
+                    configurarBottomNavigation(R.id.nav_groups)
                     return@launch
                 }
 
@@ -64,31 +58,35 @@ class produtos : AppCompatActivity() {
                     equipeIdAtual = equipeCriador.documents[0].id
                     setContentView(R.layout.activity_produtos)
                     configurarDashboard(email)
-                    configurarBottomNavigation()
+                    configurarBottomNavigation(R.id.nav_groups)
                     return@launch
                 }
 
                 setContentView(R.layout.activity_produtos_vazio)
                 configurarTelaVazia()
-                configurarBottomNavigation()
+                configurarBottomNavigation(R.id.nav_groups)
 
             } catch (e: Exception) {
-                Log.e("PRODUTOS", "Erro: ${e.message}")
-                Toast.makeText(this@produtos, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e(TAG, "Erro: ${e.message}")
+                Toast.makeText(
+                    this@produtos,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // ✅ Remove listener
         listenerTrabalhos?.remove()
         listenerTrabalhos = null
     }
 
     private fun configurarDashboard(email: String) {
-        val prefs = getSharedPreferences("CTR_PREFS", MODE_PRIVATE)
-        val nomeUsuario = prefs.getString("nomeUsuario", "Usuário") ?: "Usuário"
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val nomeUsuario = prefs.getString(KEY_NOME_USUARIO, "")
+            ?: getString(R.string.produtos_usuario_fallback)
 
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeDashboard)
         val txtCriador = findViewById<TextView>(R.id.txtCriadorEquipeDashboard)
@@ -99,7 +97,6 @@ class produtos : AppCompatActivity() {
         val btnProdutividade = findViewById<Button>(R.id.btnProdutividade)
         val btnChatEquipe = findViewById<Button>(R.id.btnChatEquipe)
 
-        // ✅ Guarda o container pra reusar
         containerTrabalhos = findViewById(R.id.containerTrabalhosRecentes)
 
         btnProdutividade.setOnClickListener {
@@ -119,7 +116,6 @@ class produtos : AppCompatActivity() {
         val btnFiltroProgresso = findViewById<TextView>(R.id.btnFiltroProgresso)
         val btnFiltroConcluido = findViewById<TextView>(R.id.btnFiltroConcluido)
 
-        // ✅ Trocar filtro só renderiza em memória (instantâneo)
         btnFiltroTodos.setOnClickListener {
             filtroAtual = "todos"
             atualizarBotoesFiltro(btnFiltroTodos, btnFiltroPendente, btnFiltroProgresso, btnFiltroConcluido)
@@ -141,28 +137,28 @@ class produtos : AppCompatActivity() {
             aplicarFiltro()
         }
 
-        txtCriador.text = "Criado por $nomeUsuario"
+        // ✅ Placeholder na string
+        txtCriador.text = getString(R.string.produtos_criado_por, nomeUsuario)
 
         lifecycleScope.launch {
             try {
                 val equipeDoc = db.collection("equipes").document(equipeIdAtual!!).get().await()
-                val nome = equipeDoc.getString("nome") ?: "Equipe"
+                val nome = equipeDoc.getString("nome") ?: getString(R.string.produtos_equipe_fallback)
                 val descricao = equipeDoc.getString("descricao") ?: ""
 
                 txtNomeEquipe.text = nome
-                txtDescricao.text = descricao.ifEmpty { "Nenhuma descrição" }
+                txtDescricao.text = descricao.ifEmpty { getString(R.string.produtos_sem_descricao) }
 
                 val iniciais = nome.split(" ")
                     .take(2)
                     .map { palavra -> palavra.firstOrNull()?.uppercase() ?: "" }
                     .joinToString("")
-                txtLogo.text = iniciais.ifEmpty { "EQ" }
+                txtLogo.text = iniciais.ifEmpty { getString(R.string.produtos_logo_fallback) }
 
-                // ✅ Inicia listener de trabalhos em tempo real
                 iniciarListenerTrabalhos()
 
             } catch (e: Exception) {
-                Log.e("PRODUTOS", "Erro ao carregar equipe: ${e.message}")
+                Log.e(TAG, "Erro ao carregar equipe: ${e.message}")
             }
         }
 
@@ -179,9 +175,6 @@ class produtos : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ✅ LISTENER DE TRABALHOS EM TEMPO REAL
-    // ============================================================
     private fun iniciarListenerTrabalhos() {
         listenerTrabalhos?.remove()
 
@@ -191,22 +184,16 @@ class produtos : AppCompatActivity() {
             .whereEqualTo("equipeId", eqId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Log.e("PRODUTOS", "Erro listener: ${error.message}")
+                    Log.e(TAG, "Erro listener: ${error.message}")
                     return@addSnapshotListener
                 }
                 if (snapshot == null) return@addSnapshotListener
 
-                // ✅ Guarda em memória
                 todosTrabalhos = snapshot.documents
-
-                // ✅ Aplica filtro atual (sem nova query)
                 aplicarFiltro()
             }
     }
 
-    // ============================================================
-    // ✅ APLICAR FILTRO (só em memória)
-    // ============================================================
     private fun aplicarFiltro() {
         val filtrados = if (filtroAtual == "todos") {
             todosTrabalhos
@@ -225,33 +212,25 @@ class produtos : AppCompatActivity() {
         btnProgresso: TextView,
         btnConcluido: TextView
     ) {
-        btnTodos.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
-        btnTodos.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
-        btnPendente.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
-        btnPendente.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
-        btnProgresso.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
-        btnProgresso.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
-        btnConcluido.setBackgroundColor(android.graphics.Color.parseColor("#3D2B27"))
-        btnConcluido.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+        val inativo = android.graphics.Color.parseColor("#3D2B27")
+        val ativo = android.graphics.Color.parseColor("#F5E6D0")
+        val textoInativo = android.graphics.Color.WHITE
+        val textoAtivo = android.graphics.Color.parseColor("#1C1311")
 
-        when (filtroAtual) {
-            "todos" -> {
-                btnTodos.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
-                btnTodos.setTextColor(android.graphics.Color.parseColor("#1C1311"))
-            }
-            "pendente" -> {
-                btnPendente.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
-                btnPendente.setTextColor(android.graphics.Color.parseColor("#1C1311"))
-            }
-            "em_progresso" -> {
-                btnProgresso.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
-                btnProgresso.setTextColor(android.graphics.Color.parseColor("#1C1311"))
-            }
-            "concluido" -> {
-                btnConcluido.setBackgroundColor(android.graphics.Color.parseColor("#F5E6D0"))
-                btnConcluido.setTextColor(android.graphics.Color.parseColor("#1C1311"))
-            }
+        listOf(btnTodos, btnPendente, btnProgresso, btnConcluido).forEach {
+            it.setBackgroundColor(inativo)
+            it.setTextColor(textoInativo)
         }
+
+        val btnAtivo = when (filtroAtual) {
+            "todos" -> btnTodos
+            "pendente" -> btnPendente
+            "em_progresso" -> btnProgresso
+            "concluido" -> btnConcluido
+            else -> btnTodos
+        }
+        btnAtivo.setBackgroundColor(ativo)
+        btnAtivo.setTextColor(textoAtivo)
     }
 
     private fun configurarTelaVazia() {
@@ -270,7 +249,7 @@ class produtos : AppCompatActivity() {
 
         if (trabalhos.isEmpty()) {
             val txtVazio = TextView(this).apply {
-                text = "Nenhum trabalho encontrado"
+                text = getString(R.string.entregar_nenhum_trabalho)
                 setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
                 textSize = 14f
                 setPadding(0, 16, 0, 16)
@@ -279,6 +258,13 @@ class produtos : AppCompatActivity() {
             return
         }
 
+        // ✅ Fallbacks traduzidos UMA VEZ
+        val fallbackSemTitulo = getString(R.string.meus_trabalhos_sem_titulo)
+        val fallbackSemPrazo = getString(R.string.meus_trabalhos_sem_prazo)
+        val labelPendente = getString(R.string.status_pendente)
+        val labelProgresso = getString(R.string.status_em_progresso)
+        val labelConcluido = getString(R.string.status_concluido)
+
         trabalhos.forEach { doc ->
             val itemView = inflater.inflate(R.layout.item_trabalho_dashboard, container, false)
 
@@ -286,21 +272,24 @@ class produtos : AppCompatActivity() {
             val txtStatus = itemView.findViewById<TextView>(R.id.txtStatusItem)
             val txtPrazo = itemView.findViewById<TextView>(R.id.txtPrazoItem)
 
-            txtTitulo.text = doc.getString("titulo") ?: "Sem título"
-            txtPrazo.text = "Entrega: ${doc.getString("prazo") ?: "Sem prazo"}"
+            txtTitulo.text = doc.getString("titulo") ?: fallbackSemTitulo
+            txtPrazo.text = getString(
+                R.string.meus_trabalhos_entrega_formatado,
+                doc.getString("prazo") ?: fallbackSemPrazo
+            )
 
             val status = doc.getString("status") ?: "pendente"
             when (status) {
                 "pendente" -> {
-                    txtStatus.text = "Pendente"
+                    txtStatus.text = labelPendente
                     txtStatus.setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
                 }
                 "em_progresso" -> {
-                    txtStatus.text = "Em Progresso"
+                    txtStatus.text = labelProgresso
                     txtStatus.setTextColor(android.graphics.Color.parseColor("#F5E6D0"))
                 }
                 "concluido" -> {
-                    txtStatus.text = "Concluído"
+                    txtStatus.text = labelConcluido
                     txtStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
                 }
             }
@@ -309,41 +298,9 @@ class produtos : AppCompatActivity() {
         }
     }
 
-    private fun configurarBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_chat -> {
-                    startActivity(Intent(this, ListaConversasActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_groups -> {
-                    startActivity(Intent(this, MinhasEquipesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_notifications -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, perfil::class.java))
-                    finish()
-                    true
-                }
-                else -> false
-            }
-        }
-
-        lifecycleScope.launch {
-            BadgeHelper.atualizarBadgeChat(this@produtos, bottomNav)
-        }
+    companion object {
+        private const val TAG = "PRODUTOS"
+        private const val PREFS_NAME = "CTR_PREFS"
+        private const val KEY_NOME_USUARIO = "nomeUsuario"
     }
 }

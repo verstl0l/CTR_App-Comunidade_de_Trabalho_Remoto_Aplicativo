@@ -18,30 +18,27 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Titulo -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:text="Notificacoes"
+                android:text="@string/notificacoes_titulo"
                 android:textColor="@color/text_primary"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <!-- Botao marcar todas como lidas -->
             <Button
                 android:id="@+id/btnMarcarTodasLidas"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:text="Marcar todas como lidas"
+                android:text="@string/notificacoes_btn_marcar_todas"
                 android:textColor="@color/accent"
                 android:textSize="12sp" />
 
-            <!-- Estado vazio -->
             <LinearLayout
                 android:id="@+id/containerVazio"
                 android:layout_width="match_parent"
@@ -54,7 +51,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nenhuma notificacao"
+                    android:text="@string/notificacoes_vazio_titulo"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -63,15 +60,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Aqui aparecerao seus convites, trabalhos e novidades"
                     android:gravity="center"
                     android:paddingHorizontal="32dp"
+                    android:text="@string/notificacoes_vazio_subtitulo"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
             </LinearLayout>
 
-            <!-- Container dinâmico -->
             <LinearLayout
                 android:id="@+id/containerNotificacoes"
                 android:layout_width="match_parent"

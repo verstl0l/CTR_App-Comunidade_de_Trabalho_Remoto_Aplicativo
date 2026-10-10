@@ -32,7 +32,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="📊 Produtividade"
+                android:text="@string/produtividade_titulo"
                 android:textColor="@color/text_primary"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -56,7 +56,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TOTAL DE TRABALHOS"
+                        android:text="@string/produtividade_total_trabalhos"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -94,7 +94,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="DISTRIBUICAO POR STATUS"
+                        android:text="@string/produtividade_distribuicao_status"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -127,7 +127,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="PRODUTIVIDADE POR MEMBRO"
+                        android:text="@string/produtividade_por_membro_grafico"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -160,7 +160,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="POR STATUS"
+                        android:text="@string/produtividade_por_status"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -181,7 +181,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Concluído"
+                                android:text="@string/status_concluido"
                                 android:textColor="@color/status_concluido"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -225,7 +225,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Em Progresso"
+                                android:text="@string/status_em_progresso"
                                 android:textColor="@color/accent"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -268,7 +268,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Pendente"
+                                android:text="@string/status_pendente"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -319,7 +319,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TAXA DE CONCLUSAO"
+                        android:text="@string/produtividade_taxa_conclusao"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -338,7 +338,7 @@
                         android:id="@+id/txtDetalheTaxa"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0 de 0 trabalhos"
+                        android:text="@string/produtividade_detalhe_taxa_placeholder"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
 
@@ -367,7 +367,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="POR MEMBRO"
+                        android:text="@string/produtividade_por_membro"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold" />

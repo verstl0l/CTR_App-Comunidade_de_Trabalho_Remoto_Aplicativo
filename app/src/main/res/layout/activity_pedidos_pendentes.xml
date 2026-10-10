@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
-            android:text="←"
+            android:text="@string/pedidos_btn_voltar"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
 
@@ -35,7 +35,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pedidos de Entrada"
+                android:text="@string/pedidos_titulo"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Equipe"
+                android:text="@string/pedidos_equipe_fallback"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
@@ -67,7 +67,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Estado vazio -->
             <LinearLayout
                 android:id="@+id/containerVazioPedidos"
                 android:layout_width="match_parent"
@@ -80,7 +79,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nenhum pedido pendente"
+                    android:text="@string/pedidos_vazio_titulo"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -91,13 +90,12 @@
                     android:layout_marginTop="4dp"
                     android:gravity="center"
                     android:paddingHorizontal="32dp"
-                    android:text="Quando alguém pedir para entrar na sua equipe, aparece aqui"
+                    android:text="@string/pedidos_vazio_subtitulo"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
             </LinearLayout>
 
-            <!-- Lista dinâmica -->
             <LinearLayout
                 android:id="@+id/containerPedidos"
                 android:layout_width="match_parent"

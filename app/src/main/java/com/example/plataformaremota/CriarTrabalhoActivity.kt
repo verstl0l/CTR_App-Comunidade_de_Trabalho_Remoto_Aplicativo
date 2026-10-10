@@ -2,24 +2,21 @@ package com.example.plataformaremota
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class CriarTrabalhoActivity : AppCompatActivity() {
+class CriarTrabalhoActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -41,7 +38,6 @@ class CriarTrabalhoActivity : AppCompatActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
-        // ✅ CALENDÁRIO + HORÁRIO no campo de prazo
         edtPrazo.isFocusable = false
         edtPrazo.isClickable = true
         edtPrazo.setOnClickListener {
@@ -55,12 +51,16 @@ class CriarTrabalhoActivity : AppCompatActivity() {
             val prazo = edtPrazo.text.toString().trim()
 
             if (titulo.isEmpty() || descricao.isEmpty() || categoria.isEmpty() || prazo.isEmpty()) {
-                Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.criar_trabalho_preencher_campos),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
             btnPublicar.isEnabled = false
-            btnPublicar.text = "PUBLICANDO..."
+            btnPublicar.text = getString(R.string.criar_trabalho_publicando)
 
             lifecycleScope.launch {
                 try {
@@ -76,9 +76,13 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                             .await()
 
                         if (equipe.isEmpty) {
-                            Toast.makeText(this@CriarTrabalhoActivity, "Crie uma equipe primeiro", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@CriarTrabalhoActivity,
+                                getString(R.string.criar_trabalho_criar_equipe_primeiro),
+                                Toast.LENGTH_SHORT
+                            ).show()
                             btnPublicar.isEnabled = true
-                            btnPublicar.text = "PUBLICAR TRABALHO"
+                            btnPublicar.text = getString(R.string.criar_trabalho_btn_publicar)
                             return@launch
                         }
                         equipe.documents[0].id
@@ -109,7 +113,8 @@ class CriarTrabalhoActivity : AppCompatActivity() {
 
                     if (emailsParaNotificar.isNotEmpty()) {
                         val nomeEquipe = db.collection("equipes").document(equipeId)
-                            .get().await().getString("nome") ?: "Equipe"
+                            .get().await().getString("nome")
+                            ?: getString(R.string.criar_trabalho_equipe_fallback)
 
                         val nomeRemetente = db.collection("usuarios").document(email)
                             .get().await().getString("nome") ?: email
@@ -124,24 +129,32 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                         )
                     }
 
-                    Log.d("CRIAR_TRABALHO", "Trabalho publicado com prazo: $prazo")
-                    Toast.makeText(this@CriarTrabalhoActivity, "Trabalho publicado!", Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "Trabalho publicado com prazo: $prazo")
+                    Toast.makeText(
+                        this@CriarTrabalhoActivity,
+                        getString(R.string.criar_trabalho_publicado_sucesso),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     finish()
 
                 } catch (e: Exception) {
-                    Log.e("CRIAR_TRABALHO", "Erro: ${e.message}")
-                    Toast.makeText(this@CriarTrabalhoActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                    Log.e(TAG, "Erro: ${e.message}")
+                    Toast.makeText(
+                        this@CriarTrabalhoActivity,
+                        getString(R.string.erro_generico, e.message ?: ""),
+                        Toast.LENGTH_LONG
+                    ).show()
                     btnPublicar.isEnabled = true
-                    btnPublicar.text = "PUBLICAR TRABALHO"
+                    btnPublicar.text = getString(R.string.criar_trabalho_btn_publicar)
                 }
             }
         }
 
-        configurarBottomNavigation()
+        configurarBottomNavigation(R.id.nav_home)
     }
 
     // ============================================================
-    // ✅ CALENDÁRIO + HORÁRIO
+    // CALENDARIO + HORARIO (com i18n correto)
     // ============================================================
     private fun abrirCalendarioHorario(edtPrazo: EditText) {
         val calendario = Calendar.getInstance()
@@ -159,11 +172,17 @@ class CriarTrabalhoActivity : AppCompatActivity() {
                         calendario.set(Calendar.HOUR_OF_DAY, hora)
                         calendario.set(Calendar.MINUTE, minuto)
 
-                        val formato = SimpleDateFormat(
-                            "dd/MM/yyyy 'às' HH:mm",
-                            Locale("pt", "BR")
+                        // ✅ Formato numérico universal (não depende de locale)
+                        val formatoData = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val formatoHora = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+                        val dataStr = formatoData.format(calendario.time)
+                        val horaStr = formatoHora.format(calendario.time)
+
+                        // ✅ "às" (ou equivalente) vem do strings.xml
+                        edtPrazo.setText(
+                            getString(R.string.criar_trabalho_data_hora_formato, dataStr, horaStr)
                         )
-                        edtPrazo.setText(formato.format(calendario.time))
                     },
                     calendario.get(Calendar.HOUR_OF_DAY),
                     calendario.get(Calendar.MINUTE),
@@ -178,17 +197,7 @@ class CriarTrabalhoActivity : AppCompatActivity() {
         datePicker.show()
     }
 
-    private fun configurarBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); finish(); true }
-                R.id.nav_chat -> { startActivity(Intent(this, ListaConversasActivity::class.java)); finish(); true }
-                R.id.nav_groups -> { startActivity(Intent(this, MinhasEquipesActivity::class.java)); finish(); true }
-                R.id.nav_notifications -> { startActivity(Intent(this, NotificacoesActivity::class.java)); finish(); true }
-                R.id.nav_profile -> { startActivity(Intent(this, perfil::class.java)); finish(); true }
-                else -> false
-            }
-        }
+    companion object {
+        private const val TAG = "CRIAR_TRABALHO"
     }
 }

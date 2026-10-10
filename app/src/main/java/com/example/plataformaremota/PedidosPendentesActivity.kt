@@ -1,5 +1,6 @@
 package com.example.plataformaremota
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,20 +10,19 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class PedidosPendentesActivity : AppCompatActivity() {
+class PedidosPendentesActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
     private var equipeId: String = ""
-    private var nomeEquipe: String = "Equipe"
+    private var nomeEquipe: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +34,7 @@ class PedidosPendentesActivity : AppCompatActivity() {
         equipeId = intent.getStringExtra("equipeId") ?: ""
 
         if (equipeId.isEmpty()) {
-            Toast.makeText(this, "Equipe não encontrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.pedidos_equipe_nao_encontrada), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -42,23 +42,22 @@ class PedidosPendentesActivity : AppCompatActivity() {
         val btnVoltar = findViewById<Button>(R.id.btnVoltarPedidos)
         btnVoltar.setOnClickListener { finish() }
 
-        // Carrega nome da equipe
+        // Nome provisório da equipe enquanto carrega
+        nomeEquipe = getString(R.string.pedidos_equipe_fallback)
+
         lifecycleScope.launch {
             try {
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-                nomeEquipe = equipeDoc.getString("nome") ?: "Equipe"
+                nomeEquipe = equipeDoc.getString("nome") ?: getString(R.string.pedidos_equipe_fallback)
                 findViewById<TextView>(R.id.txtNomeEquipePedidos).text = nomeEquipe
             } catch (e: Exception) {
-                Log.e("PEDIDOS_PENDENTES", "Erro nome equipe: ${e.message}")
+                Log.e(TAG, "Erro nome equipe: ${e.message}")
             }
         }
 
         carregarPedidos()
     }
 
-    // ============================================================
-    // CARREGAR PEDIDOS PENDENTES
-    // ============================================================
     private fun carregarPedidos() {
         val container = findViewById<LinearLayout>(R.id.containerPedidos)
         val containerVazio = findViewById<LinearLayout>(R.id.containerVazioPedidos)
@@ -80,10 +79,11 @@ class PedidosPendentesActivity : AppCompatActivity() {
                 containerVazio.visibility = View.GONE
 
                 val inflater = LayoutInflater.from(this@PedidosPendentesActivity)
+                val fallbackUsuario = getString(R.string.pedidos_usuario_fallback)
 
                 pedidos.documents.forEach { doc ->
                     val pedidoId = doc.id
-                    val nomeSolicitante = doc.getString("nomeSolicitante") ?: "Usuário"
+                    val nomeSolicitante = doc.getString("nomeSolicitante") ?: fallbackUsuario
                     val emailSolicitante = doc.getString("emailSolicitante") ?: ""
                     val profissao = doc.getString("profissaoSolicitante") ?: ""
                     val motivos = doc.getString("motivos") ?: ""
@@ -105,9 +105,8 @@ class PedidosPendentesActivity : AppCompatActivity() {
                     view.findViewById<TextView>(R.id.txtMotivos).text = motivos
                     view.findViewById<TextView>(R.id.txtEspecialidades).text = especialidades
 
-                    // Botão ver perfil
                     view.findViewById<Button>(R.id.btnVerPerfilSolicitante).setOnClickListener {
-                        val i = android.content.Intent(
+                        val i = Intent(
                             this@PedidosPendentesActivity,
                             PerfilUsuarioActivity::class.java
                         )
@@ -115,12 +114,10 @@ class PedidosPendentesActivity : AppCompatActivity() {
                         startActivity(i)
                     }
 
-                    // Botão ACEITAR
                     view.findViewById<Button>(R.id.btnAceitarPedido).setOnClickListener {
                         confirmarAceitar(pedidoId, nomeSolicitante, emailSolicitante)
                     }
 
-                    // Botão RECUSAR
                     view.findViewById<Button>(R.id.btnRecusarPedido).setOnClickListener {
                         confirmarRecusar(pedidoId, nomeSolicitante, emailSolicitante)
                     }
@@ -129,36 +126,33 @@ class PedidosPendentesActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("PEDIDOS_PENDENTES", "Erro: ${e.message}")
+                Log.e(TAG, "Erro: ${e.message}")
                 Toast.makeText(
                     this@PedidosPendentesActivity,
-                    "Erro ao carregar pedidos: ${e.message}",
+                    getString(R.string.pedidos_erro_carregar, e.message ?: ""),
                     Toast.LENGTH_LONG
                 ).show()
             }
         }
     }
 
-    // ============================================================
-    // ACEITAR PEDIDO
-    // ============================================================
     private fun confirmarAceitar(pedidoId: String, nome: String, email: String) {
         AlertDialog.Builder(this)
-            .setTitle("Aceitar pedido")
-            .setMessage("Aceitar $nome na equipe $nomeEquipe?")
-            .setPositiveButton("Aceitar") { _, _ -> aceitarPedido(pedidoId, nome, email) }
-            .setNegativeButton("Cancelar", null)
+            .setTitle(getString(R.string.pedidos_aceitar_titulo))
+            .setMessage(getString(R.string.pedidos_aceitar_msg, nome, nomeEquipe))
+            .setPositiveButton(getString(R.string.pedidos_aceitar_confirmar)) { _, _ ->
+                aceitarPedido(pedidoId, nome, email)
+            }
+            .setNegativeButton(R.string.cancelar, null)
             .show()
     }
 
     private fun aceitarPedido(pedidoId: String, nome: String, email: String) {
         lifecycleScope.launch {
             try {
-                // 1. Atualiza status do pedido
                 db.collection("pedidos_entrada").document(pedidoId)
                     .update("status", "aceito").await()
 
-                // 2. Cria membro com ID determinístico
                 val membroId = "${email}_${equipeId}"
                 val jaExiste = db.collection("membros_equipe").document(membroId).get().await()
 
@@ -173,81 +167,84 @@ class PedidosPendentesActivity : AppCompatActivity() {
                     db.collection("membros_equipe").document(membroId).set(membro).await()
                 }
 
-                // 3. Notifica o solicitante
+                // ⚠️ nomeRemetente continua fixo: valor salvo no BD
                 NotificacaoHelper.notificarPedidoAceito(
                     destinatario = email,
                     remetente = emailUsuario,
-                    nomeRemetente = "Admin",
+                    nomeRemetente = getString(R.string.pedidos_nome_remetente_admin),
                     equipeId = equipeId,
                     nomeEquipe = nomeEquipe
                 )
 
                 Toast.makeText(
                     this@PedidosPendentesActivity,
-                    "✅ $nome entrou na equipe!",
+                    getString(R.string.pedidos_aceito_sucesso, nome),
                     Toast.LENGTH_SHORT
                 ).show()
 
                 carregarPedidos()
 
             } catch (e: Exception) {
-                Log.e("PEDIDOS_PENDENTES", "Erro aceitar: ${e.message}")
+                Log.e(TAG, "Erro aceitar: ${e.message}")
                 Toast.makeText(
                     this@PedidosPendentesActivity,
-                    "Erro: ${e.message}",
+                    getString(R.string.erro_generico, e.message ?: ""),
                     Toast.LENGTH_LONG
                 ).show()
             }
         }
     }
 
-    // ============================================================
-    // RECUSAR PEDIDO
-    // ============================================================
     private fun confirmarRecusar(pedidoId: String, nome: String, email: String) {
         AlertDialog.Builder(this)
-            .setTitle("Recusar pedido")
-            .setMessage("Recusar o pedido de $nome?")
-            .setPositiveButton("Recusar") { _, _ -> recusarPedido(pedidoId, nome, email) }
-            .setNegativeButton("Cancelar", null)
+            .setTitle(getString(R.string.pedidos_recusar_titulo))
+            .setMessage(getString(R.string.pedidos_recusar_msg, nome))
+            .setPositiveButton(getString(R.string.pedidos_recusar_confirmar)) { _, _ ->
+                recusarPedido(pedidoId, nome, email)
+            }
+            .setNegativeButton(R.string.cancelar, null)
             .show()
     }
 
     private fun recusarPedido(pedidoId: String, nome: String, email: String) {
         lifecycleScope.launch {
             try {
-                // 1. Atualiza status
                 db.collection("pedidos_entrada").document(pedidoId)
                     .update("status", "recusado").await()
 
-                // 2. Notifica o solicitante (opcional, mas educado)
+                // ⚠️ Este título/mensagem vai pro BD em português
+                // (refatoração futura pode mover para i18n runtime)
                 NotificacaoHelper.criar(
                     destinatario = email,
                     tipo = "pedido_recusado",
-                    titulo = "Pedido recusado",
-                    mensagem = "Seu pedido para entrar em $nomeEquipe foi recusado",
+                    titulo = getString(R.string.pedidos_notif_recusado_titulo),
+                    mensagem = getString(R.string.pedidos_notif_recusado_msg, nomeEquipe),
                     referenciaId = equipeId,
                     referenciaTipo = "equipe",
                     remetente = emailUsuario,
-                    nomeRemetente = "Admin"
+                    nomeRemetente = getString(R.string.pedidos_nome_remetente_admin)
                 )
 
                 Toast.makeText(
                     this@PedidosPendentesActivity,
-                    "Pedido de $nome recusado",
+                    getString(R.string.pedidos_recusado_sucesso, nome),
                     Toast.LENGTH_SHORT
                 ).show()
 
                 carregarPedidos()
 
             } catch (e: Exception) {
-                Log.e("PEDIDOS_PENDENTES", "Erro recusar: ${e.message}")
+                Log.e(TAG, "Erro recusar: ${e.message}")
                 Toast.makeText(
                     this@PedidosPendentesActivity,
-                    "Erro: ${e.message}",
+                    getString(R.string.erro_generico, e.message ?: ""),
                     Toast.LENGTH_LONG
                 ).show()
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "PEDIDOS_PENDENTES"
     }
 }

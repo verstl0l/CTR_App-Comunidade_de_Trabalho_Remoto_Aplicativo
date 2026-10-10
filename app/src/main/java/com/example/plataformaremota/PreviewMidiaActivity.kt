@@ -15,15 +15,16 @@ import android.widget.TextView
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.gowtham.library.utils.TrimVideo
 import com.yalantis.ucrop.UCrop
 import java.io.File
+import java.util.Locale
 
-class PreviewMidiaActivity : AppCompatActivity() {
+class PreviewMidiaActivity : BaseActivity() {
 
     private var uriAtual: Uri? = null
     private var uriOriginal: Uri? = null
@@ -50,17 +51,25 @@ class PreviewMidiaActivity : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             val resultUri = result.data?.let { UCrop.getOutput(it) }
             if (resultUri != null) {
-                Log.d("PREVIEW_MIDIA", "Crop OK: $resultUri")
+                Log.d(TAG, "Crop OK: $resultUri")
                 uriAtual = resultUri
                 carregarFoto()
-                Toast.makeText(this, "Imagem cortada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.preview_midia_imagem_cortada),
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
-                Log.e("PREVIEW_MIDIA", "Crop retornou URI nula")
+                Log.e(TAG, "Crop retornou URI nula")
             }
         } else if (result.resultCode == UCrop.RESULT_ERROR) {
             val error = result.data?.let { UCrop.getError(it) }
-            Log.e("PREVIEW_MIDIA", "Crop erro: ${error?.message}")
-            Toast.makeText(this, "Erro ao cortar: ${error?.message}", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "Crop erro: ${error?.message}")
+            Toast.makeText(
+                this,
+                getString(R.string.preview_midia_erro_cortar, error?.message ?: ""),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -73,13 +82,17 @@ class PreviewMidiaActivity : AppCompatActivity() {
             if (data != null) {
                 val trimmedPath = TrimVideo.getTrimmedVideoPath(data)
                 if (!trimmedPath.isNullOrEmpty()) {
-                    Log.d("PREVIEW_MIDIA", "Trim OK: $trimmedPath")
+                    Log.d(TAG, "Trim OK: $trimmedPath")
                     val novaUri = Uri.parse(trimmedPath)
                     uriAtual = novaUri
                     carregarVideo()
-                    Toast.makeText(this, "Vídeo cortado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.preview_midia_video_cortado),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
-                    Log.e("PREVIEW_MIDIA", "Trim retornou path nulo")
+                    Log.e(TAG, "Trim retornou path nulo")
                 }
             }
         }
@@ -95,7 +108,11 @@ class PreviewMidiaActivity : AppCompatActivity() {
         chatId = intent.getStringExtra("chatId") ?: ""
 
         if (uriString.isEmpty()) {
-            Toast.makeText(this, "Mídia inválida", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.preview_midia_invalida),
+                Toast.LENGTH_SHORT
+            ).show()
             finish()
             return
         }
@@ -130,9 +147,6 @@ class PreviewMidiaActivity : AppCompatActivity() {
         btnEditarVideo.setOnClickListener { abrirTrimVideo() }
     }
 
-    // ============================================================
-    // CONFIGURAR FOTO
-    // ============================================================
     private fun configurarFoto() {
         imgPreview.visibility = View.VISIBLE
         videoPreview.visibility = View.GONE
@@ -149,9 +163,6 @@ class PreviewMidiaActivity : AppCompatActivity() {
         Glide.with(this).load(uriAtual).into(imgPreview)
     }
 
-    // ============================================================
-    // CONFIGURAR VÍDEO
-    // ============================================================
     private fun configurarVideo() {
         imgPreview.visibility = View.GONE
         videoPreview.visibility = View.VISIBLE
@@ -164,7 +175,6 @@ class PreviewMidiaActivity : AppCompatActivity() {
         btnEditarVideo.isEnabled = true
     }
 
-    /** Carrega o vídeo do uriAtual (reutilizado após trim). */
     private fun carregarVideo() {
         try {
             videoPreview.setVideoURI(uriAtual)
@@ -173,19 +183,16 @@ class PreviewMidiaActivity : AppCompatActivity() {
                 videoPreview.start()
             }
         } catch (e: Exception) {
-            Log.e("PREVIEW_MIDIA", "Erro video: ${e.message}")
+            Log.e(TAG, "Erro video: ${e.message}")
         }
     }
 
-    // ============================================================
-    // CONFIGURAR ARQUIVO
-    // ============================================================
     private fun configurarArquivo() {
         imgPreview.visibility = View.GONE
         videoPreview.visibility = View.GONE
         containerArquivo.visibility = View.VISIBLE
 
-        var nome = "arquivo"
+        var nome = getString(R.string.preview_midia_arquivo_fallback)
         var tamanho = 0L
         var mime = "application/octet-stream"
 
@@ -194,7 +201,8 @@ class PreviewMidiaActivity : AppCompatActivity() {
                 if (c.moveToFirst()) {
                     val ni = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                     val si = c.getColumnIndex(OpenableColumns.SIZE)
-                    if (ni != -1) nome = c.getString(ni) ?: "arquivo"
+                    if (ni != -1) nome = c.getString(ni)
+                        ?: getString(R.string.preview_midia_arquivo_fallback)
                     if (si != -1) tamanho = c.getLong(si)
                 }
             }
@@ -204,25 +212,23 @@ class PreviewMidiaActivity : AppCompatActivity() {
         txtNomeArquivo.text = nome
         txtTamanhoArquivo.text = formatarTamanho(tamanho)
 
+        // ✅ Siglas de tipo de arquivo (universais, mas centralizadas)
         txtIconeArquivo.text = when {
-            mime == "application/pdf" -> "PDF"
-            mime.contains("word") || mime.contains("document") -> "DOC"
-            mime.contains("sheet") || mime.contains("excel") -> "XLS"
-            mime.contains("presentation") || mime.contains("powerpoint") -> "PPT"
-            mime.startsWith("image/") -> "IMG"
-            mime.startsWith("video/") -> "VID"
-            mime.startsWith("audio/") -> "AUD"
-            mime.contains("zip") || mime.contains("rar") -> "ZIP"
-            else -> "ARQ"
+            mime == "application/pdf" -> getString(R.string.preview_midia_sigla_pdf)
+            mime.contains("word") || mime.contains("document") -> getString(R.string.preview_midia_sigla_doc)
+            mime.contains("sheet") || mime.contains("excel") -> getString(R.string.preview_midia_sigla_xls)
+            mime.contains("presentation") || mime.contains("powerpoint") -> getString(R.string.preview_midia_sigla_ppt)
+            mime.startsWith("image/") -> getString(R.string.preview_midia_sigla_img)
+            mime.startsWith("video/") -> getString(R.string.preview_midia_sigla_vid)
+            mime.startsWith("audio/") -> getString(R.string.preview_midia_sigla_aud)
+            mime.contains("zip") || mime.contains("rar") -> getString(R.string.preview_midia_sigla_zip)
+            else -> getString(R.string.preview_midia_sigla_arq)
         }
 
         btnCortar.visibility = View.GONE
         btnEditarVideo.visibility = View.GONE
     }
 
-    // ============================================================
-    // ABRIR UCROP (crop de imagem)
-    // ============================================================
     private fun abrirCrop() {
         val origem = uriAtual ?: return
 
@@ -232,8 +238,12 @@ class PreviewMidiaActivity : AppCompatActivity() {
         val destinoUri = try {
             FileProvider.getUriForFile(this, "$packageName.fileprovider", arquivoSaida)
         } catch (e: Exception) {
-            Log.e("PREVIEW_MIDIA", "FileProvider erro: ${e.message}")
-            Toast.makeText(this, "Erro ao preparar crop", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "FileProvider erro: ${e.message}")
+            Toast.makeText(
+                this,
+                getString(R.string.preview_midia_erro_preparar_crop),
+                Toast.LENGTH_LONG
+            ).show()
             return
         }
 
@@ -242,10 +252,11 @@ class PreviewMidiaActivity : AppCompatActivity() {
             setCompressionQuality(90)
             setHideBottomControls(false)
             setFreeStyleCropEnabled(true)
-            setToolbarTitle("Cortar imagem")
-            setToolbarColor(androidx.core.content.ContextCompat.getColor(this@PreviewMidiaActivity, R.color.bg_primary))
-            setToolbarWidgetColor(androidx.core.content.ContextCompat.getColor(this@PreviewMidiaActivity, R.color.text_primary))
-            setRootViewBackgroundColor(androidx.core.content.ContextCompat.getColor(this@PreviewMidiaActivity, R.color.bg_primary))
+            // ✅ Título da toolbar do uCrop — traduzível
+            setToolbarTitle(getString(R.string.preview_midia_cortar_titulo))
+            setToolbarColor(ContextCompat.getColor(this@PreviewMidiaActivity, R.color.bg_primary))
+            setToolbarWidgetColor(ContextCompat.getColor(this@PreviewMidiaActivity, R.color.text_primary))
+            setRootViewBackgroundColor(ContextCompat.getColor(this@PreviewMidiaActivity, R.color.bg_primary))
         }
 
         val intent = UCrop.of(origem, destinoUri).withOptions(opcoes).getIntent(this)
@@ -253,30 +264,32 @@ class PreviewMidiaActivity : AppCompatActivity() {
         try {
             abrirUCrop.launch(intent)
         } catch (e: Exception) {
-            Log.e("PREVIEW_MIDIA", "Erro ao abrir uCrop: ${e.message}")
-            Toast.makeText(this, "Erro ao abrir editor", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "Erro ao abrir uCrop: ${e.message}")
+            Toast.makeText(
+                this,
+                getString(R.string.preview_midia_erro_abrir_editor),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
-    // ============================================================
-    // ✅ ABRIR VIDEO TRIMMER (trim de vídeo)
-    // ============================================================
     private fun abrirTrimVideo() {
         val origem = uriAtual ?: return
 
         try {
             TrimVideo.activity(origem.toString())
-                .setHideSeekBar(false)  // mostra barra de progresso
+                .setHideSeekBar(false)
                 .start(this, abrirVideoTrimmer)
         } catch (e: Exception) {
-            Log.e("PREVIEW_MIDIA", "Erro ao abrir trim: ${e.message}")
-            Toast.makeText(this, "Erro ao abrir editor de vídeo", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "Erro ao abrir trim: ${e.message}")
+            Toast.makeText(
+                this,
+                getString(R.string.preview_midia_erro_abrir_editor_video),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
-    // ============================================================
-    // CONFIRMAR ENVIO
-    // ============================================================
     private fun confirmarEnvio() {
         val legenda = edtLegenda.text.toString().trim()
 
@@ -290,15 +303,24 @@ class PreviewMidiaActivity : AppCompatActivity() {
         finish()
     }
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
+    /**
+     * ✅ Formata tamanho com locale do sistema (evita vírgula em pt-BR)
+     * Usa o separador decimal do locale, mas com espaço entre número e unidade.
+     */
     private fun formatarTamanho(bytes: Long): String {
         return when {
             bytes < 1024 -> "$bytes B"
             bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-            bytes < 1024 * 1024 * 1024 -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
-            else -> String.format("%.1f GB", bytes / (1024.0 * 1024.0 * 1024.0))
+            bytes < 1024 * 1024 * 1024 -> String.format(
+                Locale.getDefault(), "%.1f MB", bytes / (1024.0 * 1024.0)
+            )
+            else -> String.format(
+                Locale.getDefault(), "%.1f GB", bytes / (1024.0 * 1024.0 * 1024.0)
+            )
         }
+    }
+
+    companion object {
+        private const val TAG = "PREVIEW_MIDIA"
     }
 }

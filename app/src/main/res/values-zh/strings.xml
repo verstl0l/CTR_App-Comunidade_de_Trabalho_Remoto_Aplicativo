@@ -2,427 +2,23 @@
 <resources>
     <string name="app_name">CTR</string>
 
-    <!-- Bottom nav -->
+    <!-- ===== 通用可复用键 ===== -->
+    <string name="geral_equipe">团队</string>
+    <string name="geral_usuario">用户</string>
+    <string name="geral_grupo">小组</string>
+    <string name="geral_conversa">对话</string>
+    <string name="geral_trabalho">任务</string>
+    <string name="geral_sem_descricao">无描述</string>
+    <string name="geral_admin">管理员</string>
+
+    <!-- ===== 底部导航 ===== -->
     <string name="nav_home">首页</string>
     <string name="nav_chat">聊天</string>
     <string name="nav_groups">团队</string>
     <string name="nav_notifications">通知</string>
     <string name="nav_profile">个人资料</string>
 
-    <!-- Main -->
-    <string name="main_abrir_chat">打开聊天</string>
-    <string name="main_bem_vindo">欢迎来到 CTR</string>
-    <string name="main_cadastrar_se">注册</string>
-    <string name="main_entrar_equipe">加入团队</string>
-    <string name="main_criar_equipe">创建团队</string>
-
-    <!-- 语言 -->
-    <string name="idioma">语言</string>
-    <string name="selecione_idioma">选择语言</string>
-    <string name="idioma_portugues">葡萄牙语</string>
-    <string name="idioma_ingles">英语</string>
-    <string name="idioma_espanhol">西班牙语</string>
-    <string name="idioma_frances">法语</string>
-    <string name="idioma_russo">俄语</string>
-    <string name="idioma_chines">中文</string>
-
-    <!-- 登录 -->
-    <string name="login_titulo">CTR</string>
-    <string name="login_subtitulo">远程工作社区</string>
-    <string name="login_instrucao">登录以继续</string>
-    <string name="login_email">邮箱</string>
-    <string name="login_senha">密码</string>
-    <string name="login_entrar">登录</string>
-    <string name="login_criar_conta">创建账号</string>
-    <string name="login_entrando">登录中……</string>
-
-    <!-- 登录（错误和消息） -->
-    <string name="login_erro_email_invalido">邮箱无效</string>
-    <string name="login_erro_credenciais">邮箱或密码错误</string>
-    <string name="login_erro_conta_nao_encontrada">未找到使用此邮箱的账号</string>
-    <string name="login_erro_muitas_tentativas">尝试次数过多。请在几分钟后重试</string>
-    <string name="login_erro_email_formato">邮箱格式无效</string>
-    <string name="login_erro_generico">登录失败。请重试。</string>
-    <string name="login_sucesso">✅ 登录成功！</string>
-
-    <!-- 注册 -->
-    <string name="cadastro_titulo">创建账号</string>
-    <string name="cadastro_nome">姓名</string>
-    <string name="cadastro_email">邮箱</string>
-    <string name="cadastro_senha">密码</string>
-    <string name="cadastro_confirmar_senha">确认密码</string>
-    <string name="cadastro_profissao">职业</string>
-    <string name="cadastro_botao">注册</string>
-    <string name="cadastro_cadastrando">注册中……</string>
-    <string name="cadastro_sucesso">✅ 账号已创建！</string>
-    <string name="cadastro_erro_salvar">账号已创建，但保存数据时出错：%1$s</string>
-    <string name="cadastro_erro_senha_curta">密码必须至少为 6 个字符</string>
-    <string name="cadastro_erro_senhas_diferentes">密码不一致</string>
-
-    <!-- 创建团队 -->
-    <string name="voltar_seta">← 返回</string>
-    <string name="criar_nova_equipe">创建新团队</string>
-    <string name="nome_da_equipe">团队名称</string>
-    <string name="hint_ex_design_core">例如：设计核心</string>
-    <string name="descricao">描述</string>
-    <string name="hint_objetivo_equipe">介绍一下团队的目标……</string>
-    <string name="criar_equipe">创建团队</string>
-    <string name="criando_equipe">创建中……</string>
-    <string name="salvar_equipe">保存</string>
-    <string name="erro_nome_equipe_obrigatorio">团队名称为必填项</string>
-    <string name="equipe_criada_sucesso">✅ 团队创建成功！</string>
-    <string name="erro_adicionar_membro">团队已创建，但添加成员失败</string>
-    <string name="erro_criar_equipe">创建团队出错：%1$s</string>
-
-    <!-- 搜索团队 -->
-    <string name="buscar_equipes_titulo">搜索团队</string>
-    <string name="buscar_equipes_hint">按名称搜索……</string>
-    <string name="buscar_equipes_vazio">未找到公开团队</string>
-    <string name="buscar_equipes_criado_por">创建者：%1$s</string>
-    <string name="buscar_equipes_pedido_ja_enviado">您已向该团队发送过请求</string>
-    <string name="equipe_default_nome">团队</string>
-    <string name="equipe_sem_descricao">无描述</string>
-
-    <!-- ===== REQUEST TO JOIN ===== -->
-    <string name="pedir_entrada_titulo">申请加入</string>
-    <string name="pedir_entrada_equipe_prefixo">团队：%1$s</string>
-    <string name="pedir_entrada_equipe_placeholder">团队：...</string>
-    <string name="pedir_entrada_hint_motivos">为什么想加入？（理由）</string>
-    <string name="pedir_entrada_hint_especialidades">您的专长</string>
-    <string name="pedir_entrada_enviar">发送申请</string>
-    <string name="pedir_entrada_enviando">发送中……</string>
-    <string name="pedir_entrada_ja_enviado_botao">申请已发送</string>
-    <string name="pedir_entrada_ja_enviado">您已向该团队发送过申请</string>
-    <string name="pedir_entrada_sucesso">✅ 申请已发送！请等待批准。</string>
-    <string name="usuario_padrao">用户</string>
-
-    <!-- ===== CONVERSATIONS LIST ===== -->
-    <string name="lista_conversas_titulo">会话</string>
-    <string name="lista_conversas_nova">+ 新会话</string>
-    <string name="lista_conversas_vazio">还没有会话</string>
-    <string name="lista_conversas_apagar_conversa">删除会话</string>
-    <string name="lista_conversas_apagar_mensagens">删除消息</string>
-    <string name="lista_conversas_apagar_inteira">删除整个会话</string>
-    <string name="lista_conversas_ver_perfil">查看资料</string>
-    <string name="lista_conversas_mensagens_apagadas">消息已删除</string>
-    <string name="lista_conversas_conversa_apagada">会话已删除</string>
-    <string name="lista_conversas_hint_email">用户邮箱</string>
-    <string name="lista_conversas_iniciar">开始</string>
-    <string name="lista_conversas_nao_consigo_mesmo">您不能与自己聊天</string>
-    <string name="lista_conversas_usuario_nao_encontrado">未找到用户</string>
-    <string name="conversa_padrao">会话</string>
-    <string name="grupo_padrao">群组</string>
-
-    <!-- ===== MY TEAMS ===== -->
-    <string name="minhas_equipes_titulo">我的团队</string>
-    <string name="minhas_equipes_nova">+ 新团队</string>
-    <string name="minhas_equipes_vazio">您还没有加入任何团队</string>
-    <string name="minhas_equipes_papel_criador">创建者</string>
-    <string name="minhas_equipes_papel_admin">管理员</string>
-    <string name="minhas_equipes_papel_membro">成员</string>
-
-    <plurals name="minhas_equipes_qtd_trabalhos">
-        <item quantity="other">%d 个工作</item>
-    </plurals>
-
-    <!-- ===== MANAGE TEAM ===== -->
-    <string name="gerenciar_titulo">管理团队</string>
-    <string name="gerenciar_hint_descricao">团队描述</string>
-    <string name="gerenciar_equipe_privada">私密团队</string>
-    <string name="gerenciar_equipe_privada_info">私密团队不会接收加入请求</string>
-    <string name="gerenciar_salvar_dados">保存团队数据</string>
-    <string name="gerenciar_excluir_botao">删除团队</string>
-    <string name="gerenciar_convidar_email">通过邮箱邀请</string>
-    <string name="gerenciar_enviar_convite">发送邀请</string>
-    <string name="gerenciar_pedidos_entrada">加入请求</string>
-    <string name="gerenciar_membros">团队成员</string>
-    <string name="gerenciar_trabalhos_publicados">已发布工作</string>
-
-    <!-- Manage Team — dialogs and toasts -->
-    <string name="gerenciar_dados_atualizados">数据已更新！</string>
-    <string name="gerenciar_selecione_usuario">选择用户</string>
-    <string name="gerenciar_nao_convidar_mesmo">您不能邀请自己</string>
-    <string name="gerenciar_equipe_nao_carregada">团队尚未加载</string>
-    <string name="gerenciar_email_nao_cadastrado">该邮箱未注册</string>
-    <string name="gerenciar_ja_convidado">该用户已被邀请</string>
-    <string name="gerenciar_convite_enviado">✅ 邀请已发送！</string>
-    <string name="gerenciar_excluir_titulo">删除团队</string>
-    <string name="gerenciar_excluir_msg">确定吗？所有工作将被永久删除。</string>
-    <string name="gerenciar_excluir_confirmar">是，删除</string>
-    <string name="gerenciar_equipe_excluida">🗑️ 团队已删除！</string>
-    <string name="gerenciar_todos_na_equipe">所有用户都已在团队中</string>
-    <string name="gerenciar_selecionar_usuario">选择用户（%1$d 位可用）</string>
-    <string name="gerenciar_selecionado">已选择：%1$s</string>
-    <string name="gerenciar_erro_usuarios">加载用户出错：%1$s</string>
-    <string name="gerenciar_editar_trabalho">编辑工作</string>
-    <string name="gerenciar_trabalho_atualizado">✅ 工作已更新！</string>
-    <string name="gerenciar_sem_membros">还没有成员</string>
-    <string name="gerenciar_sem_pedidos">没有待处理的请求</string>
-    <string name="gerenciar_sem_trabalhos">还没有发布的工作</string>
-    <string name="gerenciar_nome_dono">%1$s（所有者）</string>
-    <string name="gerenciar_nome_admin">%1$s（管理员）</string>
-    <string name="gerenciar_nome_voce">%1$s ← 您</string>
-    <string name="gerenciar_promover">提升为管理员</string>
-    <string name="gerenciar_rebaixar">降为成员</string>
-    <string name="gerenciar_remover">从团队移除</string>
-    <string name="gerenciar_nenhuma_acao">没有可用的操作</string>
-    <string name="gerenciar_promovido">✅ 已提升</string>
-    <string name="gerenciar_rebaixado">✅ 已降级</string>
-    <string name="gerenciar_removido">✅ 已移除</string>
-    <string name="gerenciar_remover_titulo">移除成员</string>
-    <string name="gerenciar_remover_msg">将 %1$s 从团队中移除？</string>
-    <string name="gerenciar_remover_confirmar">移除</string>
-    <string name="gerenciar_pedido_resumo">理由：%1$s\n专长：%2$s</string>
-    <string name="gerenciar_pedido_titulo">来自 %1$s 的请求</string>
-    <string name="gerenciar_pedido_detalhe">理由：%1$s\n\n专长：%2$s</string>
-    <string name="gerenciar_aceitar">接受</string>
-    <string name="gerenciar_recusar">拒绝</string>
-    <string name="gerenciar_depois">稍后</string>
-    <string name="gerenciar_pedido_aceito">请求已接受！</string>
-    <string name="gerenciar_pedido_recusado">请求已拒绝</string>
-    <string name="gerenciar_notif_recusado_titulo">请求被拒绝</string>
-    <string name="gerenciar_notif_recusado_msg">您加入 %1$s 的请求被拒绝了</string>
-    <string name="gerenciar_excluir_trabalho_titulo">删除工作</string>
-    <string name="gerenciar_excluir_trabalho_msg">确定要删除“%1$s”吗？</string>
-    <string name="gerenciar_trabalho_removido">工作已删除！</string>
-
-    <!-- Create Job (hints) -->
-    <string name="criar_trabalho_hint_titulo">标题</string>
-    <string name="criar_trabalho_hint_descricao">描述</string>
-    <string name="criar_trabalho_hint_categoria">类别</string>
-    <string name="criar_trabalho_hint_prazo">截止日期</string>
-
-    <!-- ===== INVITE TO JOB ===== -->
-    <string name="convidar_trabalho_titulo">邀请参与工作</string>
-    <string name="convidar_trabalho_prefixo">工作：%1$s</string>
-    <string name="convidar_trabalho_placeholder">工作：...</string>
-    <string name="convidar_trabalho_enviar">发送邀请</string>
-    <string name="convidar_trabalho_enviado">✅ 邀请已发送给 %1$s</string>
-    <string name="convidar_trabalho_sem_disponiveis">没有可邀请的用户</string>
-    <string name="convidar_trabalho_erro_permissao">此设备存在安全限制。请重试或使用其他设备。</string>
-
-    <!-- ===== WORK ITEM (manage list) ===== -->
-    <string name="item_trabalho_placeholder_titulo">标题</string>
-    <string name="item_trabalho_placeholder_info">类别 - 截止日期</string>
-    <string name="item_trabalho_placeholder_descricao">描述</string>
-    <string name="item_trabalho_zero">0</string>
-    <string name="item_trabalho_convidar">邀请</string>
-
-    <!-- ===== JOB COMMENTS ===== -->
-    <string name="comentarios_titulo">评论</string>
-    <string name="comentarios_seta_voltar">←</string>
-    <string name="comentarios_trabalho_padrao">工作</string>
-    <string name="comentarios_vazio_titulo">暂无评论</string>
-    <string name="comentarios_vazio_subtitulo">成为第一个评论此工作的人</string>
-    <string name="comentarios_hint_escreva">写评论……</string>
-    <string name="comentarios_enviar">发送</string>
-    <string name="comentarios_avatar_desc">头像</string>
-    <string name="comentarios_inicial_placeholder">A</string>
-    <string name="comentarios_nome_placeholder">姓名</string>
-    <string name="comentarios_texto_placeholder">评论文本</string>
-    <string name="comentarios_editado">（已编辑）</string>
-
-    <!-- Job Comments — actions and toasts -->
-    <string name="comentarios_nao_encontrado">未找到工作</string>
-    <string name="comentarios_voce">您</string>
-    <string name="comentarios_opcoes_titulo">选项</string>
-    <string name="comentarios_opcao_editar">编辑</string>
-    <string name="comentarios_opcao_excluir">删除</string>
-    <string name="comentarios_erro_enviar">发送出错</string>
-    <string name="comentarios_editar_titulo">编辑评论</string>
-    <string name="comentarios_digite_texto">请输入文字</string>
-    <string name="comentarios_atualizado">已更新</string>
-    <string name="comentarios_erro_atualizar">更新出错</string>
-    <string name="comentarios_excluir_titulo">删除评论</string>
-    <string name="comentarios_excluir_msg">确定要删除吗？</string>
-    <string name="comentarios_excluido">已删除</string>
-    <string name="comentarios_erro_excluir">删除出错</string>
-
-    <!-- ===== ATTACHMENTS ===== -->
-    <string name="anexos_titulo">附件</string>
-    <string name="anexos_trabalho_padrao">工作</string>
-    <string name="anexos_nao_encontrado">未找到工作</string>
-    <string name="anexos_enviando">发送中……</string>
-    <string name="anexos_adicionar">+ 添加附件</string>
-    <string name="anexos_adicionado">附件已添加</string>
-    <string name="anexos_vazio_titulo">暂无附件</string>
-    <string name="anexos_vazio_subtitulo">向工作添加文件、照片或文档</string>
-
-    <!-- Attachment actions -->
-    <string name="anexo_acao_abrir">打开</string>
-    <string name="anexo_acao_baixar">下载</string>
-    <string name="anexo_acao_remover">删除</string>
-    <string name="anexo_remover_titulo">删除附件</string>
-    <string name="anexo_remover_msg">删除“%1$s”？</string>
-    <string name="anexo_removido">附件已删除</string>
-    <string name="anexo_erro_remover">删除出错</string>
-
-    <!-- Attachment info -->
-    <string name="anexo_info_formato">%1$s - 来自 %2$s</string>
-    <string name="anexo_sem_app">没有应用可以打开“%1$s”</string>
-    <string name="anexo_baixando_do_ctr">正在从 CTR 下载……</string>
-    <string name="anexo_baixando">下载中……</string>
-
-    <!-- Attachment errors (AnexoHelper) -->
-    <string name="anexo_nome_arquivo_padrao">文件</string>
-    <string name="anexo_erro_url">Cloudinary 未返回 URL</string>
-    <string name="anexo_erro_salvar">保存出错：%1$s</string>
-    <string name="anexo_erro_upload_desconhecido">未知的上传错误</string>
-
-    <!-- Attachment notification -->
-    <string name="anexo_notif_titulo">%1$s 中有新附件</string>
-    <string name="anexo_notif_msg">%1$s 添加了一个附件</string>
-
-    <!-- Attachment item placeholders (preview only) -->
-    <string name="item_anexo_placeholder_icone">A</string>
-    <string name="item_anexo_placeholder_nome">文件.pdf</string>
-    <string name="item_anexo_placeholder_info">1.2 MB - 来自 Ana</string>
-    <string name="item_anexo_placeholder_menu">...</string>
-
-    <!-- ===== CHAT ITEMS (shared) ===== -->
-    <string name="chat_responder_desc">回复</string>
-    <string name="item_mensagem_nome_placeholder">姓名</string>
-    <string name="item_mensagem_citacao_placeholder">原始消息……</string>
-    <string name="item_mensagem_texto_placeholder">消息</string>
-    <string name="item_mensagem_play_simbolo">▶</string>
-    <string name="item_mensagem_arquivo_emoji">📎</string>
-    <string name="item_mensagem_arquivo_tamanho_placeholder">0 KB</string>
-
-    <!-- ===== CHAT (shared) ===== -->
-
-    <!-- Errors and validation -->
-    <string name="chat_sessao_expirada">会话已过期。请重新登录。</string>
-    <string name="chat_conversa_invalida">无效会话</string>
-    <string name="chat_conversa_nao_encontrada">未找到会话</string>
-    <string name="chat_erro_abrir_conversa">打开会话出错</string>
-    <string name="chat_grupo_nao_encontrado">未找到群组</string>
-    <string name="chat_equipe_nao_encontrada">未找到团队</string>
-    <string name="chat_nenhum_app">没有应用</string>
-    <string name="chat_msg_nao_encontrada">未找到消息</string>
-    <string name="chat_perfil_indisponivel">无法查看资料</string>
-
-    <!-- Blocking -->
-    <string name="chat_voce_bloqueou">您已屏蔽该用户</string>
-    <string name="chat_voce_foi_bloqueado">您已被该用户屏蔽</string>
-
-    <!-- Typing indicator -->
-    <string name="chat_digitando">%1$s 正在输入……</string>
-
-    <!-- Responding -->
-    <string name="chat_respondendo_a">回复 %1$s</string>
-    <string name="chat_tipo_foto">📷 照片</string>
-    <string name="chat_tipo_video">🎥 视频</string>
-    <string name="chat_tipo_arquivo">📎 文件</string>
-
-    <!-- Upload toasts -->
-    <string name="chat_enviando_foto">📤 正在发送照片……</string>
-    <string name="chat_enviando_video">📤 正在发送视频……</string>
-    <string name="chat_enviando_arquivo">📤 正在发送文件……</string>
-    <string name="chat_foto_enviada">✅ 照片已发送！</string>
-    <string name="chat_video_enviado">✅ 视频已发送！</string>
-    <string name="chat_arquivo_enviado">✅ 文件已发送！</string>
-
-    <!-- Previews (Firestore + UI) -->
-    <string name="chat_preview_foto">📷 照片</string>
-    <string name="chat_preview_video">🎥 视频</string>
-    <string name="chat_preview_arquivo">📎 %1$s</string>
-
-    <!-- Message options -->
-    <string name="chat_responder">💬 回复</string>
-    <string name="chat_favoritar">⭐ 收藏</string>
-    <string name="chat_desfavoritar">⭐ 取消收藏</string>
-    <string name="chat_informacoes">ℹ️ 信息</string>
-    <string name="chat_apagar_todos">🗑 为所有人删除</string>
-    <string name="chat_apagar">🗑 删除</string>
-    <string name="chat_baixar">⬇ 下载</string>
-    <string name="chat_abrir">📂 打开</string>
-    <string name="chat_opcoes_titulo">选项</string>
-
-    <!-- Favorites -->
-    <string name="chat_favoritado">⭐ 已收藏</string>
-    <string name="chat_removido_favoritos">已移除</string>
-
-    <!-- Download -->
-    <string name="chat_baixando">⬇ 正在下载……</string>
-    <string name="chat_baixando_do_ctr">正在从 CTR 下载……</string>
-
-    <!-- Delete message -->
-    <string name="chat_msg_apagada_toast">消息已删除</string>
-
-    <!-- Message info -->
-    <string name="chat_info_titulo">ℹ️ 消息信息</string>
-    <string name="chat_info_enviada">已发送：%1$s</string>
-    <string name="chat_info_lida_sim">已读：✅</string>
-    <string name="chat_info_lida_nao">已读：❌</string>
-    <string name="chat_info_tipo">类型：%1$s</string>
-    <string name="chat_info_arquivo">文件：%1$s</string>
-    <string name="chat_info_tamanho">大小：%1$s</string>
-    <string name="chat_info_resposta_a">回复：%1$s</string>
-    <string name="chat_info_data_formato">yyyy/MM/dd \'于\' HH:mm</string>
-    <string name="chat_info_ok">确定</string>
-
-    <!-- Hub -->
-    <string name="chat_hub_titulo">团队聊天</string>
-    <string name="chat_hub_secao_geral">综合</string>
-    <string name="chat_hub_secao_grupos">群组</string>
-    <string name="chat_hub_secao_individuais">私聊</string>
-    <string name="chat_hub_chat_geral">综合聊天</string>
-    <string name="chat_hub_novo_grupo">+ 新建群组</string>
-    <string name="chat_hub_sem_mensagem">暂无消息</string>
-    <string name="chat_hub_toque_iniciar">点击开始对话</string>
-    <string name="chat_hub_sem_outro_membro">团队中没有其他成员</string>
-    <string name="chat_hub_msg_apagada">消息已删除</string>
-    <string name="chat_hub_foto">照片</string>
-    <string name="chat_hub_video">视频</string>
-    <string name="chat_hub_arquivo">文件</string>
-
-    <!-- Hub: create group dialog -->
-    <string name="chat_hub_novo_grupo_titulo">新建群组</string>
-    <string name="chat_hub_novo_grupo_hint">群组名称</string>
-    <string name="chat_hub_novo_grupo_criar">创建</string>
-    <string name="chat_hub_grupo_criado">群组已创建！</string>
-
-    <!-- Group: leave -->
-    <string name="chat_grupo_sair_titulo">退出群组</string>
-    <string name="chat_grupo_sair_msg">确定吗？</string>
-    <string name="chat_grupo_sair_confirmar">退出</string>
-    <string name="chat_grupo_criador_aviso">您是创建者。只能删除。</string>
-    <string name="chat_grupo_saiu">您已退出</string>
-
-    <!-- Chat UI placeholders -->
-    <string name="chat_hint_digite">输入……</string>
-    <string name="chat_placeholder_conversa">会话</string>
-    <string name="chat_placeholder_mensagem">消息</string>
-    <string name="chat_placeholder_usuario">用户</string>
-
-    <!-- ===== CONVERSATION ITEM ===== -->
-    <string name="item_conversa_icone_usuario">👤</string>
-    <string name="item_conversa_ultima_msg_placeholder">最后一条消息</string>
-
-    <!-- ===== RELATIVE TIME (shared) ===== -->
-    <string name="tempo_agora">刚刚</string>
-    <string name="tempo_ha_min">%1$d 分钟前</string>
-    <string name="tempo_ha_horas">%1$d 小时前</string>
-    <string name="tempo_ha_dias">%1$d 天前</string>
-
-    <!-- 个人资料 -->
-    <string name="perfil_titulo">我的资料</string>
-    <string name="perfil_links">链接</string>
-    <string name="perfil_sem_links">未添加链接</string>
-    <string name="perfil_meus_trabalhos">我的工作</string>
-    <string name="perfil_favoritos">收藏消息</string>
-    <string name="perfil_sair">退出账号</string>
-    <string name="perfil_configuracoes">设置</string>
-
-    <!-- 设置 -->
-    <string name="config_titulo">设置</string>
-    <string name="config_idioma">语言</string>
-    <string name="config_sair">退出账号</string>
-    <string name="config_excluir_conta">删除账号</string>
-    <string name="config_excluir_conta_msg">确定吗？您的所有数据将被永久删除。</string>
-    <string name="config_excluir_confirmar">是，删除</string>
-
-    <!-- 操作 -->
+    <!-- ===== 全局操作 ===== -->
     <string name="voltar">← 返回</string>
     <string name="cancelar">取消</string>
     <string name="salvar">保存</string>
@@ -434,17 +30,807 @@
     <string name="abrir">📂 打开</string>
     <string name="opcoes">选项</string>
 
+    <!-- ===== 全局错误 ===== -->
+    <string name="erro_generico">错误：%1$s</string>
+    <string name="erro_campos_vazios">请填写所有字段</string>
+    <string name="erro_sem_conexao">⚠️ 无网络连接。请检查网络后重试。</string>
+
+    <!-- ===== 启动页 ===== -->
+    <string name="splash_logo_content_description">CTR 应用标志</string>
+    <string name="splash_app_sigla">CTR</string>
+    <string name="splash_app_nome">远程平台</string>
+
+    <!-- ===== 语言 ===== -->
+    <string name="idioma">语言</string>
+    <string name="selecione_idioma">选择语言</string>
+    <string name="idioma_portugues">葡萄牙语</string>
+    <string name="idioma_ingles">英语</string>
+    <string name="idioma_espanhol">西班牙语</string>
+    <string name="idioma_frances">法语</string>
+    <string name="idioma_russo">俄语</string>
+    <string name="idioma_chines">中文</string>
+
+    <!-- ===== 登录 ===== -->
+    <string name="login_titulo">CTR</string>
+    <string name="login_subtitulo">远程工作社区</string>
+    <string name="login_instrucao">请登录以继续</string>
+    <string name="login_email">邮箱</string>
+    <string name="login_senha">密码</string>
+    <string name="login_entrar">登录</string>
+    <string name="login_criar_conta">创建账号</string>
+    <string name="login_entrando">登录中…</string>
+
+    <string name="login_erro_email_invalido">邮箱无效</string>
+    <string name="login_erro_credenciais">邮箱或密码错误</string>
+    <string name="login_erro_conta_nao_encontrada">找不到该邮箱对应的账号</string>
+    <string name="login_erro_muitas_tentativas">尝试次数过多。请几分钟后重试</string>
+    <string name="login_erro_email_formato">邮箱格式无效</string>
+    <string name="login_erro_generico">登录失败。请重试。</string>
+    <string name="login_sucesso">✅ 登录成功！</string>
+
+    <!-- ===== 注册 ===== -->
+    <string name="cadastro_titulo">创建账号</string>
+    <string name="cadastro_nome">姓名</string>
+    <string name="cadastro_email">邮箱</string>
+    <string name="cadastro_senha">密码</string>
+    <string name="cadastro_confirmar_senha">确认密码</string>
+    <string name="cadastro_profissao">职业</string>
+    <string name="cadastro_botao">注册</string>
+    <string name="cadastro_cadastrando">注册中…</string>
+    <string name="cadastro_sucesso">✅ 注册成功！</string>
+    <string name="cadastro_erro_salvar">账号已创建，但保存数据时出错：%1$s</string>
+    <string name="cadastro_erro_senha_curta">密码至少需要 6 个字符</string>
+    <string name="cadastro_erro_senhas_diferentes">两次输入的密码不一致</string>
+
+    <!-- ===== 主页 ===== -->
+    <string name="main_abrir_chat">打开聊天</string>
+    <string name="main_bem_vindo">欢迎来到 CTR</string>
+    <string name="main_cadastrar_se">注册</string>
+    <string name="main_entrar_equipe">加入团队</string>
+    <string name="main_criar_equipe">创建团队</string>
+
+    <!-- ===== 创建团队 ===== -->
+    <string name="voltar_seta">← 返回</string>
+    <string name="criar_nova_equipe">创建新团队</string>
+    <string name="nome_da_equipe">团队名称</string>
+    <string name="hint_ex_design_core">例如：Design Core</string>
+    <string name="descricao">描述</string>
+    <string name="hint_objetivo_equipe">介绍一下团队的目标…</string>
+    <string name="criar_equipe">创建团队</string>
+    <string name="criando_equipe">创建中…</string>
+    <string name="salvar_equipe">保存</string>
+    <string name="erro_nome_equipe_obrigatorio">团队名称为必填项</string>
+    <string name="equipe_criada_sucesso">✅ 团队创建成功！</string>
+    <string name="erro_adicionar_membro">团队已创建，但添加成员时出错</string>
+    <string name="erro_criar_equipe">创建团队时出错：%1$s</string>
+
+    <!-- ===== 搜索团队 ===== -->
+    <string name="buscar_equipes_titulo">搜索团队</string>
+    <string name="buscar_equipes_hint">按名称搜索…</string>
+    <string name="buscar_equipes_vazio">未找到公开团队</string>
+    <string name="buscar_equipes_criado_por">创建者：%1$s</string>
+    <string name="buscar_equipes_pedido_ja_enviado">您已向该团队发送过申请</string>
+    <string name="equipe_default_nome">团队</string>
+    <string name="equipe_sem_descricao">无描述</string>
+
+    <!-- ===== 申请加入 ===== -->
+    <string name="pedir_entrada_titulo">申请加入</string>
+    <string name="pedir_entrada_equipe_prefixo">团队：%1$s</string>
+    <string name="pedir_entrada_equipe_placeholder">团队：…</string>
+    <string name="pedir_entrada_hint_motivos">为什么想加入？（原因）</string>
+    <string name="pedir_entrada_hint_especialidades">您的专长</string>
+    <string name="pedir_entrada_enviar">发送申请</string>
+    <string name="pedir_entrada_enviando">发送中…</string>
+    <string name="pedir_entrada_ja_enviado_botao">申请已发送</string>
+    <string name="pedir_entrada_ja_enviado">您已向该团队发送过申请</string>
+    <string name="pedir_entrada_sucesso">✅ 申请已发送！请等待批准。</string>
+    <string name="usuario_padrao">用户</string>
+
+    <!-- ===== 对话列表 ===== -->
+    <string name="lista_conversas_titulo">对话</string>
+    <string name="lista_conversas_nova">+ 新对话</string>
+    <string name="lista_conversas_vazio">暂无对话</string>
+    <string name="lista_conversas_apagar_conversa">删除对话</string>
+    <string name="lista_conversas_apagar_mensagens">删除消息</string>
+    <string name="lista_conversas_apagar_inteira">删除整个对话</string>
+    <string name="lista_conversas_ver_perfil">查看资料</string>
+    <string name="lista_conversas_mensagens_apagadas">消息已删除</string>
+    <string name="lista_conversas_conversa_apagada">对话已删除</string>
+    <string name="lista_conversas_hint_email">用户邮箱</string>
+    <string name="lista_conversas_iniciar">开始</string>
+    <string name="lista_conversas_nao_consigo_mesmo">不能与自己聊天</string>
+    <string name="lista_conversas_usuario_nao_encontrado">未找到用户</string>
+    <string name="conversa_padrao">对话</string>
+    <string name="grupo_padrao">小组</string>
+
+    <!-- ===== 我的团队 ===== -->
+    <string name="minhas_equipes_titulo">我的团队</string>
+    <string name="minhas_equipes_nova">+ 新团队</string>
+    <string name="minhas_equipes_vazio">您尚未加入任何团队</string>
+    <string name="minhas_equipes_papel_criador">创建者</string>
+    <string name="minhas_equipes_papel_admin">管理员</string>
+    <string name="minhas_equipes_papel_membro">成员</string>
+
+    <plurals name="minhas_equipes_qtd_trabalhos">
+        <item quantity="other">%d 个任务</item>
+    </plurals>
+
+    <!-- ===== 管理团队 ===== -->
+    <string name="gerenciar_titulo">管理团队</string>
+    <string name="gerenciar_hint_descricao">团队描述</string>
+    <string name="gerenciar_equipe_privada">私密团队</string>
+    <string name="gerenciar_equipe_privada_info">私密团队不接收加入申请</string>
+    <string name="gerenciar_salvar_dados">保存团队数据</string>
+    <string name="gerenciar_excluir_botao">删除团队</string>
+    <string name="gerenciar_convidar_email">通过邮箱邀请</string>
+    <string name="gerenciar_enviar_convite">发送邀请</string>
+    <string name="gerenciar_pedidos_entrada">加入申请</string>
+    <string name="gerenciar_membros">团队成员</string>
+    <string name="gerenciar_trabalhos_publicados">已发布任务</string>
+
+    <string name="gerenciar_dados_atualizados">数据已更新！</string>
+    <string name="gerenciar_selecione_usuario">请选择用户</string>
+    <string name="gerenciar_nao_convidar_mesmo">不能邀请自己</string>
+    <string name="gerenciar_equipe_nao_carregada">团队尚未加载</string>
+    <string name="gerenciar_email_nao_cadastrado">该邮箱未注册</string>
+    <string name="gerenciar_ja_convidado">该用户已被邀请</string>
+    <string name="gerenciar_convite_enviado">✅ 邀请已发送！</string>
+    <string name="gerenciar_excluir_titulo">删除团队</string>
+    <string name="gerenciar_excluir_msg">确定吗？所有任务将被永久删除。</string>
+    <string name="gerenciar_excluir_confirmar">确定删除</string>
+    <string name="gerenciar_equipe_excluida">🗑️ 团队已删除！</string>
+    <string name="gerenciar_todos_na_equipe">所有用户都已在团队中</string>
+    <string name="gerenciar_selecionar_usuario">选择用户（%1$d 个可用）</string>
+    <string name="gerenciar_selecionado">已选：%1$s</string>
+    <string name="gerenciar_erro_usuarios">加载用户时出错：%1$s</string>
+    <string name="gerenciar_editar_trabalho">编辑任务</string>
+    <string name="gerenciar_trabalho_atualizado">✅ 任务已更新！</string>
+    <string name="gerenciar_sem_membros">暂无成员</string>
+    <string name="gerenciar_sem_pedidos">暂无待处理申请</string>
+    <string name="gerenciar_sem_trabalhos">暂无已发布任务</string>
+    <string name="gerenciar_nome_dono">%1$s（所有者）</string>
+    <string name="gerenciar_nome_admin">%1$s（管理员）</string>
+    <string name="gerenciar_nome_voce">%1$s ← 您</string>
+    <string name="gerenciar_promover">提升为管理员</string>
+    <string name="gerenciar_rebaixar">降为成员</string>
+    <string name="gerenciar_remover">从团队移除</string>
+    <string name="gerenciar_nenhuma_acao">无可用操作</string>
+    <string name="gerenciar_promovido">✅ 已提升</string>
+    <string name="gerenciar_rebaixado">✅ 已降级</string>
+    <string name="gerenciar_removido">✅ 已移除</string>
+    <string name="gerenciar_remover_titulo">移除成员</string>
+    <string name="gerenciar_remover_msg">将 %1$s 从团队移除？</string>
+    <string name="gerenciar_remover_confirmar">移除</string>
+    <string name="gerenciar_pedido_resumo">原因：%1$s\n专长：%2$s</string>
+    <string name="gerenciar_pedido_titulo">来自 %1$s 的申请</string>
+    <string name="gerenciar_pedido_detalhe">原因：%1$s\n\n专长：%2$s</string>
+    <string name="gerenciar_aceitar">接受</string>
+    <string name="gerenciar_recusar">拒绝</string>
+    <string name="gerenciar_depois">稍后</string>
+    <string name="gerenciar_pedido_aceito">申请已接受！</string>
+    <string name="gerenciar_pedido_recusado">申请已拒绝</string>
+    <string name="gerenciar_notif_recusado_titulo">申请被拒绝</string>
+    <string name="gerenciar_notif_recusado_msg">您加入 %1$s 的申请已被拒绝</string>
+    <string name="gerenciar_excluir_trabalho_titulo">删除任务</string>
+    <string name="gerenciar_excluir_trabalho_msg">确定要删除「%1$s」吗？</string>
+    <string name="gerenciar_trabalho_removido">任务已删除！</string>
+
+    <!-- ===== 创建任务 ===== -->
+    <string name="criar_trabalho_titulo">创建任务</string>
+    <string name="criar_trabalho_btn_voltar">← 返回</string>
+
+    <string name="criar_trabalho_hint_titulo">任务标题</string>
+    <string name="criar_trabalho_hint_descricao">任务描述</string>
+    <string name="criar_trabalho_hint_categoria">类别</string>
+    <string name="criar_trabalho_hint_prazo">截止时间</string>
+
+    <string name="criar_trabalho_btn_publicar">发布任务</string>
+    <string name="criar_trabalho_publicando">发布中…</string>
+
+    <string name="criar_trabalho_preencher_campos">请填写所有字段</string>
+    <string name="criar_trabalho_criar_equipe_primeiro">请先创建一个团队</string>
+    <string name="criar_trabalho_publicado_sucesso">任务已发布！</string>
+    <string name="criar_trabalho_equipe_fallback">团队</string>
+
+    <string name="criar_trabalho_data_hora_formato">%1$s %2$s</string>
+
+    <!-- ===== 团队信息 ===== -->
+    <string name="info_equipe_nao_encontrada">找不到团队</string>
+    <string name="info_equipe_nome_fallback">团队</string>
+    <string name="info_equipe_sem_descricao">无描述</string>
+    <string name="info_equipe_usuario_fallback">用户</string>
+    <string name="info_equipe_nenhum_membro">暂无成员</string>
+    <string name="info_equipe_funcao_admin">管理员</string>
+    <string name="info_equipe_funcao_membro">成员</string>
+    <string name="info_equipe_avatar_letra">U</string>
+    <string name="info_equipe_nome_placeholder">团队名称</string>
+    <string name="info_equipe_descricao_placeholder">描述</string>
+    <string name="info_equipe_membros_titulo">成员</string>
+
+    <string name="info_equipe_btn_voltar">← 返回</string>
+    <string name="info_equipe_btn_criar_grupo">创建小组</string>
+    <string name="info_equipe_btn_ver_grupos">查看小组</string>
+    <string name="info_equipe_btn_sair">退出团队</string>
+    <string name="info_equipe_btn_excluir">删除团队</string>
+
+    <string name="info_equipe_op_conversar_pv">私聊</string>
+    <string name="info_equipe_op_ver_perfil">查看资料</string>
+    <string name="info_equipe_op_ver_meu_perfil">查看我的资料</string>
+
+    <string name="info_equipe_sair_titulo">退出团队</string>
+    <string name="info_equipe_sair_mensagem">确定要退出团队 %1$s 吗？</string>
+    <string name="info_equipe_sair_confirmar">退出</string>
+    <string name="info_equipe_saiu_sucesso">您已退出团队</string>
+
+    <string name="info_equipe_excluir_titulo">删除团队</string>
+    <string name="info_equipe_excluir_mensagem">确定吗？所有数据将被永久删除。</string>
+    <string name="info_equipe_excluir_confirmar">删除</string>
+    <string name="info_equipe_excluida_sucesso">团队已删除！</string>
+
+    <string name="info_equipe_cancelar">取消</string>
+
+    <!-- ===== 小组 ===== -->
+    <string name="grupos_titulo">小组</string>
+    <string name="grupos_btn_novo">+ 新建小组</string>
+    <string name="grupos_hint_nome">小组名称</string>
+    <string name="grupos_dialog_novo_titulo">新建小组</string>
+    <string name="grupos_dialog_criar">创建</string>
+    <string name="grupos_nenhum_criado">尚未创建任何小组</string>
+    <string name="grupos_nome_fallback">小组</string>
+    <string name="grupos_sem_permissao_criar">只有所有者或管理员可以创建小组</string>
+    <string name="grupos_criado_sucesso">小组已创建！</string>
+
+    <plurals name="grupos_qtd_membros">
+        <item quantity="other">%1$d 名成员</item>
+    </plurals>
+
+    <!-- ===== 我的任务 ===== -->
+    <string name="meus_trabalhos_titulo">我的任务</string>
+    <string name="meus_trabalhos_btn_voltar">←</string>
+    <string name="meus_trabalhos_sessao_expirada">会话已过期，请重新登录。</string>
+
+    <string name="meus_trabalhos_filtro_todos">全部</string>
+    <string name="meus_trabalhos_filtro_pendente">待处理</string>
+    <string name="meus_trabalhos_filtro_em_progresso">进行中</string>
+    <string name="meus_trabalhos_filtro_concluido">已完成</string>
+
+    <string name="meus_trabalhos_vazio_titulo">未找到任务</string>
+    <string name="meus_trabalhos_vazio_subtitulo">当您被分配任务时，它会显示在这里</string>
+
+    <string name="meus_trabalhos_equipe_fallback">团队</string>
+    <string name="meus_trabalhos_sem_titulo">无标题</string>
+    <string name="meus_trabalhos_sem_descricao">无描述</string>
+    <string name="meus_trabalhos_sem_prazo">无期限</string>
+
+    <string name="meus_trabalhos_entrega_prefixo">截止：</string>
+    <string name="meus_trabalhos_entrega_formatado">截止：%1$s</string>
+
+    <string name="meus_trabalhos_item_titulo_placeholder">任务标题</string>
+    <string name="meus_trabalhos_equipe_placeholder">团队</string>
+    <string name="meus_trabalhos_prazo_placeholder">截止：日期</string>
+    <string name="meus_trabalhos_descricao_placeholder">任务描述…</string>
+
+    <!-- ===== 可复用状态 ===== -->
+    <string name="status_pendente">待处理</string>
+    <string name="status_em_progresso">进行中</string>
+    <string name="status_concluido">已完成</string>
+
+    <!-- ===== 生产力 ===== -->
+    <string name="produtividade_titulo">📊 生产力</string>
+    <string name="produtividade_equipe_nao_encontrada">找不到团队</string>
+
+    <string name="produtividade_total_trabalhos">任务总数</string>
+    <string name="produtividade_distribuicao_status">按状态分布</string>
+    <string name="produtividade_por_membro_grafico">成员生产力</string>
+    <string name="produtividade_por_status">按状态</string>
+    <string name="produtividade_taxa_conclusao">完成率</string>
+    <string name="produtividade_por_membro">按成员</string>
+
+    <string name="produtividade_taxa_percentual">%1$d%%</string>
+    <string name="produtividade_detalhe_taxa_placeholder">0 / 0 任务</string>
+
+    <string name="produtividade_pizza_sem_dados">暂无任务</string>
+    <string name="produtividade_barras_sem_dados">没有成员拥有任务</string>
+    <string name="produtividade_barras_label">任务</string>
+    <string name="produtividade_item_nome_placeholder">姓名</string>
+
+    <plurals name="produtividade_detalhe_taxa">
+        <item quantity="other">%1$d / %2$d 任务</item>
+    </plurals>
+
+    <!-- ===== 收藏消息 ===== -->
+    <string name="favoritos_sem_texto">（无文字）</string>
+    <string name="favoritos_usuario_fallback">您</string>
+    <string name="favoritos_texto_placeholder">消息…</string>
+    <string name="favoritos_chat_nao_encontrado">未找到聊天</string>
+
+    <string name="favoritos_tipo_foto">照片</string>
+    <string name="favoritos_tipo_video">视频</string>
+    <string name="favoritos_tipo_arquivo">文件</string>
+
+    <string name="favoritos_ctx_grupo">群组</string>
+    <string name="favoritos_ctx_equipe">团队聊天</string>
+    <string name="favoritos_ctx_privado">私人聊天</string>
+
+    <string name="favoritos_remover_confirmar">移除</string>
+    <string name="favoritos_removido_sucesso">已移除</string>
+
+    <!-- ===== 通知 ===== -->
+    <string name="notificacoes_titulo">通知</string>
+    <string name="notificacoes_btn_marcar_todas">全部标为已读</string>
+    <string name="notificacoes_vazio_titulo">暂无通知</string>
+    <string name="notificacoes_vazio_subtitulo">您的邀请、任务和动态将显示在此处</string>
+    <string name="notificacoes_icone_content_description">通知图标</string>
+
+    <string name="notificacoes_titulo_fallback">通知</string>
+    <string name="notificacoes_mensagem_placeholder">消息</string>
+    <string name="notificacoes_equipe_fallback">团队</string>
+    <string name="notificacoes_sem_descricao">无描述</string>
+    <string name="notificacoes_usuario_fallback">用户</string>
+    <string name="notificacoes_trabalho_fallback">任务</string>
+
+    <string name="notificacoes_apagar_titulo">删除通知</string>
+    <string name="notificacoes_apagar_msg">要删除这条通知吗？</string>
+    <string name="notificacoes_apagar_confirmar">删除</string>
+    <string name="notificacoes_apagada_sucesso">通知已删除</string>
+    <string name="notificacoes_todas_lidas">已全部标为已读</string>
+
+    <string name="notificacoes_agora">刚刚</string>
+
+    <plurals name="notificacoes_minutos_atras">
+        <item quantity="other">%1$d 分钟前</item>
+    </plurals>
+
+    <plurals name="notificacoes_horas_atras">
+        <item quantity="other">%1$d 小时前</item>
+    </plurals>
+
+    <plurals name="notificacoes_dias_atras">
+        <item quantity="other">%1$d 天前</item>
+    </plurals>
+
+    <!-- ===== 待处理申请 ===== -->
+    <string name="pedidos_titulo">加入申请</string>
+    <string name="pedidos_btn_voltar">←</string>
+    <string name="pedidos_equipe_nao_encontrada">找不到团队</string>
+    <string name="pedidos_equipe_fallback">团队</string>
+    <string name="pedidos_usuario_fallback">用户</string>
+
+    <string name="pedidos_vazio_titulo">暂无待处理申请</string>
+    <string name="pedidos_vazio_subtitulo">当有人申请加入您的团队时，会显示在此处</string>
+
+    <string name="pedidos_email_placeholder">email@x.com</string>
+    <string name="pedidos_profissao_placeholder">职业</string>
+    <string name="pedidos_label_motivos">原因</string>
+    <string name="pedidos_motivos_placeholder">原因…</string>
+    <string name="pedidos_label_especialidades">专长</string>
+    <string name="pedidos_especialidades_placeholder">专长…</string>
+
+    <string name="pedidos_btn_perfil">资料</string>
+    <string name="pedidos_btn_recusar">拒绝</string>
+    <string name="pedidos_btn_aceitar">接受</string>
+
+    <string name="pedidos_aceitar_titulo">接受申请</string>
+    <string name="pedidos_aceitar_msg">接受 %1$s 加入团队 %2$s？</string>
+    <string name="pedidos_aceitar_confirmar">接受</string>
+    <string name="pedidos_aceito_sucesso">%1$s 已加入团队！</string>
+
+    <string name="pedidos_recusar_titulo">拒绝申请</string>
+    <string name="pedidos_recusar_msg">拒绝 %1$s 的申请？</string>
+    <string name="pedidos_recusar_confirmar">拒绝</string>
+    <string name="pedidos_recusado_sucesso">已拒绝 %1$s 的申请</string>
+
+    <string name="pedidos_erro_carregar">加载申请时出错：%1$s</string>
+
+    <string name="pedidos_nome_remetente_admin">管理员</string>
+
+    <string name="pedidos_notif_recusado_titulo">申请被拒绝</string>
+    <string name="pedidos_notif_recusado_msg">您加入 %1$s 的申请已被拒绝</string>
+
+    <!-- ===== 用户资料 ===== -->
+    <string name="perfil_usuario_titulo">用户资料</string>
+    <string name="perfil_usuario_btn_voltar">← 返回</string>
+    <string name="perfil_usuario_nao_encontrado">未找到用户</string>
+
+    <string name="perfil_usuario_usuario_fallback">用户</string>
+    <string name="perfil_usuario_profissao_fallback">职业</string>
+    <string name="perfil_usuario_iniciais_fallback">用</string>
+    <string name="perfil_usuario_email_placeholder">email@email.com</string>
+
+    <string name="perfil_usuario_label_email">电子邮件</string>
+    <string name="perfil_usuario_label_links">链接</string>
+
+    <string name="perfil_usuario_linkedin_vazio">未填写 LinkedIn</string>
+    <string name="perfil_usuario_github_vazio">未填写 GitHub</string>
+    <string name="perfil_usuario_portfolio_vazio">未填写作品集</string>
+
+    <string name="perfil_usuario_link_invalido">无效链接</string>
+    <string name="perfil_usuario_sem_conversa">未找到对话</string>
+
+    <string name="perfil_usuario_btn_conversar">聊天</string>
+    <string name="perfil_usuario_btn_apagar_conversa">删除对话</string>
+    <string name="perfil_usuario_btn_bloquear">屏蔽用户</string>
+    <string name="perfil_usuario_btn_desbloquear">解除屏蔽</string>
+
+    <string name="perfil_usuario_apagar_conversa_titulo">删除对话</string>
+    <string name="perfil_usuario_apagar_mensagens">删除消息</string>
+    <string name="perfil_usuario_apagar_conversa_inteira">删除整个对话</string>
+    <string name="perfil_usuario_mensagens_apagadas">消息已删除</string>
+    <string name="perfil_usuario_conversa_apagada">对话已删除</string>
+
+    <string name="perfil_usuario_bloquear_titulo">屏蔽用户</string>
+    <string name="perfil_usuario_bloquear_msg">确定吗？对方将无法再向您发送消息。</string>
+    <string name="perfil_usuario_bloquear_confirmar">屏蔽</string>
+    <string name="perfil_usuario_bloqueado_sucesso">已屏蔽用户</string>
+    <string name="perfil_usuario_desbloqueado_sucesso">已解除屏蔽</string>
+
+    <!-- ===== 邀请参与任务 ===== -->
+    <string name="convidar_trabalho_titulo">邀请参与任务</string>
+    <string name="convidar_trabalho_prefixo">任务：%1$s</string>
+    <string name="convidar_trabalho_placeholder">任务：…</string>
+    <string name="convidar_trabalho_enviar">发送邀请</string>
+    <string name="convidar_trabalho_enviado">✅ 已向 %1$s 发送邀请</string>
+    <string name="convidar_trabalho_sem_disponiveis">没有可邀请的用户</string>
+    <string name="convidar_trabalho_erro_permissao">此设备存在安全限制。请重试或使用其他设备。</string>
+
+    <!-- ===== 任务项 ===== -->
+    <string name="item_trabalho_placeholder_titulo">标题</string>
+    <string name="item_trabalho_placeholder_info">类别 - 截止时间</string>
+    <string name="item_trabalho_placeholder_descricao">描述</string>
+    <string name="item_trabalho_zero">0</string>
+    <string name="item_trabalho_convidar">邀请</string>
+
+    <!-- ===== 评论 ===== -->
+    <string name="comentarios_titulo">评论</string>
+    <string name="comentarios_seta_voltar">←</string>
+    <string name="comentarios_trabalho_padrao">任务</string>
+    <string name="comentarios_vazio_titulo">暂无评论</string>
+    <string name="comentarios_vazio_subtitulo">成为第一个评论此任务的人</string>
+    <string name="comentarios_hint_escreva">写一条评论…</string>
+    <string name="comentarios_enviar">发送</string>
+    <string name="comentarios_avatar_desc">头像</string>
+    <string name="comentarios_inicial_placeholder">A</string>
+    <string name="comentarios_nome_placeholder">姓名</string>
+    <string name="comentarios_texto_placeholder">评论内容</string>
+    <string name="comentarios_editado">（已编辑）</string>
+
+    <string name="comentarios_nao_encontrado">找不到任务</string>
+    <string name="comentarios_voce">您</string>
+    <string name="comentarios_opcoes_titulo">选项</string>
+    <string name="comentarios_opcao_editar">编辑</string>
+    <string name="comentarios_opcao_excluir">删除</string>
+    <string name="comentarios_erro_enviar">发送失败</string>
+    <string name="comentarios_editar_titulo">编辑评论</string>
+    <string name="comentarios_digite_texto">请输入文字</string>
+    <string name="comentarios_atualizado">已更新</string>
+    <string name="comentarios_erro_atualizar">更新失败</string>
+    <string name="comentarios_excluir_titulo">删除评论</string>
+    <string name="comentarios_excluir_msg">确定要删除吗？</string>
+    <string name="comentarios_excluido">已删除</string>
+    <string name="comentarios_erro_excluir">删除失败</string>
+
+    <!-- ===== 附件 ===== -->
+    <string name="anexos_titulo">附件</string>
+    <string name="anexos_trabalho_padrao">任务</string>
+    <string name="anexos_nao_encontrado">找不到任务</string>
+    <string name="anexos_enviando">发送中…</string>
+    <string name="anexos_adicionar">+ 添加附件</string>
+    <string name="anexos_adicionado">附件已添加</string>
+    <string name="anexos_vazio_titulo">暂无附件</string>
+    <string name="anexos_vazio_subtitulo">向任务添加文件、照片或文档</string>
+
+    <string name="anexo_acao_abrir">打开</string>
+    <string name="anexo_acao_baixar">下载</string>
+    <string name="anexo_acao_remover">移除</string>
+    <string name="anexo_remover_titulo">移除附件</string>
+    <string name="anexo_remover_msg">要移除「%1$s」吗？</string>
+    <string name="anexo_removido">附件已移除</string>
+    <string name="anexo_erro_remover">移除失败</string>
+
+    <string name="anexo_info_formato">%1$s - 来自 %2$s</string>
+    <string name="anexo_sem_app">没有可打开「%1$s」的应用</string>
+    <string name="anexo_baixando_do_ctr">正在从 CTR 下载…</string>
+    <string name="anexo_baixando">下载中…</string>
+
+    <string name="anexo_nome_arquivo_padrao">文件</string>
+    <string name="anexo_erro_url">Cloudinary 未返回 URL</string>
+    <string name="anexo_erro_salvar">保存时出错：%1$s</string>
+    <string name="anexo_erro_upload_desconhecido">上传时发生未知错误</string>
+
+    <string name="anexo_notif_titulo">%1$s 中的新附件</string>
+    <string name="anexo_notif_msg">%1$s 添加了一个附件</string>
+
+    <string name="item_anexo_placeholder_icone">A</string>
+    <string name="item_anexo_placeholder_nome">文件.pdf</string>
+    <string name="item_anexo_placeholder_info">1.2 MB - 来自 Ana</string>
+    <string name="item_anexo_placeholder_menu">...</string>
+
+    <!-- ===== 聊天 — 共享项目 ===== -->
+    <string name="chat_responder_desc">回复</string>
+    <string name="item_mensagem_nome_placeholder">姓名</string>
+    <string name="item_mensagem_citacao_placeholder">原始消息…</string>
+    <string name="item_mensagem_texto_placeholder">消息</string>
+    <string name="item_mensagem_play_simbolo">▶</string>
+    <string name="item_mensagem_arquivo_emoji">📎</string>
+    <string name="item_mensagem_arquivo_tamanho_placeholder">0 KB</string>
+
+    <!-- ===== 聊天 — 共享 ===== -->
+    <string name="chat_sessao_expirada">会话已过期，请重新登录。</string>
+    <string name="chat_conversa_invalida">无效对话</string>
+    <string name="chat_conversa_nao_encontrada">未找到对话</string>
+    <string name="chat_erro_abrir_conversa">打开对话时出错</string>
+    <string name="chat_grupo_nao_encontrado">未找到小组</string>
+    <string name="chat_equipe_nao_encontrada">找不到团队</string>
+    <string name="chat_nenhum_app">无应用</string>
+    <string name="chat_msg_nao_encontrada">未找到消息</string>
+    <string name="chat_perfil_indisponivel">无法查看资料</string>
+
+    <string name="chat_voce_bloqueou">您已屏蔽此用户</string>
+    <string name="chat_voce_foi_bloqueado">您已被此用户屏蔽</string>
+
+    <string name="chat_digitando">%1$s 正在输入…</string>
+
+    <string name="chat_respondendo_a">回复 %1$s</string>
+    <string name="chat_tipo_foto">📷 照片</string>
+    <string name="chat_tipo_video">🎥 视频</string>
+    <string name="chat_tipo_arquivo">📎 文件</string>
+
+    <string name="chat_enviando_foto">📤 正在发送照片…</string>
+    <string name="chat_enviando_video">📤 正在发送视频…</string>
+    <string name="chat_enviando_arquivo">📤 正在发送文件…</string>
+    <string name="chat_foto_enviada">✅ 照片已发送！</string>
+    <string name="chat_video_enviado">✅ 视频已发送！</string>
+    <string name="chat_arquivo_enviado">✅ 文件已发送！</string>
+
+    <string name="chat_preview_foto">📷 照片</string>
+    <string name="chat_preview_video">🎥 视频</string>
+    <string name="chat_preview_arquivo">📎 %1$s</string>
+
+    <string name="chat_responder">💬 回复</string>
+    <string name="chat_favoritar">⭐ 收藏</string>
+    <string name="chat_desfavoritar">⭐ 取消收藏</string>
+    <string name="chat_informacoes">ℹ️ 信息</string>
+    <string name="chat_apagar_todos">🗑 为所有人删除</string>
+    <string name="chat_apagar">🗑 删除</string>
+    <string name="chat_baixar">⬇ 下载</string>
+    <string name="chat_abrir">📂 打开</string>
+    <string name="chat_opcoes_titulo">选项</string>
+
+    <string name="chat_favoritado">⭐ 已收藏</string>
+    <string name="chat_removido_favoritos">已移除</string>
+
+    <string name="chat_baixando">⬇ 下载中…</string>
+    <string name="chat_baixando_do_ctr">正在从 CTR 下载…</string>
+
+    <string name="chat_msg_apagada_toast">消息已删除</string>
+
+    <string name="chat_info_titulo">ℹ️ 消息信息</string>
+    <string name="chat_info_enviada">已发送：%1$s</string>
+    <string name="chat_info_lida_sim">已读：✅</string>
+    <string name="chat_info_lida_nao">已读：❌</string>
+    <string name="chat_info_tipo">类型：%1$s</string>
+    <string name="chat_info_arquivo">文件：%1$s</string>
+    <string name="chat_info_tamanho">大小：%1$s</string>
+    <string name="chat_info_resposta_a">回复：%1$s</string>
+    <string name="chat_info_data_formato">dd/MM/yyyy \'às\' HH:mm</string>
+    <string name="chat_info_ok">确定</string>
+
+    <!-- ===== ENTREGAR TRABALHO ===== -->
+    <string name="entregar_nao_membro">您不属于任何团队</string>
+    <string name="entregar_equipe_fallback">团队</string>
+    <string name="entregar_nenhum_trabalho">未找到任务</string>
+    <string name="entregar_contador_zero">0</string>
+
+    <string name="entregar_avatar_sigla">任务</string>
+    <string name="entregar_participante">参与者</string>
+    <string name="entregar_btn_chat_equipe">团队聊天</string>
+    <string name="entregar_meus_trabalhos">我的任务</string>
+
+    <string name="entregar_btn_iniciar">开始</string>
+    <string name="entregar_btn_concluir">完成</string>
+    <string name="entregar_btn_reabrir">重新打开</string>
+
+    <string name="entregar_alterar_status_titulo">更改状态</string>
+    <string name="entregar_status_atualizado">状态已更新！</string>
+
+    <!-- ===== GERENCIAR MEMBROS GRUPO ===== -->
+    <string name="gerenciar_membros_grupo_titulo">小组成员</string>
+    <string name="gerenciar_membros_grupo_btn_adicionar">+ 添加成员</string>
+    <string name="gerenciar_membros_grupo_dica_long_press">长按移除</string>
+    <string name="gerenciar_membros_grupo_nao_encontrado">未找到小组</string>
+    <string name="gerenciar_membros_grupo_sem_permissao">您没有权限</string>
+    <string name="gerenciar_membros_grupo_nenhum_membro">小组中没有成员</string>
+    <string name="gerenciar_membros_grupo_usuario_fallback">用户</string>
+    <string name="gerenciar_membros_grupo_grupo_fallback">小组</string>
+
+    <string name="gerenciar_membros_grupo_remover_titulo">移除成员</string>
+    <string name="gerenciar_membros_grupo_remover_msg">将 %1$s 从小组中移除？</string>
+    <string name="gerenciar_membros_grupo_remover_confirmar">移除</string>
+    <string name="gerenciar_membros_grupo_removido_sucesso">成员已移除</string>
+
+    <string name="gerenciar_membros_grupo_adicionar_titulo">添加成员</string>
+    <string name="gerenciar_membros_grupo_todos_no_grupo">所有成员都已在小组中</string>
+    <string name="gerenciar_membros_grupo_adicionado_sucesso">成员已添加</string>
+
+    <!-- ===== PREVIEW MIDIA ===== -->
+    <string name="preview_midia_invalida">媒体无效</string>
+    <string name="preview_midia_imagem_cortada">图片已裁剪</string>
+    <string name="preview_midia_video_cortado">视频已裁剪</string>
+    <string name="preview_midia_cortar_titulo">裁剪图片</string>
+
+    <string name="preview_midia_erro_cortar">裁剪出错：%1$s</string>
+    <string name="preview_midia_erro_preparar_crop">准备裁剪出错</string>
+    <string name="preview_midia_erro_abrir_editor">打开编辑器出错</string>
+    <string name="preview_midia_erro_abrir_editor_video">打开视频编辑器出错</string>
+
+    <string name="preview_midia_arquivo_fallback">文件</string>
+    <string name="preview_midia_arquivo_placeholder">文件.pdf</string>
+    <string name="preview_midia_legenda_hint">添加说明…</string>
+
+    <string name="preview_midia_sigla_pdf">PDF</string>
+    <string name="preview_midia_sigla_doc">DOC</string>
+    <string name="preview_midia_sigla_xls">XLS</string>
+    <string name="preview_midia_sigla_ppt">PPT</string>
+    <string name="preview_midia_sigla_img">IMG</string>
+    <string name="preview_midia_sigla_vid">VID</string>
+    <string name="preview_midia_sigla_aud">AUD</string>
+    <string name="preview_midia_sigla_zip">ZIP</string>
+    <string name="preview_midia_sigla_arq">文件</string>
+
+    <!-- ===== VISUALIZAR MIDIA ===== -->
+    <string name="visualizar_midia_btn_voltar">← 返回</string>
+    <string name="visualizar_midia_btn_baixar">⬇ 下载</string>
+
+    <string name="visualizar_midia_nao_encontrada">未找到媒体文件</string>
+    <string name="visualizar_midia_baixando_desc">正在从 CTR 下载…</string>
+    <string name="visualizar_midia_baixando_toast">⬇ 下载中…</string>
+    <string name="visualizar_midia_erro_baixar">下载出错：%1$s</string>
+
+    <!-- ===== GALERIA MIDIA ===== -->
+    <string name="galeria_btn_fechar">✕</string>
+    <string name="galeria_btn_baixar">⬇</string>
+    <string name="galeria_nenhuma_midia">没有可显示的媒体</string>
+
+    <!-- ===== SELETOR USUARIO (helper reutilizável) ===== -->
+    <string name="seletor_usuario_titulo">选择用户</string>
+    <string name="seletor_usuario_buscar_hint">按姓名或邮箱搜索…</string>
+    <string name="seletor_usuario_nome_fallback">用户</string>
+
+    <!-- (adicionar ao bloco SELETOR USUARIO) -->
+    <string name="seletor_usuario_inicial_placeholder">用</string>
+    <string name="seletor_usuario_email_placeholder">email@email.com</string>
+
+    <!-- ===== PERFIL (MINHA CONTA) ===== -->
+    <string name="perfil_carregando">加载中…</string>
+    <string name="perfil_saindo">正在退出账号…</string>
+    <string name="perfil_enviando_foto">正在上传照片…</string>
+    <string name="perfil_foto_atualizada">照片已更新</string>
+
+    <string name="perfil_nome_fallback">用户</string>
+    <string name="perfil_profissao_fallback">职业</string>
+    <string name="perfil_iniciais_fallback">我</string>
+    <string name="perfil_nenhuma_equipe">无团队</string>
+    <string name="perfil_erro_carregar">加载出错</string>
+
+    <string name="perfil_avatar_desc">个人头像</string>
+    <string name="perfil_btn_camera_simbolo">+</string>
+    <string name="perfil_btn_adicionar_simbolo">+</string>
+    <string name="perfil_equipe_label">当前加入的团队：</string>
+
+    <string name="perfil_erro_url_nao_encontrada">错误：未找到 URL</string>
+    <string name="perfil_erro_upload">上传出错：%1$s</string>
+
+    <string name="perfil_link_invalido">无效链接</string>
+    <string name="perfil_remover_link_titulo">删除链接</string>
+    <string name="perfil_remover_link_msg">要删除此链接吗？</string>
+    <string name="perfil_remover_link_sim">是</string>
+
+    <string name="perfil_link_titulo">添加链接</string>
+    <string name="perfil_link_instrucao">粘贴链接 URL：</string>
+    <string name="perfil_link_hint">https://…</string>
+    <string name="perfil_link_digite_url">请输入 URL</string>
+    <string name="perfil_link_formato_invalido">URL 必须以 http:// 或 https:// 开头</string>
+    <string name="perfil_link_adicionado">链接已添加</string>
+    <string name="perfil_link_nao_encontrado">未找到链接</string>
+    <string name="perfil_link_removido">链接已删除</string>
+
+    <!-- ===== PRODUTOS / DASHBOARD EQUIPE ===== -->
+    <string name="produtos_logo_fallback">团</string>
+    <string name="produtos_equipe_fallback">团队</string>
+    <string name="produtos_usuario_fallback">用户</string>
+    <string name="produtos_sem_descricao">无描述</string>
+
+    <string name="produtos_criado_por">创建者：%1$s</string>
+    <string name="produtos_criado_por_placeholder">创建者：</string>
+    <string name="produtos_config_desc">团队设置</string>
+    <string name="produtos_descricao_label">描述</string>
+
+    <string name="produtos_delegar_tarefa_titulo">分配任务</string>
+    <string name="produtos_delegar_tarefa_msg">创建新任务、设定截止时间、分配给成员并跟踪生产力。</string>
+
+    <string name="produtos_btn_ver_produtividade">📊 查看生产力</string>
+    <string name="produtos_btn_criar_trabalho">创建任务</string>
+    <string name="produtos_btn_chat_equipe">团队聊天</string>
+
+    <string name="produtos_trabalhos_recentes">最近任务</string>
+
+    <string name="produtos_vazio_titulo">您还没有团队</string>
+    <string name="produtos_vazio_subtitulo">创建一个团队以开始管理任务</string>
+    <string name="produtos_vazio_btn_criar">创建团队</string>
+
+    <!-- ===== GERENCIAR EQUIPE (adicional) ===== -->
+    <string name="gerenciar_usuario_selecionado">已选：%1$s</string>
+    <string name="gerenciar_pedido_linha">%1$s（%2$s）</string>
+    <string name="item_trabalho_info_formato">%1$s - %2$s</string>
+    <string name="produtividade_item_zero">0</string>
+
+    <!-- ===== 聊天中心 ===== -->
+    <string name="chat_hub_titulo">团队聊天</string>
+    <string name="chat_hub_secao_geral">通用</string>
+    <string name="chat_hub_secao_grupos">小组</string>
+    <string name="chat_hub_secao_individuais">私人对话</string>
+    <string name="chat_hub_chat_geral">通用聊天</string>
+    <string name="chat_hub_novo_grupo">+ 新建小组</string>
+    <string name="chat_hub_sem_mensagem">暂无消息</string>
+    <string name="chat_hub_toque_iniciar">点击开始对话</string>
+    <string name="chat_hub_sem_outro_membro">团队中没有其他成员</string>
+    <string name="chat_hub_msg_apagada">消息已删除</string>
+    <string name="chat_hub_foto">照片</string>
+    <string name="chat_hub_video">视频</string>
+    <string name="chat_hub_arquivo">文件</string>
+
+    <string name="chat_hub_novo_grupo_titulo">新建小组</string>
+    <string name="chat_hub_novo_grupo_hint">小组名称</string>
+    <string name="chat_hub_novo_grupo_criar">创建</string>
+    <string name="chat_hub_grupo_criado">小组已创建！</string>
+
+    <!-- ===== 群组聊天 ===== -->
+    <string name="chat_grupo_sair_titulo">退出小组</string>
+    <string name="chat_grupo_sair_msg">确定吗？</string>
+    <string name="chat_grupo_sair_confirmar">退出</string>
+    <string name="chat_grupo_criador_aviso">您是创建者。只能删除。</string>
+    <string name="chat_grupo_saiu">您已退出</string>
+
+    <string name="chat_hint_digite">输入…</string>
+    <string name="chat_placeholder_conversa">对话</string>
+    <string name="chat_placeholder_mensagem">消息</string>
+    <string name="chat_placeholder_usuario">用户</string>
+
+    <!-- ===== 对话项 ===== -->
+    <string name="item_conversa_icone_usuario">👤</string>
+    <string name="item_conversa_ultima_msg_placeholder">最后一条消息</string>
+
+    <!-- ===== 相对时间（共享） ===== -->
+    <string name="tempo_agora">刚刚</string>
+    <string name="tempo_ha_min">%1$d 分钟前</string>
+    <string name="tempo_ha_horas">%1$d 小时前</string>
+    <string name="tempo_ha_dias">%1$d 天前</string>
+
+    <!-- ===== 我的资料 ===== -->
+    <string name="perfil_titulo">我的资料</string>
+    <string name="perfil_links">链接</string>
+    <string name="perfil_sem_links">未添加任何链接</string>
+    <string name="perfil_meus_trabalhos">我的任务</string>
+    <string name="perfil_favoritos">收藏消息</string>
+    <string name="perfil_sair">退出登录</string>
+    <string name="perfil_configuracoes">设置</string>
+
+    <!-- ===== 设置 ===== -->
+    <string name="config_titulo">设置</string>
+    <string name="config_idioma">语言</string>
+    <string name="config_sair">退出登录</string>
+    <string name="config_excluir_conta">删除账号</string>
+    <string name="config_excluir_conta_msg">确定吗？您的所有数据将被永久删除。</string>
+    <string name="config_excluir_confirmar">确定删除</string>
+
+    <!-- ===== 收藏（页面） ===== -->
+    <string name="favoritos_titulo">⭐ 收藏消息</string>
+    <string name="favoritos_vazio">暂无收藏消息</string>
+    <string name="favoritos_remover">取消收藏</string>
+    <string name="favoritos_remover_msg">要将此消息从收藏中移除吗？</string>
+
+    <!-- ===== 聊天 — 日期分隔 ===== -->
     <string name="chat_separador_hoje">今天</string>
     <string name="chat_separador_ontem">昨天</string>
 
-    <!-- 错误 -->
-    <string name="erro_generico">错误：%1$s</string>
-    <string name="erro_campos_vazios">请填写所有字段</string>
-    <string name="erro_sem_conexao">⚠️ 无网络连接。请检查网络并重试。</string>
-
-    <!-- 收藏 -->
-    <string name="favoritos_titulo">⭐ 收藏的消息</string>
-    <string name="favoritos_vazio">还没有收藏的消息</string>
-    <string name="favoritos_remover">取消收藏</string>
-    <string name="favoritos_remover_msg">将此消息从收藏中移除？</string>
 </resources>

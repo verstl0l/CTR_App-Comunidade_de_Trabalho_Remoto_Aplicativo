@@ -2,21 +2,46 @@
 <resources>
     <string name="app_name">CTR</string>
 
-    <!-- Bottom nav -->
+    <!-- ===== CHAVES GENÉRICAS REUTILIZÁVEIS ===== -->
+    <!-- (adicionadas para futura consolidação; as antigas continuam existindo) -->
+    <string name="geral_equipe">Equipe</string>
+    <string name="geral_usuario">Usuário</string>
+    <string name="geral_grupo">Grupo</string>
+    <string name="geral_conversa">Conversa</string>
+    <string name="geral_trabalho">Trabalho</string>
+    <string name="geral_sem_descricao">Sem descrição</string>
+    <string name="geral_admin">Admin</string>
+
+    <!-- ===== BOTTOM NAV ===== -->
     <string name="nav_home">Início</string>
     <string name="nav_chat">Chat</string>
     <string name="nav_groups">Equipes</string>
     <string name="nav_notifications">Notificações</string>
     <string name="nav_profile">Perfil</string>
 
-    <!-- Main -->
-    <string name="main_abrir_chat">Abrir chat</string>
-    <string name="main_bem_vindo">Bem-vindo ao CTR</string>
-    <string name="main_cadastrar_se">CADASTRAR-SE</string>
-    <string name="main_entrar_equipe">ENTRAR EM EQUIPE</string>
-    <string name="main_criar_equipe">CRIAR EQUIPE</string>
+    <!-- ===== AÇÕES GLOBAIS ===== -->
+    <string name="voltar">← VOLTAR</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="salvar">Salvar</string>
+    <string name="excluir">Excluir</string>
+    <string name="favoritar">⭐ Favoritar</string>
+    <string name="desfavoritar">⭐ Remover dos favoritos</string>
+    <string name="apagar">🗑 Apagar</string>
+    <string name="baixar">⬇ Baixar</string>
+    <string name="abrir">📂 Abrir</string>
+    <string name="opcoes">Opções</string>
 
-    <!-- Idioma -->
+    <!-- ===== ERROS GLOBAIS ===== -->
+    <string name="erro_generico">Erro: %1$s</string>
+    <string name="erro_campos_vazios">Preencha todos os campos</string>
+    <string name="erro_sem_conexao">⚠️ Sem conexão com a internet. Verifique sua rede e tente novamente.</string>
+
+    <!-- ===== SPLASH ===== -->
+    <string name="splash_logo_content_description">Logotipo do aplicativo CTR</string>
+    <string name="splash_app_sigla">CTR</string>
+    <string name="splash_app_nome">Plataforma Remota</string>
+
+    <!-- ===== IDIOMA ===== -->
     <string name="idioma">Idioma</string>
     <string name="selecione_idioma">Selecione o idioma</string>
     <string name="idioma_portugues">Português</string>
@@ -26,7 +51,7 @@
     <string name="idioma_russo">Russo</string>
     <string name="idioma_chines">Chinês</string>
 
-    <!-- Login -->
+    <!-- ===== LOGIN ===== -->
     <string name="login_titulo">CTR</string>
     <string name="login_subtitulo">Comunidade de Trabalho Remoto</string>
     <string name="login_instrucao">Faça login para continuar</string>
@@ -34,9 +59,8 @@
     <string name="login_senha">Senha</string>
     <string name="login_entrar">ENTRAR</string>
     <string name="login_criar_conta">CRIAR CONTA</string>
-    <string name="login_entrando">ENTRANDO...</string>
+    <string name="login_entrando">ENTRANDO…</string>
 
-    <!-- Login (erros e mensagens) -->
     <string name="login_erro_email_invalido">E-mail inválido</string>
     <string name="login_erro_credenciais">E-mail ou senha incorretos</string>
     <string name="login_erro_conta_nao_encontrada">Nenhuma conta encontrada com este e-mail</string>
@@ -45,7 +69,7 @@
     <string name="login_erro_generico">Erro ao fazer login. Tente novamente.</string>
     <string name="login_sucesso">✅ Login realizado!</string>
 
-    <!-- Cadastro -->
+    <!-- ===== CADASTRO ===== -->
     <string name="cadastro_titulo">Criar conta</string>
     <string name="cadastro_nome">Nome</string>
     <string name="cadastro_email">E-mail</string>
@@ -53,13 +77,20 @@
     <string name="cadastro_confirmar_senha">Confirmar Senha</string>
     <string name="cadastro_profissao">Profissão</string>
     <string name="cadastro_botao">CADASTRAR</string>
-    <string name="cadastro_cadastrando">CADASTRANDO...</string>
+    <string name="cadastro_cadastrando">CADASTRANDO…</string>
     <string name="cadastro_sucesso">✅ Cadastro realizado!</string>
     <string name="cadastro_erro_salvar">Cadastro criado, mas erro ao salvar dados: %1$s</string>
     <string name="cadastro_erro_senha_curta">A senha deve ter pelo menos 6 caracteres</string>
     <string name="cadastro_erro_senhas_diferentes">As senhas não coincidem</string>
 
-    <!-- Criar Equipe -->
+    <!-- ===== MAIN ===== -->
+    <string name="main_abrir_chat">Abrir chat</string>
+    <string name="main_bem_vindo">Bem-vindo ao CTR</string>
+    <string name="main_cadastrar_se">CADASTRAR-SE</string>
+    <string name="main_entrar_equipe">ENTRAR EM EQUIPE</string>
+    <string name="main_criar_equipe">CRIAR EQUIPE</string>
+
+    <!-- ===== CRIAR EQUIPE ===== -->
     <string name="voltar_seta">← VOLTAR</string>
     <string name="criar_nova_equipe">Criar Nova Equipe</string>
     <string name="nome_da_equipe">Nome da Equipe</string>
@@ -74,19 +105,19 @@
     <string name="erro_adicionar_membro">Equipe criada, mas erro ao adicionar membro</string>
     <string name="erro_criar_equipe">Erro ao criar equipe: %1$s</string>
 
-    <!-- Buscar Equipes -->
+    <!-- ===== BUSCAR EQUIPES ===== -->
     <string name="buscar_equipes_titulo">Buscar Equipes</string>
-    <string name="buscar_equipes_hint">Buscar por nome...</string>
+    <string name="buscar_equipes_hint">Buscar por nome…</string>
     <string name="buscar_equipes_vazio">Nenhuma equipe pública encontrada</string>
     <string name="buscar_equipes_criado_por">Criado por: %1$s</string>
     <string name="buscar_equipes_pedido_ja_enviado">Você já enviou um pedido para esta equipe</string>
     <string name="equipe_default_nome">Equipe</string>
     <string name="equipe_sem_descricao">Sem descrição</string>
 
-    <!-- ===== REQUEST TO JOIN ===== -->
+    <!-- ===== PEDIR ENTRADA ===== -->
     <string name="pedir_entrada_titulo">Pedir para Entrar</string>
     <string name="pedir_entrada_equipe_prefixo">Equipe: %1$s</string>
-    <string name="pedir_entrada_equipe_placeholder">Equipe: ...</string>
+    <string name="pedir_entrada_equipe_placeholder">Equipe: …</string>
     <string name="pedir_entrada_hint_motivos">Por que quer entrar? (motivos)</string>
     <string name="pedir_entrada_hint_especialidades">Suas especialidades</string>
     <string name="pedir_entrada_enviar">ENVIAR PEDIDO</string>
@@ -96,7 +127,7 @@
     <string name="pedir_entrada_sucesso">✅ Pedido enviado! Aguarde aprovação.</string>
     <string name="usuario_padrao">Usuário</string>
 
-    <!-- ===== CONVERSATIONS LIST ===== -->
+    <!-- ===== LISTA CONVERSAS ===== -->
     <string name="lista_conversas_titulo">Conversas</string>
     <string name="lista_conversas_nova">+ NOVA CONVERSA</string>
     <string name="lista_conversas_vazio">Nenhuma conversa ainda</string>
@@ -113,7 +144,7 @@
     <string name="conversa_padrao">Conversa</string>
     <string name="grupo_padrao">Grupo</string>
 
-    <!-- ===== MY TEAMS ===== -->
+    <!-- ===== MINHAS EQUIPES ===== -->
     <string name="minhas_equipes_titulo">Minhas Equipes</string>
     <string name="minhas_equipes_nova">+ NOVA EQUIPE</string>
     <string name="minhas_equipes_vazio">Você não está em nenhuma equipe</string>
@@ -126,7 +157,7 @@
         <item quantity="other">%d trabalhos</item>
     </plurals>
 
-    <!-- ===== MANAGE TEAM ===== -->
+    <!-- ===== GERENCIAR EQUIPE ===== -->
     <string name="gerenciar_titulo">Gerenciar Equipe</string>
     <string name="gerenciar_hint_descricao">Descrição da Equipe</string>
     <string name="gerenciar_equipe_privada">Equipe Privada</string>
@@ -139,7 +170,6 @@
     <string name="gerenciar_membros">Membros da Equipe</string>
     <string name="gerenciar_trabalhos_publicados">Trabalhos Publicados</string>
 
-    <!-- Manage Team — dialogs and toasts -->
     <string name="gerenciar_dados_atualizados">Dados atualizados!</string>
     <string name="gerenciar_selecione_usuario">Selecione um usuário</string>
     <string name="gerenciar_nao_convidar_mesmo">Você não pode convidar a si mesmo</string>
@@ -187,20 +217,264 @@
     <string name="gerenciar_excluir_trabalho_msg">Tem certeza que deseja excluir \'%1$s\'?</string>
     <string name="gerenciar_trabalho_removido">Trabalho removido!</string>
 
-    <!-- Criar Trabalho (hints) -->
-    <string name="criar_trabalho_hint_titulo">Título</string>
-    <string name="criar_trabalho_hint_descricao">Descrição</string>
+    <!-- ===== CRIAR TRABALHO ===== -->
+    <string name="criar_trabalho_titulo">Criar Trabalho</string>
+    <string name="criar_trabalho_btn_voltar">← VOLTAR</string>
+
+    <string name="criar_trabalho_hint_titulo">Título do trabalho</string>
+    <string name="criar_trabalho_hint_descricao">Descrição do trabalho</string>
     <string name="criar_trabalho_hint_categoria">Categoria</string>
     <string name="criar_trabalho_hint_prazo">Prazo</string>
 
-    <!-- ===== CHAT - DATE SEPARATOR ===== -->
-    <string name="chat_separador_hoje">HOJE</string>
-    <string name="chat_separador_ontem">ONTEM</string>
+    <string name="criar_trabalho_btn_publicar">PUBLICAR TRABALHO</string>
+    <string name="criar_trabalho_publicando">PUBLICANDO…</string>
 
-    <!-- ===== INVITE TO JOB ===== -->
+    <string name="criar_trabalho_preencher_campos">Preencha todos os campos</string>
+    <string name="criar_trabalho_criar_equipe_primeiro">Crie uma equipe primeiro</string>
+    <string name="criar_trabalho_publicado_sucesso">Trabalho publicado!</string>
+    <string name="criar_trabalho_equipe_fallback">Equipe</string>
+
+    <string name="criar_trabalho_data_hora_formato">%1$s às %2$s</string>
+
+    <!-- ===== INFO EQUIPE ===== -->
+    <string name="info_equipe_nao_encontrada">Equipe não encontrada</string>
+    <string name="info_equipe_nome_fallback">Equipe</string>
+    <string name="info_equipe_sem_descricao">Sem descrição</string>
+    <string name="info_equipe_usuario_fallback">Usuário</string>
+    <string name="info_equipe_nenhum_membro">Nenhum membro ainda</string>
+    <string name="info_equipe_funcao_admin">Administrador</string>
+    <string name="info_equipe_funcao_membro">Membro</string>
+    <string name="info_equipe_avatar_letra">U</string>
+    <string name="info_equipe_nome_placeholder">Nome da Equipe</string>
+    <string name="info_equipe_descricao_placeholder">Descrição</string>
+    <string name="info_equipe_membros_titulo">Membros</string>
+
+    <string name="info_equipe_btn_voltar">← VOLTAR</string>
+    <string name="info_equipe_btn_criar_grupo">CRIAR GRUPO</string>
+    <string name="info_equipe_btn_ver_grupos">VER GRUPOS</string>
+    <string name="info_equipe_btn_sair">SAIR DA EQUIPE</string>
+    <string name="info_equipe_btn_excluir">EXCLUIR EQUIPE</string>
+
+    <string name="info_equipe_op_conversar_pv">Conversar no PV</string>
+    <string name="info_equipe_op_ver_perfil">Ver perfil</string>
+    <string name="info_equipe_op_ver_meu_perfil">Ver meu perfil</string>
+
+    <string name="info_equipe_sair_titulo">Sair da equipe</string>
+    <string name="info_equipe_sair_mensagem">Tem certeza que deseja sair da equipe %1$s?</string>
+    <string name="info_equipe_sair_confirmar">Sair</string>
+    <string name="info_equipe_saiu_sucesso">Você saiu da equipe</string>
+
+    <string name="info_equipe_excluir_titulo">Excluir equipe</string>
+    <string name="info_equipe_excluir_mensagem">Tem certeza? Todos os dados serão removidos permanentemente.</string>
+    <string name="info_equipe_excluir_confirmar">Excluir</string>
+    <string name="info_equipe_excluida_sucesso">Equipe excluída!</string>
+
+    <string name="info_equipe_cancelar">Cancelar</string>
+
+    <!-- ===== GRUPOS ===== -->
+    <string name="grupos_titulo">Grupos</string>
+    <string name="grupos_btn_novo">+ NOVO GRUPO</string>
+    <string name="grupos_hint_nome">Nome do grupo</string>
+    <string name="grupos_dialog_novo_titulo">Novo Grupo</string>
+    <string name="grupos_dialog_criar">Criar</string>
+    <string name="grupos_nenhum_criado">Nenhum grupo criado ainda</string>
+    <string name="grupos_nome_fallback">Grupo</string>
+    <string name="grupos_sem_permissao_criar">Só o dono ou administrador pode criar grupos</string>
+    <string name="grupos_criado_sucesso">Grupo criado!</string>
+
+    <plurals name="grupos_qtd_membros">
+        <item quantity="one">%1$d membro</item>
+        <item quantity="other">%1$d membros</item>
+    </plurals>
+
+    <!-- ===== MEUS TRABALHOS ===== -->
+    <string name="meus_trabalhos_titulo">Meus Trabalhos</string>
+    <string name="meus_trabalhos_btn_voltar">←</string>
+    <string name="meus_trabalhos_sessao_expirada">Sessão expirada. Faça login novamente.</string>
+
+    <string name="meus_trabalhos_filtro_todos">Todos</string>
+    <string name="meus_trabalhos_filtro_pendente">Pendente</string>
+    <string name="meus_trabalhos_filtro_em_progresso">Em Prog.</string>
+    <string name="meus_trabalhos_filtro_concluido">Concluído</string>
+
+    <string name="meus_trabalhos_vazio_titulo">Nenhum trabalho encontrado</string>
+    <string name="meus_trabalhos_vazio_subtitulo">Quando você for atribuído a um trabalho, ele aparece aqui</string>
+
+    <string name="meus_trabalhos_equipe_fallback">Equipe</string>
+    <string name="meus_trabalhos_sem_titulo">Sem título</string>
+    <string name="meus_trabalhos_sem_descricao">Sem descrição</string>
+    <string name="meus_trabalhos_sem_prazo">Sem prazo</string>
+
+    <string name="meus_trabalhos_entrega_prefixo">Entrega:</string>
+    <string name="meus_trabalhos_entrega_formatado">Entrega: %1$s</string>
+
+    <string name="meus_trabalhos_item_titulo_placeholder">Título do Trabalho</string>
+    <string name="meus_trabalhos_equipe_placeholder">Equipe</string>
+    <string name="meus_trabalhos_prazo_placeholder">Entrega: Data</string>
+    <string name="meus_trabalhos_descricao_placeholder">Descrição do trabalho…</string>
+
+    <!-- ===== STATUS REUTILIZÁVEL ===== -->
+    <string name="status_pendente">Pendente</string>
+    <string name="status_em_progresso">Em Progresso</string>
+    <string name="status_concluido">Concluído</string>
+
+    <!-- ===== PRODUTIVIDADE ===== -->
+    <string name="produtividade_titulo">📊 Produtividade</string>
+    <string name="produtividade_equipe_nao_encontrada">Equipe não encontrada</string>
+
+    <string name="produtividade_total_trabalhos">TOTAL DE TRABALHOS</string>
+    <string name="produtividade_distribuicao_status">DISTRIBUIÇÃO POR STATUS</string>
+    <string name="produtividade_por_membro_grafico">PRODUTIVIDADE POR MEMBRO</string>
+    <string name="produtividade_por_status">POR STATUS</string>
+    <string name="produtividade_taxa_conclusao">TAXA DE CONCLUSÃO</string>
+    <string name="produtividade_por_membro">POR MEMBRO</string>
+
+    <string name="produtividade_taxa_percentual">%1$d%%</string>
+    <string name="produtividade_detalhe_taxa_placeholder">0 de 0 trabalhos</string>
+
+    <string name="produtividade_pizza_sem_dados">Nenhum trabalho ainda</string>
+    <string name="produtividade_barras_sem_dados">Nenhum membro com trabalhos</string>
+    <string name="produtividade_barras_label">Trabalhos</string>
+    <string name="produtividade_item_nome_placeholder">Nome</string>
+
+    <plurals name="produtividade_detalhe_taxa">
+        <item quantity="one">%1$d de %2$d trabalho</item>
+        <item quantity="other">%1$d de %2$d trabalhos</item>
+    </plurals>
+
+    <!-- ===== MENSAGENS FAVORITAS ===== -->
+    <string name="favoritos_sem_texto">(sem texto)</string>
+    <string name="favoritos_usuario_fallback">Você</string>
+    <string name="favoritos_texto_placeholder">Mensagem…</string>
+    <string name="favoritos_chat_nao_encontrado">Chat não encontrado</string>
+
+    <string name="favoritos_tipo_foto">Foto</string>
+    <string name="favoritos_tipo_video">Vídeo</string>
+    <string name="favoritos_tipo_arquivo">Arquivo</string>
+
+    <string name="favoritos_ctx_grupo">Grupo</string>
+    <string name="favoritos_ctx_equipe">Chat da equipe</string>
+    <string name="favoritos_ctx_privado">Chat privado</string>
+
+    <string name="favoritos_remover_confirmar">Remover</string>
+    <string name="favoritos_removido_sucesso">Removido</string>
+
+    <!-- ===== NOTIFICAÇÕES ===== -->
+    <string name="notificacoes_titulo">Notificações</string>
+    <string name="notificacoes_btn_marcar_todas">Marcar todas como lidas</string>
+    <string name="notificacoes_vazio_titulo">Nenhuma notificação</string>
+    <string name="notificacoes_vazio_subtitulo">Aqui aparecerão seus convites, trabalhos e novidades</string>
+    <string name="notificacoes_icone_content_description">Ícone da notificação</string>
+
+    <string name="notificacoes_titulo_fallback">Notificação</string>
+    <string name="notificacoes_mensagem_placeholder">Mensagem</string>
+    <string name="notificacoes_equipe_fallback">Equipe</string>
+    <string name="notificacoes_sem_descricao">Sem descrição</string>
+    <string name="notificacoes_usuario_fallback">Usuário</string>
+    <string name="notificacoes_trabalho_fallback">Trabalho</string>
+
+    <string name="notificacoes_apagar_titulo">Apagar notificação</string>
+    <string name="notificacoes_apagar_msg">Deseja apagar esta notificação?</string>
+    <string name="notificacoes_apagar_confirmar">Apagar</string>
+    <string name="notificacoes_apagada_sucesso">Notificação apagada</string>
+    <string name="notificacoes_todas_lidas">Todas marcadas como lidas</string>
+
+    <string name="notificacoes_agora">Agora</string>
+
+    <plurals name="notificacoes_minutos_atras">
+        <item quantity="one">Há %1$d minuto</item>
+        <item quantity="other">Há %1$d minutos</item>
+    </plurals>
+
+    <plurals name="notificacoes_horas_atras">
+        <item quantity="one">Há %1$d hora</item>
+        <item quantity="other">Há %1$d horas</item>
+    </plurals>
+
+    <plurals name="notificacoes_dias_atras">
+        <item quantity="one">Há %1$d dia</item>
+        <item quantity="other">Há %1$d dias</item>
+    </plurals>
+
+    <!-- ===== PEDIDOS PENDENTES ===== -->
+    <string name="pedidos_titulo">Pedidos de Entrada</string>
+    <string name="pedidos_btn_voltar">←</string>
+    <string name="pedidos_equipe_nao_encontrada">Equipe não encontrada</string>
+    <string name="pedidos_equipe_fallback">Equipe</string>
+    <string name="pedidos_usuario_fallback">Usuário</string>
+
+    <string name="pedidos_vazio_titulo">Nenhum pedido pendente</string>
+    <string name="pedidos_vazio_subtitulo">Quando alguém pedir para entrar na sua equipe, aparece aqui</string>
+
+    <string name="pedidos_email_placeholder">email@x.com</string>
+    <string name="pedidos_profissao_placeholder">Profissão</string>
+    <string name="pedidos_label_motivos">MOTIVOS</string>
+    <string name="pedidos_motivos_placeholder">Motivos…</string>
+    <string name="pedidos_label_especialidades">ESPECIALIDADES</string>
+    <string name="pedidos_especialidades_placeholder">Especialidades…</string>
+
+    <string name="pedidos_btn_perfil">PERFIL</string>
+    <string name="pedidos_btn_recusar">RECUSAR</string>
+    <string name="pedidos_btn_aceitar">ACEITAR</string>
+
+    <string name="pedidos_aceitar_titulo">Aceitar pedido</string>
+    <string name="pedidos_aceitar_msg">Aceitar %1$s na equipe %2$s?</string>
+    <string name="pedidos_aceitar_confirmar">Aceitar</string>
+    <string name="pedidos_aceito_sucesso">%1$s entrou na equipe!</string>
+
+    <string name="pedidos_recusar_titulo">Recusar pedido</string>
+    <string name="pedidos_recusar_msg">Recusar o pedido de %1$s?</string>
+    <string name="pedidos_recusar_confirmar">Recusar</string>
+    <string name="pedidos_recusado_sucesso">Pedido de %1$s recusado</string>
+
+    <string name="pedidos_erro_carregar">Erro ao carregar pedidos: %1$s</string>
+
+    <string name="pedidos_nome_remetente_admin">Admin</string>
+
+    <string name="pedidos_notif_recusado_titulo">Pedido recusado</string>
+    <string name="pedidos_notif_recusado_msg">Seu pedido para entrar em %1$s foi recusado</string>
+
+    <!-- ===== PERFIL USUÁRIO ===== -->
+    <string name="perfil_usuario_titulo">Perfil do Usuário</string>
+    <string name="perfil_usuario_btn_voltar">← VOLTAR</string>
+    <string name="perfil_usuario_nao_encontrado">Usuário não encontrado</string>
+
+    <string name="perfil_usuario_usuario_fallback">Usuário</string>
+    <string name="perfil_usuario_profissao_fallback">Profissão</string>
+    <string name="perfil_usuario_iniciais_fallback">US</string>
+    <string name="perfil_usuario_email_placeholder">email@email.com</string>
+
+    <string name="perfil_usuario_label_email">E-mail</string>
+    <string name="perfil_usuario_label_links">Links</string>
+
+    <string name="perfil_usuario_linkedin_vazio">LinkedIn não cadastrado</string>
+    <string name="perfil_usuario_github_vazio">GitHub não cadastrado</string>
+    <string name="perfil_usuario_portfolio_vazio">Portfólio não cadastrado</string>
+
+    <string name="perfil_usuario_link_invalido">Link inválido</string>
+    <string name="perfil_usuario_sem_conversa">Nenhuma conversa encontrada</string>
+
+    <string name="perfil_usuario_btn_conversar">CONVERSAR</string>
+    <string name="perfil_usuario_btn_apagar_conversa">APAGAR CONVERSA</string>
+    <string name="perfil_usuario_btn_bloquear">BLOQUEAR USUÁRIO</string>
+    <string name="perfil_usuario_btn_desbloquear">DESBLOQUEAR USUÁRIO</string>
+
+    <string name="perfil_usuario_apagar_conversa_titulo">Apagar conversa</string>
+    <string name="perfil_usuario_apagar_mensagens">Apagar mensagens</string>
+    <string name="perfil_usuario_apagar_conversa_inteira">Apagar conversa inteira</string>
+    <string name="perfil_usuario_mensagens_apagadas">Mensagens apagadas</string>
+    <string name="perfil_usuario_conversa_apagada">Conversa apagada</string>
+
+    <string name="perfil_usuario_bloquear_titulo">Bloquear usuário</string>
+    <string name="perfil_usuario_bloquear_msg">Tem certeza? Ele não poderá mais enviar mensagens para você.</string>
+    <string name="perfil_usuario_bloquear_confirmar">Bloquear</string>
+    <string name="perfil_usuario_bloqueado_sucesso">Usuário bloqueado</string>
+    <string name="perfil_usuario_desbloqueado_sucesso">Desbloqueado</string>
+
+    <!-- ===== CONVIDAR TRABALHO ===== -->
     <string name="convidar_trabalho_titulo">Convidar para Trabalho</string>
     <string name="convidar_trabalho_prefixo">Trabalho: %1$s</string>
-    <string name="convidar_trabalho_placeholder">Trabalho: ...</string>
+    <string name="convidar_trabalho_placeholder">Trabalho: …</string>
     <string name="convidar_trabalho_enviar">ENVIAR CONVITE</string>
     <string name="convidar_trabalho_enviado">✅ Convite enviado para %1$s</string>
     <string name="convidar_trabalho_sem_disponiveis">Nenhum usuário disponível para convidar</string>
@@ -213,7 +487,7 @@
     <string name="item_trabalho_zero">0</string>
     <string name="item_trabalho_convidar">Convidar</string>
 
-    <!-- ===== JOB COMMENTS ===== -->
+    <!-- ===== COMENTÁRIOS ===== -->
     <string name="comentarios_titulo">Comentários</string>
     <string name="comentarios_seta_voltar">←</string>
     <string name="comentarios_trabalho_padrao">Trabalho</string>
@@ -227,7 +501,6 @@
     <string name="comentarios_texto_placeholder">Texto do comentário</string>
     <string name="comentarios_editado">(editado)</string>
 
-    <!-- Job Comments — actions and toasts -->
     <string name="comentarios_nao_encontrado">Trabalho não encontrado</string>
     <string name="comentarios_voce">Você</string>
     <string name="comentarios_opcoes_titulo">Opções</string>
@@ -243,7 +516,7 @@
     <string name="comentarios_excluido">Excluído</string>
     <string name="comentarios_erro_excluir">Erro ao excluir</string>
 
-    <!-- ===== ATTACHMENTS ===== -->
+    <!-- ===== ANEXOS ===== -->
     <string name="anexos_titulo">Anexos</string>
     <string name="anexos_trabalho_padrao">Trabalho</string>
     <string name="anexos_nao_encontrado">Trabalho não encontrado</string>
@@ -253,7 +526,6 @@
     <string name="anexos_vazio_titulo">Nenhum anexo</string>
     <string name="anexos_vazio_subtitulo">Adicione arquivos, fotos ou documentos ao trabalho</string>
 
-    <!-- Attachment actions -->
     <string name="anexo_acao_abrir">Abrir</string>
     <string name="anexo_acao_baixar">Baixar</string>
     <string name="anexo_acao_remover">Remover</string>
@@ -262,29 +534,25 @@
     <string name="anexo_removido">Anexo removido</string>
     <string name="anexo_erro_remover">Erro ao remover</string>
 
-    <!-- Attachment info -->
     <string name="anexo_info_formato">%1$s - por %2$s</string>
     <string name="anexo_sem_app">Nenhum app para abrir \'%1$s\'</string>
     <string name="anexo_baixando_do_ctr">Baixando do CTR…</string>
     <string name="anexo_baixando">Baixando…</string>
 
-    <!-- Attachment errors (AnexoHelper) -->
     <string name="anexo_nome_arquivo_padrao">arquivo</string>
     <string name="anexo_erro_url">URL não retornada pelo Cloudinary</string>
     <string name="anexo_erro_salvar">Erro ao salvar: %1$s</string>
     <string name="anexo_erro_upload_desconhecido">Erro desconhecido no upload</string>
 
-    <!-- Attachment notification -->
     <string name="anexo_notif_titulo">Novo anexo em %1$s</string>
     <string name="anexo_notif_msg">%1$s adicionou um anexo</string>
 
-    <!-- Attachment item placeholders (preview only) -->
     <string name="item_anexo_placeholder_icone">A</string>
     <string name="item_anexo_placeholder_nome">arquivo.pdf</string>
     <string name="item_anexo_placeholder_info">1.2 MB - por Ana</string>
     <string name="item_anexo_placeholder_menu">...</string>
 
-    <!-- ===== CHAT ITEMS (shared) ===== -->
+    <!-- ===== CHAT — ITENS COMPARTILHADOS ===== -->
     <string name="chat_responder_desc">Responder</string>
     <string name="item_mensagem_nome_placeholder">Nome</string>
     <string name="item_mensagem_citacao_placeholder">Mensagem original…</string>
@@ -293,9 +561,7 @@
     <string name="item_mensagem_arquivo_emoji">📎</string>
     <string name="item_mensagem_arquivo_tamanho_placeholder">0 KB</string>
 
-    <!-- ===== CHAT (shared across ChatActivity, ChatEquipeActivity, ChatGrupoActivity, ChatEquipeHubActivity) ===== -->
-
-    <!-- Errors and validation -->
+    <!-- ===== CHAT — COMPARTILHADO ===== -->
     <string name="chat_sessao_expirada">Sessão expirada. Faça login novamente.</string>
     <string name="chat_conversa_invalida">Conversa inválida</string>
     <string name="chat_conversa_nao_encontrada">Conversa não encontrada</string>
@@ -306,20 +572,16 @@
     <string name="chat_msg_nao_encontrada">Mensagem não encontrada</string>
     <string name="chat_perfil_indisponivel">Não é possível ver o perfil</string>
 
-    <!-- Blocking -->
     <string name="chat_voce_bloqueou">Você bloqueou este usuário</string>
     <string name="chat_voce_foi_bloqueado">Você foi bloqueado por este usuário</string>
 
-    <!-- Typing indicator -->
     <string name="chat_digitando">%1$s está digitando…</string>
 
-    <!-- Responding -->
     <string name="chat_respondendo_a">Respondendo a %1$s</string>
     <string name="chat_tipo_foto">📷 Foto</string>
     <string name="chat_tipo_video">🎥 Vídeo</string>
     <string name="chat_tipo_arquivo">📎 Arquivo</string>
 
-    <!-- Upload toasts -->
     <string name="chat_enviando_foto">📤 Enviando foto…</string>
     <string name="chat_enviando_video">📤 Enviando vídeo…</string>
     <string name="chat_enviando_arquivo">📤 Enviando arquivo…</string>
@@ -327,12 +589,10 @@
     <string name="chat_video_enviado">✅ Vídeo enviado!</string>
     <string name="chat_arquivo_enviado">✅ Arquivo enviado!</string>
 
-    <!-- Previews (Firestore + UI) -->
     <string name="chat_preview_foto">📷 Foto</string>
     <string name="chat_preview_video">🎥 Vídeo</string>
     <string name="chat_preview_arquivo">📎 %1$s</string>
 
-    <!-- Message options -->
     <string name="chat_responder">💬 Responder</string>
     <string name="chat_favoritar">⭐ Favoritar</string>
     <string name="chat_desfavoritar">⭐ Remover dos favoritos</string>
@@ -343,18 +603,14 @@
     <string name="chat_abrir">📂 Abrir</string>
     <string name="chat_opcoes_titulo">Opções</string>
 
-    <!-- Favorites -->
     <string name="chat_favoritado">⭐ Favoritado</string>
     <string name="chat_removido_favoritos">Removido</string>
 
-    <!-- Download -->
     <string name="chat_baixando">⬇ Baixando…</string>
     <string name="chat_baixando_do_ctr">Baixando do CTR…</string>
 
-    <!-- Delete message -->
     <string name="chat_msg_apagada_toast">Mensagem apagada</string>
 
-    <!-- Message info -->
     <string name="chat_info_titulo">ℹ️ Informações da mensagem</string>
     <string name="chat_info_enviada">Enviada: %1$s</string>
     <string name="chat_info_lida_sim">Lida: ✅</string>
@@ -366,7 +622,156 @@
     <string name="chat_info_data_formato">dd/MM/yyyy \'às\' HH:mm</string>
     <string name="chat_info_ok">OK</string>
 
-    <!-- Hub: chat geral, grupos, individuais -->
+    <!-- ===== ENTREGAR TRABALHO ===== -->
+    <string name="entregar_nao_membro">Você não é membro de nenhuma equipe</string>
+    <string name="entregar_equipe_fallback">Equipe</string>
+    <string name="entregar_nenhum_trabalho">Nenhum trabalho encontrado</string>
+    <string name="entregar_contador_zero">0</string>
+
+    <string name="entregar_avatar_sigla">ME</string>
+    <string name="entregar_participante">Participante</string>
+    <string name="entregar_btn_chat_equipe">CHAT DA EQUIPE</string>
+    <string name="entregar_meus_trabalhos">Meus Trabalhos</string>
+
+    <string name="entregar_btn_iniciar">INICIAR</string>
+    <string name="entregar_btn_concluir">CONCLUIR</string>
+    <string name="entregar_btn_reabrir">REABRIR</string>
+
+    <string name="entregar_alterar_status_titulo">Alterar status</string>
+    <string name="entregar_status_atualizado">Status atualizado!</string>
+
+    <!-- ===== GERENCIAR MEMBROS GRUPO ===== -->
+    <string name="gerenciar_membros_grupo_titulo">Membros do Grupo</string>
+    <string name="gerenciar_membros_grupo_btn_adicionar">+ ADICIONAR MEMBRO</string>
+    <string name="gerenciar_membros_grupo_dica_long_press">Long press para remover</string>
+    <string name="gerenciar_membros_grupo_nao_encontrado">Grupo não encontrado</string>
+    <string name="gerenciar_membros_grupo_sem_permissao">Você não tem permissão</string>
+    <string name="gerenciar_membros_grupo_nenhum_membro">Nenhum membro no grupo</string>
+    <string name="gerenciar_membros_grupo_usuario_fallback">Usuário</string>
+    <string name="gerenciar_membros_grupo_grupo_fallback">Grupo</string>
+
+    <string name="gerenciar_membros_grupo_remover_titulo">Remover membro</string>
+    <string name="gerenciar_membros_grupo_remover_msg">Deseja remover %1$s do grupo?</string>
+    <string name="gerenciar_membros_grupo_remover_confirmar">Remover</string>
+    <string name="gerenciar_membros_grupo_removido_sucesso">Membro removido</string>
+
+    <string name="gerenciar_membros_grupo_adicionar_titulo">Adicionar membro</string>
+    <string name="gerenciar_membros_grupo_todos_no_grupo">Todos os membros já estão no grupo</string>
+    <string name="gerenciar_membros_grupo_adicionado_sucesso">Membro adicionado</string>
+
+    <!-- ===== PREVIEW MIDIA ===== -->
+    <string name="preview_midia_invalida">Mídia inválida</string>
+    <string name="preview_midia_imagem_cortada">Imagem cortada</string>
+    <string name="preview_midia_video_cortado">Vídeo cortado</string>
+    <string name="preview_midia_cortar_titulo">Cortar imagem</string>
+
+    <string name="preview_midia_erro_cortar">Erro ao cortar: %1$s</string>
+    <string name="preview_midia_erro_preparar_crop">Erro ao preparar crop</string>
+    <string name="preview_midia_erro_abrir_editor">Erro ao abrir editor</string>
+    <string name="preview_midia_erro_abrir_editor_video">Erro ao abrir editor de vídeo</string>
+
+    <string name="preview_midia_arquivo_fallback">arquivo</string>
+    <string name="preview_midia_arquivo_placeholder">arquivo.pdf</string>
+    <string name="preview_midia_legenda_hint">Adicione uma legenda…</string>
+
+    <string name="preview_midia_sigla_pdf">PDF</string>
+    <string name="preview_midia_sigla_doc">DOC</string>
+    <string name="preview_midia_sigla_xls">XLS</string>
+    <string name="preview_midia_sigla_ppt">PPT</string>
+    <string name="preview_midia_sigla_img">IMG</string>
+    <string name="preview_midia_sigla_vid">VID</string>
+    <string name="preview_midia_sigla_aud">AUD</string>
+    <string name="preview_midia_sigla_zip">ZIP</string>
+    <string name="preview_midia_sigla_arq">ARQ</string>
+
+    <!-- ===== VISUALIZAR MIDIA ===== -->
+    <string name="visualizar_midia_btn_voltar">← VOLTAR</string>
+    <string name="visualizar_midia_btn_baixar">⬇ BAIXAR</string>
+
+    <string name="visualizar_midia_nao_encontrada">Mídia não encontrada</string>
+    <string name="visualizar_midia_baixando_desc">Baixando do CTR…</string>
+    <string name="visualizar_midia_baixando_toast">⬇ Baixando…</string>
+    <string name="visualizar_midia_erro_baixar">Erro ao baixar: %1$s</string>
+
+    <!-- ===== GALERIA MIDIA ===== -->
+    <string name="galeria_btn_fechar">✕</string>
+    <string name="galeria_btn_baixar">⬇</string>
+    <string name="galeria_nenhuma_midia">Nenhuma mídia para mostrar</string>
+
+    <!-- ===== SELETOR USUARIO (helper reutilizável) ===== -->
+    <string name="seletor_usuario_titulo">Selecionar usuário</string>
+    <string name="seletor_usuario_buscar_hint">Buscar por nome ou email…</string>
+    <string name="seletor_usuario_nome_fallback">Usuário</string>
+
+    <!-- (adicionar ao bloco SELETOR USUARIO) -->
+    <string name="seletor_usuario_inicial_placeholder">A</string>
+    <string name="seletor_usuario_email_placeholder">email@email.com</string>
+
+    <!-- ===== PERFIL (MINHA CONTA) ===== -->
+    <string name="perfil_carregando">Carregando…</string>
+    <string name="perfil_saindo">Saindo da conta…</string>
+    <string name="perfil_enviando_foto">Enviando foto…</string>
+    <string name="perfil_foto_atualizada">Foto atualizada</string>
+
+    <string name="perfil_nome_fallback">Usuário</string>
+    <string name="perfil_profissao_fallback">Profissão</string>
+    <string name="perfil_iniciais_fallback">ME</string>
+    <string name="perfil_nenhuma_equipe">Nenhuma equipe</string>
+    <string name="perfil_erro_carregar">Erro ao carregar</string>
+
+    <string name="perfil_avatar_desc">Foto de perfil</string>
+    <string name="perfil_btn_camera_simbolo">+</string>
+    <string name="perfil_btn_adicionar_simbolo">+</string>
+    <string name="perfil_equipe_label">Equipe ingressada no momento:</string>
+
+    <string name="perfil_erro_url_nao_encontrada">Erro: URL não encontrada</string>
+    <string name="perfil_erro_upload">Erro no upload: %1$s</string>
+
+    <string name="perfil_link_invalido">Link inválido</string>
+    <string name="perfil_remover_link_titulo">Remover link</string>
+    <string name="perfil_remover_link_msg">Deseja remover este link?</string>
+    <string name="perfil_remover_link_sim">Sim</string>
+
+    <string name="perfil_link_titulo">Adicionar Link</string>
+    <string name="perfil_link_instrucao">Cole a URL do link:</string>
+    <string name="perfil_link_hint">https://…</string>
+    <string name="perfil_link_digite_url">Digite uma URL</string>
+    <string name="perfil_link_formato_invalido">A URL deve começar com http:// ou https://</string>
+    <string name="perfil_link_adicionado">Link adicionado</string>
+    <string name="perfil_link_nao_encontrado">Link não encontrado</string>
+    <string name="perfil_link_removido">Link removido</string>
+
+    <!-- ===== PRODUTOS / DASHBOARD EQUIPE ===== -->
+    <string name="produtos_logo_fallback">EQ</string>
+    <string name="produtos_equipe_fallback">Equipe</string>
+    <string name="produtos_usuario_fallback">Usuário</string>
+    <string name="produtos_sem_descricao">Nenhuma descrição</string>
+
+    <string name="produtos_criado_por">Criado por %1$s</string>
+    <string name="produtos_criado_por_placeholder">Criado por</string>
+    <string name="produtos_config_desc">Configurações da equipe</string>
+    <string name="produtos_descricao_label">Descrição</string>
+
+    <string name="produtos_delegar_tarefa_titulo">Delegar Tarefa</string>
+    <string name="produtos_delegar_tarefa_msg">Crie um novo trabalho, defina o prazo, atribua aos membros e acompanhe a produtividade.</string>
+
+    <string name="produtos_btn_ver_produtividade">📊 VER PRODUTIVIDADE</string>
+    <string name="produtos_btn_criar_trabalho">CRIAR TRABALHO</string>
+    <string name="produtos_btn_chat_equipe">CHAT DA EQUIPE</string>
+
+    <string name="produtos_trabalhos_recentes">Trabalhos Recentes</string>
+
+    <string name="produtos_vazio_titulo">Você ainda não tem uma equipe</string>
+    <string name="produtos_vazio_subtitulo">Crie uma equipe para começar a gerenciar trabalhos</string>
+    <string name="produtos_vazio_btn_criar">CRIAR EQUIPE</string>
+
+    <!-- ===== GERENCIAR EQUIPE (adicional) ===== -->
+    <string name="gerenciar_usuario_selecionado">Selecionado: %1$s</string>
+    <string name="gerenciar_pedido_linha">%1$s (%2$s)</string>
+    <string name="item_trabalho_info_formato">%1$s - %2$s</string>
+    <string name="produtividade_item_zero">0</string>
+
+    <!-- ===== CHAT HUB ===== -->
     <string name="chat_hub_titulo">Chat da Equipe</string>
     <string name="chat_hub_secao_geral">GERAL</string>
     <string name="chat_hub_secao_grupos">GRUPOS</string>
@@ -381,36 +786,34 @@
     <string name="chat_hub_video">Vídeo</string>
     <string name="chat_hub_arquivo">Arquivo</string>
 
-    <!-- Hub: create group dialog -->
     <string name="chat_hub_novo_grupo_titulo">Novo Grupo</string>
     <string name="chat_hub_novo_grupo_hint">Nome do grupo</string>
     <string name="chat_hub_novo_grupo_criar">Criar</string>
     <string name="chat_hub_grupo_criado">Grupo criado!</string>
 
-    <!-- Group: leave -->
+    <!-- ===== CHAT GRUPO ===== -->
     <string name="chat_grupo_sair_titulo">Sair do grupo</string>
     <string name="chat_grupo_sair_msg">Tem certeza?</string>
     <string name="chat_grupo_sair_confirmar">Sair</string>
     <string name="chat_grupo_criador_aviso">Você é o criador. Só pode excluir.</string>
     <string name="chat_grupo_saiu">Você saiu</string>
 
-    <!-- Chat UI placeholders -->
     <string name="chat_hint_digite">Digite…</string>
     <string name="chat_placeholder_conversa">Conversa</string>
     <string name="chat_placeholder_mensagem">Mensagem</string>
     <string name="chat_placeholder_usuario">Usuário</string>
 
-    <!-- ===== CONVERSATION ITEM ===== -->
+    <!-- ===== ITEM CONVERSA ===== -->
     <string name="item_conversa_icone_usuario">👤</string>
     <string name="item_conversa_ultima_msg_placeholder">Última mensagem</string>
 
-    <!-- ===== RELATIVE TIME (shared) ===== -->
+    <!-- ===== TEMPO RELATIVO (compartilhado) ===== -->
     <string name="tempo_agora">Agora</string>
     <string name="tempo_ha_min">Há %1$dmin</string>
     <string name="tempo_ha_horas">Há %1$dh</string>
     <string name="tempo_ha_dias">Há %1$dd</string>
 
-    <!-- Perfil -->
+    <!-- ===== PERFIL ===== -->
     <string name="perfil_titulo">Meu Perfil</string>
     <string name="perfil_links">Links</string>
     <string name="perfil_sem_links">Nenhum link cadastrado</string>
@@ -419,7 +822,7 @@
     <string name="perfil_sair">SAIR DA CONTA</string>
     <string name="perfil_configuracoes">Configurações</string>
 
-    <!-- Configurações -->
+    <!-- ===== CONFIGURAÇÕES ===== -->
     <string name="config_titulo">Configurações</string>
     <string name="config_idioma">Idioma</string>
     <string name="config_sair">Sair da conta</string>
@@ -427,26 +830,14 @@
     <string name="config_excluir_conta_msg">Tem certeza? Todos os seus dados serão removidos permanentemente.</string>
     <string name="config_excluir_confirmar">Sim, excluir</string>
 
-    <!-- Ações -->
-    <string name="voltar">← VOLTAR</string>
-    <string name="cancelar">Cancelar</string>
-    <string name="salvar">Salvar</string>
-    <string name="excluir">Excluir</string>
-    <string name="favoritar">⭐ Favoritar</string>
-    <string name="desfavoritar">⭐ Remover dos favoritos</string>
-    <string name="apagar">🗑 Apagar</string>
-    <string name="baixar">⬇ Baixar</string>
-    <string name="abrir">📂 Abrir</string>
-    <string name="opcoes">Opções</string>
-
-    <!-- Erros -->
-    <string name="erro_generico">Erro: %1$s</string>
-    <string name="erro_campos_vazios">Preencha todos os campos</string>
-    <string name="erro_sem_conexao">⚠️ Sem conexão com a internet. Verifique sua rede e tente novamente.</string>
-
-    <!-- Favoritos -->
+    <!-- ===== FAVORITOS (tela) ===== -->
     <string name="favoritos_titulo">⭐ Mensagens Favoritas</string>
     <string name="favoritos_vazio">Nenhuma mensagem favoritada ainda</string>
     <string name="favoritos_remover">Remover favorito</string>
     <string name="favoritos_remover_msg">Deseja remover esta mensagem dos favoritos?</string>
+
+    <!-- ===== CHAT — SEPARADOR DE DATA ===== -->
+    <string name="chat_separador_hoje">HOJE</string>
+    <string name="chat_separador_ontem">ONTEM</string>
+
 </resources>

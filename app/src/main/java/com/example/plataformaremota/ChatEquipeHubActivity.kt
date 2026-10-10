@@ -57,16 +57,12 @@ class ChatEquipeHubActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // CARREGAR TUDO (sequencial)
-    // ============================================================
     private fun carregarDados() {
         if (carregando) return
         carregando = true
 
         lifecycleScope.launch {
             try {
-                // 1. Dados da equipe
                 val equipeDoc = db.collection("equipes").document(equipeId).get().await()
                 nomeEquipe = equipeDoc.getString("nome") ?: getString(R.string.equipe_default_nome)
                 val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
@@ -74,22 +70,16 @@ class ChatEquipeHubActivity : BaseActivity() {
 
                 findViewById<TextView>(R.id.txtNomeEquipeHub).text = nomeEquipe
 
-                // Botao criar grupo
                 val btnCriarGrupo = findViewById<Button>(R.id.btnCriarGrupoHub)
                 btnCriarGrupo.visibility = if (ehDono) View.VISIBLE else View.GONE
                 btnCriarGrupo.setOnClickListener { abrirDialogNovoGrupo() }
 
-                // 2. Chat geral
                 montarChatGeral()
-
-                // 3. Grupos
                 montarGrupos()
-
-                // 4. Individuais
                 montarIndividuais()
 
             } catch (e: Exception) {
-                Log.e("HUB", "Erro: ${e.message}")
+                Log.e(TAG, "Erro: ${e.message}")
                 Toast.makeText(
                     this@ChatEquipeHubActivity,
                     getString(R.string.erro_generico, e.message ?: ""),
@@ -101,9 +91,6 @@ class ChatEquipeHubActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // 1. CHAT GERAL
-    // ============================================================
     private suspend fun montarChatGeral() {
         try {
             val container = findViewById<LinearLayout>(R.id.containerChatGeral)
@@ -130,27 +117,24 @@ class ChatEquipeHubActivity : BaseActivity() {
 
             container.addView(view)
         } catch (e: Exception) {
-            Log.e("HUB", "Erro chat geral: ${e.message}")
+            Log.e(TAG, "Erro chat geral: ${e.message}")
         }
     }
 
-    // ============================================================
-    // 2. GRUPOS
-    // ============================================================
     private suspend fun montarGrupos() {
         try {
             val container = findViewById<LinearLayout>(R.id.containerGrupos)
             val section = findViewById<LinearLayout>(R.id.containerGruposSection)
             container.removeAllViews()
 
-            Log.d("HUB", "Buscando grupos com equipeId=$equipeId")
+            Log.d(TAG, "Buscando grupos com equipeId=$equipeId")
 
             val grupos = db.collection("grupos")
                 .whereEqualTo("equipeId", equipeId)
                 .get()
                 .await()
 
-            Log.d("HUB", "Grupos encontrados: ${grupos.size()}")
+            Log.d(TAG, "Grupos encontrados: ${grupos.size()}")
 
             if (grupos.isEmpty) {
                 section.visibility = View.GONE
@@ -203,13 +187,10 @@ class ChatEquipeHubActivity : BaseActivity() {
                 container.addView(view)
             }
         } catch (e: Exception) {
-            Log.e("HUB", "Erro grupos: ${e.message}")
+            Log.e(TAG, "Erro grupos: ${e.message}")
         }
     }
 
-    // ============================================================
-    // 3. INDIVIDUAIS
-    // ============================================================
     private suspend fun montarIndividuais() {
         try {
             val container = findViewById<LinearLayout>(R.id.containerIndividuais)
@@ -271,13 +252,10 @@ class ChatEquipeHubActivity : BaseActivity() {
                 container.addView(view)
             }
         } catch (e: Exception) {
-            Log.e("HUB", "Erro individuais: ${e.message}")
+            Log.e(TAG, "Erro individuais: ${e.message}")
         }
     }
 
-    // ============================================================
-    // MONTAR LINHA
-    // ============================================================
     private fun montarLinha(icone: String, nome: String, preview: String, naoLidas: Int): View {
         val view = LayoutInflater.from(this).inflate(R.layout.item_hub_linha, null, false)
 
@@ -296,9 +274,6 @@ class ChatEquipeHubActivity : BaseActivity() {
         return view
     }
 
-    // ============================================================
-    // CRIAR GRUPO
-    // ============================================================
     private fun abrirDialogNovoGrupo() {
         val edtNome = EditText(this).apply {
             hint = getString(R.string.chat_hub_novo_grupo_hint)
@@ -323,7 +298,7 @@ class ChatEquipeHubActivity : BaseActivity() {
                         )
 
                         val grupoId = db.collection("grupos").add(grupo).await().id
-                        Log.d("HUB", "Grupo criado: $grupoId")
+                        Log.d(TAG, "Grupo criado: $grupoId")
 
                         val userRef = db.collection("usuarios").document(emailUsuario)
                         val userDoc = userRef.get().await()
@@ -332,7 +307,11 @@ class ChatEquipeHubActivity : BaseActivity() {
                             userRef.update("gruposIds", ids + grupoId).await()
                         }
 
-                        Toast.makeText(this@ChatEquipeHubActivity, getString(R.string.chat_hub_grupo_criado), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@ChatEquipeHubActivity,
+                            getString(R.string.chat_hub_grupo_criado),
+                            Toast.LENGTH_SHORT
+                        ).show()
 
                         carregando = false
                         carregarDados()
@@ -348,5 +327,9 @@ class ChatEquipeHubActivity : BaseActivity() {
             }
             .setNegativeButton(R.string.cancelar, null)
             .show()
+    }
+
+    companion object {
+        private const val TAG = "HUB"
     }
 }

@@ -46,11 +46,14 @@ class GruposActivity : BaseActivity() {
             if (ehDonoOuAdm) {
                 abrirDialogNovoGrupo()
             } else {
-                Toast.makeText(this, "Só o dono ou administrador pode criar grupos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.grupos_sem_permissao_criar),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
-        // ✅ Bottom nav configurado em 1 linha
         configurarBottomNavigation(R.id.nav_groups)
     }
 
@@ -76,7 +79,7 @@ class GruposActivity : BaseActivity() {
                     ehDonoOuAdm = funcao == "administrador"
                 }
             } catch (e: Exception) {
-                Log.e("GRUPOS", getString(R.string.erro_generico, e.message ?: ""))
+                Log.e(TAG, "Erro verificarPermissao: ${e.message}")
             }
         }
     }
@@ -94,7 +97,7 @@ class GruposActivity : BaseActivity() {
 
                 if (grupos.isEmpty) {
                     val txtVazio = TextView(this@GruposActivity).apply {
-                        text = "Nenhum grupo criado ainda"
+                        text = getString(R.string.grupos_nenhum_criado)
                         setTextColor(ContextCompat.getColor(this@GruposActivity, R.color.text_secondary))
                         textSize = 14f
                         setPadding(0, 60, 0, 60)
@@ -105,10 +108,11 @@ class GruposActivity : BaseActivity() {
                 }
 
                 val inflater = LayoutInflater.from(this@GruposActivity)
+                val nomeFallback = getString(R.string.grupos_nome_fallback)
 
                 grupos.documents.forEach { doc ->
                     val grupoId = doc.id
-                    val nome = doc.getString("nomeGrupo") ?: "Grupo"
+                    val nome = doc.getString("nomeGrupo") ?: nomeFallback
                     val membros = doc.get("membros") as? List<*> ?: emptyList<Any>()
 
                     val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
@@ -117,7 +121,13 @@ class GruposActivity : BaseActivity() {
 
                     t1.text = nome
                     t1.setTextColor(ContextCompat.getColor(this@GruposActivity, R.color.text_primary))
-                    t2.text = "${membros.size} membros"
+
+                    // ✅ Plural correto por idioma
+                    t2.text = resources.getQuantityString(
+                        R.plurals.grupos_qtd_membros,
+                        membros.size,
+                        membros.size
+                    )
                     t2.setTextColor(ContextCompat.getColor(this@GruposActivity, R.color.text_secondary))
                     view.setPadding(0, 24, 0, 24)
 
@@ -132,25 +142,21 @@ class GruposActivity : BaseActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("GRUPOS", getString(R.string.erro_generico, e.message ?: ""))
+                Log.e(TAG, "Erro carregarGrupos: ${e.message}")
             }
         }
     }
 
-    // ============================================================
-    // ✅ Funcionalidade: denormalização de gruposIds
-    // ✅ Melhoria: strings extraídas
-    // ============================================================
     private fun abrirDialogNovoGrupo() {
         val edtNome = EditText(this).apply {
-            hint = "Nome do grupo"
+            hint = getString(R.string.grupos_hint_nome)
             setPadding(40, 30, 40, 30)
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Novo Grupo")
+            .setTitle(getString(R.string.grupos_dialog_novo_titulo))
             .setView(edtNome)
-            .setPositiveButton("Criar") { _, _ ->
+            .setPositiveButton(getString(R.string.grupos_dialog_criar)) { _, _ ->
                 val nome = edtNome.text.toString().trim()
                 if (nome.isEmpty()) return@setPositiveButton
 
@@ -166,10 +172,13 @@ class GruposActivity : BaseActivity() {
 
                         val grupoId = db.collection("grupos").add(grupo).await().id
 
-                        // ✅ Denormaliza o grupoId na lista do criador
                         adicionarGrupoIdAoUsuario(emailUsuario, grupoId)
 
-                        Toast.makeText(this@GruposActivity, "✅ Grupo criado!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@GruposActivity,
+                            getString(R.string.grupos_criado_sucesso),
+                            Toast.LENGTH_SHORT
+                        ).show()
                         carregarGrupos()
                     } catch (e: Exception) {
                         Toast.makeText(
@@ -184,10 +193,6 @@ class GruposActivity : BaseActivity() {
             .show()
     }
 
-    /**
-     * ✅ Adiciona o grupoId na lista `gruposIds` do usuário.
-     * Idempotente: se já existe, não faz nada.
-     */
     private suspend fun adicionarGrupoIdAoUsuario(email: String, grupoId: String) {
         try {
             val userRef = db.collection("usuarios").document(email)
@@ -196,10 +201,14 @@ class GruposActivity : BaseActivity() {
 
             if (grupoId !in ids) {
                 userRef.update("gruposIds", ids + grupoId).await()
-                Log.d("GRUPOS", "✅ gruposIds atualizado para $email")
+                Log.d(TAG, "gruposIds atualizado para $email")
             }
         } catch (e: Exception) {
-            Log.e("GRUPOS", "Erro ao denormalizar gruposIds: ${e.message}")
+            Log.e(TAG, "Erro ao denormalizar gruposIds: ${e.message}")
         }
+    }
+
+    companion object {
+        private const val TAG = "GRUPOS"
     }
 }

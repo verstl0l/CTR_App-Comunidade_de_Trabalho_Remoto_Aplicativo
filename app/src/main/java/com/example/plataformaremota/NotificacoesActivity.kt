@@ -29,7 +29,6 @@ class NotificacoesActivity : BaseActivity() {
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
 
-    // ✅ Guard contra chamadas simultaneas
     private var carregando = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +45,6 @@ class NotificacoesActivity : BaseActivity() {
         }
 
         configurarBottomNavigation(R.id.nav_notifications)
-
-        // ✅ NAO chama carregarNotificacoes aqui — o onResume cuida
     }
 
     override fun onResume() {
@@ -58,11 +55,7 @@ class NotificacoesActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // CARREGAR NOTIFICACOES
-    // ============================================================
     private fun carregarNotificacoes() {
-        // ✅ Guard
         if (carregando) return
         carregando = true
 
@@ -86,21 +79,26 @@ class NotificacoesActivity : BaseActivity() {
 
                 containerVazio.visibility = View.GONE
 
-                // ✅ Deduplica (mesmo titulo + mensagem + tipo criados em <5s)
                 val unicas = notificacoes.documents.distinctBy { doc ->
                     val tipo = doc.getString("tipo") ?: ""
                     val titulo = doc.getString("titulo") ?: ""
                     val msg = doc.getString("mensagem") ?: ""
-                    // Chave de deduplicacao: combina campos unicos
                     "${tipo}_${titulo}_${msg}_${doc.getString("referenciaId") ?: ""}"
                 }
 
                 val inflater = LayoutInflater.from(this@NotificacoesActivity)
 
+                // ✅ Fallbacks traduzidos capturados UMA VEZ
+                val fallbackTitulo = getString(R.string.notificacoes_titulo_fallback)
+                val fallbackEquipe = getString(R.string.notificacoes_equipe_fallback)
+                val fallbackSemDescricao = getString(R.string.notificacoes_sem_descricao)
+                val fallbackUsuario = getString(R.string.notificacoes_usuario_fallback)
+                val fallbackTrabalho = getString(R.string.notificacoes_trabalho_fallback)
+
                 unicas.forEach { doc ->
                     val notificacaoId = doc.id
                     val tipo = doc.getString("tipo") ?: "generico"
-                    val titulo = doc.getString("titulo") ?: "Notificacao"
+                    val titulo = doc.getString("titulo") ?: fallbackTitulo
                     val mensagem = doc.getString("mensagem") ?: ""
                     val lida = doc.getBoolean("lida") ?: false
                     val criadoEm = doc.getLong("criadoEm") ?: 0L
@@ -136,9 +134,9 @@ class NotificacoesActivity : BaseActivity() {
 
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@NotificacoesActivity)
-                            .setTitle("Apagar notificacao")
-                            .setMessage("Deseja apagar esta notificacao?")
-                            .setPositiveButton("Apagar") { _, _ ->
+                            .setTitle(getString(R.string.notificacoes_apagar_titulo))
+                            .setMessage(getString(R.string.notificacoes_apagar_msg))
+                            .setPositiveButton(getString(R.string.notificacoes_apagar_confirmar)) { _, _ ->
                                 apagarNotificacao(notificacaoId)
                             }
                             .setNegativeButton(R.string.cancelar, null)
@@ -150,17 +148,13 @@ class NotificacoesActivity : BaseActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("NOTIFICACOES", getString(R.string.erro_generico, e.message ?: ""))
+                Log.e(TAG, "Erro: ${e.message}")
             } finally {
-                // ✅ Libera o guard
                 carregando = false
             }
         }
     }
 
-    // ============================================================
-    // CONFIGURAR ICONE POR TIPO
-    // ============================================================
     private fun configurarIcone(
         cardIcone: com.google.android.material.card.MaterialCardView,
         imgIcone: ImageView,
@@ -197,9 +191,6 @@ class NotificacoesActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // NAVEGAR
-    // ============================================================
     private fun navegarParaNotificacao(tipo: String, referenciaTipo: String, referenciaId: String) {
         if (tipo == "pedido_entrada") {
             val intent = Intent(this@NotificacoesActivity, PedidosPendentesActivity::class.java)
@@ -222,9 +213,12 @@ class NotificacoesActivity : BaseActivity() {
                     if (!convites.isEmpty) {
                         val doc = convites.documents[0]
                         val conviteId = doc.id
-                        val nomeEquipe = doc.getString("nomeEquipe") ?: "Equipe"
-                        val descricaoEquipe = doc.getString("descricaoEquipe") ?: "Sem descricao"
-                        val nomeRemetente = doc.getString("nomeRemetente") ?: "Usuario"
+                        val nomeEquipe = doc.getString("nomeEquipe")
+                            ?: getString(R.string.notificacoes_equipe_fallback)
+                        val descricaoEquipe = doc.getString("descricaoEquipe")
+                            ?: getString(R.string.notificacoes_sem_descricao)
+                        val nomeRemetente = doc.getString("nomeRemetente")
+                            ?: getString(R.string.notificacoes_usuario_fallback)
 
                         val intent = Intent(this@NotificacoesActivity, AceitarConviteActivity::class.java)
                         intent.putExtra("conviteId", conviteId)
@@ -239,7 +233,7 @@ class NotificacoesActivity : BaseActivity() {
                         startActivity(intent)
                     }
                 } catch (e: Exception) {
-                    Log.e("NOTIFICACOES", "Erro convite: ${e.message}")
+                    Log.e(TAG, "Erro convite: ${e.message}")
                 }
             }
             return
@@ -250,7 +244,8 @@ class NotificacoesActivity : BaseActivity() {
                 lifecycleScope.launch {
                     try {
                         val trabalhoDoc = db.collection("trabalhos").document(referenciaId).get().await()
-                        val titulo = trabalhoDoc.getString("titulo") ?: "Trabalho"
+                        val titulo = trabalhoDoc.getString("titulo")
+                            ?: getString(R.string.notificacoes_trabalho_fallback)
                         val equipeIdTrab = trabalhoDoc.getString("equipeId") ?: ""
 
                         val intent = Intent(this@NotificacoesActivity, ComentariosTrabalhoActivity::class.java)
@@ -273,16 +268,34 @@ class NotificacoesActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // MARCAR TODAS COMO LIDAS
-    // ============================================================
     private fun marcarTodasComoLidas() {
         lifecycleScope.launch {
             try {
                 NotificacaoHelper.marcarTodasComoLidas(emailUsuario)
                 Toast.makeText(
                     this@NotificacoesActivity,
-                    "Todas marcadas como lidas",
+                    getString(R.string.notificacoes_todas_lidas),
+                    Toast.LENGTH_SHORT
+                ).show()
+                carregando = false
+                carregarNotificacoes()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@NotificacoesActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun apagarNotificacao(notificacaoId: String) {
+        lifecycleScope.launch {
+            try {
+                db.collection("notificacoes").document(notificacaoId).delete().await()
+                Toast.makeText(
+                    this@NotificacoesActivity,
+                    getString(R.string.notificacoes_apagada_sucesso),
                     Toast.LENGTH_SHORT
                 ).show()
                 carregando = false
@@ -298,27 +311,7 @@ class NotificacoesActivity : BaseActivity() {
     }
 
     // ============================================================
-    // APAGAR NOTIFICACAO
-    // ============================================================
-    private fun apagarNotificacao(notificacaoId: String) {
-        lifecycleScope.launch {
-            try {
-                db.collection("notificacoes").document(notificacaoId).delete().await()
-                Toast.makeText(this@NotificacoesActivity, "Notificacao apagada", Toast.LENGTH_SHORT).show()
-                carregando = false
-                carregarNotificacoes()
-            } catch (e: Exception) {
-                Toast.makeText(
-                    this@NotificacoesActivity,
-                    getString(R.string.erro_generico, e.message ?: ""),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
-
-    // ============================================================
-    // FORMATAR DATA
+    // FORMATAR DATA (com plurais e locale do sistema)
     // ============================================================
     private fun formatarDataRelativa(timestamp: Long): String {
         if (timestamp == 0L) return ""
@@ -327,23 +320,28 @@ class NotificacoesActivity : BaseActivity() {
         val diff = agora - timestamp
 
         return when {
-            diff < 60_000 -> "Agora"
+            diff < 60_000 -> getString(R.string.notificacoes_agora)
             diff < 3_600_000 -> {
-                val min = TimeUnit.MILLISECONDS.toMinutes(diff)
-                "Ha ${min}min"
+                val min = TimeUnit.MILLISECONDS.toMinutes(diff).toInt()
+                resources.getQuantityString(R.plurals.notificacoes_minutos_atras, min, min)
             }
             diff < 86_400_000 -> {
-                val horas = TimeUnit.MILLISECONDS.toHours(diff)
-                "Ha ${horas}h"
+                val horas = TimeUnit.MILLISECONDS.toHours(diff).toInt()
+                resources.getQuantityString(R.plurals.notificacoes_horas_atras, horas, horas)
             }
             diff < 604_800_000 -> {
-                val dias = TimeUnit.MILLISECONDS.toDays(diff)
-                "Ha ${dias}d"
+                val dias = TimeUnit.MILLISECONDS.toDays(diff).toInt()
+                resources.getQuantityString(R.plurals.notificacoes_dias_atras, dias, dias)
             }
             else -> {
-                val formato = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+                // ✅ Usa o locale do sistema, não força pt-BR
+                val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 formato.format(Date(timestamp))
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "NOTIFICACOES"
     }
 }

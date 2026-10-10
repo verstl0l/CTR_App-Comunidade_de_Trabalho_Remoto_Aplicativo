@@ -24,7 +24,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/criar_trabalho_btn_voltar"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -33,7 +33,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="32dp"
                 android:gravity="center"
-                android:text="Criar Trabalho"
+                android:text="@string/criar_trabalho_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="#9E9E9E"
-                android:hint="Título do trabalho"
+                android:hint="@string/criar_trabalho_hint_titulo"
                 android:padding="10dp"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="#9E9E9E"
-                android:hint="Descrição do trabalho"
+                android:hint="@string/criar_trabalho_hint_descricao"
                 android:padding="10dp"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="#9E9E9E"
-                android:hint="Categoria"
+                android:hint="@string/criar_trabalho_hint_categoria"
                 android:padding="10dp"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
@@ -77,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 android:backgroundTint="#9E9E9E"
-                android:hint="Prazo"
+                android:hint="@string/criar_trabalho_hint_prazo"
                 android:padding="10dp"
                 android:textColor="@android:color/white"
                 android:textColorHint="#9E9E9E" />
@@ -87,7 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:backgroundTint="#3D2B27"
-                android:text="PUBLICAR TRABALHO"
+                android:text="@string/criar_trabalho_btn_publicar"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 

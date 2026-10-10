@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Botão voltar flutuante (canto superior esquerdo) -->
+    <!-- Botão voltar flutuante -->
     <Button
         android:id="@+id/btnVoltarGaleria"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -19,13 +19,13 @@
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         android:minWidth="0dp"
-        android:text="✕"
+        android:text="@string/galeria_btn_fechar"
         android:textColor="@android:color/white"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Botão baixar flutuante (canto superior direito) -->
+    <!-- Botão baixar flutuante -->
     <Button
         android:id="@+id/btnBaixarGaleria"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         android:minWidth="0dp"
-        android:text="⬇"
+        android:text="@string/galeria_btn_baixar"
         android:textColor="@android:color/white"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"

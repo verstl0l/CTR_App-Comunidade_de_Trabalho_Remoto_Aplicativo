@@ -40,7 +40,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="EQ"
+                        android:text="@string/produtos_logo_fallback"
                         android:textColor="#1C1311"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -58,7 +58,7 @@
                         android:id="@+id/txtNomeEquipeDashboard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nome da Equipe"
+                        android:text="@string/produtos_equipe_fallback"
                         android:textColor="@android:color/white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -67,7 +67,7 @@
                         android:id="@+id/txtCriadorEquipeDashboard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Criado por"
+                        android:text="@string/produtos_criado_por_placeholder"
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
 
@@ -80,7 +80,7 @@
                     android:src="@android:drawable/ic_menu_manage"
                     android:clickable="true"
                     android:focusable="true"
-                    android:contentDescription="Configurações da equipe"
+                    android:contentDescription="@string/produtos_config_desc"
                     app:tint="#9E9E9E" />
 
             </LinearLayout>
@@ -103,7 +103,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Descrição"
+                        android:text="@string/produtos_descricao_label"
                         android:textColor="#9E9E9E"
                         android:textSize="12sp" />
 
@@ -112,7 +112,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Nenhuma descrição"
+                        android:text="@string/produtos_sem_descricao"
                         android:textColor="@android:color/white"
                         android:textSize="14sp" />
 
@@ -138,7 +138,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Delegar Tarefa"
+                        android:text="@string/produtos_delegar_tarefa_titulo"
                         android:textColor="@android:color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -147,7 +147,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Crie um novo trabalho, defina o prazo, atribua aos membros e acompanhe a produtividade."
+                        android:text="@string/produtos_delegar_tarefa_msg"
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
 
@@ -157,7 +157,7 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="12dp"
                         android:backgroundTint="#2B1F1C"
-                        android:text="📊 VER PRODUTIVIDADE"
+                        android:text="@string/produtos_btn_ver_produtividade"
                         android:textColor="#F5E6D0"
                         android:textStyle="bold"
                         app:strokeColor="#F5E6D0"
@@ -169,7 +169,7 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="20dp"
                         android:backgroundTint="#F5E6D0"
-                        android:text="CRIAR TRABALHO"
+                        android:text="@string/produtos_btn_criar_trabalho"
                         android:textColor="#1C1311"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -180,7 +180,7 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="12dp"
                         android:backgroundTint="#3D2B27"
-                        android:text="CHAT DA EQUIPE"
+                        android:text="@string/produtos_btn_chat_equipe"
                         android:textColor="@android:color/white"
                         android:textStyle="bold" />
 
@@ -193,7 +193,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Trabalhos Recentes"
+                android:text="@string/produtos_trabalhos_recentes"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -214,7 +214,7 @@
                     android:layout_marginEnd="4dp"
                     android:background="#F5E6D0"
                     android:gravity="center"
-                    android:text="Todos"
+                    android:text="@string/meus_trabalhos_filtro_todos"
                     android:textColor="#1C1311"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -227,7 +227,7 @@
                     android:layout_marginEnd="4dp"
                     android:background="#3D2B27"
                     android:gravity="center"
-                    android:text="Pendente"
+                    android:text="@string/meus_trabalhos_filtro_pendente"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
 
@@ -239,7 +239,7 @@
                     android:layout_marginEnd="4dp"
                     android:background="#3D2B27"
                     android:gravity="center"
-                    android:text="Em Prog."
+                    android:text="@string/meus_trabalhos_filtro_em_progresso"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
 
@@ -250,7 +250,7 @@
                     android:layout_weight="1"
                     android:background="#3D2B27"
                     android:gravity="center"
-                    android:text="Concluído"
+                    android:text="@string/meus_trabalhos_filtro_concluido"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
 

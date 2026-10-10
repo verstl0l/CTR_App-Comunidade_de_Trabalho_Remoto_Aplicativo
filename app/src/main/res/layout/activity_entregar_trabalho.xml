@@ -37,7 +37,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="ME"
+                        android:text="@string/entregar_avatar_sigla"
                         android:textColor="#241614"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -55,7 +55,7 @@
                         android:id="@+id/txtNomeEquipeMembro"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nome da Equipe"
+                        android:text="@string/info_equipe_nome_placeholder"
                         android:textColor="@android:color/white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -63,7 +63,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Participante"
+                        android:text="@string/entregar_participante"
                         android:textColor="#9E9E9E"
                         android:textSize="14sp" />
 
@@ -78,7 +78,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="#F5E6D0"
-                android:text="CHAT DA EQUIPE"
+                android:text="@string/entregar_btn_chat_equipe"
                 android:textColor="#1C1311"
                 android:textStyle="bold" />
 
@@ -87,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Meus Trabalhos"
+                android:text="@string/entregar_meus_trabalhos"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -107,7 +107,7 @@
                     android:layout_marginEnd="4dp"
                     android:background="#F5E6D0"
                     android:gravity="center"
-                    android:text="Todos"
+                    android:text="@string/meus_trabalhos_filtro_todos"
                     android:textColor="#1C1311"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -120,7 +120,7 @@
                     android:layout_marginEnd="4dp"
                     android:background="#3D2B27"
                     android:gravity="center"
-                    android:text="Pendente"
+                    android:text="@string/meus_trabalhos_filtro_pendente"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
 
@@ -132,7 +132,7 @@
                     android:layout_marginEnd="4dp"
                     android:background="#3D2B27"
                     android:gravity="center"
-                    android:text="Em Prog."
+                    android:text="@string/meus_trabalhos_filtro_em_progresso"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
 
@@ -143,7 +143,7 @@
                     android:layout_weight="1"
                     android:background="#3D2B27"
                     android:gravity="center"
-                    android:text="Concluído"
+                    android:text="@string/meus_trabalhos_filtro_concluido"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
 

@@ -25,7 +25,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Título do Trabalho"
+                android:text="@string/meus_trabalhos_item_titulo_placeholder"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -37,7 +37,7 @@
                 android:background="@color/bg_surface_hover"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
-                android:text="Pendente"
+                android:text="@string/status_pendente"
                 android:textColor="@color/accent"
                 android:textSize="11sp" />
 
@@ -49,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Equipe"
+            android:text="@string/meus_trabalhos_equipe_fallback"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Entrega: Data"
+            android:text="@string/meus_trabalhos_prazo_placeholder"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
@@ -71,7 +71,7 @@
             android:layout_marginTop="12dp"
             android:ellipsize="end"
             android:maxLines="3"
-            android:text="Descrição do trabalho..."
+            android:text="@string/meus_trabalhos_descricao_placeholder"
             android:textColor="@color/text_tertiary"
             android:textSize="14sp" />
 

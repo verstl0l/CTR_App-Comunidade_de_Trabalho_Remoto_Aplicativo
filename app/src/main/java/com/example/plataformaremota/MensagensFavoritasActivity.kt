@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
@@ -17,13 +16,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class MensagensFavoritasActivity : AppCompatActivity() {
+class MensagensFavoritasActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
 
-    // ✅ Guard contra chamadas simultaneas
     private var carregando = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +34,6 @@ class MensagensFavoritasActivity : AppCompatActivity() {
 
         val btnVoltar = findViewById<Button>(R.id.btnVoltarFavoritos)
         btnVoltar.setOnClickListener { finish() }
-
-        // ✅ NAO chama carregarFavoritos aqui — o onResume cuida
     }
 
     override fun onResume() {
@@ -48,11 +44,7 @@ class MensagensFavoritasActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // CARREGAR LISTA DE FAVORITOS
-    // ============================================================
     private fun carregarFavoritos() {
-        // ✅ Guard
         if (carregando) return
         carregando = true
 
@@ -78,17 +70,26 @@ class MensagensFavoritasActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // ✅ Deduplica por mensagemId (evita duplicatas antigas)
                 val unicos = favoritos.documents
                     .distinctBy { it.getString("mensagemId") ?: it.id }
                     .sortedByDescending { it.getLong("criadoEm") ?: 0L }
 
                 val inflater = LayoutInflater.from(this@MensagensFavoritasActivity)
 
+                // ✅ Captura strings traduzidas UMA VEZ antes do loop
+                val fallbackSemTexto = getString(R.string.favoritos_sem_texto)
+                val fallbackUsuario = getString(R.string.favoritos_usuario_fallback)
+                val labelFoto = getString(R.string.favoritos_tipo_foto)
+                val labelVideo = getString(R.string.favoritos_tipo_video)
+                val labelArquivo = getString(R.string.favoritos_tipo_arquivo)
+                val ctxGrupo = getString(R.string.favoritos_ctx_grupo)
+                val ctxEquipe = getString(R.string.favoritos_ctx_equipe)
+                val ctxPrivado = getString(R.string.favoritos_ctx_privado)
+
                 unicos.forEach { doc ->
                     val favoritoId = doc.id
-                    val texto = doc.getString("texto") ?: "(sem texto)"
-                    val nomeRemetente = doc.getString("nomeRemetente") ?: "Usuário"
+                    val texto = doc.getString("texto") ?: fallbackSemTexto
+                    val nomeRemetente = doc.getString("nomeRemetente") ?: fallbackUsuario
                     val chatId = doc.getString("chatId") ?: ""
                     val tipoChat = doc.getString("tipoChat") ?: "pv"
                     val tipoMidia = doc.getString("tipoMidia") ?: "texto"
@@ -98,31 +99,29 @@ class MensagensFavoritasActivity : AppCompatActivity() {
                     view.findViewById<TextView>(R.id.txtNomeFavorito).text = nomeRemetente
 
                     val textoExibido = when (tipoMidia) {
-                        "foto" -> "Foto"
-                        "video" -> "Vídeo"
-                        "arquivo" -> "Arquivo"
+                        "foto" -> labelFoto
+                        "video" -> labelVideo
+                        "arquivo" -> labelArquivo
                         else -> texto
                     }
                     view.findViewById<TextView>(R.id.txtTextoFavorito).text = textoExibido
 
                     val contexto = when (tipoChat) {
-                        "grupo" -> "Grupo"
-                        "equipe" -> "Chat da equipe"
-                        else -> "Chat privado"
+                        "grupo" -> ctxGrupo
+                        "equipe" -> ctxEquipe
+                        else -> ctxPrivado
                     }
                     view.findViewById<TextView>(R.id.txtContextoFavorito).text = contexto
 
-                    // Clique curto: abre o chat de origem
                     view.setOnClickListener {
                         abrirChat(chatId, tipoChat)
                     }
 
-                    // Long press: remove dos favoritos
                     view.setOnLongClickListener {
                         AlertDialog.Builder(this@MensagensFavoritasActivity)
                             .setTitle(getString(R.string.favoritos_remover))
                             .setMessage(getString(R.string.favoritos_remover_msg))
-                            .setPositiveButton("Remover") { _, _ ->
+                            .setPositiveButton(getString(R.string.favoritos_remover_confirmar)) { _, _ ->
                                 removerFavorito(favoritoId)
                             }
                             .setNegativeButton(R.string.cancelar, null)
@@ -134,25 +133,21 @@ class MensagensFavoritasActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("FAVORITOS", "Erro: ${e.message}")
+                Log.e(TAG, "Erro: ${e.message}")
                 Toast.makeText(
                     this@MensagensFavoritasActivity,
                     getString(R.string.erro_generico, e.message ?: ""),
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                // ✅ Libera o guard
                 carregando = false
             }
         }
     }
 
-    // ============================================================
-    // ABRIR CHAT DE ORIGEM
-    // ============================================================
     private fun abrirChat(chatId: String, tipoChat: String) {
         if (chatId.isEmpty()) {
-            Toast.makeText(this, "Chat não encontrado", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.favoritos_chat_nao_encontrado), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -171,14 +166,15 @@ class MensagensFavoritasActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    // ============================================================
-    // REMOVER FAVORITO
-    // ============================================================
     private fun removerFavorito(favoritoId: String) {
         lifecycleScope.launch {
             try {
                 db.collection("favoritos").document(favoritoId).delete().await()
-                Toast.makeText(this@MensagensFavoritasActivity, "Removido", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MensagensFavoritasActivity,
+                    getString(R.string.favoritos_removido_sucesso),
+                    Toast.LENGTH_SHORT
+                ).show()
                 carregando = false
                 carregarFavoritos()
             } catch (e: Exception) {
@@ -189,5 +185,9 @@ class MensagensFavoritasActivity : AppCompatActivity() {
                 ).show()
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "FAVORITOS"
     }
 }

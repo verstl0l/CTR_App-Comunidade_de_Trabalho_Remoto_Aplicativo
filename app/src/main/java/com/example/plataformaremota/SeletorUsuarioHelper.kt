@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -49,12 +50,12 @@ object SeletorUsuarioHelper {
             setPadding(32, 24, 32, 16)
         }
 
-        // Campo de busca
+        // Campo de busca (com hint traduzido)
         val edtBusca = EditText(context).apply {
-            hint = "Buscar por nome ou email..."
+            hint = context.getString(R.string.seletor_usuario_buscar_hint)
             setSingleLine()
             setPadding(24, 24, 24, 24)
-            background = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.edittext_bg)
+            background = ContextCompat.getDrawable(context, R.drawable.edittext_bg)
             setTextColor(android.graphics.Color.WHITE)
             setHintTextColor(android.graphics.Color.GRAY)
         }
@@ -73,12 +74,12 @@ object SeletorUsuarioHelper {
         root.addView(recycler)
 
         // ============================================================
-        // DIALOG
+        // DIALOG (título e botão traduzidos)
         // ============================================================
         val dialog = AlertDialog.Builder(context)
-            .setTitle("Selecionar usuário")
+            .setTitle(context.getString(R.string.seletor_usuario_titulo))
             .setView(root)
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(context.getString(R.string.cancelar), null)
             .create()
 
         // ============================================================
@@ -94,6 +95,7 @@ object SeletorUsuarioHelper {
         // CARREGA USUÁRIOS (em background)
         // ============================================================
         val todosUsuarios = mutableListOf<UsuarioItem>()
+        val nomeFallback = context.getString(R.string.seletor_usuario_nome_fallback)
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
@@ -105,7 +107,7 @@ object SeletorUsuarioHelper {
                     val email = doc.id
                     if (email == emailExcluir) return@forEach
 
-                    val nome = doc.getString("nome") ?: email
+                    val nome = doc.getString("nome") ?: nomeFallback
                     val profissao = doc.getString("profissao") ?: ""
                     val fotoUrl = doc.getString("fotoUrl") ?: ""
 

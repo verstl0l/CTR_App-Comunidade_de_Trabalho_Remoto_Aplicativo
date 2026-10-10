@@ -21,7 +21,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="← VOLTAR"
+                android:text="@string/voltar"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -30,7 +30,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="Membros do Grupo"
+                android:text="@string/gerenciar_membros_grupo_titulo"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -41,7 +41,7 @@
                 android:layout_height="48dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="#F5E6D0"
-                android:text="+ ADICIONAR MEMBRO"
+                android:text="@string/gerenciar_membros_grupo_btn_adicionar"
                 android:textColor="#1C1311"
                 android:textStyle="bold" />
 
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:text="Long press para remover"
+                android:text="@string/gerenciar_membros_grupo_dica_long_press"
                 android:textColor="#9E9E9E"
                 android:textSize="12sp" />
 

@@ -11,10 +11,9 @@ import android.widget.ImageView
 import android.widget.MediaController
 import android.widget.Toast
 import android.widget.VideoView
-import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 
-class VisualizarMidiaActivity : AppCompatActivity() {
+class VisualizarMidiaActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +23,11 @@ class VisualizarMidiaActivity : AppCompatActivity() {
         val url = intent.getStringExtra("url") ?: ""
 
         if (url.isEmpty()) {
-            Toast.makeText(this, "Mídia não encontrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.visualizar_midia_nao_encontrada),
+                Toast.LENGTH_SHORT
+            ).show()
             finish()
             return
         }
@@ -52,6 +55,7 @@ class VisualizarMidiaActivity : AppCompatActivity() {
         btnVoltar.setOnClickListener { finish() }
 
         btnBaixar.setOnClickListener {
+            // ✅ Nomes de arquivo com prefixo CTR (não traduzível, mas centralizado)
             val nome = if (tipo == "foto") {
                 "CTR_foto_${System.currentTimeMillis()}.jpg"
             } else {
@@ -66,7 +70,7 @@ class VisualizarMidiaActivity : AppCompatActivity() {
         try {
             val request = DownloadManager.Request(Uri.parse(url))
             request.setTitle(nomeArquivo)
-            request.setDescription("Baixando do CTR...")
+            request.setDescription(getString(R.string.visualizar_midia_baixando_desc))
             request.allowScanningByMediaScanner()
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setDestinationInExternalPublicDir(pastaDestino, nomeArquivo)
@@ -74,9 +78,17 @@ class VisualizarMidiaActivity : AppCompatActivity() {
             val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             downloadManager.enqueue(request)
 
-            Toast.makeText(this, "⬇ Baixando...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.visualizar_midia_baixando_toast),
+                Toast.LENGTH_SHORT
+            ).show()
         } catch (e: Exception) {
-            Toast.makeText(this, "Erro ao baixar: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                getString(R.string.visualizar_midia_erro_baixar, e.message ?: ""),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 }

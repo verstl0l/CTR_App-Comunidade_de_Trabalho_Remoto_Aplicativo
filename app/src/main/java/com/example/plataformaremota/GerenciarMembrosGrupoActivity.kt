@@ -8,7 +8,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
@@ -16,7 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class GerenciarMembrosGrupoActivity : AppCompatActivity() {
+class GerenciarMembrosGrupoActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -36,7 +35,11 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
         equipeId = intent.getStringExtra("equipeId") ?: ""
 
         if (grupoId.isEmpty() || equipeId.isEmpty()) {
-            Toast.makeText(this, "Grupo não encontrado", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.gerenciar_membros_grupo_nao_encontrado),
+                Toast.LENGTH_SHORT
+            ).show()
             finish()
             return
         }
@@ -70,7 +73,11 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                 val ehCriadorGrupo = criadorGrupo == emailUsuario
 
                 if (!ehCriadorGrupo && !ehAdmin) {
-                    Toast.makeText(this@GerenciarMembrosGrupoActivity, "Você não tem permissão", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@GerenciarMembrosGrupoActivity,
+                        getString(R.string.gerenciar_membros_grupo_sem_permissao),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     finish()
                     return@launch
                 }
@@ -78,7 +85,7 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                 carregarMembros()
 
             } catch (e: Exception) {
-                Log.e("GERENCIAR_MEMBROS", getString(R.string.erro_generico, e.message ?: ""))
+                Log.e(TAG, getString(R.string.erro_generico, e.message ?: ""))
             }
         }
     }
@@ -96,7 +103,7 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
 
                 if (membros.isEmpty()) {
                     val txtVazio = TextView(this@GerenciarMembrosGrupoActivity).apply {
-                        text = "Nenhum membro no grupo"
+                        text = getString(R.string.gerenciar_membros_grupo_nenhum_membro)
                         setTextColor(ContextCompat.getColor(this@GerenciarMembrosGrupoActivity, R.color.text_secondary))
                         textSize = 14f
                         setPadding(0, 16, 0, 16)
@@ -105,11 +112,14 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                     return@launch
                 }
 
+                // ✅ Fallbacks traduzidos capturados UMA VEZ
+                val nomeFallback = getString(R.string.gerenciar_membros_grupo_usuario_fallback)
+
                 for (emailMembro in membros) {
                     val email = emailMembro as? String ?: continue
 
                     val usuarioDoc = db.collection("usuarios").document(email).get().await()
-                    val nome = usuarioDoc.getString("nome") ?: email
+                    val nome = usuarioDoc.getString("nome") ?: nomeFallback
 
                     val view = inflater.inflate(android.R.layout.simple_list_item_2, container, false)
                     val t1 = view.findViewById<TextView>(android.R.id.text1)
@@ -124,9 +134,9 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                     if (email != criadorGrupo) {
                         view.setOnLongClickListener {
                             AlertDialog.Builder(this@GerenciarMembrosGrupoActivity)
-                                .setTitle("Remover membro")
-                                .setMessage("Deseja remover $nome do grupo?")
-                                .setPositiveButton("Remover") { _, _ ->
+                                .setTitle(getString(R.string.gerenciar_membros_grupo_remover_titulo))
+                                .setMessage(getString(R.string.gerenciar_membros_grupo_remover_msg, nome))
+                                .setPositiveButton(getString(R.string.gerenciar_membros_grupo_remover_confirmar)) { _, _ ->
                                     removerMembro(email, membros)
                                 }
                                 .setNegativeButton(R.string.cancelar, null)
@@ -139,14 +149,11 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("GERENCIAR_MEMBROS", getString(R.string.erro_generico, e.message ?: ""))
+                Log.e(TAG, getString(R.string.erro_generico, e.message ?: ""))
             }
         }
     }
 
-    // ============================================================
-    // ✅ Funcionalidade: limpa gruposIds ao remover membro
-    // ============================================================
     private fun removerMembro(email: String, membrosAtuais: List<*>) {
         lifecycleScope.launch {
             try {
@@ -155,10 +162,13 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                 db.collection("grupos").document(grupoId)
                     .update("membros", novosMembros).await()
 
-                // ✅ Remove o grupoId da lista do usuário removido
                 removerGrupoIdDoUsuario(email, grupoId)
 
-                Toast.makeText(this@GerenciarMembrosGrupoActivity, "Membro removido", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@GerenciarMembrosGrupoActivity,
+                    getString(R.string.gerenciar_membros_grupo_removido_sucesso),
+                    Toast.LENGTH_SHORT
+                ).show()
                 carregarMembros()
 
             } catch (e: Exception) {
@@ -188,22 +198,27 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                 }
 
                 if (disponiveis.isEmpty()) {
-                    Toast.makeText(this@GerenciarMembrosGrupoActivity, "Todos os membros já estão no grupo", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@GerenciarMembrosGrupoActivity,
+                        getString(R.string.gerenciar_membros_grupo_todos_no_grupo),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@launch
                 }
 
                 val nomes = mutableListOf<String>()
                 val emails = mutableListOf<String>()
+                val nomeFallback = getString(R.string.gerenciar_membros_grupo_usuario_fallback)
 
                 for (doc in disponiveis) {
                     val email = doc.getString("email") ?: ""
-                    val nome = doc.getString("nome") ?: email
+                    val nome = doc.getString("nome") ?: nomeFallback
                     nomes.add(nome)
                     emails.add(email)
                 }
 
                 AlertDialog.Builder(this@GerenciarMembrosGrupoActivity)
-                    .setTitle("Adicionar membro")
+                    .setTitle(getString(R.string.gerenciar_membros_grupo_adicionar_titulo))
                     .setItems(nomes.toTypedArray()) { _, which ->
                         adicionarMembro(emails[which], membrosGrupo)
                     }
@@ -220,9 +235,6 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // ✅ Funcionalidade: adiciona gruposIds ao novo membro
-    // ============================================================
     private fun adicionarMembro(email: String, membrosAtuais: List<*>) {
         lifecycleScope.launch {
             try {
@@ -232,12 +244,11 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                 db.collection("grupos").document(grupoId)
                     .update("membros", novosMembros).await()
 
-                // Adiciona o grupoId na lista do novo membro
                 adicionarGrupoIdAoUsuario(email, grupoId)
 
-                // Notifica o membro adicionado
                 val grupoDoc = db.collection("grupos").document(grupoId).get().await()
-                val nomeGrupo = grupoDoc.getString("nomeGrupo") ?: "Grupo"
+                val nomeGrupo = grupoDoc.getString("nomeGrupo")
+                    ?: getString(R.string.gerenciar_membros_grupo_grupo_fallback)
                 val nomeRemetente = db.collection("usuarios").document(emailUsuario)
                     .get().await().getString("nome") ?: emailUsuario
 
@@ -249,7 +260,11 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
                     nomeGrupo = nomeGrupo
                 )
 
-                Toast.makeText(this@GerenciarMembrosGrupoActivity, "Membro adicionado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@GerenciarMembrosGrupoActivity,
+                    getString(R.string.gerenciar_membros_grupo_adicionado_sucesso),
+                    Toast.LENGTH_SHORT
+                ).show()
                 carregarMembros()
 
             } catch (e: Exception) {
@@ -262,14 +277,6 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // HELPERS DE DENORMALIZAÇÃO
-    // ============================================================
-
-    /**
-     * ✅ Adiciona o grupoId na lista `gruposIds` do usuário.
-     * Idempotente.
-     */
     private suspend fun adicionarGrupoIdAoUsuario(email: String, grupoId: String) {
         try {
             val userRef = db.collection("usuarios").document(email)
@@ -278,16 +285,13 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
 
             if (grupoId !in ids) {
                 userRef.update("gruposIds", ids + grupoId).await()
-                Log.d("GRUPO_MEMBROS", "✅ gruposIds + $grupoId para $email")
+                Log.d(TAG_DENORM, "gruposIds + $grupoId para $email")
             }
         } catch (e: Exception) {
-            Log.e("GRUPO_MEMBROS", "Erro ao adicionar grupoId: ${e.message}")
+            Log.e(TAG_DENORM, "Erro ao adicionar grupoId: ${e.message}")
         }
     }
 
-    /**
-     * ✅ Remove o grupoId da lista `gruposIds` do usuário.
-     */
     private suspend fun removerGrupoIdDoUsuario(email: String, grupoId: String) {
         try {
             val userRef = db.collection("usuarios").document(email)
@@ -296,10 +300,15 @@ class GerenciarMembrosGrupoActivity : AppCompatActivity() {
 
             if (grupoId in ids) {
                 userRef.update("gruposIds", ids - grupoId).await()
-                Log.d("GRUPO_MEMBROS", "✅ gruposIds - $grupoId para $email")
+                Log.d(TAG_DENORM, "gruposIds - $grupoId para $email")
             }
         } catch (e: Exception) {
-            Log.e("GRUPO_MEMBROS", "Erro ao remover grupoId: ${e.message}")
+            Log.e(TAG_DENORM, "Erro ao remover grupoId: ${e.message}")
         }
+    }
+
+    companion object {
+        private const val TAG = "GERENCIAR_MEMBROS"
+        private const val TAG_DENORM = "GRUPO_MEMBROS"
     }
 }

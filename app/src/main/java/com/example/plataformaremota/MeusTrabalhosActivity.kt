@@ -1,5 +1,7 @@
 package com.example.plataformaremota
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,14 +10,12 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import android.content.Context
 
 /**
  * Tela que mostra TODOS os trabalhos do usuario logado,
@@ -23,14 +23,13 @@ import android.content.Context
  *
  * Filtros: Todos | Pendente | Em Progresso | Concluido
  */
-class MeusTrabalhosActivity : AppCompatActivity() {
+class MeusTrabalhosActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var emailUsuario: String = ""
     private var filtroAtual: String = "todos"
 
-    // ✅ Cache local
     private var todosTrabalhos: List<TrabalhoItem> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,20 +39,18 @@ class MeusTrabalhosActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        //  Fallback pro cache (mesmo problema do login)
-        val prefs = getSharedPreferences("CTR_PREFS", Context.MODE_PRIVATE)
-        val emailCache = prefs.getString("emailUsuario", "") ?: ""
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val emailCache = prefs.getString(KEY_EMAIL_USUARIO, "") ?: ""
         emailUsuario = auth.currentUser?.email ?: emailCache
 
         if (emailUsuario.isEmpty()) {
-            Toast.makeText(this, "Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.meus_trabalhos_sessao_expirada), Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
         findViewById<Button>(R.id.btnVoltarMeusTrabalhos).setOnClickListener { finish() }
 
-        // Filtros
         val btnTodos = findViewById<TextView>(R.id.btnFiltroTodosMeus)
         val btnPendente = findViewById<TextView>(R.id.btnFiltroPendenteMeus)
         val btnProgresso = findViewById<TextView>(R.id.btnFiltroProgressoMeus)
@@ -83,13 +80,9 @@ class MeusTrabalhosActivity : AppCompatActivity() {
         carregarTrabalhos()
     }
 
-    // ============================================================
-    // CARREGAR TRABALHOS
-    // ============================================================
     private fun carregarTrabalhos() {
         lifecycleScope.launch {
             try {
-                // 1. Busca todas as equipes que o usuario pertence
                 val membros = db.collection("membros_equipe")
                     .whereEqualTo("email", emailUsuario)
                     .get()
@@ -97,7 +90,6 @@ class MeusTrabalhosActivity : AppCompatActivity() {
 
                 val equipesIds = membros.documents.mapNotNull { it.getString("equipeId") }
 
-                // 2. Busca equipes que o usuario criou
                 val equipesCriador = db.collection("equipes")
                     .whereEqualTo("criadorEmail", emailUsuario)
                     .get()
@@ -105,7 +97,6 @@ class MeusTrabalhosActivity : AppCompatActivity() {
 
                 val equipesCriadorIds = equipesCriador.documents.map { it.id }
 
-                // 3. Junta (sem duplicatas)
                 val todasEquipesIds = (equipesIds + equipesCriadorIds).distinct()
 
                 if (todasEquipesIds.isEmpty()) {
@@ -114,10 +105,14 @@ class MeusTrabalhosActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // 4. Busca trabalhos dessas equipes onde o usuario e responsavel ou criador
                 val trabalhos = mutableListOf<TrabalhoItem>()
 
-                // Firestore limita `whereIn` a 10 itens
+                // ✅ Captura fallbacks traduzidos UMA VEZ
+                val fallbackEquipe = getString(R.string.meus_trabalhos_equipe_fallback)
+                val fallbackSemTitulo = getString(R.string.meus_trabalhos_sem_titulo)
+                val fallbackSemDescricao = getString(R.string.meus_trabalhos_sem_descricao)
+                val fallbackSemPrazo = getString(R.string.meus_trabalhos_sem_prazo)
+
                 todasEquipesIds.chunked(10).forEach { chunk ->
                     val snap = db.collection("trabalhos")
                         .whereIn("equipeId", chunk)
@@ -128,19 +123,19 @@ class MeusTrabalhosActivity : AppCompatActivity() {
                         val responsavel = doc.getString("responsavelEmail") ?: ""
                         val criador = doc.getString("criadorEmail") ?: ""
 
-                        // ✅ So mostra trabalhos onde SOU responsavel OU criador
                         if (responsavel == emailUsuario || criador == emailUsuario) {
-                            // Busca nome da equipe
-                            val equipeDoc = db.collection("equipes").document(doc.getString("equipeId") ?: "").get().await()
-                            val nomeEquipe = equipeDoc.getString("nome") ?: "Equipe"
+                            val equipeDoc = db.collection("equipes")
+                                .document(doc.getString("equipeId") ?: "")
+                                .get().await()
+                            val nomeEquipe = equipeDoc.getString("nome") ?: fallbackEquipe
 
                             trabalhos.add(
                                 TrabalhoItem(
                                     id = doc.id,
-                                    titulo = doc.getString("titulo") ?: "Sem título",
-                                    descricao = doc.getString("descricao") ?: "Sem descrição",
+                                    titulo = doc.getString("titulo") ?: fallbackSemTitulo,
+                                    descricao = doc.getString("descricao") ?: fallbackSemDescricao,
                                     status = doc.getString("status") ?: "pendente",
-                                    prazo = doc.getString("prazo") ?: "Sem prazo",
+                                    prazo = doc.getString("prazo") ?: fallbackSemPrazo,
                                     equipeNome = nomeEquipe,
                                     equipeId = doc.getString("equipeId") ?: ""
                                 )
@@ -153,15 +148,16 @@ class MeusTrabalhosActivity : AppCompatActivity() {
                 aplicarFiltro()
 
             } catch (e: Exception) {
-                Log.e("MEUS_TRABALHOS", "Erro: ${e.message}")
-                Toast.makeText(this@MeusTrabalhosActivity, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e(TAG, "Erro: ${e.message}")
+                Toast.makeText(
+                    this@MeusTrabalhosActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-    // ============================================================
-    // APLICAR FILTRO
-    // ============================================================
     private fun aplicarFiltro() {
         val container = findViewById<LinearLayout>(R.id.containerMeusTrabalhos)
         val containerVazio = findViewById<LinearLayout>(R.id.containerVazioMeus)
@@ -181,33 +177,39 @@ class MeusTrabalhosActivity : AppCompatActivity() {
         containerVazio.visibility = View.GONE
         val inflater = LayoutInflater.from(this)
 
+        // ✅ Captura labels traduzidos ANTES do loop
+        val labelPendente = getString(R.string.status_pendente)
+        val labelEmProgresso = getString(R.string.status_em_progresso)
+        val labelConcluido = getString(R.string.status_concluido)
+        val prefixoEntrega = getString(R.string.meus_trabalhos_entrega_prefixo)
+
         filtrados.forEach { trabalho ->
             val view = inflater.inflate(R.layout.item_meu_trabalho, container, false)
 
             view.findViewById<TextView>(R.id.txtTituloMeuTrabalho).text = trabalho.titulo
             view.findViewById<TextView>(R.id.txtDescricaoMeuTrabalho).text = trabalho.descricao
-            view.findViewById<TextView>(R.id.txtPrazoMeuTrabalho).text = "Entrega: ${trabalho.prazo}"
+            view.findViewById<TextView>(R.id.txtPrazoMeuTrabalho).text =
+                getString(R.string.meus_trabalhos_entrega_formatado, trabalho.prazo)
             view.findViewById<TextView>(R.id.txtEquipeMeuTrabalho).text = trabalho.equipeNome
 
             val txtStatus = view.findViewById<TextView>(R.id.txtStatusMeuTrabalho)
             when (trabalho.status) {
                 "pendente" -> {
-                    txtStatus.text = "Pendente"
+                    txtStatus.text = labelPendente
                     txtStatus.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
                 }
                 "em_progresso" -> {
-                    txtStatus.text = "Em Progresso"
+                    txtStatus.text = labelEmProgresso
                     txtStatus.setTextColor(ContextCompat.getColor(this, R.color.accent))
                 }
                 "concluido" -> {
-                    txtStatus.text = "Concluído"
+                    txtStatus.text = labelConcluido
                     txtStatus.setTextColor(ContextCompat.getColor(this, R.color.status_concluido))
                 }
             }
 
-            // Clique abre a tela de trabalho (EntregarTrabalho na equipe)
             view.setOnClickListener {
-                val intent = android.content.Intent(this, EntregarTrabalhoActivity::class.java)
+                val intent = Intent(this, EntregarTrabalhoActivity::class.java)
                 intent.putExtra("equipeId", trabalho.equipeId)
                 startActivity(intent)
             }
@@ -216,9 +218,6 @@ class MeusTrabalhosActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================
-    // FILTROS UI
-    // ============================================================
     private fun atualizarBotoesFiltro(
         btnTodos: TextView,
         btnPendente: TextView,
@@ -246,9 +245,6 @@ class MeusTrabalhosActivity : AppCompatActivity() {
         btnAtivo.setTextColor(textoAtivo)
     }
 
-    // ============================================================
-    // DATA CLASS
-    // ============================================================
     data class TrabalhoItem(
         val id: String,
         val titulo: String,
@@ -258,4 +254,10 @@ class MeusTrabalhosActivity : AppCompatActivity() {
         val equipeNome: String,
         val equipeId: String
     )
+
+    companion object {
+        private const val TAG = "MEUS_TRABALHOS"
+        private const val PREFS_NAME = "CTR_PREFS"
+        private const val KEY_EMAIL_USUARIO = "emailUsuario"
+    }
 }

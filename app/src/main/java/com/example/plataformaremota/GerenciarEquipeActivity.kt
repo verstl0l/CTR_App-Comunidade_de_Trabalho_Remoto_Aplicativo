@@ -53,13 +53,17 @@ class GerenciarEquipeActivity : BaseActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
-        //  Clicar no campo abre lista de usuários disponíveis
+        // ✅ Clicar no campo abre lista de usuários disponíveis
         edtEmailConvite.isFocusable = false
         edtEmailConvite.isClickable = true
         edtEmailConvite.setOnClickListener {
             SeletorUsuarioHelper.abrir(this, email) { emailEscolhido, nome ->
                 edtEmailConvite.setText(emailEscolhido)
-                Toast.makeText(this, "Selecionado: $nome", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.gerenciar_usuario_selecionado, nome),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -87,7 +91,7 @@ class GerenciarEquipeActivity : BaseActivity() {
                     carregarMembros(equipeId!!)
                 }
             } catch (e: Exception) {
-                Log.e("GERENCIAR", "Erro ao carregar equipe: ${e.message}")
+                Log.e(TAG, "Erro ao carregar equipe: ${e.message}")
             }
         }
 
@@ -201,9 +205,6 @@ class GerenciarEquipeActivity : BaseActivity() {
             }
         }
 
-        // ============================================================
-        // ✅ EXCLUIR EQUIPE (deleta subcoleções antes do doc raiz)
-        // ============================================================
         btnExcluirEquipe.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.gerenciar_excluir_titulo))
@@ -256,153 +257,6 @@ class GerenciarEquipeActivity : BaseActivity() {
         }
 
         configurarBottomNavigation(R.id.nav_groups)
-    }
-
-    // ============================================================
-    // ✅ MOSTRA LISTA DE USUÁRIOS DISPONÍVEIS
-    // ============================================================
-    private fun mostrarDialogUsuariosDisponiveis() {
-        lifecycleScope.launch {
-            try {
-                val eqId = equipeId ?: run {
-                    Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.gerenciar_equipe_nao_carregada), Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                val usuarios = db.collection("usuarios").get().await()
-
-                val membros = db.collection("membros_equipe")
-                    .whereEqualTo("equipeId", eqId)
-                    .get()
-                    .await()
-
-                val emailsMembros = membros.documents.mapNotNull { it.getString("email") }.toSet()
-
-                val disponiveis = usuarios.documents
-                    .mapNotNull { doc ->
-                        val uEmail = doc.id
-                        val nome = doc.getString("nome") ?: uEmail
-                        val profissao = doc.getString("profissao") ?: ""
-                        if (uEmail !in emailsMembros) Triple(uEmail, nome, profissao) else null
-                    }
-                    .sortedBy { it.second.lowercase() }
-
-                if (disponiveis.isEmpty()) {
-                    Toast.makeText(
-                        this@GerenciarEquipeActivity,
-                        getString(R.string.gerenciar_todos_na_equipe),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
-                }
-
-                val nomes = disponiveis.map { "${it.second} (${it.first})" }.toTypedArray()
-
-                AlertDialog.Builder(this@GerenciarEquipeActivity)
-                    .setTitle(getString(R.string.gerenciar_selecionar_usuario, disponiveis.size))
-                    .setItems(nomes) { _, which ->
-                        val (emailEscolhido, nomeEscolhido, _) = disponiveis[which]
-                        findViewById<EditText>(R.id.edtEmailConviteEquipe).setText(emailEscolhido)
-                        Toast.makeText(
-                            this@GerenciarEquipeActivity,
-                            getString(R.string.gerenciar_selecionado, nomeEscolhido),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    .setNegativeButton(R.string.cancelar, null)
-                    .show()
-
-            } catch (e: Exception) {
-                Log.e("GERENCIAR", "Erro lista usuários: ${e.message}")
-                Toast.makeText(
-                    this@GerenciarEquipeActivity,
-                    getString(R.string.gerenciar_erro_usuarios, e.message ?: ""),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
-
-    // ============================================================
-    // ABRIR DIALOG EDITAR TRABALHO
-    // ============================================================
-    private fun abrirDialogEditarTrabalho(
-        trabalhoId: String,
-        tituloAtual: String,
-        descricaoAtual: String,
-        categoriaAtual: String,
-        prazoAtual: String
-    ) {
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(50, 40, 50, 20)
-        }
-
-        val edtTitulo = EditText(this).apply {
-            hint = getString(R.string.criar_trabalho_hint_titulo)
-            setText(tituloAtual)
-            setTextColor(android.graphics.Color.parseColor("#1C1311"))
-        }
-
-        val edtDescricao = EditText(this).apply {
-            hint = getString(R.string.criar_trabalho_hint_descricao)
-            setText(descricaoAtual)
-            setTextColor(android.graphics.Color.parseColor("#1C1311"))
-        }
-
-        val edtCategoria = EditText(this).apply {
-            hint = getString(R.string.criar_trabalho_hint_categoria)
-            setText(categoriaAtual)
-            setTextColor(android.graphics.Color.parseColor("#1C1311"))
-        }
-
-        val edtPrazo = EditText(this).apply {
-            hint = getString(R.string.criar_trabalho_hint_prazo)
-            setText(prazoAtual)
-            setTextColor(android.graphics.Color.parseColor("#1C1311"))
-        }
-
-        layout.addView(edtTitulo)
-        layout.addView(edtDescricao)
-        layout.addView(edtCategoria)
-        layout.addView(edtPrazo)
-
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.gerenciar_editar_trabalho))
-            .setView(layout)
-            .setPositiveButton(R.string.salvar) { _, _ ->
-                val novoTitulo = edtTitulo.text.toString().trim()
-                val novaDescricao = edtDescricao.text.toString().trim()
-                val novaCategoria = edtCategoria.text.toString().trim()
-                val novoPrazo = edtPrazo.text.toString().trim()
-
-                if (novoTitulo.isEmpty() || novaDescricao.isEmpty() || novaCategoria.isEmpty() || novoPrazo.isEmpty()) {
-                    Toast.makeText(this, getString(R.string.erro_campos_vazios), Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                lifecycleScope.launch {
-                    try {
-                        db.collection("trabalhos").document(trabalhoId)
-                            .update(
-                                mapOf(
-                                    "titulo" to novoTitulo,
-                                    "descricao" to novaDescricao,
-                                    "categoria" to novaCategoria,
-                                    "prazo" to novoPrazo
-                                )
-                            ).await()
-
-                        Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.gerenciar_trabalho_atualizado), Toast.LENGTH_SHORT).show()
-                        equipeId?.let { carregarTrabalhos(it) }
-
-                    } catch (e: Exception) {
-                        Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
-            .setNegativeButton(R.string.cancelar, null)
-            .show()
     }
 
     private fun carregarMembros(equipeId: String) {
@@ -552,7 +406,7 @@ class GerenciarEquipeActivity : BaseActivity() {
                     container.addView(view)
                 }
             } catch (e: Exception) {
-                Log.e("GERENCIAR", "Erro membros: ${e.message}")
+                Log.e(TAG, "Erro membros: ${e.message}")
             }
         }
     }
@@ -593,7 +447,8 @@ class GerenciarEquipeActivity : BaseActivity() {
                     val t1 = view.findViewById<TextView>(android.R.id.text1)
                     val t2 = view.findViewById<TextView>(android.R.id.text2)
 
-                    t1.text = "$nome ($emailSol)"
+                    // ✅ Placeholder para "Nome (email)"
+                    t1.text = getString(R.string.gerenciar_pedido_linha, nome, emailSol)
                     t1.setTextColor(android.graphics.Color.WHITE)
                     t2.text = getString(R.string.gerenciar_pedido_resumo, motivos, especialidades)
                     t2.setTextColor(android.graphics.Color.GRAY)
@@ -668,7 +523,7 @@ class GerenciarEquipeActivity : BaseActivity() {
                     container.addView(view)
                 }
             } catch (e: Exception) {
-                Log.e("GERENCIAR", "Erro pedidos: ${e.message}")
+                Log.e(TAG, "Erro pedidos: ${e.message}")
             }
         }
     }
@@ -697,6 +552,8 @@ class GerenciarEquipeActivity : BaseActivity() {
                     return@launch
                 }
 
+                val textoZero = getString(R.string.produtividade_item_zero)
+
                 trabalhos.documents.forEach { doc ->
                     val trabalhoId = doc.id
                     val titulo = doc.getString("titulo") ?: ""
@@ -707,7 +564,9 @@ class GerenciarEquipeActivity : BaseActivity() {
                     val view = inflater.inflate(R.layout.item_trabalho_gerenciar, container, false)
 
                     view.findViewById<TextView>(R.id.txtTituloGerenciar).text = titulo
-                    view.findViewById<TextView>(R.id.txtInfoGerenciar).text = "$categoria - $prazo"
+                    // ✅ Placeholder "categoria - prazo"
+                    view.findViewById<TextView>(R.id.txtInfoGerenciar).text =
+                        getString(R.string.item_trabalho_info_formato, categoria, prazo)
                     view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
 
                     val btnComentarios = view.findViewById<Button>(R.id.btnComentariosGerenciar)
@@ -716,7 +575,7 @@ class GerenciarEquipeActivity : BaseActivity() {
                             val total = ComentarioHelper.contar(trabalhoId)
                             btnComentarios.text = total.toString()
                         } catch (e: Exception) {
-                            btnComentarios.text = "0"
+                            btnComentarios.text = textoZero
                         }
                     }
 
@@ -734,7 +593,7 @@ class GerenciarEquipeActivity : BaseActivity() {
                             val anexos = doc.reference.collection("anexos").get().await()
                             btnAnexos.text = anexos.size().toString()
                         } catch (e: Exception) {
-                            btnAnexos.text = "0"
+                            btnAnexos.text = textoZero
                         }
                     }
 
@@ -789,8 +648,94 @@ class GerenciarEquipeActivity : BaseActivity() {
                 }
 
             } catch (e: Exception) {
-                Log.e("GERENCIAR", "Erro trabalhos: ${e.message}")
+                Log.e(TAG, "Erro trabalhos: ${e.message}")
             }
         }
+    }
+
+    // ============================================================
+    // ABRIR DIALOG EDITAR TRABALHO
+    // ============================================================
+    private fun abrirDialogEditarTrabalho(
+        trabalhoId: String,
+        tituloAtual: String,
+        descricaoAtual: String,
+        categoriaAtual: String,
+        prazoAtual: String
+    ) {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 20)
+        }
+
+        val edtTitulo = EditText(this).apply {
+            hint = getString(R.string.criar_trabalho_hint_titulo)
+            setText(tituloAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        val edtDescricao = EditText(this).apply {
+            hint = getString(R.string.criar_trabalho_hint_descricao)
+            setText(descricaoAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        val edtCategoria = EditText(this).apply {
+            hint = getString(R.string.criar_trabalho_hint_categoria)
+            setText(categoriaAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        val edtPrazo = EditText(this).apply {
+            hint = getString(R.string.criar_trabalho_hint_prazo)
+            setText(prazoAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+        }
+
+        layout.addView(edtTitulo)
+        layout.addView(edtDescricao)
+        layout.addView(edtCategoria)
+        layout.addView(edtPrazo)
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.gerenciar_editar_trabalho))
+            .setView(layout)
+            .setPositiveButton(R.string.salvar) { _, _ ->
+                val novoTitulo = edtTitulo.text.toString().trim()
+                val novaDescricao = edtDescricao.text.toString().trim()
+                val novaCategoria = edtCategoria.text.toString().trim()
+                val novoPrazo = edtPrazo.text.toString().trim()
+
+                if (novoTitulo.isEmpty() || novaDescricao.isEmpty() || novaCategoria.isEmpty() || novoPrazo.isEmpty()) {
+                    Toast.makeText(this, getString(R.string.erro_campos_vazios), Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                lifecycleScope.launch {
+                    try {
+                        db.collection("trabalhos").document(trabalhoId)
+                            .update(
+                                mapOf(
+                                    "titulo" to novoTitulo,
+                                    "descricao" to novaDescricao,
+                                    "categoria" to novaCategoria,
+                                    "prazo" to novoPrazo
+                                )
+                            ).await()
+
+                        Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.gerenciar_trabalho_atualizado), Toast.LENGTH_SHORT).show()
+                        equipeId?.let { carregarTrabalhos(it) }
+
+                    } catch (e: Exception) {
+                        Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            .setNegativeButton(R.string.cancelar, null)
+            .show()
+    }
+
+    companion object {
+        private const val TAG = "GERENCIAR"
     }
 }
