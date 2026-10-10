@@ -6,12 +6,18 @@ import org.junit.Test
 import java.util.Calendar
 
 /**
- * Testes unitarios da sealed class ItemChat.
+ * Testes unitários da sealed class ItemChat.
  *
- * Testam a funcao deMensagens() que injeta separadores de data
+ * Testam a função deMensagens() que injeta separadores de data
  * no meio da lista de mensagens quando o dia muda.
  */
 class ItemChatTest {
+
+    // ============================================================
+    // CONSTANTES (simulando strings traduzidas)
+    // ============================================================
+    private val hoje = "HOJE"
+    private val ontem = "ONTEM"
 
     // ============================================================
     // HELPERS
@@ -47,13 +53,18 @@ class ItemChatTest {
         )
     }
 
+    /** Atalho pra chamar deMensagens com as strings padrão. */
+    private fun deMensagens(mensagens: List<Mensagem>): List<ItemChat> {
+        return ItemChat.deMensagens(mensagens, hoje, ontem)
+    }
+
     // ============================================================
     // LISTA VAZIA
     // ============================================================
 
     @Test
     fun listaVazia_retornaListaVazia() {
-        val resultado = ItemChat.deMensagens(emptyList())
+        val resultado = deMensagens(emptyList())
         assertTrue(resultado.isEmpty())
     }
 
@@ -64,7 +75,7 @@ class ItemChatTest {
     @Test
     fun umaMensagem_geraSeparadorMaisMensagem() {
         val msg = mensagem("m1", hojeAsHora(10))
-        val resultado = ItemChat.deMensagens(listOf(msg))
+        val resultado = deMensagens(listOf(msg))
 
         assertEquals(2, resultado.size)
         assertTrue(resultado[0] is ItemChat.SeparadorData)
@@ -74,10 +85,10 @@ class ItemChatTest {
     @Test
     fun umaMensagem_separadorDizHOJE() {
         val msg = mensagem("m1", hojeAsHora(10))
-        val resultado = ItemChat.deMensagens(listOf(msg))
+        val resultado = deMensagens(listOf(msg))
 
         val sep = resultado[0] as ItemChat.SeparadorData
-        assertEquals("HOJE", sep.texto)
+        assertEquals(hoje, sep.texto)
     }
 
     // ============================================================
@@ -89,7 +100,7 @@ class ItemChatTest {
         val m1 = mensagem("m1", hojeAsHora(10))
         val m2 = mensagem("m2", hojeAsHora(11))
 
-        val resultado = ItemChat.deMensagens(listOf(m1, m2))
+        val resultado = deMensagens(listOf(m1, m2))
 
         assertEquals(3, resultado.size)
         assertTrue(resultado[0] is ItemChat.SeparadorData)
@@ -103,9 +114,8 @@ class ItemChatTest {
         val m2 = mensagem("m2", hojeAsHora(12))
         val m3 = mensagem("m3", hojeAsHora(20))
 
-        val resultado = ItemChat.deMensagens(listOf(m1, m2, m3))
+        val resultado = deMensagens(listOf(m1, m2, m3))
 
-        // 1 separador + 3 mensagens = 4
         assertEquals(4, resultado.size)
 
         val separadores = resultado.filterIsInstance<ItemChat.SeparadorData>()
@@ -121,9 +131,8 @@ class ItemChatTest {
         val m1 = mensagem("m1", ontemAsHora(20))
         val m2 = mensagem("m2", hojeAsHora(10))
 
-        val resultado = ItemChat.deMensagens(listOf(m1, m2))
+        val resultado = deMensagens(listOf(m1, m2))
 
-        // 2 separadores + 2 mensagens = 4
         assertEquals(4, resultado.size)
 
         val separadores = resultado.filterIsInstance<ItemChat.SeparadorData>()
@@ -135,13 +144,13 @@ class ItemChatTest {
         val m1 = mensagem("m1", ontemAsHora(20))
         val m2 = mensagem("m2", hojeAsHora(10))
 
-        val resultado = ItemChat.deMensagens(listOf(m1, m2))
+        val resultado = deMensagens(listOf(m1, m2))
 
         val primeiroSep = resultado[0] as ItemChat.SeparadorData
-        assertEquals("ONTEM", primeiroSep.texto)
+        assertEquals(ontem, primeiroSep.texto)
 
         val segundoSep = resultado[2] as ItemChat.SeparadorData
-        assertEquals("HOJE", segundoSep.texto)
+        assertEquals(hoje, segundoSep.texto)
     }
 
     // ============================================================
@@ -153,12 +162,7 @@ class ItemChatTest {
         val m1 = mensagem("m1", ontemAsHora(20))
         val m2 = mensagem("m2", hojeAsHora(10))
 
-        val resultado = ItemChat.deMensagens(listOf(m1, m2))
-
-        // 0: SeparadorData (ONTEM)
-        // 1: MensagemItem (m1)
-        // 2: SeparadorData (HOJE)
-        // 3: MensagemItem (m2)
+        val resultado = deMensagens(listOf(m1, m2))
 
         assertTrue(resultado[0] is ItemChat.SeparadorData)
         assertTrue(resultado[1] is ItemChat.MensagemItem)
@@ -182,7 +186,7 @@ class ItemChatTest {
         val m2 = mensagem("m2", hojeAsHora(10))
         val m3 = mensagem("m3", hojeAsHora(11))
 
-        val resultado = ItemChat.deMensagens(listOf(m1, m2, m3))
+        val resultado = deMensagens(listOf(m1, m2, m3))
 
         val mensagens = resultado.filterIsInstance<ItemChat.MensagemItem>().map { it.mensagem }
         assertEquals(3, mensagens.size)

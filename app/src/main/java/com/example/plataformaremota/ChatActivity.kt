@@ -18,14 +18,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -173,10 +171,10 @@ class ChatActivity : BaseActivity() {
             } catch (e: Exception) {
                 Log.e("CHAT", "Erro ao criar chat: ${e.message}")
                 Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show()
+                    this@ChatActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
                 finish()
             }
         }
@@ -200,9 +198,6 @@ class ChatActivity : BaseActivity() {
         paginacaoHelper = null
     }
 
-    // ============================================================
-    // MARCAR COMO LIDAS — agora zera naoLidas no doc do chat
-    // ============================================================
     private fun marcarMensagensComoLidas() {
         if (chatId.isEmpty()) return
         lifecycleScope.launch {
@@ -211,7 +206,6 @@ class ChatActivity : BaseActivity() {
                     .whereEqualTo("lida", false).get().await()
 
                 if (msgs.isEmpty) {
-                    // ✅ Zera mesmo sem mensagens
                     val chatDoc = db.collection("chats").document(chatId).get().await()
                     val naoLidasAtual = (chatDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
                     val naoLidasNovo = naoLidasAtual.toMutableMap()
@@ -232,7 +226,6 @@ class ChatActivity : BaseActivity() {
                 }
                 batch.commit().await()
 
-                // ✅ Zera naoLidas no doc do chat
                 val chatDoc = db.collection("chats").document(chatId).get().await()
                 val naoLidasAtual = (chatDoc.get("naoLidas") as? Map<String, Any>) ?: emptyMap()
                 val naoLidasNovo = naoLidasAtual.toMutableMap()
@@ -248,9 +241,6 @@ class ChatActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // CONFIGURAR UI
-    // ============================================================
     private fun configurarUI() {
         val btnVoltar = findViewById<Button>(R.id.btnVoltarChat)
         val btnVerPerfil = findViewById<Button>(R.id.btnVerPerfil)
@@ -406,7 +396,13 @@ class ChatActivity : BaseActivity() {
             onListaAtualizada = { todas, inseriuNoTopo ->
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
-                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, todas)) {
+                    adapter.submitList(
+                        ItemChat.deMensagens(
+                            mensagens = todas,
+                            textoHoje = getString(R.string.chat_separador_hoje),
+                            textoOntem = getString(R.string.chat_separador_ontem)
+                        )
+                    ) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) {
                             recycler.scrollToPosition(adapter.itemCount - 1)
                         }
@@ -425,7 +421,13 @@ class ChatActivity : BaseActivity() {
                         .toMutableList()
 
                     mensagensAtuais.addAll(novas)
-                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, mensagensAtuais)) {
+                    adapter.submitList(
+                        ItemChat.deMensagens(
+                            mensagens = mensagensAtuais,
+                            textoHoje = getString(R.string.chat_separador_hoje),
+                            textoOntem = getString(R.string.chat_separador_ontem)
+                        )
+                    ) {
                         if (estavaNoFim && adapter.itemCount > 0)
                             recycler.scrollToPosition(adapter.itemCount - 1)
                     }
@@ -435,9 +437,6 @@ class ChatActivity : BaseActivity() {
         paginacaoHelper?.iniciar()
     }
 
-    // ============================================================
-    // RECARREGAR MENSAGENS
-    // ============================================================
     private fun recarregarMensagens() {
         paginacaoHelper?.destruir()
         paginacaoHelper = null
@@ -449,7 +448,13 @@ class ChatActivity : BaseActivity() {
             onListaAtualizada = { todas, inseriuNoTopo ->
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
-                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, todas)) {
+                    adapter.submitList(
+                        ItemChat.deMensagens(
+                            mensagens = todas,
+                            textoHoje = getString(R.string.chat_separador_hoje),
+                            textoOntem = getString(R.string.chat_separador_ontem)
+                        )
+                    ) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) {
                             recycler.scrollToPosition(adapter.itemCount - 1)
                         }
@@ -466,7 +471,13 @@ class ChatActivity : BaseActivity() {
                         .map { it.mensagem }
                         .toMutableList()
                     mensagensAtuais.addAll(novas)
-                    adapter.submitList(ItemChat.deMensagens(this@ChatActivity, mensagensAtuais)) {
+                    adapter.submitList(
+                        ItemChat.deMensagens(
+                            mensagens = mensagensAtuais,
+                            textoHoje = getString(R.string.chat_separador_hoje),
+                            textoOntem = getString(R.string.chat_separador_ontem)
+                        )
+                    ) {
                         if (estavaNoFim && adapter.itemCount > 0)
                             recycler.scrollToPosition(adapter.itemCount - 1)
                     }
@@ -554,9 +565,6 @@ class ChatActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // ✅ ATUALIZAR naoLidas (usando Map, sem notação de ponto)
-    // ============================================================
     private suspend fun incrementarNaoLidas(outro: String) {
         try {
             val chatDoc = db.collection("chats").document(chatId).get().await()
@@ -574,9 +582,6 @@ class ChatActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // ✅ ENVIAR MENSAGEM DE TEXTO
-    // ============================================================
     private fun enviarMensagem(texto: String) {
         lifecycleScope.launch {
             try {
@@ -587,11 +592,9 @@ class ChatActivity : BaseActivity() {
                 )
                 adicionarResposta(m)
 
-                // 1. Salva a mensagem
                 val msgRef = db.collection("chats").document(chatId).collection("mensagens").document()
                 msgRef.set(m).await()
 
-                // 2. Preview + updated_at
                 val preview = hashMapOf<String, Any>(
                     "texto" to texto,
                     "autorNome" to emailUsuario,
@@ -606,13 +609,11 @@ class ChatActivity : BaseActivity() {
                     )
                 ).await()
 
-                // 3. Incrementa naoLidas do outro (via Map)
                 incrementarNaoLidas(outroEmail)
 
                 Log.d("CHAT_DEBUG", "=== ENVIAR MENSAGEM ===")
                 Log.d("CHAT_DEBUG", "emailUsuario='$emailUsuario' outroEmail='$outroEmail' chatId='$chatId'")
 
-                // 4. Atualiza resumo do OUTRO
                 try {
                     ChatResumoHelper.atualizarResumo(
                         emailUsuario = outroEmail,
@@ -628,7 +629,6 @@ class ChatActivity : BaseActivity() {
                     Log.e("CHAT_DEBUG", "❌ Erro resumo OUTRO: ${e.message}")
                 }
 
-                // 5. Atualiza resumo MEU
                 try {
                     ChatResumoHelper.atualizarResumo(
                         emailUsuario = emailUsuario,
@@ -651,10 +651,10 @@ class ChatActivity : BaseActivity() {
             } catch (e: Exception) {
                 Log.e("CHAT_DEBUG", "❌ Erro enviarMensagem: ${e.message}")
                 Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show()
+                    this@ChatActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -679,12 +679,9 @@ class ChatActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // ✅ ENVIAR FOTO
-    // ============================================================
     private fun enviarFoto(uri: Uri, legenda: String = "") {
         Toast.makeText(this, getString(R.string.chat_enviando_foto), Toast.LENGTH_SHORT).show()
-MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/")
+        MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
@@ -742,10 +739,10 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
                         } catch (e: Exception) {
                             Log.e("CHAT_DEBUG", "Erro enviarFoto: ${e.message}")
                             Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show()
+                                this@ChatActivity,
+                                getString(R.string.erro_generico, e.message ?: ""),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     } }
                 }
@@ -762,9 +759,6 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
             }).dispatch()
     }
 
-    // ============================================================
-    // ✅ ENVIAR VÍDEO
-    // ============================================================
     private fun enviarVideo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, getString(R.string.chat_enviando_video), Toast.LENGTH_SHORT).show()
         MediaManager.get().upload(uri).unsigned("fqb729sb")
@@ -826,10 +820,10 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
                         } catch (e: Exception) {
                             Log.e("CHAT_DEBUG", "Erro enviarVideo: ${e.message}")
                             Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show()
+                                this@ChatActivity,
+                                getString(R.string.erro_generico, e.message ?: ""),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     } }
                 }
@@ -846,9 +840,6 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
             }).dispatch()
     }
 
-    // ============================================================
-    // ✅ ENVIAR ARQUIVO
-    // ============================================================
     private fun enviarArquivo(uri: Uri, legenda: String = "") {
         Toast.makeText(this, getString(R.string.chat_enviando_arquivo), Toast.LENGTH_SHORT).show()
         var nome = "arquivo"; var tam = 0L; var mime = "application/octet-stream"
@@ -925,10 +916,10 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
                         } catch (e: Exception) {
                             Log.e("CHAT_DEBUG", "Erro enviarArquivo: ${e.message}")
                             Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show()
+                                this@ChatActivity,
+                                getString(R.string.erro_generico, e.message ?: ""),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     } }
                 }
@@ -1056,10 +1047,10 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
                 )).await()
                 Toast.makeText(this@ChatActivity, getString(R.string.chat_favoritado), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) { Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show() }
+                this@ChatActivity,
+                getString(R.string.erro_generico, e.message ?: ""),
+                Toast.LENGTH_LONG
+            ).show() }
         }
     }
 
@@ -1071,10 +1062,10 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
                     .documents.forEach { it.reference.delete().await() }
                 Toast.makeText(this@ChatActivity, getString(R.string.chat_removido_favoritos), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) { Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show() }
+                this@ChatActivity,
+                getString(R.string.erro_generico, e.message ?: ""),
+                Toast.LENGTH_LONG
+            ).show() }
         }
     }
 
@@ -1095,8 +1086,8 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
             }
             startActivity(i)
         } catch (e: Exception) {
-    Toast.makeText(this, getString(R.string.chat_nenhum_app), Toast.LENGTH_LONG).show()
-}
+            Toast.makeText(this, getString(R.string.chat_nenhum_app), Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun baixarArquivo(url: String, nome: String, pasta: String) {
@@ -1133,10 +1124,10 @@ MediaManager.get().upload(uri).unsigned("fqb729sb").option("folder", "chats_pv/"
                 Toast.makeText(this@ChatActivity, getString(R.string.chat_msg_apagada_toast), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Toast.makeText(
-    this@ChatActivity,
-    getString(R.string.erro_generico, e.message ?: ""),
-    Toast.LENGTH_LONG
-).show()
+                    this@ChatActivity,
+                    getString(R.string.erro_generico, e.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

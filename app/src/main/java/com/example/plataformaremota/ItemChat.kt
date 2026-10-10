@@ -1,6 +1,5 @@
 package com.example.plataformaremota
 
-import android.content.Context
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -23,9 +22,13 @@ sealed class ItemChat {
 
         /**
          * Recebe lista de Mensagem e injeta separadores de data onde o dia muda.
-         * Requer Context pra traduzir "HOJE"/"ONTEM".
+         * As strings "HOJE"/"ONTEM" são passadas pelo caller (já traduzidas via Context).
          */
-        fun deMensagens(context: Context, mensagens: List<Mensagem>): List<ItemChat> {
+        fun deMensagens(
+            mensagens: List<Mensagem>,
+            textoHoje: String,
+            textoOntem: String
+        ): List<ItemChat> {
             if (mensagens.isEmpty()) return emptyList()
 
             val itens = mutableListOf<ItemChat>()
@@ -37,7 +40,7 @@ sealed class ItemChat {
                 if (dia != ultimoDia) {
                     itens.add(
                         SeparadorData(
-                            texto = formatarSeparador(context, msg.timestamp),
+                            texto = formatarSeparador(msg.timestamp, textoHoje, textoOntem),
                             timestamp = msg.timestamp
                         )
                     )
@@ -56,8 +59,12 @@ sealed class ItemChat {
             return fmt.format(Date(timestamp))
         }
 
-        /** Retorna "HOJE", "ONTEM" ou "30/09/2026". */
-        private fun formatarSeparador(context: Context, timestamp: Long): String {
+        /** Retorna o textoHoje, textoOntem ou "30/09/2026". */
+        private fun formatarSeparador(
+            timestamp: Long,
+            textoHoje: String,
+            textoOntem: String
+        ): String {
             val agora = Calendar.getInstance()
             val data = Calendar.getInstance().apply { timeInMillis = timestamp }
 
@@ -65,16 +72,14 @@ sealed class ItemChat {
             val mesmoDia = mesmoAno &&
                     agora.get(Calendar.DAY_OF_YEAR) == data.get(Calendar.DAY_OF_YEAR)
 
-            if (mesmoDia) return context.getString(R.string.chat_separador_hoje)
+            if (mesmoDia) return textoHoje
 
-            // Ontem?
             val ontem = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
             val ehOntem = mesmoAno &&
                     ontem.get(Calendar.DAY_OF_YEAR) == data.get(Calendar.DAY_OF_YEAR)
 
-            if (ehOntem) return context.getString(R.string.chat_separador_ontem)
+            if (ehOntem) return textoOntem
 
-            // Data completa
             val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
             return fmt.format(Date(timestamp))
         }

@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cloudinary.android.MediaManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -246,7 +245,13 @@ class ChatGrupoActivity : BaseActivity() {
             onListaAtualizada = { todas, inseriuNoTopo ->
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
-                    adapter.submitList(ItemChat.deMensagens(this@ChatGrupoActivity, todas)) {
+                    adapter.submitList(
+                        ItemChat.deMensagens(
+                            mensagens = todas,
+                            textoHoje = getString(R.string.chat_separador_hoje),
+                            textoOntem = getString(R.string.chat_separador_ontem)
+                        )
+                    ) {
                         if (!inseriuNoTopo && adapter.itemCount > 0) recycler.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
@@ -262,8 +267,13 @@ class ChatGrupoActivity : BaseActivity() {
                         .toMutableList()
 
                     mensagensAtuais.addAll(novas)
-                    adapter.submitList(ItemChat.deMensagens(this@ChatGrupoActivity, mensagensAtuais)
-) {
+                    adapter.submitList(
+                        ItemChat.deMensagens(
+                            mensagens = mensagensAtuais,
+                            textoHoje = getString(R.string.chat_separador_hoje),
+                            textoOntem = getString(R.string.chat_separador_ontem)
+                        )
+                    ) {
                         if (estavaNoFim && adapter.itemCount > 0) recycler.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
