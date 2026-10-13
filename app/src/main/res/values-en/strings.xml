@@ -640,6 +640,17 @@
     <string name="config_conta_removida">Removed Account</string>
     <string name="config_conta_excluida">Account deleted successfully</string>
 
+    <!-- ===== USUARIOS BLOQUEADOS ===== -->
+    <string name="usuarios_bloqueados_titulo">Blocked Users</string>
+    <string name="usuarios_bloqueados_fallback_usuario">User</string>
+    <string name="usuarios_bloqueados_vazio_titulo">No blocked users</string>
+    <string name="usuarios_bloqueados_vazio_subtitulo">When you block someone, they appear here</string>
+    <string name="usuarios_bloqueados_btn_desbloquear">UNBLOCK</string>
+    <string name="usuarios_bloqueados_desbloquear_titulo">Unblock user</string>
+    <string name="usuarios_bloqueados_desbloquear_msg">Unblock %1$s? You will be able to chat again.</string>
+    <string name="usuarios_bloqueados_desbloquear_confirmar">Unblock</string>
+    <string name="usuarios_bloqueados_desbloqueado_sucesso">User unblocked</string>
+
     <!-- ===== ENTREGAR TRABALHO ===== -->
     <string name="entregar_nao_membro">You are not a member of any team</string>
     <string name="entregar_equipe_fallback">Team</string>

@@ -783,6 +783,17 @@
     <string name="config_conta_removida">已删除账户</string>
     <string name="config_conta_excluida">账户已成功删除</string>
 
+    <!-- ===== USUARIOS BLOQUEADOS ===== -->
+    <string name="usuarios_bloqueados_titulo">已屏蔽用户</string>
+    <string name="usuarios_bloqueados_fallback_usuario">用户</string>
+    <string name="usuarios_bloqueados_vazio_titulo">暂无已屏蔽用户</string>
+    <string name="usuarios_bloqueados_vazio_subtitulo">当您屏蔽某人时，他们将显示在此处</string>
+    <string name="usuarios_bloqueados_btn_desbloquear">解除屏蔽</string>
+    <string name="usuarios_bloqueados_desbloquear_titulo">解除屏蔽用户</string>
+    <string name="usuarios_bloqueados_desbloquear_msg">解除对 %1$s 的屏蔽？你们可以再次聊天。</string>
+    <string name="usuarios_bloqueados_desbloquear_confirmar">解除屏蔽</string>
+    <string name="usuarios_bloqueados_desbloqueado_sucesso">已解除屏蔽</string>
+
     <!-- ===== 聊天中心 ===== -->
     <string name="chat_hub_titulo">团队聊天</string>
     <string name="chat_hub_secao_geral">通用</string>

@@ -816,6 +816,17 @@
     <string name="config_conta_removida">Compte supprimé</string>
     <string name="config_conta_excluida">Compte supprimé avec succès</string>
 
+    <!-- ===== USUARIOS BLOQUEADOS ===== -->
+    <string name="usuarios_bloqueados_titulo">Utilisateurs bloqués</string>
+    <string name="usuarios_bloqueados_fallback_usuario">Utilisateur</string>
+    <string name="usuarios_bloqueados_vazio_titulo">Aucun utilisateur bloqué</string>
+    <string name="usuarios_bloqueados_vazio_subtitulo">Lorsque vous bloquez quelqu\'un, il apparaît ici</string>
+    <string name="usuarios_bloqueados_btn_desbloquear">DÉBLOQUER</string>
+    <string name="usuarios_bloqueados_desbloquear_titulo">Débloquer l\'utilisateur</string>
+    <string name="usuarios_bloqueados_desbloquear_msg">Débloquer %1$s ? Vous pourrez à nouveau discuter.</string>
+    <string name="usuarios_bloqueados_desbloquear_confirmar">Débloquer</string>
+    <string name="usuarios_bloqueados_desbloqueado_sucesso">Utilisateur débloqué</string>
+
     <string name="chat_hint_digite">Écrivez…</string>
     <string name="chat_placeholder_conversa">Conversation</string>
     <string name="chat_placeholder_mensagem">Message</string>

@@ -752,6 +752,16 @@
     <string name="perfil_link_nao_encontrado">Ссылка не найдена</string>
     <string name="perfil_link_removido">Ссылка удалена</string>
 
+    <!-- ===== USUARIOS BLOQUEADOS ===== -->
+    <string name="usuarios_bloqueados_titulo">Заблокированные пользователи</string>
+    <string name="usuarios_bloqueados_fallback_usuario">Пользователь</string>
+    <string name="usuarios_bloqueados_vazio_titulo">Нет заблокированных пользователей</string>
+    <string name="usuarios_bloqueados_vazio_subtitulo">Когда вы кого-то заблокируете, он появится здесь</string>
+    <string name="usuarios_bloqueados_btn_desbloquear">РАЗБЛОКИРОВАТЬ</string>
+    <string name="usuarios_bloqueados_desbloquear_titulo">Разблокировать пользователя</string>
+    <string name="usuarios_bloqueados_desbloquear_msg">Разблокировать %1$s? Вы снова сможете общаться.</string>
+    <string name="usuarios_bloqueados_desbloquear_confirmar">Разблокировать</string>
+    <string name="usuarios_bloqueados_desbloqueado_sucesso">Пользователь разблокирован</string>
 
     <!-- ===== PRODUTOS / DASHBOARD EQUIPE ===== -->
     <string name="produtos_logo_fallback">КМ</string>

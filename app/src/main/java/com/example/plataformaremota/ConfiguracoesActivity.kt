@@ -82,8 +82,7 @@ class ConfiguracoesActivity : BaseActivity() {
         // USUÁRIOS BLOQUEADOS
         // ============================================================
         findViewById<LinearLayout>(R.id.btnUsuariosBloqueadosConfig).setOnClickListener {
-            // startActivity(Intent(this, UsuariosBloqueadosActivity::class.java))  // ← comentado
-            Toast.makeText(this, "Em breve", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, UsuariosBloqueadosActivity::class.java))  // ← comentado
         }
 
         // ============================================================

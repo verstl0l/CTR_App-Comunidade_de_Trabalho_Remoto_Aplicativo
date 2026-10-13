@@ -809,6 +809,17 @@
     <string name="config_conta_removida">Cuenta Eliminada</string>
     <string name="config_conta_excluida">Cuenta eliminada correctamente</string>
 
+    <!-- ===== USUARIOS BLOQUEADOS ===== -->
+    <string name="usuarios_bloqueados_titulo">Usuarios Bloqueados</string>
+    <string name="usuarios_bloqueados_fallback_usuario">Usuario</string>
+    <string name="usuarios_bloqueados_vazio_titulo">Ningún usuario bloqueado</string>
+    <string name="usuarios_bloqueados_vazio_subtitulo">Cuando bloquees a alguien, aparecerá aquí</string>
+    <string name="usuarios_bloqueados_btn_desbloquear">DESBLOQUEAR</string>
+    <string name="usuarios_bloqueados_desbloquear_titulo">Desbloquear usuario</string>
+    <string name="usuarios_bloqueados_desbloquear_msg">¿Desbloquear a %1$s? Podrán volver a chatear.</string>
+    <string name="usuarios_bloqueados_desbloquear_confirmar">Desbloquear</string>
+    <string name="usuarios_bloqueados_desbloqueado_sucesso">Usuario desbloqueado</string>
+
     <!-- ===== CHAT DE GRUPO ===== -->
     <string name="chat_grupo_sair_titulo">Salir del grupo</string>
     <string name="chat_grupo_sair_msg">¿Estás seguro?</string>

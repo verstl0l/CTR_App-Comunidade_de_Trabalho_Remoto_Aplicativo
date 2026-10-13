@@ -58,6 +58,7 @@ android {
     // ✅ Habilita o BuildConfig (necessario pra usar BuildConfig.CLOUDINARY_*)
     buildFeatures {
         buildConfig = true
+        viewBinding = true
     }
 }
 
@@ -67,6 +68,8 @@ dependencies {
     // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.material)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.constraintlayout)

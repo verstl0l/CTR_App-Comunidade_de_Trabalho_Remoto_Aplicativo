@@ -191,6 +191,11 @@
             android:name=".ConfiguracoesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".UsuariosBloqueadosActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CTR"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
