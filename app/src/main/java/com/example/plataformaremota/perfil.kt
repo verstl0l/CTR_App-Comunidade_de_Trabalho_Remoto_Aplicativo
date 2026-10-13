@@ -97,23 +97,11 @@ class perfil : BaseActivity() {
             startActivity(Intent(this, MensagensFavoritasActivity::class.java))
         }
 
-        val btnSair = findViewById<Button>(R.id.btnSair)
-        btnSair.text = getString(R.string.perfil_sair)
-        btnSair.setOnClickListener {
-            auth.signOut()
-            prefs.edit()
-                .putBoolean("logado", false)
-                .remove(KEY_EMAIL_USUARIO)
-                .remove("nomeUsuario")
-                .remove("profissaoUsuario")
-                .apply()
-            Toast.makeText(
-                this,
-                getString(R.string.perfil_saindo),
-                Toast.LENGTH_SHORT
-            ).show()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finishAffinity()
+        //  Botão Configurações
+        val btnConfiguracoes = findViewById<Button>(R.id.btnConfiguracoesPerfil)
+        btnConfiguracoes.text = getString(R.string.perfil_configuracoes)
+        btnConfiguracoes.setOnClickListener {
+            startActivity(Intent(this, ConfiguracoesActivity::class.java))
         }
 
         configurarBottomNavigation(R.id.nav_profile)

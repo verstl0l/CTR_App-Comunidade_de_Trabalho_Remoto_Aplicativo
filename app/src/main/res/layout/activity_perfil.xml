@@ -277,13 +277,14 @@
                 app:strokeColor="@color/accent"
                 app:strokeWidth="1dp" />
 
+            <!-- Botão Configurações (substitui o antigo btnSair) -->
             <Button
-                android:id="@+id/btnSair"
+                android:id="@+id/btnConfiguracoesPerfil"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@color/bg_surface_hover"
-                android:text="@string/perfil_sair"
+                android:text="@string/perfil_configuracoes"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold" />
 

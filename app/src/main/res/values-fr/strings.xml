@@ -797,6 +797,25 @@
     <string name="chat_grupo_criador_aviso">Vous êtes le créateur. Vous pouvez seulement supprimer.</string>
     <string name="chat_grupo_saiu">Vous avez quitté</string>
 
+    <string name="config_secao_preferencias">PRÉFÉRENCES</string>
+    <string name="config_secao_atividade">MON ACTIVITÉ</string>
+    <string name="config_secao_privacidade">CONFIDENTIALITÉ</string>
+    <string name="config_secao_conta">COMPTE</string>
+
+    <string name="config_historico_trabalhos">Historique des tâches</string>
+    <string name="config_mensagens_favoritas">Messages favoris</string>
+    <string name="config_historico_equipes">Historique des équipes</string>
+    <string name="config_usuarios_bloqueados">Utilisateurs bloqués</string>
+
+    <string name="config_idioma_alterado">Langue modifiée</string>
+
+    <string name="config_sair_titulo">Se déconnecter</string>
+    <string name="config_sair_msg">Voulez-vous vraiment vous déconnecter ?</string>
+    <string name="config_sair_confirmar">Se déconnecter</string>
+
+    <string name="config_conta_removida">Compte supprimé</string>
+    <string name="config_conta_excluida">Compte supprimé avec succès</string>
+
     <string name="chat_hint_digite">Écrivez…</string>
     <string name="chat_placeholder_conversa">Conversation</string>
     <string name="chat_placeholder_mensagem">Message</string>

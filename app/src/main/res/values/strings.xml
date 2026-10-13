@@ -287,6 +287,26 @@
         <item quantity="other">%1$d membros</item>
     </plurals>
 
+    <!-- ===== CONFIGURAÇÕES (itens novos) ===== -->
+    <string name="config_secao_preferencias">PREFERÊNCIAS</string>
+    <string name="config_secao_atividade">MINHA ATIVIDADE</string>
+    <string name="config_secao_privacidade">PRIVACIDADE</string>
+    <string name="config_secao_conta">CONTA</string>
+
+    <string name="config_historico_trabalhos">Histórico de Trabalhos</string>
+    <string name="config_mensagens_favoritas">Mensagens Favoritas</string>
+    <string name="config_historico_equipes">Histórico de Equipes</string>
+    <string name="config_usuarios_bloqueados">Usuários Bloqueados</string>
+
+    <string name="config_idioma_alterado">Idioma alterado</string>
+
+    <string name="config_sair_titulo">Sair da conta</string>
+    <string name="config_sair_msg">Tem certeza que deseja sair?</string>
+    <string name="config_sair_confirmar">Sair</string>
+
+    <string name="config_conta_removida">Conta Removida</string>
+    <string name="config_conta_excluida">Conta excluída com sucesso</string>
+
     <!-- ===== MEUS TRABALHOS ===== -->
     <string name="meus_trabalhos_titulo">Meus Trabalhos</string>
     <string name="meus_trabalhos_btn_voltar">←</string>

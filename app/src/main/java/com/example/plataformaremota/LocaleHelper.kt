@@ -2,6 +2,7 @@ package com.example.plataformaremota
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import androidx.appcompat.app.AlertDialog
@@ -63,8 +64,11 @@ object LocaleHelper {
 
     /**
      * Abre um dialog pra o user escolher o idioma.
+     *
+     * @param activity Activity que está chamando
+     * @param onEscolheu Callback chamado DEPOIS de salvar (recebe o código escolhido)
      */
-    fun mostrarSeletorIdioma(activity: Activity, onEscolheu: () -> Unit) {
+    fun mostrarSeletorIdioma(activity: Activity, onEscolheu: (String) -> Unit) {
         val atual = getIdiomaAtual(activity)
 
         val nomes = IDIOMAS.map { (codigo, stringRes) ->
@@ -79,9 +83,20 @@ object LocaleHelper {
             .setItems(nomes) { _, which ->
                 val codigo = IDIOMAS[which].first
                 salvarIdioma(activity, codigo)
-                onEscolheu()
+                onEscolheu(codigo)
             }
             .setNegativeButton(activity.getString(R.string.cancelar), null)
             .show()
+    }
+
+    /**
+     * ✅ NOVO — Reinicia a Activity para aplicar o novo idioma.
+     * Chama após `salvarIdioma()`.
+     */
+    fun reiniciarApp(activity: Activity) {
+        val intent = activity.intent
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        activity.startActivity(intent)
+        activity.finishAffinity()
     }
 }

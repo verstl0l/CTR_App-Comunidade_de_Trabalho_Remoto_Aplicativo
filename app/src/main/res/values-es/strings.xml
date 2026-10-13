@@ -790,6 +790,25 @@
     <string name="chat_hub_novo_grupo_criar">Crear</string>
     <string name="chat_hub_grupo_criado">¡Grupo creado!</string>
 
+    <string name="config_secao_preferencias">PREFERENCIAS</string>
+    <string name="config_secao_atividade">MI ACTIVIDAD</string>
+    <string name="config_secao_privacidade">PRIVACIDAD</string>
+    <string name="config_secao_conta">CUENTA</string>
+
+    <string name="config_historico_trabalhos">Historial de Tareas</string>
+    <string name="config_mensagens_favoritas">Mensajes Favoritos</string>
+    <string name="config_historico_equipes">Historial de Equipos</string>
+    <string name="config_usuarios_bloqueados">Usuarios Bloqueados</string>
+
+    <string name="config_idioma_alterado">Idioma cambiado</string>
+
+    <string name="config_sair_titulo">Cerrar sesión</string>
+    <string name="config_sair_msg">¿Seguro que quieres cerrar sesión?</string>
+    <string name="config_sair_confirmar">Cerrar sesión</string>
+
+    <string name="config_conta_removida">Cuenta Eliminada</string>
+    <string name="config_conta_excluida">Cuenta eliminada correctamente</string>
+
     <!-- ===== CHAT DE GRUPO ===== -->
     <string name="chat_grupo_sair_titulo">Salir del grupo</string>
     <string name="chat_grupo_sair_msg">¿Estás seguro?</string>
@@ -838,5 +857,7 @@
     <!-- ===== CHAT — SEPARADOR DE FECHA ===== -->
     <string name="chat_separador_hoje">HOY</string>
     <string name="chat_separador_ontem">AYER</string>
+
+
 
 </resources>

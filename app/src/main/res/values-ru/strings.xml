@@ -752,6 +752,7 @@
     <string name="perfil_link_nao_encontrado">Ссылка не найдена</string>
     <string name="perfil_link_removido">Ссылка удалена</string>
 
+
     <!-- ===== PRODUTOS / DASHBOARD EQUIPE ===== -->
     <string name="produtos_logo_fallback">КМ</string>
     <string name="produtos_equipe_fallback">Команда</string>
@@ -781,6 +782,25 @@
     <string name="gerenciar_pedido_linha">%1$s (%2$s)</string>
     <string name="item_trabalho_info_formato">%1$s - %2$s</string>
     <string name="produtividade_item_zero">0</string>
+
+    <string name="config_secao_preferencias">НАСТРОЙКИ</string>
+    <string name="config_secao_atividade">МОЯ АКТИВНОСТЬ</string>
+    <string name="config_secao_privacidade">ПРИВАТНОСТЬ</string>
+    <string name="config_secao_conta">АККАУНТ</string>
+
+    <string name="config_historico_trabalhos">История задач</string>
+    <string name="config_mensagens_favoritas">Избранные сообщения</string>
+    <string name="config_historico_equipes">История команд</string>
+    <string name="config_usuarios_bloqueados">Заблокированные</string>
+
+    <string name="config_idioma_alterado">Язык изменён</string>
+
+    <string name="config_sair_titulo">Выйти из аккаунта</string>
+    <string name="config_sair_msg">Вы уверены, что хотите выйти?</string>
+    <string name="config_sair_confirmar">Выйти</string>
+
+    <string name="config_conta_removida">Удалённый аккаунт</string>
+    <string name="config_conta_excluida">Аккаунт успешно удалён</string>
 
     <!-- ===== ЦЕНТР ЧАТОВ ===== -->
     <string name="chat_hub_titulo">Чат команды</string>

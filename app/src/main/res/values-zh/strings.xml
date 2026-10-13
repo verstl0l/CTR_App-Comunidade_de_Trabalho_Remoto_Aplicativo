@@ -764,6 +764,25 @@
     <string name="item_trabalho_info_formato">%1$s - %2$s</string>
     <string name="produtividade_item_zero">0</string>
 
+    <string name="config_secao_preferencias">偏好设置</string>
+    <string name="config_secao_atividade">我的活动</string>
+    <string name="config_secao_privacidade">隐私</string>
+    <string name="config_secao_conta">账户</string>
+
+    <string name="config_historico_trabalhos">任务历史</string>
+    <string name="config_mensagens_favoritas">收藏消息</string>
+    <string name="config_historico_equipes">团队历史</string>
+    <string name="config_usuarios_bloqueados">已屏蔽用户</string>
+
+    <string name="config_idioma_alterado">语言已更改</string>
+
+    <string name="config_sair_titulo">退出登录</string>
+    <string name="config_sair_msg">确定要退出登录吗？</string>
+    <string name="config_sair_confirmar">退出</string>
+
+    <string name="config_conta_removida">已删除账户</string>
+    <string name="config_conta_excluida">账户已成功删除</string>
+
     <!-- ===== 聊天中心 ===== -->
     <string name="chat_hub_titulo">团队聊天</string>
     <string name="chat_hub_secao_geral">通用</string>

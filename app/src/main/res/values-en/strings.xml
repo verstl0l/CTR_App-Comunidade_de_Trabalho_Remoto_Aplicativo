@@ -621,6 +621,25 @@
     <string name="chat_info_data_formato">dd/MM/yyyy \'às\' HH:mm</string>
     <string name="chat_info_ok">OK</string>
 
+    <string name="config_secao_preferencias">PREFERENCES</string>
+    <string name="config_secao_atividade">MY ACTIVITY</string>
+    <string name="config_secao_privacidade">PRIVACY</string>
+    <string name="config_secao_conta">ACCOUNT</string>
+
+    <string name="config_historico_trabalhos">Task History</string>
+    <string name="config_mensagens_favoritas">Favorite Messages</string>
+    <string name="config_historico_equipes">Team History</string>
+    <string name="config_usuarios_bloqueados">Blocked Users</string>
+
+    <string name="config_idioma_alterado">Language changed</string>
+
+    <string name="config_sair_titulo">Log out</string>
+    <string name="config_sair_msg">Are you sure you want to log out?</string>
+    <string name="config_sair_confirmar">Log out</string>
+
+    <string name="config_conta_removida">Removed Account</string>
+    <string name="config_conta_excluida">Account deleted successfully</string>
+
     <!-- ===== ENTREGAR TRABALHO ===== -->
     <string name="entregar_nao_membro">You are not a member of any team</string>
     <string name="entregar_equipe_fallback">Team</string>
