@@ -59,8 +59,7 @@ class ConfiguracoesActivity : BaseActivity() {
         // HISTÓRICO DE TRABALHOS
         // ============================================================
         findViewById<LinearLayout>(R.id.btnHistoricoTrabalhosConfig).setOnClickListener {
-            // startActivity(Intent(this, HistoricoTrabalhosActivity::class.java))  // ← comentado por enquanto
-            Toast.makeText(this, "Em breve", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, HistoricoTrabalhoDetalhesActivity::class.java))
         }
 
         // ============================================================
@@ -74,8 +73,7 @@ class ConfiguracoesActivity : BaseActivity() {
         // HISTÓRICO DE EQUIPES
         // ============================================================
         findViewById<LinearLayout>(R.id.btnHistoricoEquipesConfig).setOnClickListener {
-            // startActivity(Intent(this, HistoricoEquipesActivity::class.java))  // ← comentado
-            Toast.makeText(this, "Em breve", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, HistoricoEquipesActivity::class.java))
         }
 
         // ============================================================

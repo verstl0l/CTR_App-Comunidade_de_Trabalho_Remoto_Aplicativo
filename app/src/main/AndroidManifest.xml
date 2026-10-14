@@ -196,6 +196,18 @@
             android:exported="false"
             android:theme="@style/Theme.CTR"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".HistoricoEquipesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".HistoricoEquipeDetalhesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".HistoricoTrabalhoDetalhesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

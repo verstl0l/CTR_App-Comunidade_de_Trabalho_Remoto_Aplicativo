@@ -213,6 +213,10 @@ class GerenciarEquipeActivity : BaseActivity() {
                     equipeId?.let { id ->
                         lifecycleScope.launch {
                             try {
+                                //  Grava histórico pra TODOS os membros ANTES de deletar
+                                HistoricoEquipeHelper.registrarExclusaoParaTodos(id)
+
+                                // 1. Anexos e comentarios dos trabalhos
                                 val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", id).get().await()
                                 trabalhos.documents.forEach { db.collection("trabalhos").document(it.id).delete().await() }
 
@@ -386,6 +390,13 @@ class GerenciarEquipeActivity : BaseActivity() {
                                             .setPositiveButton(getString(R.string.gerenciar_remover_confirmar)) { _, _ ->
                                                 lifecycleScope.launch {
                                                     try {
+                                                        //  Grava histórico ANTES de deletar
+                                                        HistoricoEquipeHelper.registrarSaida(
+                                                            emailUsuario = emailMembro,
+                                                            equipeId = equipeId,
+                                                            motivoSaida = "removido"
+                                                        )
+
                                                         db.collection("membros_equipe").document(membroId).delete().await()
                                                         Toast.makeText(this@GerenciarEquipeActivity, getString(R.string.gerenciar_removido), Toast.LENGTH_SHORT).show()
                                                         carregarMembros(equipeId)

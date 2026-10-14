@@ -651,6 +651,32 @@
     <string name="usuarios_bloqueados_desbloquear_confirmar">Unblock</string>
     <string name="usuarios_bloqueados_desbloqueado_sucesso">User unblocked</string>
 
+    <!-- ===== HISTORICO EQUIPES ===== -->
+    <string name="historico_equipes_titulo">Team History</string>
+    <string name="historico_equipes_equipe_fallback">Team</string>
+    <string name="historico_equipes_vazio_titulo">No teams in history</string>
+    <string name="historico_equipes_vazio_subtitulo">When you leave a team, it will appear here</string>
+    <string name="historico_equipes_saiu_em">Left on %1$s</string>
+    <string name="historico_equipes_saiu_em_placeholder">Left on 01/01/2026 00:00</string>
+    <string name="historico_equipes_motivo_saiu">LEFT</string>
+    <string name="historico_equipes_motivo_removido">REMOVED</string>
+    <string name="historico_equipes_motivo_excluida">TEAM DELETED</string>
+
+    <string name="historico_equipes_sem_descricao">No description</string>
+    <string name="historico_detalhes_entrou_em">Joined on %1$s</string>
+    <string name="historico_detalhes_entrou_em_placeholder">Joined on 01/01/2026 00:00</string>
+    <string name="historico_detalhes_saiu_em">Left on %1$s</string>
+    <string name="historico_detalhes_trabalhos_titulo">Tasks you participated in</string>
+    <string name="historico_detalhes_sem_trabalhos">No tasks in this team</string>
+    <string name="historico_trabalho_qtd_comentarios">💬 %1$d</string>
+    <string name="historico_trabalho_qtd_anexos">📎 %1$d</string>
+
+    <!-- ===== HISTORICO TRABALHO DETALHES ===== -->
+    <string name="historico_trabalho_comentarios_titulo">Comments</string>
+    <string name="historico_trabalho_anexos_titulo">Attachments</string>
+    <string name="historico_trabalho_sem_comentarios">No comments on this task</string>
+    <string name="historico_trabalho_sem_anexos">No attachments on this task</string>
+
     <!-- ===== ENTREGAR TRABALHO ===== -->
     <string name="entregar_nao_membro">You are not a member of any team</string>
     <string name="entregar_equipe_fallback">Team</string>

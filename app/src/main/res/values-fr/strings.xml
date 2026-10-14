@@ -827,6 +827,32 @@
     <string name="usuarios_bloqueados_desbloquear_confirmar">Débloquer</string>
     <string name="usuarios_bloqueados_desbloqueado_sucesso">Utilisateur débloqué</string>
 
+    <!-- ===== HISTORICO EQUIPES ===== -->
+    <string name="historico_equipes_titulo">Historique des équipes</string>
+    <string name="historico_equipes_equipe_fallback">Équipe</string>
+    <string name="historico_equipes_vazio_titulo">Aucune équipe dans l\'historique</string>
+    <string name="historico_equipes_vazio_subtitulo">Lorsque vous quitterez une équipe, elle apparaîtra ici</string>
+    <string name="historico_equipes_saiu_em">Parti le %1$s</string>
+    <string name="historico_equipes_saiu_em_placeholder">Parti le 01/01/2026 00:00</string>
+    <string name="historico_equipes_motivo_saiu">PARTI</string>
+    <string name="historico_equipes_motivo_removido">RETIRÉ</string>
+    <string name="historico_equipes_motivo_excluida">ÉQUIPE SUPPRIMÉE</string>
+
+    <string name="historico_equipes_sem_descricao">Sans description</string>
+    <string name="historico_detalhes_entrou_em">Rejoint le %1$s</string>
+    <string name="historico_detalhes_entrou_em_placeholder">Rejoint le 01/01/2026 00:00</string>
+    <string name="historico_detalhes_saiu_em">Parti le %1$s</string>
+    <string name="historico_detalhes_trabalhos_titulo">Tâches auxquelles vous avez participé</string>
+    <string name="historico_detalhes_sem_trabalhos">Aucune tâche dans cette équipe</string>
+    <string name="historico_trabalho_qtd_comentarios">💬 %1$d</string>
+    <string name="historico_trabalho_qtd_anexos">📎 %1$d</string>
+
+    <!-- ===== HISTORICO TRABALHO DETALHES ===== -->
+    <string name="historico_trabalho_comentarios_titulo">Commentaires</string>
+    <string name="historico_trabalho_anexos_titulo">Pièces jointes</string>
+    <string name="historico_trabalho_sem_comentarios">Aucun commentaire sur cette tâche</string>
+    <string name="historico_trabalho_sem_anexos">Aucune pièce jointe sur cette tâche</string>
+
     <string name="chat_hint_digite">Écrivez…</string>
     <string name="chat_placeholder_conversa">Conversation</string>
     <string name="chat_placeholder_mensagem">Message</string>

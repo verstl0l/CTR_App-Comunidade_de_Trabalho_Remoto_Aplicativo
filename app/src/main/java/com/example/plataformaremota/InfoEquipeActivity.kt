@@ -260,6 +260,14 @@ class InfoEquipeActivity : BaseActivity() {
                             .whereEqualTo("email", emailUsuario)
                             .get().await()
 
+                        //  Grava histórico ANTES de deletar o membro
+                        HistoricoEquipeHelper.registrarSaida(
+                            emailUsuario = emailUsuario,
+                            equipeId = equipeId,
+                            motivoSaida = "saiu"
+                        )
+
+                        // Agora deleta o membro
                         membro.documents.forEach { doc ->
                             db.collection("membros_equipe").document(doc.id).delete().await()
                         }
