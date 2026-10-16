@@ -165,9 +165,14 @@ class PedidosPendentesActivity : BaseActivity() {
                         "entrouEm" to System.currentTimeMillis()
                     )
                     db.collection("membros_equipe").document(membroId).set(membro).await()
+
+                    // ✅ NOVO: registra entrada no histórico (fire-and-forget)
+                    HistoricoEquipeHelper.registrarEntradaAsync(
+                        emailUsuario = email,
+                        equipeId = equipeId
+                    )
                 }
 
-                // ⚠️ nomeRemetente continua fixo: valor salvo no BD
                 NotificacaoHelper.notificarPedidoAceito(
                     destinatario = email,
                     remetente = emailUsuario,
@@ -212,8 +217,6 @@ class PedidosPendentesActivity : BaseActivity() {
                 db.collection("pedidos_entrada").document(pedidoId)
                     .update("status", "recusado").await()
 
-                // ⚠️ Este título/mensagem vai pro BD em português
-                // (refatoração futura pode mover para i18n runtime)
                 NotificacaoHelper.criar(
                     destinatario = email,
                     tipo = "pedido_recusado",

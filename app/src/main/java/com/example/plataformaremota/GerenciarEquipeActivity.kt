@@ -213,10 +213,9 @@ class GerenciarEquipeActivity : BaseActivity() {
                     equipeId?.let { id ->
                         lifecycleScope.launch {
                             try {
-                                //  Grava histórico pra TODOS os membros ANTES de deletar
-                                HistoricoEquipeHelper.registrarExclusaoParaTodos(id)
+                                // ✅ Grava histórico pra TODOS os membros ANTES de deletar (fire-and-forget)
+                                HistoricoEquipeHelper.registrarExclusaoParaTodosAsync(id)
 
-                                // 1. Anexos e comentarios dos trabalhos
                                 val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", id).get().await()
                                 trabalhos.documents.forEach { db.collection("trabalhos").document(it.id).delete().await() }
 
@@ -390,8 +389,8 @@ class GerenciarEquipeActivity : BaseActivity() {
                                             .setPositiveButton(getString(R.string.gerenciar_remover_confirmar)) { _, _ ->
                                                 lifecycleScope.launch {
                                                     try {
-                                                        //  Grava histórico ANTES de deletar
-                                                        HistoricoEquipeHelper.registrarSaida(
+                                                        // ✅ Grava histórico ANTES de deletar (fire-and-forget)
+                                                        HistoricoEquipeHelper.registrarSaidaAsync(
                                                             emailUsuario = emailMembro,
                                                             equipeId = equipeId,
                                                             motivoSaida = "removido"
@@ -458,7 +457,6 @@ class GerenciarEquipeActivity : BaseActivity() {
                     val t1 = view.findViewById<TextView>(android.R.id.text1)
                     val t2 = view.findViewById<TextView>(android.R.id.text2)
 
-                    // ✅ Placeholder para "Nome (email)"
                     t1.text = getString(R.string.gerenciar_pedido_linha, nome, emailSol)
                     t1.setTextColor(android.graphics.Color.WHITE)
                     t2.text = getString(R.string.gerenciar_pedido_resumo, motivos, especialidades)
@@ -484,6 +482,12 @@ class GerenciarEquipeActivity : BaseActivity() {
                                         )
                                         val membroId = "${emailSol}_${equipeId}"
                                         db.collection("membros_equipe").document(membroId).set(membro).await()
+
+                                        // ✅ NOVO: registra entrada no histórico (fire-and-forget)
+                                        HistoricoEquipeHelper.registrarEntradaAsync(
+                                            emailUsuario = emailSol,
+                                            equipeId = equipeId
+                                        )
 
                                         NotificacaoHelper.notificarPedidoAceito(
                                             destinatario = emailSol,
@@ -575,7 +579,6 @@ class GerenciarEquipeActivity : BaseActivity() {
                     val view = inflater.inflate(R.layout.item_trabalho_gerenciar, container, false)
 
                     view.findViewById<TextView>(R.id.txtTituloGerenciar).text = titulo
-                    // ✅ Placeholder "categoria - prazo"
                     view.findViewById<TextView>(R.id.txtInfoGerenciar).text =
                         getString(R.string.item_trabalho_info_formato, categoria, prazo)
                     view.findViewById<TextView>(R.id.txtDescricaoGerenciar).text = descricao
@@ -664,9 +667,6 @@ class GerenciarEquipeActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // ABRIR DIALOG EDITAR TRABALHO
-    // ============================================================
     private fun abrirDialogEditarTrabalho(
         trabalhoId: String,
         tituloAtual: String,

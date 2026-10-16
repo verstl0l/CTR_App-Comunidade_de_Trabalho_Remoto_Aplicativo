@@ -145,7 +145,6 @@ class InfoEquipeActivity : BaseActivity() {
                     return@launch
                 }
 
-                // ✅ Captura strings traduzidas UMA VEZ
                 val labelAdmin = getString(R.string.info_equipe_funcao_admin)
                 val labelMembro = getString(R.string.info_equipe_funcao_membro)
                 val nomeFallback = getString(R.string.info_equipe_usuario_fallback)
@@ -177,7 +176,6 @@ class InfoEquipeActivity : BaseActivity() {
     }
 
     private fun mostrarOpcoesMembro(email: String, nome: String) {
-        // ✅ Captura strings traduzidas ANTES do when
         val opConversar = getString(R.string.info_equipe_op_conversar_pv)
         val opVerPerfil = getString(R.string.info_equipe_op_ver_perfil)
         val opVerMeuPerfil = getString(R.string.info_equipe_op_ver_meu_perfil)
@@ -260,8 +258,8 @@ class InfoEquipeActivity : BaseActivity() {
                             .whereEqualTo("email", emailUsuario)
                             .get().await()
 
-                        //  Grava histórico ANTES de deletar o membro
-                        HistoricoEquipeHelper.registrarSaida(
+                        // ✅ Grava histórico ANTES de deletar o membro (fire-and-forget)
+                        HistoricoEquipeHelper.registrarSaidaAsync(
                             emailUsuario = emailUsuario,
                             equipeId = equipeId,
                             motivoSaida = "saiu"
@@ -299,6 +297,9 @@ class InfoEquipeActivity : BaseActivity() {
             .setPositiveButton(getString(R.string.info_equipe_excluir_confirmar)) { _, _ ->
                 lifecycleScope.launch {
                     try {
+                        // ✅ Grava histórico pra TODOS os membros ANTES de deletar (fire-and-forget)
+                        HistoricoEquipeHelper.registrarExclusaoParaTodosAsync(equipeId)
+
                         // 1. Anexos e comentarios dos trabalhos
                         val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", equipeId).get().await()
                         for (trabalho in trabalhos.documents) {

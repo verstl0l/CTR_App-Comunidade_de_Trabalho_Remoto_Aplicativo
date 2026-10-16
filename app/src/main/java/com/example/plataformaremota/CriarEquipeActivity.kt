@@ -1,12 +1,11 @@
 package com.example.plataformaremota
 
-import  android.content.Intent
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -54,9 +53,8 @@ class CriarEquipeActivity : BaseActivity() {
             db.collection("equipes")
                 .add(equipe)
                 .addOnSuccessListener { documentReference ->
-                    Log.d("CRIAR_EQUIPE", "✅ Equipe criada! ID: ${documentReference.id}")
+                    Log.d(TAG, "✅ Equipe criada! ID: ${documentReference.id}")
 
-                    // ✅ Adiciona o criador como administrador na coleção de membros
                     val membro = hashMapOf(
                         "equipeId" to documentReference.id,
                         "email" to email,
@@ -65,19 +63,24 @@ class CriarEquipeActivity : BaseActivity() {
                         "entrouEm" to System.currentTimeMillis()
                     )
 
-                    // ✅ ONDA 0 — ID determinístico: {email}_{equipeId}
                     val membroId = "${email}_${documentReference.id}"
 
                     db.collection("membros_equipe")
                         .document(membroId)
                         .set(membro)
                         .addOnSuccessListener {
+                            //  Registra entrada no histórico (fire-and-forget)
+                            HistoricoEquipeHelper.registrarEntradaAsync(
+                                emailUsuario = email,
+                                equipeId = documentReference.id
+                            )
+
                             Toast.makeText(this, getString(R.string.equipe_criada_sucesso), Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this, produtos::class.java))
                             finish()
                         }
                         .addOnFailureListener { e ->
-                            Log.e("CRIAR_EQUIPE", "Erro ao adicionar membro: ${e.message}")
+                            Log.e(TAG, "Erro ao adicionar membro: ${e.message}")
                             Toast.makeText(
                                 this,
                                 getString(R.string.erro_adicionar_membro),
@@ -88,11 +91,15 @@ class CriarEquipeActivity : BaseActivity() {
                         }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("CRIAR_EQUIPE", "❌ Erro: ${e.message}")
+                    Log.e(TAG, "❌ Erro: ${e.message}")
                     Toast.makeText(this, getString(R.string.erro_criar_equipe, e.message ?: ""), Toast.LENGTH_LONG).show()
                     btnSalvar.isEnabled = true
                     btnSalvar.text = getString(R.string.salvar_equipe)
                 }
         }
+    }
+
+    companion object {
+        private const val TAG = "CRIAR_EQUIPE"
     }
 }

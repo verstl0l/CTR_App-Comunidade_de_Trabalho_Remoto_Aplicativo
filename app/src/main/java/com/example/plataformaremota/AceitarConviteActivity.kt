@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,7 +21,7 @@ import kotlinx.coroutines.tasks.await
  *   - descricaoEquipe: descricao (opcional)
  *   - nomeRemetente: quem convidou (opcional)
  */
-class AceitarConviteActivity : AppCompatActivity() {
+class AceitarConviteActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -92,7 +91,7 @@ class AceitarConviteActivity : AppCompatActivity() {
                 txtNomeEquipe.text = nomeEquipe
                 txtDescricao.text = descricaoEquipe
             } catch (e: Exception) {
-                Log.e("ACEITAR_CONVITE", "Erro ao carregar convite: ${e.message}")
+                Log.e(TAG, "Erro ao carregar convite: ${e.message}")
             }
         }
 
@@ -136,6 +135,12 @@ class AceitarConviteActivity : AppCompatActivity() {
                     // ID determinístico
                     val membroId = "${emailUsuario}_${equipeId}"
                     db.collection("membros_equipe").document(membroId).set(membro).await()
+
+                    // ✅ NOVO: registra entrada no histórico (só se criou o membro agora)
+                    HistoricoEquipeHelper.registrarEntradaAsync(
+                        emailUsuario = emailUsuario,
+                        equipeId = equipeId
+                    )
                 }
 
                 Toast.makeText(
@@ -211,8 +216,12 @@ class AceitarConviteActivity : AppCompatActivity() {
                     nomeRemetente = nomeUsuario
                 )
             } catch (e: Exception) {
-                Log.e("ACEITAR_CONVITE", "Erro ao notificar: ${e.message}")
+                Log.e(TAG, "Erro ao notificar: ${e.message}")
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "ACEITAR_CONVITE"
     }
 }
