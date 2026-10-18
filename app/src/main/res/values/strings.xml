@@ -337,6 +337,43 @@
     <string name="historico_trabalho_qtd_comentarios">💬 %1$d</string>
     <string name="historico_trabalho_qtd_anexos">📎 %1$d</string>
 
+    <string name="historico_equipes_status_ativo">ATIVO</string>
+    <string name="historico_equipes_ativo_msg">Você está nesta equipe atualmente</string>
+
+    <!-- ===== CRIAR TRABALHO (participante) ===== -->
+    <string name="criar_trabalho_hint_participante">Participante</string>
+    <string name="criar_trabalho_selecionar_participante">Selecionar participante</string>
+    <string name="criar_trabalho_selecione_participante">Selecione um participante</string>
+    <string name="criar_trabalho_equipe_sem_membros">Nenhum membro na equipe</string>
+
+    <string name="criar_trabalho_notif_participante_titulo">Novo trabalho: %1$s</string>
+    <string name="criar_trabalho_notif_participante_msg">%1$s te designou para um trabalho em %2$s</string>
+
+    <string name="anexos_sem_permissao">Apenas o criador ou participante pode adicionar anexos</string>
+
+    <string name="entregar_participante_fallback">Sem participante</string>
+    <string name="entregar_participante_formatado">👤 %1$s</string>
+
+    <!-- ===== HISTORICO TRABALHOS ===== -->
+    <string name="historico_trabalhos_titulo">Histórico de Trabalhos</string>
+    <string name="historico_trabalhos_vazio_titulo">Nenhum trabalho no histórico</string>
+    <string name="historico_trabalhos_vazio_subtitulo">Trabalhos que você criou ou participou aparecem aqui</string>
+    <string name="historico_trabalhos_inativa">Equipe Inativa</string>
+
+    <!-- ===== ANEXO PRIVADO ===== -->
+    <string name="anexo_privacidade_titulo">Confidencialidade do anexo</string>
+    <string name="anexo_privacidade_msg">Este arquivo é confidencial?</string>
+    <string name="anexo_privacidade_sim">Sim</string>
+    <string name="anexo_privacidade_nao">Não</string>
+
+    <string name="anexo_privado_ok_titulo">Anexo confidencial</string>
+    <string name="anexo_privado_ok_msg">Clique em OK para manter o anexo privado. Apenas você, o dono da equipe e as pessoas envolvidas no trabalho poderão acessá-lo.</string>
+    <string name="anexo_privado_ok_confirmar">OK</string>
+
+    <string name="anexo_privado_nome">Arquivo Confidencial</string>
+    <string name="anexo_privado_info">Protegido · %1$s</string>
+    <string name="anexo_privado_aviso">Acesso restrito aos envolvidos no trabalho</string>
+
     <!-- ===== MEUS TRABALHOS ===== -->
     <string name="meus_trabalhos_titulo">Meus Trabalhos</string>
     <string name="meus_trabalhos_btn_voltar">←</string>

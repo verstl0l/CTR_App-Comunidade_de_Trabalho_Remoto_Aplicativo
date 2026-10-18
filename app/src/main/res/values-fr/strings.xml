@@ -847,6 +847,40 @@
     <string name="historico_trabalho_qtd_comentarios">💬 %1$d</string>
     <string name="historico_trabalho_qtd_anexos">📎 %1$d</string>
 
+    <string name="historico_equipes_status_ativo">ACTIF</string>
+    <string name="historico_equipes_ativo_msg">Vous êtes actuellement dans cette équipe</string>
+
+    <string name="criar_trabalho_hint_participante">Participant</string>
+    <string name="criar_trabalho_selecionar_participante">Sélectionner un participant</string>
+    <string name="criar_trabalho_selecione_participante">Sélectionnez un participant</string>
+    <string name="criar_trabalho_equipe_sem_membros">Aucun membre dans l\'équipe</string>
+
+    <string name="criar_trabalho_notif_participante_titulo">Nouvelle tâche : %1$s</string>
+    <string name="criar_trabalho_notif_participante_msg">%1$s vous a assigné une tâche dans %2$s</string>
+
+    <string name="anexos_sem_permissao">Seul le créateur ou le participant peut ajouter des pièces jointes</string>
+
+    <string name="entregar_participante_fallback">Aucun participant</string>
+    <string name="entregar_participante_formatado">👤 %1$s</string>
+
+    <string name="historico_trabalhos_titulo">Historique des tâches</string>
+    <string name="historico_trabalhos_vazio_titulo">Aucune tâche dans l\'historique</string>
+    <string name="historico_trabalhos_vazio_subtitulo">Les tâches que vous avez créées ou auxquelles vous avez participé apparaissent ici</string>
+    <string name="historico_trabalhos_inativa">Équipe inactive</string>
+
+    <string name="anexo_privacidade_titulo">Confidentialité du fichier</string>
+    <string name="anexo_privacidade_msg">Ce fichier est-il confidentiel ?</string>
+    <string name="anexo_privacidade_sim">Oui</string>
+    <string name="anexo_privacidade_nao">Non</string>
+
+    <string name="anexo_privado_ok_titulo">Pièce jointe confidentielle</string>
+    <string name="anexo_privado_ok_msg">Appuyez sur OK pour garder la pièce jointe privée. Seuls vous, le propriétaire de l\'équipe et les personnes impliquées dans la tâche pourront y accéder.</string>
+    <string name="anexo_privado_ok_confirmar">OK</string>
+
+    <string name="anexo_privado_nome">Fichier Confidentiel</string>
+    <string name="anexo_privado_info">Protégé · %1$s</string>
+    <string name="anexo_privado_aviso">Accès restreint aux participants</string>
+
     <!-- ===== HISTORICO TRABALHO DETALHES ===== -->
     <string name="historico_trabalho_comentarios_titulo">Commentaires</string>
     <string name="historico_trabalho_anexos_titulo">Pièces jointes</string>

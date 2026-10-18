@@ -20,7 +20,8 @@ import java.util.Locale
 
 /**
  * Mostra os detalhes de uma equipe do histórico do usuário.
- * Inclui dados da equipe + lista de trabalhos que ele participou.
+ * Se ativo: mostra mensagem "Você está nesta equipe" e NÃO mostra trabalhos.
+ * Se inativo: mostra o período completo e a lista de trabalhos.
  */
 class HistoricoEquipeDetalhesActivity : BaseActivity() {
 
@@ -71,7 +72,6 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
 
         lifecycleScope.launch {
             try {
-                // Lê o doc do histórico
                 val doc = db.collection("historico_equipes")
                     .document(emailUsuario)
                     .collection("equipes")
@@ -93,6 +93,7 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
                     ?: getString(R.string.historico_equipes_equipe_fallback)
                 val descricaoEquipe = doc.getString("descricaoEquipe") ?: ""
                 val papel = doc.getString("papel") ?: "membro"
+                val status = doc.getString("status") ?: "inativo"
                 val motivoSaida = doc.getString("motivoSaida") ?: "saiu"
                 val entrouEm = doc.getTimestamp("entrouEm")?.toDate()
                 val saiuEm = doc.getTimestamp("saiuEm")?.toDate()
@@ -111,22 +112,28 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
                     else -> getString(R.string.minhas_equipes_papel_membro)
                 }
 
-                // Badge do motivo
-                when (motivoSaida) {
-                    "saiu" -> {
-                        txtBadgeMotivo.text = getString(R.string.historico_equipes_motivo_saiu)
-                        txtBadgeMotivo.setBackgroundColor(android.graphics.Color.parseColor("#9E9E9E"))
-                        txtBadgeMotivo.setTextColor(android.graphics.Color.parseColor("#1C1311"))
-                    }
-                    "removido" -> {
-                        txtBadgeMotivo.text = getString(R.string.historico_equipes_motivo_removido)
-                        txtBadgeMotivo.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
-                        txtBadgeMotivo.setTextColor(android.graphics.Color.WHITE)
-                    }
-                    "equipe_excluida" -> {
-                        txtBadgeMotivo.text = getString(R.string.historico_equipes_motivo_excluida)
-                        txtBadgeMotivo.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
-                        txtBadgeMotivo.setTextColor(android.graphics.Color.WHITE)
+                // Badge
+                if (status == "ativo") {
+                    txtBadgeMotivo.text = getString(R.string.historico_equipes_status_ativo)
+                    txtBadgeMotivo.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"))
+                    txtBadgeMotivo.setTextColor(android.graphics.Color.WHITE)
+                } else {
+                    when (motivoSaida) {
+                        "saiu" -> {
+                            txtBadgeMotivo.text = getString(R.string.historico_equipes_motivo_saiu)
+                            txtBadgeMotivo.setBackgroundColor(android.graphics.Color.parseColor("#9E9E9E"))
+                            txtBadgeMotivo.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+                        }
+                        "removido" -> {
+                            txtBadgeMotivo.text = getString(R.string.historico_equipes_motivo_removido)
+                            txtBadgeMotivo.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
+                            txtBadgeMotivo.setTextColor(android.graphics.Color.WHITE)
+                        }
+                        "equipe_excluida" -> {
+                            txtBadgeMotivo.text = getString(R.string.historico_equipes_motivo_excluida)
+                            txtBadgeMotivo.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
+                            txtBadgeMotivo.setTextColor(android.graphics.Color.WHITE)
+                        }
                     }
                 }
 
@@ -141,8 +148,26 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
                     }
                 }
 
-                // Carrega os trabalhos
-                carregarTrabalhos(containerTrabalhos, containerVazioTrabalhos, txtTituloTrabalhos)
+                // ✅ Se ativo: esconde trabalhos e mostra mensagem
+                if (status == "ativo") {
+                    txtTituloTrabalhos.visibility = View.GONE
+                    containerVazioTrabalhos.visibility = View.GONE
+                    containerTrabalhos.visibility = View.GONE
+
+                    // Mostra a mensagem "Você está nesta equipe atualmente"
+                    // Reutiliza o txtTituloTrabalhos como "mensagem"
+                    txtTituloTrabalhos.text = getString(R.string.historico_equipes_ativo_msg)
+                    txtTituloTrabalhos.visibility = View.VISIBLE
+                    txtTituloTrabalhos.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+                } else {
+                    // Inativo: comportamento normal
+                    txtTituloTrabalhos.text = getString(R.string.historico_detalhes_trabalhos_titulo)
+                    txtTituloTrabalhos.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+                    txtTituloTrabalhos.visibility = View.VISIBLE
+                    containerTrabalhos.visibility = View.VISIBLE
+
+                    carregarTrabalhos(containerTrabalhos, containerVazioTrabalhos, txtTituloTrabalhos)
+                }
 
             } catch (e: Exception) {
                 Log.e(TAG, "Erro ao carregar detalhes: ${e.message}")
@@ -187,7 +212,6 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
                 val fallbackTitulo = getString(R.string.meus_trabalhos_sem_titulo)
                 val fallbackPrazo = getString(R.string.meus_trabalhos_sem_prazo)
 
-                // Ordena por criadoEm se existir, senão por título
                 val trabalhos = snap.documents.sortedByDescending {
                     it.getTimestamp("criadoEm")?.seconds ?: 0L
                 }
@@ -209,14 +233,12 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
 
                     txtTitulo.text = titulo
 
-                    // Info: "Categoria - Entrega: X"
                     txtInfo.text = buildString {
                         if (categoria.isNotEmpty()) append(categoria)
                         if (categoria.isNotEmpty() && prazo.isNotEmpty()) append(" • ")
                         append(getString(R.string.meus_trabalhos_entrega_formatado, prazo))
                     }
 
-                    // Status com cor
                     when (status) {
                         "pendente" -> {
                             txtStatus.text = getString(R.string.status_pendente)
@@ -232,7 +254,6 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
                         }
                     }
 
-                    // Contadores (comentários/anexos) — carrega de forma assíncrona
                     lifecycleScope.launch {
                         try {
                             val comentarios = db.collection("historico_equipes")
@@ -279,7 +300,6 @@ class HistoricoEquipeDetalhesActivity : BaseActivity() {
                         }
                     }
 
-                    // Clicar abre a tela de detalhes do trabalho
                     view.setOnClickListener {
                         val i = Intent(
                             this@HistoricoEquipeDetalhesActivity,

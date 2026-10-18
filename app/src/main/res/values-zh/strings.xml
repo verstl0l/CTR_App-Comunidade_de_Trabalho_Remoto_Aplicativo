@@ -814,6 +814,40 @@
     <string name="historico_trabalho_qtd_comentarios">💬 %1$d</string>
     <string name="historico_trabalho_qtd_anexos">📎 %1$d</string>
 
+    <string name="historico_equipes_status_ativo">活跃</string>
+    <string name="historico_equipes_ativo_msg">您目前在此团队中</string>
+
+    <string name="criar_trabalho_hint_participante">参与者</string>
+    <string name="criar_trabalho_selecionar_participante">选择参与者</string>
+    <string name="criar_trabalho_selecione_participante">请选择参与者</string>
+    <string name="criar_trabalho_equipe_sem_membros">团队中没有成员</string>
+
+    <string name="criar_trabalho_notif_participante_titulo">新任务：%1$s</string>
+    <string name="criar_trabalho_notif_participante_msg">%1$s 在 %2$s 中为您分配了任务</string>
+
+    <string name="anexos_sem_permissao">只有创建者或参与者可以添加附件</string>
+
+    <string name="entregar_participante_fallback">无参与者</string>
+    <string name="entregar_participante_formatado">👤 %1$s</string>
+
+    <string name="historico_trabalhos_titulo">任务历史</string>
+    <string name="historico_trabalhos_vazio_titulo">历史中暂无任务</string>
+    <string name="historico_trabalhos_vazio_subtitulo">您创建或参与的任务会显示在此处</string>
+    <string name="historico_trabalhos_inativa">非活跃团队</string>
+
+    <string name="anexo_privacidade_titulo">文件保密性</string>
+    <string name="anexo_privacidade_msg">此文件是否保密？</string>
+    <string name="anexo_privacidade_sim">是</string>
+    <string name="anexo_privacidade_nao">否</string>
+
+    <string name="anexo_privado_ok_titulo">保密附件</string>
+    <string name="anexo_privado_ok_msg">点击确定以保持附件私密。只有您、团队所有者及任务参与者可以访问。</string>
+    <string name="anexo_privado_ok_confirmar">确定</string>
+
+    <string name="anexo_privado_nome">保密文件</string>
+    <string name="anexo_privado_info">受保护 · %1$s</string>
+    <string name="anexo_privado_aviso">仅限任务参与者访问</string>
+
     <!-- ===== HISTORICO TRABALHO DETALHES ===== -->
     <string name="historico_trabalho_comentarios_titulo">评论</string>
     <string name="historico_trabalho_anexos_titulo">附件</string>

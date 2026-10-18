@@ -13,16 +13,14 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 /**
- * Lista as equipes passadas do usuário (as que ele saiu, foi removido ou que foram excluídas).
- * Ao clicar, abre a tela de detalhes com os trabalhos.
+ * Lista as equipes do histórico do usuário (ativas e inativas).
+ * Ao clicar, abre a tela de detalhes.
  */
 class HistoricoEquipesActivity : BaseActivity() {
 
@@ -65,10 +63,12 @@ class HistoricoEquipesActivity : BaseActivity() {
 
         lifecycleScope.launch {
             try {
+                // ⚠️ Removido orderBy("saiuEm") porque documentos com status="ativo"
+                // têm saiuEm=null e o Firestore os ignora nessa ordenação.
+                // Ordenamos em memória depois.
                 val snap = db.collection("historico_equipes")
                     .document(emailUsuario)
                     .collection("equipes")
-                    .orderBy("saiuEm", Query.Direction.DESCENDING)
                     .get()
                     .await()
 
@@ -83,11 +83,25 @@ class HistoricoEquipesActivity : BaseActivity() {
                 val formatoData = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
                 val fallbackEquipe = getString(R.string.historico_equipes_equipe_fallback)
 
-                for (doc in snap.documents) {
+                // ✅ Ordena em memória: ativos primeiro, depois por saiuEm desc
+                val documentos = snap.documents.sortedWith(
+                    compareByDescending<com.google.firebase.firestore.DocumentSnapshot> {
+                        // Ativos primeiro
+                        if ((it.getString("status") ?: "inativo") == "ativo") 1 else 0
+                    }.thenByDescending {
+                        it.getTimestamp("saiuEm")?.seconds
+                            ?: it.getTimestamp("entrouEm")?.seconds
+                            ?: 0L
+                    }
+                )
+
+                for (doc in documentos) {
                     val equipeId = doc.getString("equipeId") ?: doc.id
                     val nomeEquipe = doc.getString("nomeEquipe") ?: fallbackEquipe
                     val papel = doc.getString("papel") ?: "membro"
+                    val status = doc.getString("status") ?: "inativo"
                     val motivoSaida = doc.getString("motivoSaida") ?: "saiu"
+                    val entrouEm = doc.getTimestamp("entrouEm")?.toDate()
                     val saiuEm = doc.getTimestamp("saiuEm")?.toDate()
 
                     val view = inflater.inflate(R.layout.item_historico_equipe, container, false)
@@ -106,32 +120,41 @@ class HistoricoEquipesActivity : BaseActivity() {
                         else -> getString(R.string.minhas_equipes_papel_membro)
                     }
 
-                    // Período: "Saiu em 14/10/2026 10:29"
-                    txtPeriodo.text = if (saiuEm != null) {
-                        getString(
-                            R.string.historico_equipes_saiu_em,
-                            formatoData.format(saiuEm)
-                        )
-                    } else {
-                        ""
+                    // Período
+                    txtPeriodo.text = when {
+                        // Ativo: "Entrou em X"
+                        status == "ativo" && entrouEm != null -> {
+                            getString(R.string.historico_detalhes_entrou_em, formatoData.format(entrouEm))
+                        }
+                        // Inativo: "Saiu em Y" (ou "Entrou em X • Saiu em Y")
+                        saiuEm != null -> {
+                            getString(R.string.historico_equipes_saiu_em, formatoData.format(saiuEm))
+                        }
+                        else -> ""
                     }
 
-                    // Badge do motivo
-                    when (motivoSaida) {
-                        "saiu" -> {
-                            txtBadge.text = getString(R.string.historico_equipes_motivo_saiu)
-                            txtBadge.setBackgroundColor(android.graphics.Color.parseColor("#9E9E9E"))
-                            txtBadge.setTextColor(android.graphics.Color.parseColor("#1C1311"))
-                        }
-                        "removido" -> {
-                            txtBadge.text = getString(R.string.historico_equipes_motivo_removido)
-                            txtBadge.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
-                            txtBadge.setTextColor(android.graphics.Color.WHITE)
-                        }
-                        "equipe_excluida" -> {
-                            txtBadge.text = getString(R.string.historico_equipes_motivo_excluida)
-                            txtBadge.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
-                            txtBadge.setTextColor(android.graphics.Color.WHITE)
+                    // Badge
+                    if (status == "ativo") {
+                        txtBadge.text = getString(R.string.historico_equipes_status_ativo)
+                        txtBadge.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"))
+                        txtBadge.setTextColor(android.graphics.Color.WHITE)
+                    } else {
+                        when (motivoSaida) {
+                            "saiu" -> {
+                                txtBadge.text = getString(R.string.historico_equipes_motivo_saiu)
+                                txtBadge.setBackgroundColor(android.graphics.Color.parseColor("#9E9E9E"))
+                                txtBadge.setTextColor(android.graphics.Color.parseColor("#1C1311"))
+                            }
+                            "removido" -> {
+                                txtBadge.text = getString(R.string.historico_equipes_motivo_removido)
+                                txtBadge.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
+                                txtBadge.setTextColor(android.graphics.Color.WHITE)
+                            }
+                            "equipe_excluida" -> {
+                                txtBadge.text = getString(R.string.historico_equipes_motivo_excluida)
+                                txtBadge.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"))
+                                txtBadge.setTextColor(android.graphics.Color.WHITE)
+                            }
                         }
                     }
 

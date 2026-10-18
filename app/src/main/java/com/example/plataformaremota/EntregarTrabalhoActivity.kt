@@ -170,6 +170,7 @@ class EntregarTrabalhoActivity : BaseActivity() {
     ) {
         container.removeAllViews()
         val inflater = LayoutInflater.from(this)
+        val emailAtual = auth.currentUser?.email ?: ""
 
         if (trabalhos.isEmpty()) {
             val txtVazio = TextView(this).apply {
@@ -196,7 +197,26 @@ class EntregarTrabalhoActivity : BaseActivity() {
             val prazo = doc.getString("prazo") ?: fallbackSemPrazo
             val status = doc.getString("status") ?: "pendente"
 
+
+            // ✅ Lê o criador e o participante do trabalho
+            val criadorTrabalho = doc.getString("criadorEmail") ?: ""
+            val participanteTrabalho = doc.getString("participanteEmail")
+                ?: doc.getString("responsavelEmail")  // compatibilidade
+                ?: ""
+
+            // ✅ Regra: pode mudar status só se for criador OU participante
+            val podeMudarStatus = criadorTrabalho.equals(emailAtual, ignoreCase = true) ||
+                    participanteTrabalho.equals(emailAtual, ignoreCase = true)
+
             val view = inflater.inflate(R.layout.item_trabalho_membro, container, false)
+
+            //  Preenche o participante
+            val participanteNome = doc.getString("participanteNome")
+                ?: doc.getString("participanteEmail")
+                ?: getString(R.string.entregar_participante_fallback)
+
+            view.findViewById<TextView>(R.id.txtParticipanteTrabalhoMembro).text =
+                getString(R.string.entregar_participante_formatado, participanteNome)
 
             view.findViewById<TextView>(R.id.txtTituloTrabalhoMembro).text = titulo
             view.findViewById<TextView>(R.id.txtDescricaoTrabalhoMembro).text = descricao
@@ -208,7 +228,8 @@ class EntregarTrabalhoActivity : BaseActivity() {
 
             val btnEntregar = view.findViewById<Button>(R.id.btnEntregarTrabalho)
 
-            if (ehDono) {
+            // ✅ NOVA regra: só criador ou participante muda status
+            if (!podeMudarStatus) {
                 btnEntregar.visibility = View.GONE
             } else {
                 btnEntregar.visibility = View.VISIBLE
@@ -294,7 +315,6 @@ class EntregarTrabalhoActivity : BaseActivity() {
     }
 
     private fun mostrarOpcoesStatus(trabalhoId: String, statusAtual: String, container: LinearLayout) {
-        // ✅ Opções traduzidas capturadas ANTES do dialog
         val labelPendente = getString(R.string.status_pendente)
         val labelProgresso = getString(R.string.status_em_progresso)
         val labelConcluido = getString(R.string.status_concluido)

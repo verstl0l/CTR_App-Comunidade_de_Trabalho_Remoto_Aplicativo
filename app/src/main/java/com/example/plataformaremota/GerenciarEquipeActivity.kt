@@ -25,6 +25,9 @@ class GerenciarEquipeActivity : BaseActivity() {
     private var email: String = ""
     private var nomeUsuario: String = ""
 
+    // ✅ Cache de membros da equipe (pra usar no dropdown de participante)
+    private var membrosEquipe: List<Pair<String, String>> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gerenciar_equipe)
@@ -53,7 +56,6 @@ class GerenciarEquipeActivity : BaseActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
-        // ✅ Clicar no campo abre lista de usuários disponíveis
         edtEmailConvite.isFocusable = false
         edtEmailConvite.isClickable = true
         edtEmailConvite.setOnClickListener {
@@ -89,6 +91,7 @@ class GerenciarEquipeActivity : BaseActivity() {
                     carregarTrabalhos(equipeId!!)
                     carregarPedidos(equipeId!!)
                     carregarMembros(equipeId!!)
+                    carregarMembrosCache(equipeId!!)  // ✅ NOVO
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Erro ao carregar equipe: ${e.message}")
@@ -213,7 +216,6 @@ class GerenciarEquipeActivity : BaseActivity() {
                     equipeId?.let { id ->
                         lifecycleScope.launch {
                             try {
-                                // ✅ Grava histórico pra TODOS os membros ANTES de deletar (fire-and-forget)
                                 HistoricoEquipeHelper.registrarExclusaoParaTodosAsync(id)
 
                                 val trabalhos = db.collection("trabalhos").whereEqualTo("equipeId", id).get().await()
@@ -262,7 +264,30 @@ class GerenciarEquipeActivity : BaseActivity() {
         configurarBottomNavigation(R.id.nav_groups)
     }
 
+    // ✅ NOVO: carrega membros num cache local
+    private fun carregarMembrosCache(equipeId: String) {
+        lifecycleScope.launch {
+            try {
+                val snap = db.collection("membros_equipe")
+                    .whereEqualTo("equipeId", equipeId)
+                    .get()
+                    .await()
+
+                membrosEquipe = snap.documents.mapNotNull { doc ->
+                    val e = doc.getString("email") ?: return@mapNotNull null
+                    val n = doc.getString("nome") ?: e
+                    Pair(e, n)
+                }.sortedBy { it.second.lowercase() }
+
+                Log.d(TAG, "Membros carregados no cache: ${membrosEquipe.size}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Erro ao carregar cache de membros: ${e.message}")
+            }
+        }
+    }
+
     private fun carregarMembros(equipeId: String) {
+        // (mesmo código — sem alteração)
         val container = findViewById<LinearLayout>(R.id.containerMembros)
         container.removeAllViews()
 
@@ -389,7 +414,6 @@ class GerenciarEquipeActivity : BaseActivity() {
                                             .setPositiveButton(getString(R.string.gerenciar_remover_confirmar)) { _, _ ->
                                                 lifecycleScope.launch {
                                                     try {
-                                                        // ✅ Grava histórico ANTES de deletar (fire-and-forget)
                                                         HistoricoEquipeHelper.registrarSaidaAsync(
                                                             emailUsuario = emailMembro,
                                                             equipeId = equipeId,
@@ -422,6 +446,7 @@ class GerenciarEquipeActivity : BaseActivity() {
     }
 
     private fun carregarPedidos(equipeId: String) {
+        // (mesmo código — sem alteração)
         val container = findViewById<LinearLayout>(R.id.containerPedidos)
         container.removeAllViews()
 
@@ -483,7 +508,6 @@ class GerenciarEquipeActivity : BaseActivity() {
                                         val membroId = "${emailSol}_${equipeId}"
                                         db.collection("membros_equipe").document(membroId).set(membro).await()
 
-                                        // ✅ NOVO: registra entrada no histórico (fire-and-forget)
                                         HistoricoEquipeHelper.registrarEntradaAsync(
                                             emailUsuario = emailSol,
                                             equipeId = equipeId
@@ -576,6 +600,12 @@ class GerenciarEquipeActivity : BaseActivity() {
                     val categoria = doc.getString("categoria") ?: ""
                     val prazo = doc.getString("prazo") ?: ""
 
+                    // ✅ Lê o participante atual
+                    val participanteAtual = doc.getString("participanteEmail")
+                        ?: doc.getString("responsavelEmail")
+                        ?: ""
+                    val participanteNomeAtual = doc.getString("participanteNome") ?: ""
+
                     val view = inflater.inflate(R.layout.item_trabalho_gerenciar, container, false)
 
                     view.findViewById<TextView>(R.id.txtTituloGerenciar).text = titulo
@@ -625,8 +655,17 @@ class GerenciarEquipeActivity : BaseActivity() {
                         startActivity(intent)
                     }
 
+                    // ✅ Abertura do dialog com participante pré-selecionado
                     view.setOnClickListener {
-                        abrirDialogEditarTrabalho(trabalhoId, titulo, descricao, categoria, prazo)
+                        abrirDialogEditarTrabalho(
+                            trabalhoId,
+                            titulo,
+                            descricao,
+                            categoria,
+                            prazo,
+                            participanteAtual,
+                            participanteNomeAtual
+                        )
                     }
 
                     view.setOnLongClickListener {
@@ -667,12 +706,15 @@ class GerenciarEquipeActivity : BaseActivity() {
         }
     }
 
+    // ✅ Dialog atualizado com participante
     private fun abrirDialogEditarTrabalho(
         trabalhoId: String,
         tituloAtual: String,
         descricaoAtual: String,
         categoriaAtual: String,
-        prazoAtual: String
+        prazoAtual: String,
+        participanteAtual: String,
+        participanteNomeAtual: String
     ) {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -697,6 +739,42 @@ class GerenciarEquipeActivity : BaseActivity() {
             setTextColor(android.graphics.Color.parseColor("#1C1311"))
         }
 
+        // ✅ NOVO: Participante
+        var participanteEmail = participanteAtual
+        var participanteNome = participanteNomeAtual
+
+        val edtParticipante = EditText(this).apply {
+            hint = getString(R.string.criar_trabalho_hint_participante)
+            setText(participanteNomeAtual)
+            setTextColor(android.graphics.Color.parseColor("#1C1311"))
+            isFocusable = false
+            isClickable = true
+        }
+
+        edtParticipante.setOnClickListener {
+            if (membrosEquipe.isEmpty()) {
+                Toast.makeText(
+                    this,
+                    getString(R.string.criar_trabalho_equipe_sem_membros),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val nomes = membrosEquipe.map { "${it.second} (${it.first})" }.toTypedArray()
+
+            AlertDialog.Builder(this)
+                .setTitle(getString(R.string.criar_trabalho_selecionar_participante))
+                .setItems(nomes) { _, which ->
+                    val (email, nome) = membrosEquipe[which]
+                    participanteEmail = email
+                    participanteNome = nome
+                    edtParticipante.setText(nome)
+                }
+                .setNegativeButton(R.string.cancelar, null)
+                .show()
+        }
+
         val edtPrazo = EditText(this).apply {
             hint = getString(R.string.criar_trabalho_hint_prazo)
             setText(prazoAtual)
@@ -706,6 +784,7 @@ class GerenciarEquipeActivity : BaseActivity() {
         layout.addView(edtTitulo)
         layout.addView(edtDescricao)
         layout.addView(edtCategoria)
+        layout.addView(edtParticipante)  // ✅ NOVO
         layout.addView(edtPrazo)
 
         AlertDialog.Builder(this)
@@ -722,6 +801,15 @@ class GerenciarEquipeActivity : BaseActivity() {
                     return@setPositiveButton
                 }
 
+                if (participanteEmail.isEmpty()) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.criar_trabalho_selecione_participante),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
                 lifecycleScope.launch {
                     try {
                         db.collection("trabalhos").document(trabalhoId)
@@ -730,7 +818,10 @@ class GerenciarEquipeActivity : BaseActivity() {
                                     "titulo" to novoTitulo,
                                     "descricao" to novaDescricao,
                                     "categoria" to novaCategoria,
-                                    "prazo" to novoPrazo
+                                    "prazo" to novoPrazo,
+                                    "participanteEmail" to participanteEmail,
+                                    "participanteNome" to participanteNome,
+                                    "responsavelEmail" to participanteEmail  // compatibilidade
                                 )
                             ).await()
 

@@ -208,6 +208,10 @@
             android:name=".HistoricoTrabalhoDetalhesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".HistoricoTrabalhosActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

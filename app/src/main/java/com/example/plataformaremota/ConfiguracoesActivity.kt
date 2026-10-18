@@ -59,7 +59,7 @@ class ConfiguracoesActivity : BaseActivity() {
         // HISTÓRICO DE TRABALHOS
         // ============================================================
         findViewById<LinearLayout>(R.id.btnHistoricoTrabalhosConfig).setOnClickListener {
-            startActivity(Intent(this, HistoricoTrabalhoDetalhesActivity::class.java))
+            startActivity(Intent(this, HistoricoTrabalhosActivity::class.java))
         }
 
         // ============================================================

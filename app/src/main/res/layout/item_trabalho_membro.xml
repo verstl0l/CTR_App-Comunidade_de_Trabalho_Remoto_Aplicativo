@@ -25,7 +25,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Titulo do Trabalho"
+                android:text="@string/meus_trabalhos_item_titulo_placeholder"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -37,11 +37,22 @@
                 android:background="@color/bg_surface_hover"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
-                android:text="Em Progresso"
+                android:text="@string/status_em_progresso"
                 android:textColor="@color/accent"
                 android:textSize="11sp" />
 
         </LinearLayout>
+
+        <!-- ✅ NOVO: Participante -->
+        <TextView
+            android:id="@+id/txtParticipanteTrabalhoMembro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/entregar_participante"
+            android:textColor="@color/accent"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <!-- Prazo -->
         <TextView
@@ -49,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Entrega: 18 Out"
+            android:text="@string/meus_trabalhos_prazo_placeholder"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
@@ -59,7 +70,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Descricao do trabalho..."
+            android:text="@string/meus_trabalhos_descricao_placeholder"
             android:textColor="@color/text_tertiary"
             android:textSize="14sp" />
 
@@ -112,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:backgroundTint="@color/accent"
-                android:text="INICIAR"
+                android:text="@string/entregar_btn_iniciar"
                 android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
 

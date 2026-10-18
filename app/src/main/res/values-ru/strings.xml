@@ -783,6 +783,40 @@
     <string name="historico_trabalho_qtd_comentarios">💬 %1$d</string>
     <string name="historico_trabalho_qtd_anexos">📎 %1$d</string>
 
+    <string name="historico_equipes_status_ativo">АКТИВНО</string>
+    <string name="historico_equipes_ativo_msg">Вы сейчас в этой команде</string>
+
+    <string name="criar_trabalho_hint_participante">Участник</string>
+    <string name="criar_trabalho_selecionar_participante">Выбрать участника</string>
+    <string name="criar_trabalho_selecione_participante">Выберите участника</string>
+    <string name="criar_trabalho_equipe_sem_membros">В команде нет участников</string>
+
+    <string name="criar_trabalho_notif_participante_titulo">Новая задача: %1$s</string>
+    <string name="criar_trabalho_notif_participante_msg">%1$s назначил вам задачу в %2$s</string>
+
+    <string name="anexos_sem_permissao">Только создатель или участник может добавлять вложения</string>
+
+    <string name="entregar_participante_fallback">Нет участника</string>
+    <string name="entregar_participante_formatado">👤 %1$s</string>
+
+    <string name="historico_trabalhos_titulo">История задач</string>
+    <string name="historico_trabalhos_vazio_titulo">В истории нет задач</string>
+    <string name="historico_trabalhos_vazio_subtitulo">Задачи, которые вы создали или в которых участвовали, отображаются здесь</string>
+    <string name="historico_trabalhos_inativa">Неактивная команда</string>
+
+    <string name="anexo_privacidade_titulo">Конфиденциальность файла</string>
+    <string name="anexo_privacidade_msg">Этот файл конфиденциален?</string>
+    <string name="anexo_privacidade_sim">Да</string>
+    <string name="anexo_privacidade_nao">Нет</string>
+
+    <string name="anexo_privado_ok_titulo">Конфиденциальное вложение</string>
+    <string name="anexo_privado_ok_msg">Нажмите ОК, чтобы оставить вложение конфиденциальным. Доступ будет только у вас, владельца команды и участников задачи.</string>
+    <string name="anexo_privado_ok_confirmar">ОК</string>
+
+    <string name="anexo_privado_nome">Конфиденциальный файл</string>
+    <string name="anexo_privado_info">Защищено · %1$s</string>
+    <string name="anexo_privado_aviso">Доступ только для участников задачи</string>
+
     <!-- ===== HISTORICO TRABALHO DETALHES ===== -->
     <string name="historico_trabalho_comentarios_titulo">Комментарии</string>
     <string name="historico_trabalho_anexos_titulo">Вложения</string>

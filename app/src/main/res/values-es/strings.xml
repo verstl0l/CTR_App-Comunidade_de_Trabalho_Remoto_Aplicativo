@@ -840,6 +840,40 @@
     <string name="historico_trabalho_qtd_comentarios">💬 %1$d</string>
     <string name="historico_trabalho_qtd_anexos">📎 %1$d</string>
 
+    <string name="historico_equipes_status_ativo">ACTIVO</string>
+    <string name="historico_equipes_ativo_msg">Actualmente estás en este equipo</string>
+
+    <string name="criar_trabalho_hint_participante">Participante</string>
+    <string name="criar_trabalho_selecionar_participante">Seleccionar participante</string>
+    <string name="criar_trabalho_selecione_participante">Selecciona un participante</string>
+    <string name="criar_trabalho_equipe_sem_membros">Ningún miembro en el equipo</string>
+
+    <string name="criar_trabalho_notif_participante_titulo">Nueva tarea: %1$s</string>
+    <string name="criar_trabalho_notif_participante_msg">%1$s te asignó una tarea en %2$s</string>
+
+    <string name="anexos_sem_permissao">Solo el creador o participante puede añadir adjuntos</string>
+
+    <string name="entregar_participante_fallback">Sin participante</string>
+    <string name="entregar_participante_formatado">👤 %1$s</string>
+
+    <string name="historico_trabalhos_titulo">Historial de Tareas</string>
+    <string name="historico_trabalhos_vazio_titulo">Ninguna tarea en el historial</string>
+    <string name="historico_trabalhos_vazio_subtitulo">Las tareas que creaste o en las que participaste aparecen aquí</string>
+    <string name="historico_trabalhos_inativa">Equipo Inactivo</string>
+
+    <string name="anexo_privacidade_titulo">Confidencialidad del archivo</string>
+    <string name="anexo_privacidade_msg">¿Este archivo es confidencial?</string>
+    <string name="anexo_privacidade_sim">Sí</string>
+    <string name="anexo_privacidade_nao">No</string>
+
+    <string name="anexo_privado_ok_titulo">Adjunto confidencial</string>
+    <string name="anexo_privado_ok_msg">Toca OK para mantener el adjunto privado. Solo tú, el dueño del equipo y las personas involucradas en la tarea podrán acceder.</string>
+    <string name="anexo_privado_ok_confirmar">OK</string>
+
+    <string name="anexo_privado_nome">Archivo Confidencial</string>
+    <string name="anexo_privado_info">Protegido · %1$s</string>
+    <string name="anexo_privado_aviso">Acceso restringido a los involucrados en la tarea</string>
+
     <!-- ===== HISTORICO TRABALHO DETALHES ===== -->
     <string name="historico_trabalho_comentarios_titulo">Comentarios</string>
     <string name="historico_trabalho_anexos_titulo">Adjuntos</string>

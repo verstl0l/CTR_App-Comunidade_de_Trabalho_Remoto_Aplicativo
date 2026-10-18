@@ -39,13 +39,21 @@ class AnexosTrabalhoActivity : BaseActivity() {
     private var tituloTrabalho: String = ""
     private var equipeId: String = ""
 
-    // Launcher para selecionar arquivo
+    // ✅ Controle de quem pode anexar
+    private var podeAnexar: Boolean = false
+
+    // ✅ NOVO: dados do trabalho pra checar visibilidade de anexos privados
+    private var criadorTrabalho: String = ""
+    private var participanteTrabalho: String = ""
+    private var donoEquipe: String = ""
+
+    // Launcher
     private val selecionarArquivo = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri = result.data?.data
-            if (uri != null) fazerUpload(uri)
+            if (uri != null) perguntarPrivacidade(uri)
         }
     }
 
@@ -74,9 +82,7 @@ class AnexosTrabalhoActivity : BaseActivity() {
         txtTitulo.text = tituloTrabalho
 
         val btnAdicionar = findViewById<Button>(R.id.btnAdicionarAnexo)
-        btnAdicionar.setOnClickListener { abrirSeletorArquivo() }
 
-        // Carrega o nome do usuario e a equipeId
         lifecycleScope.launch {
             try {
                 val userDoc = db.collection("usuarios").document(emailUsuario).get().await()
@@ -84,6 +90,30 @@ class AnexosTrabalhoActivity : BaseActivity() {
 
                 val trabalhoDoc = db.collection("trabalhos").document(trabalhoId).get().await()
                 equipeId = trabalhoDoc.getString("equipeId") ?: ""
+
+                criadorTrabalho = trabalhoDoc.getString("criadorEmail") ?: ""
+                participanteTrabalho = trabalhoDoc.getString("participanteEmail")
+                    ?: trabalhoDoc.getString("responsavelEmail")
+                            ?: ""
+
+                // Dono da equipe
+                try {
+                    val eqDoc = db.collection("equipes").document(equipeId).get().await()
+                    donoEquipe = eqDoc.getString("criadorEmail") ?: ""
+                } catch (e: Exception) {
+                    Log.e("ANEXOS", "Erro ao carregar dono: ${e.message}")
+                }
+
+                podeAnexar = criadorTrabalho.equals(emailUsuario, ignoreCase = true) ||
+                        participanteTrabalho.equals(emailUsuario, ignoreCase = true)
+
+                if (podeAnexar) {
+                    btnAdicionar.visibility = View.VISIBLE
+                    btnAdicionar.setOnClickListener { abrirSeletorArquivo() }
+                } else {
+                    btnAdicionar.visibility = View.GONE
+                }
+
             } catch (e: Exception) {
                 Log.e("ANEXOS", "Erro ao carregar dados: ${e.message}")
             }
@@ -93,7 +123,34 @@ class AnexosTrabalhoActivity : BaseActivity() {
     }
 
     // ============================================================
-    // CARREGAR LISTA DE ANEXOS
+    // FLUXO DE PRIVACIDADE (2 dialogs)
+    // ============================================================
+    private fun perguntarPrivacidade(uri: Uri) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.anexo_privacidade_titulo))
+            .setMessage(getString(R.string.anexo_privacidade_msg))
+            .setPositiveButton(getString(R.string.anexo_privacidade_sim)) { _, _ ->
+                confirmarPrivado(uri)
+            }
+            .setNegativeButton(getString(R.string.anexo_privacidade_nao)) { _, _ ->
+                fazerUpload(uri, privado = false)
+            }
+            .show()
+    }
+
+    private fun confirmarPrivado(uri: Uri) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.anexo_privado_ok_titulo))
+            .setMessage(getString(R.string.anexo_privado_ok_msg))
+            .setPositiveButton(getString(R.string.anexo_privado_ok_confirmar)) { _, _ ->
+                fazerUpload(uri, privado = true)
+            }
+            .setNegativeButton(getString(R.string.cancelar), null)
+            .show()
+    }
+
+    // ============================================================
+    // CARREGAR LISTA
     // ============================================================
     private fun carregarAnexos() {
         val container = findViewById<LinearLayout>(R.id.containerAnexos)
@@ -127,6 +184,13 @@ class AnexosTrabalhoActivity : BaseActivity() {
                     val enviadoPor = doc.getString("enviadoPor") ?: ""
                     val nomeEnviadoPor = doc.getString("nomeEnviadoPor") ?: getString(R.string.usuario_padrao)
                     val enviadoEm = doc.getLong("enviadoEm") ?: 0L
+                    val privado = doc.getBoolean("privado") ?: false
+
+                    // ✅ Lógica de visibilidade
+                    val podeVerArquivo = podeVerAnexo(
+                        enviadoPor = enviadoPor,
+                        privado = privado
+                    )
 
                     val view = inflater.inflate(R.layout.item_anexo, container, false)
 
@@ -137,23 +201,49 @@ class AnexosTrabalhoActivity : BaseActivity() {
                     val txtData = view.findViewById<TextView>(R.id.txtDataAnexo)
                     val btnMenu = view.findViewById<Button>(R.id.btnMenuAnexo)
 
-                    txtNome.text = nome
-                    txtInfo.text = getString(
-                        R.string.anexo_info_formato,
-                        AnexoHelper.formatarTamanho(tamanho),
-                        nomeEnviadoPor
-                    )
-                    txtData.text = formatarDataRelativa(enviadoEm)
+                    if (podeVerArquivo) {
+                        // Mostra o arquivo normal
+                        txtNome.text = nome
+                        txtInfo.text = getString(
+                            R.string.anexo_info_formato,
+                            AnexoHelper.formatarTamanho(tamanho),
+                            nomeEnviadoPor
+                        )
+                        txtData.text = formatarDataRelativa(enviadoEm)
+                        configurarIcone(cardIcone, txtIcone, tipo)
 
-                    configurarIcone(cardIcone, txtIcone, tipo)
+                        view.setOnClickListener {
+                            abrirOuBaixar(url, mimeType, nome, tipo)
+                        }
 
-                    view.setOnClickListener {
-                        abrirOuBaixar(url, mimeType, nome, tipo)
-                    }
+                        btnMenu.setOnClickListener {
+                            val podeRemover = enviadoPor == emailUsuario || podeAnexar
+                            mostrarMenuAnexo(anexoId, url, mimeType, nome, tipo, podeRemover)
+                        }
+                    } else {
+                        // Arquivo privado de terceiro — esconde o conteúdo
+                        txtNome.text = getString(R.string.anexo_privado_nome)
+                        txtInfo.text = getString(R.string.anexo_privado_info, nomeEnviadoPor)
+                        txtData.text = formatarDataRelativa(enviadoEm)
 
-                    btnMenu.setOnClickListener {
-                        val podeRemover = enviadoPor == emailUsuario
-                        mostrarMenuAnexo(anexoId, url, mimeType, nome, tipo, podeRemover)
+                        // Ícone de "cadeado"
+                        txtIcone.text = "🔒"
+                        cardIcone.setCardBackgroundColor(
+                            ContextCompat.getColor(this@AnexosTrabalhoActivity, R.color.bg_surface_hover)
+                        )
+                        txtIcone.setTextColor(
+                            ContextCompat.getColor(this@AnexosTrabalhoActivity, R.color.text_secondary)
+                        )
+
+                        view.setOnClickListener {
+                            Toast.makeText(
+                                this@AnexosTrabalhoActivity,
+                                getString(R.string.anexo_privado_aviso),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        btnMenu.visibility = View.GONE
                     }
 
                     container.addView(view)
@@ -166,14 +256,34 @@ class AnexosTrabalhoActivity : BaseActivity() {
     }
 
     // ============================================================
-    // CONFIGURAR ICONE POR TIPO
+    // REGRA DE VISIBILIDADE
+    // ============================================================
+    private fun podeVerAnexo(enviadoPor: String, privado: Boolean): Boolean {
+        if (!privado) return true // não-privado: todos veem
+
+        // Privado: quem enviou sempre vê
+        if (enviadoPor.equals(emailUsuario, ignoreCase = true)) return true
+
+        // Dono da equipe sempre vê
+        if (donoEquipe.equals(emailUsuario, ignoreCase = true)) return true
+
+        // Criador do trabalho vê
+        if (criadorTrabalho.equals(emailUsuario, ignoreCase = true)) return true
+
+        // Participante do trabalho vê
+        if (participanteTrabalho.equals(emailUsuario, ignoreCase = true)) return true
+
+        return false
+    }
+
+    // ============================================================
+    // CONFIGURAR ICONE
     // ============================================================
     private fun configurarIcone(
         cardIcone: com.google.android.material.card.MaterialCardView,
         txtIcone: TextView,
         tipo: String
     ) {
-        // Siglas internacionais — NÃO TRADUZIR
         val texto = when (tipo) {
             "pdf" -> "PDF"
             "imagem" -> "IMG"
@@ -197,19 +307,26 @@ class AnexosTrabalhoActivity : BaseActivity() {
     }
 
     // ============================================================
-    // SELECIONAR ARQUIVO
+    // SELECIONAR / FAZER UPLOAD
     // ============================================================
     private fun abrirSeletorArquivo() {
+        if (!podeAnexar) {
+            Toast.makeText(this, getString(R.string.anexos_sem_permissao), Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         selecionarArquivo.launch(intent)
     }
 
-    // ============================================================
-    // FAZER UPLOAD
-    // ============================================================
-    private fun fazerUpload(uri: Uri) {
+    private fun fazerUpload(uri: Uri, privado: Boolean) {
+        if (!podeAnexar) {
+            Toast.makeText(this, getString(R.string.anexos_sem_permissao), Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val containerProgresso = findViewById<LinearLayout>(R.id.containerProgresso)
         val txtStatus = findViewById<TextView>(R.id.txtProgressoStatus)
         val progressBar = findViewById<ProgressBar>(R.id.progressUpload)
@@ -224,6 +341,7 @@ class AnexosTrabalhoActivity : BaseActivity() {
             uri = uri,
             emailUsuario = emailUsuario,
             nomeUsuario = nomeUsuario,
+            privado = privado,  // ✅ NOVO
             onProgress = { progresso ->
                 runOnUiThread {
                     progressBar.progress = (progresso * 100).toInt()
@@ -240,18 +358,14 @@ class AnexosTrabalhoActivity : BaseActivity() {
             onErro = { erro ->
                 runOnUiThread {
                     containerProgresso.visibility = View.GONE
-                    Toast.makeText(
-                        this,
-                        getString(R.string.erro_generico, erro),
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, getString(R.string.erro_generico, erro), Toast.LENGTH_LONG).show()
                 }
             }
         )
     }
 
     // ============================================================
-    // NOTIFICAR MEMBROS DA EQUIPE
+    // NOTIFICAR
     // ============================================================
     private fun notificarMembros() {
         if (equipeId.isEmpty()) return
@@ -286,7 +400,7 @@ class AnexosTrabalhoActivity : BaseActivity() {
     }
 
     // ============================================================
-    // MENU DE ACOES DO ANEXO
+    // MENU / ABRIR / BAIXAR / REMOVER
     // ============================================================
     private fun mostrarMenuAnexo(
         anexoId: String,
@@ -317,9 +431,6 @@ class AnexosTrabalhoActivity : BaseActivity() {
             .show()
     }
 
-    // ============================================================
-    // ABRIR / BAIXAR
-    // ============================================================
     private fun abrirOuBaixar(url: String, mimeType: String, nome: String, tipo: String) {
         if (tipo in listOf("imagem", "video", "pdf")) {
             abrirArquivo(url, mimeType, nome)
@@ -363,11 +474,7 @@ class AnexosTrabalhoActivity : BaseActivity() {
 
             Toast.makeText(this, getString(R.string.anexo_baixando), Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(
-                this,
-                getString(R.string.erro_generico, e.message ?: ""),
-                Toast.LENGTH_LONG
-            ).show()
+            Toast.makeText(this, getString(R.string.erro_generico, e.message ?: ""), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -386,9 +493,6 @@ class AnexosTrabalhoActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // REMOVER
-    // ============================================================
     private fun confirmarRemocao(anexoId: String, nome: String) {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.anexo_remover_titulo))
@@ -397,18 +501,10 @@ class AnexosTrabalhoActivity : BaseActivity() {
                 lifecycleScope.launch {
                     val ok = AnexoHelper.removerAnexo(trabalhoId, anexoId)
                     if (ok) {
-                        Toast.makeText(
-                            this@AnexosTrabalhoActivity,
-                            getString(R.string.anexo_removido),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@AnexosTrabalhoActivity, getString(R.string.anexo_removido), Toast.LENGTH_SHORT).show()
                         carregarAnexos()
                     } else {
-                        Toast.makeText(
-                            this@AnexosTrabalhoActivity,
-                            getString(R.string.anexo_erro_remover),
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Toast.makeText(this@AnexosTrabalhoActivity, getString(R.string.anexo_erro_remover), Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -417,7 +513,7 @@ class AnexosTrabalhoActivity : BaseActivity() {
     }
 
     // ============================================================
-    // FORMATAR DATA RELATIVA
+    // FORMATAR DATA
     // ============================================================
     private fun formatarDataRelativa(timestamp: Long): String {
         if (timestamp == 0L) return ""

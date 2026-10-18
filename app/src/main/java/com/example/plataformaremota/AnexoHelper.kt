@@ -17,14 +17,9 @@ import kotlinx.coroutines.withContext
  *
  * Estrutura no Firestore:
  *   trabalhos/{trabalhoId}/anexos/{anexoId}
- *     - nome: "briefing.pdf"
- *     - url: "https://res.cloudinary.com/..."
- *     - tipo: "pdf" | "imagem" | "video" | "outro"   (CHAVES DE BANCO — NÃO TRADUZIR)
- *     - mimeType: "application/pdf"
- *     - tamanho: 1234567
- *     - enviadoPor: "ana@x.com"
- *     - nomeEnviadoPor: "Ana"
- *     - enviadoEm: 1234567890
+ *     - nome, url, tipo, mimeType, tamanho
+ *     - enviadoPor, nomeEnviadoPor, enviadoEm
+ *     - privado: Boolean   ← NOVO (se true, só certos usuários veem)
  */
 object AnexoHelper {
 
@@ -43,6 +38,7 @@ object AnexoHelper {
         uri: Uri,
         emailUsuario: String,
         nomeUsuario: String,
+        privado: Boolean = false,   // ✅ NOVO
         onProgress: (Double) -> Unit = {},
         onSucesso: (String) -> Unit,
         onErro: (String) -> Unit
@@ -82,7 +78,7 @@ object AnexoHelper {
             .option("folder", "anexos_trabalhos/")
             .callback(object : com.cloudinary.android.callback.UploadCallback {
                 override fun onStart(requestId: String?) {
-                    Log.d(TAG, "Iniciando upload de $nomeFinal")
+                    Log.d(TAG, "Iniciando upload de $nomeFinal (privado=$privado)")
                 }
 
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
@@ -108,13 +104,14 @@ object AnexoHelper {
                                 "tamanho" to tamanhoFinal,
                                 "enviadoPor" to emailUsuario,
                                 "nomeEnviadoPor" to nomeUsuario,
-                                "enviadoEm" to System.currentTimeMillis()
+                                "enviadoEm" to System.currentTimeMillis(),
+                                "privado" to privado  // ✅ NOVO
                             )
 
                             val anexoId = db.collection("trabalhos").document(trabalhoId)
                                 .collection("anexos").add(anexo).await().id
 
-                            Log.d(TAG, "Anexo criado: $anexoId")
+                            Log.d(TAG, "Anexo criado: $anexoId (privado=$privado)")
 
                             withContext(Dispatchers.Main) {
                                 onSucesso(anexoId)
@@ -161,7 +158,6 @@ object AnexoHelper {
     // HELPERS
     // ============================================================
 
-    // ⚠️ Retorna chaves de banco — NÃO TRADUZIR (quebra dados existentes)
     internal fun detectarTipo(mimeType: String): String {
         return when {
             mimeType.startsWith("image/") -> "imagem"
@@ -177,7 +173,6 @@ object AnexoHelper {
         }
     }
 
-    // Unidades B/KB/MB/GB são padrão internacional, mantidas fixas
     fun formatarTamanho(bytes: Long): String {
         return when {
             bytes < 1024 -> "$bytes B"

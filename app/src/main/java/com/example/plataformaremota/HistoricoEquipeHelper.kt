@@ -334,7 +334,25 @@ object HistoricoEquipeHelper {
                 .document(trabalhoId)
                 .collection(subcolecao)
 
-            snap.documents.chunked(LIMITE_BATCH).forEach { chunk ->
+            // ✅ NOVO: se for "anexos", filtra anexos privados de outros
+            val docsFiltrados = if (subcolecao == "anexos") {
+                snap.documents.filter { doc ->
+                    val privado = doc.getBoolean("privado") ?: false
+                    val enviadoPor = doc.getString("enviadoPor") ?: ""
+
+                    // Copia se: não é privado OU foi ele que enviou
+                    !privado || enviadoPor == emailUsuario
+                }
+            } else {
+                snap.documents
+            }
+
+            if (docsFiltrados.isEmpty()) {
+                Log.d(TAG, "  $subcolecao: nenhum doc pra copiar (todos privados de terceiros)")
+                return
+            }
+
+            docsFiltrados.chunked(LIMITE_BATCH).forEach { chunk ->
                 val batch = db.batch()
                 chunk.forEach { doc ->
                     val dados = doc.data ?: return@forEach
@@ -344,7 +362,7 @@ object HistoricoEquipeHelper {
                 batch.commit().await()
             }
 
-            Log.d(TAG, "  $subcolecao copiados: ${snap.size()}")
+            Log.d(TAG, "  $subcolecao copiados: ${docsFiltrados.size} (de ${snap.size()})")
 
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao copiar $subcolecao: ${e.message}")
