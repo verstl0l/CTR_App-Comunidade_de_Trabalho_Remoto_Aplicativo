@@ -19,7 +19,7 @@
             android:id="@+id/txtNomeEquipeItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nome da Equipe"
+            android:text="@string/buscar_equipes_item_nome_placeholder"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Descrição"
+            android:text="@string/buscar_equipes_item_descricao_placeholder"
             android:textColor="#9E9E9E"
             android:textSize="14sp" />
 
@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Criado por..."
+            android:text="@string/buscar_equipes_criado_por_placeholder"
             android:textColor="#9E9E9E"
             android:textSize="12sp" />
 
@@ -51,7 +51,7 @@
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
             android:backgroundTint="#F5E6D0"
-            android:text="PEDIR PARA ENTRAR"
+            android:text="@string/buscar_equipes_btn_pedir_entrar"
             android:textColor="#1C1311"
             android:textStyle="bold" />
 

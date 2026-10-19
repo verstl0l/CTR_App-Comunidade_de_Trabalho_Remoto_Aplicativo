@@ -17,12 +17,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-/**
- * Tela que mostra TODOS os trabalhos do usuario logado,
- * em todas as equipes que ele pertence.
- *
- * Filtros: Todos | Pendente | Em Progresso | Concluido
- */
 class MeusTrabalhosActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -83,18 +77,18 @@ class MeusTrabalhosActivity : BaseActivity() {
     private fun carregarTrabalhos() {
         lifecycleScope.launch {
             try {
+                // 1. Equipes que o usuário é membro
                 val membros = db.collection("membros_equipe")
                     .whereEqualTo("email", emailUsuario)
                     .get()
                     .await()
-
                 val equipesIds = membros.documents.mapNotNull { it.getString("equipeId") }
 
+                // 2. Equipes que o usuário criou (dono)
                 val equipesCriador = db.collection("equipes")
                     .whereEqualTo("criadorEmail", emailUsuario)
                     .get()
                     .await()
-
                 val equipesCriadorIds = equipesCriador.documents.map { it.id }
 
                 val todasEquipesIds = (equipesIds + equipesCriadorIds).distinct()
@@ -107,7 +101,6 @@ class MeusTrabalhosActivity : BaseActivity() {
 
                 val trabalhos = mutableListOf<TrabalhoItem>()
 
-                // ✅ Captura fallbacks traduzidos UMA VEZ
                 val fallbackEquipe = getString(R.string.meus_trabalhos_equipe_fallback)
                 val fallbackSemTitulo = getString(R.string.meus_trabalhos_sem_titulo)
                 val fallbackSemDescricao = getString(R.string.meus_trabalhos_sem_descricao)
@@ -120,10 +113,13 @@ class MeusTrabalhosActivity : BaseActivity() {
                         .await()
 
                     snap.documents.forEach { doc ->
+                        // ✅ NOVO: Lê o participante também
                         val responsavel = doc.getString("responsavelEmail") ?: ""
                         val criador = doc.getString("criadorEmail") ?: ""
+                        val participante = doc.getString("participanteEmail") ?: ""
 
-                        if (responsavel == emailUsuario || criador == emailUsuario) {
+                        // ✅ Filtra: criador, participante ou responsável
+                        if (responsavel == emailUsuario || criador == emailUsuario || participante == emailUsuario) {
                             val equipeDoc = db.collection("equipes")
                                 .document(doc.getString("equipeId") ?: "")
                                 .get().await()
@@ -177,11 +173,9 @@ class MeusTrabalhosActivity : BaseActivity() {
         containerVazio.visibility = View.GONE
         val inflater = LayoutInflater.from(this)
 
-        // ✅ Captura labels traduzidos ANTES do loop
         val labelPendente = getString(R.string.status_pendente)
         val labelEmProgresso = getString(R.string.status_em_progresso)
         val labelConcluido = getString(R.string.status_concluido)
-        val prefixoEntrega = getString(R.string.meus_trabalhos_entrega_prefixo)
 
         filtrados.forEach { trabalho ->
             val view = inflater.inflate(R.layout.item_meu_trabalho, container, false)
@@ -208,8 +202,11 @@ class MeusTrabalhosActivity : BaseActivity() {
                 }
             }
 
+            // ✅ NOVO: Abre a tela de Comentários daquele trabalho específico
             view.setOnClickListener {
-                val intent = Intent(this, EntregarTrabalhoActivity::class.java)
+                val intent = Intent(this, ComentariosTrabalhoActivity::class.java)
+                intent.putExtra("trabalhoId", trabalho.id)
+                intent.putExtra("tituloTrabalho", trabalho.titulo)
                 intent.putExtra("equipeId", trabalho.equipeId)
                 startActivity(intent)
             }

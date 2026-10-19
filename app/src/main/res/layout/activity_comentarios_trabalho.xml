@@ -52,6 +52,15 @@
 
         </LinearLayout>
 
+        <!-- ✅ NOVO: Botão para ir aos Anexos -->
+        <ImageButton
+            android:id="@+id/btnIrParaAnexos"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_notification_trabalho"
+            app:tint="@color/text_primary" />
+
     </LinearLayout>
 
     <ScrollView

@@ -886,6 +886,27 @@
     <string name="chat_placeholder_mensagem">消息</string>
     <string name="chat_placeholder_usuario">用户</string>
 
+    <string name="convite_icone_desc">邀请</string>
+    <string name="convite_titulo">团队邀请</string>
+    <string name="convite_convidado_por">邀请人</string>
+    <string name="convite_convidado_por_placeholder">邀请人</string>
+    <string name="convite_label_equipe">团队</string>
+    <string name="convite_nome_equipe_placeholder">团队名称</string>
+    <string name="convite_label_descricao">描述</string>
+    <string name="convite_descricao_placeholder">团队描述</string>
+    <string name="convite_btn_aceitar">接受邀请</string>
+    <string name="convite_btn_recusar">拒绝</string>
+    <string name="convite_btn_depois">稍后</string>
+
+    <string name="convite_item_btn_aceitar">接受邀请</string>
+    <string name="convite_item_btn_recusar">拒绝</string>
+
+    <string name="buscar_equipes_item_nome_placeholder">团队名称</string>
+    <string name="buscar_equipes_item_descricao_placeholder">描述</string>
+    <string name="buscar_equipes_criado_por_placeholder">创建者…</string>
+    <string name="buscar_equipes_btn_pedir_entrar">申请加入</string>
+    <string name="minhas_equipes_qtd_trabalhos_placeholder">0 个任务</string>
+
     <!-- ===== 对话项 ===== -->
     <string name="item_conversa_icone_usuario">👤</string>
     <string name="item_conversa_ultima_msg_placeholder">最后一条消息</string>

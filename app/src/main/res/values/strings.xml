@@ -862,6 +862,29 @@
     <string name="item_trabalho_info_formato">%1$s - %2$s</string>
     <string name="produtividade_item_zero">0</string>
 
+    <!-- ===== CONVITE ===== -->
+    <string name="convite_icone_desc">Convite</string>
+    <string name="convite_titulo">Convite de Equipe</string>
+    <string name="convite_convidado_por">Convidado por</string>
+    <string name="convite_convidado_por_placeholder">Convidado por</string>
+    <string name="convite_label_equipe">EQUIPE</string>
+    <string name="convite_nome_equipe_placeholder">Nome da Equipe</string>
+    <string name="convite_label_descricao">DESCRIÇÃO</string>
+    <string name="convite_descricao_placeholder">Descrição da equipe</string>
+    <string name="convite_btn_aceitar">ACEITAR CONVITE</string>
+    <string name="convite_btn_recusar">RECUSAR</string>
+    <string name="convite_btn_depois">Depois</string>
+
+    <string name="convite_item_btn_aceitar">Aceitar Convite</string>
+    <string name="convite_item_btn_recusar">Recusar</string>
+
+    <!-- ===== ITENS DE EQUIPE ===== -->
+    <string name="buscar_equipes_item_nome_placeholder">Nome da Equipe</string>
+    <string name="buscar_equipes_item_descricao_placeholder">Descrição</string>
+    <string name="buscar_equipes_criado_por_placeholder">Criado por…</string>
+    <string name="buscar_equipes_btn_pedir_entrar">PEDIR PARA ENTRAR</string>
+    <string name="minhas_equipes_qtd_trabalhos_placeholder">0 trabalhos</string>
+
     <!-- ===== CHAT HUB ===== -->
     <string name="chat_hub_titulo">Chat da Equipe</string>
     <string name="chat_hub_secao_geral">GERAL</string>

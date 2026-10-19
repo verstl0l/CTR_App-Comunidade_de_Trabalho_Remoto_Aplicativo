@@ -880,6 +880,27 @@
     <string name="historico_trabalho_sem_comentarios">Sin comentarios en esta tarea</string>
     <string name="historico_trabalho_sem_anexos">Sin adjuntos en esta tarea</string>
 
+    <string name="convite_icone_desc">Invitación</string>
+    <string name="convite_titulo">Invitación de Equipo</string>
+    <string name="convite_convidado_por">Invitado por</string>
+    <string name="convite_convidado_por_placeholder">Invitado por</string>
+    <string name="convite_label_equipe">EQUIPO</string>
+    <string name="convite_nome_equipe_placeholder">Nombre del Equipo</string>
+    <string name="convite_label_descricao">DESCRIPCIÓN</string>
+    <string name="convite_descricao_placeholder">Descripción del equipo</string>
+    <string name="convite_btn_aceitar">ACEPTAR INVITACIÓN</string>
+    <string name="convite_btn_recusar">RECHAZAR</string>
+    <string name="convite_btn_depois">Después</string>
+
+    <string name="convite_item_btn_aceitar">Aceptar Invitación</string>
+    <string name="convite_item_btn_recusar">Rechazar</string>
+
+    <string name="buscar_equipes_item_nome_placeholder">Team Name</string>
+    <string name="buscar_equipes_item_descricao_placeholder">Description</string>
+    <string name="buscar_equipes_criado_por_placeholder">Created by…</string>
+    <string name="buscar_equipes_btn_pedir_entrar">REQUEST TO JOIN</string>
+    <string name="minhas_equipes_qtd_trabalhos_placeholder">0 tasks</string>
+
     <!-- ===== CHAT DE GRUPO ===== -->
     <string name="chat_grupo_sair_titulo">Salir del grupo</string>
     <string name="chat_grupo_sair_msg">¿Estás seguro?</string>

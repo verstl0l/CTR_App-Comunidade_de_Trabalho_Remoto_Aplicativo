@@ -10,26 +10,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-/**
- * Helper central para gravar histórico de equipes.
- *
- * Regras:
- *  - AO ENTRAR: cria/atualiza doc com status="ativo"
- *  - AO SAIR: atualiza status="inativo" + copia trabalhos (acumula)
- *  - Se reentrar: volta status="ativo" e MANTÉM os trabalhos antigos
- *
- * Doc:
- *  historico_equipes/{email}/equipes/{equipeId}
- *    - equipeId, nomeEquipe, descricaoEquipe
- *    - papel: "dono" | "admin" | "membro"
- *    - entrouEm: Timestamp
- *    - saiuEm: Timestamp | null
- *    - motivoSaida: string | null
- *    - status: "ativo" | "inativo"
- *
- * ⚠️ Usa um CoroutineScope próprio (SupervisorJob + IO) para que as
- * operações NÃO sejam canceladas quando a Activity que chamou for finalizada.
- */
 object HistoricoEquipeHelper {
 
     private const val TAG = "HISTORICO_EQUIPE"
@@ -38,71 +18,22 @@ object HistoricoEquipeHelper {
     private val db: FirebaseFirestore
         get() = FirebaseFirestore.getInstance()
 
-    /**
-     * ✅ Scope próprio — NÃO é cancelado quando a Activity fecha.
-     * Roda em IO (background). SupervisorJob garante que um erro numa
-     * coroutine não cancela as outras.
-     */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // ============================================================
-    // ENTRADA (Async — fire-and-forget)
+    // ENTRADA
     // ============================================================
-    /**
-     * Chamado quando o usuário entra numa equipe (criou, aceitou convite, foi adicionado).
-     * Cria ou atualiza o doc do histórico com status="ativo".
-     *
-     * ⚠️ NÃO limpa os trabalhos antigos (a regra é ACUMULAR).
-     */
     fun registrarEntradaAsync(emailUsuario: String, equipeId: String) {
         scope.launch {
             registrarEntrada(emailUsuario, equipeId)
         }
     }
 
-    // ============================================================
-    // SAÍDA (Async — fire-and-forget)
-    // ============================================================
-    /**
-     * Chamado quando o usuário sai/é removido, ou a equipe é excluída.
-     * Atualiza status="inativo" + copia trabalhos (acumula).
-     */
-    fun registrarSaidaAsync(emailUsuario: String, equipeId: String, motivoSaida: String) {
-        scope.launch {
-            registrarSaida(emailUsuario, equipeId, motivoSaida)
-        }
-    }
-
-    // ============================================================
-    // EXCLUSÃO EM MASSA (Async — fire-and-forget)
-    // ============================================================
-    /**
-     * Registra a exclusão de uma equipe pra TODOS os membros ativos.
-     * Deve ser chamado ANTES de deletar a equipe.
-     */
-    fun registrarExclusaoParaTodosAsync(equipeId: String) {
-        scope.launch {
-            registrarExclusaoParaTodos(equipeId)
-        }
-    }
-
-    // ============================================================
-    // ENTRADA (suspend — pra chamadas internas)
-    // ============================================================
     private suspend fun registrarEntrada(emailUsuario: String, equipeId: String) {
-        if (emailUsuario.isEmpty() || equipeId.isEmpty()) {
-            Log.w(TAG, "Email ou equipeId vazio, ignorando entrada")
-            return
-        }
-
+        if (emailUsuario.isEmpty() || equipeId.isEmpty()) return
         try {
-            Log.d(TAG, "registrarEntrada: $emailUsuario / $equipeId")
-
             val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-            if (!equipeDoc.exists()) {
-                Log.w(TAG, "Equipe não existe, ignorando")
-                return
-            }
+            if (!equipeDoc.exists()) return
 
             val nomeEquipe = equipeDoc.getString("nome") ?: "Equipe"
             val descricaoEquipe = equipeDoc.getString("descricao") ?: ""
@@ -140,30 +71,25 @@ object HistoricoEquipeHelper {
                 .set(historicoDoc, SetOptions.merge())
                 .await()
 
-            Log.d(TAG, "Doc de entrada gravado (status=ativo)")
-
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao registrar entrada: ${e.message}", e)
         }
     }
 
     // ============================================================
-    // SAÍDA (suspend — pra chamadas internas)
+    // SAÍDA
     // ============================================================
-    private suspend fun registrarSaida(emailUsuario: String, equipeId: String, motivoSaida: String) {
-        if (emailUsuario.isEmpty() || equipeId.isEmpty()) {
-            Log.w(TAG, "Email ou equipeId vazio, ignorando saída")
-            return
+    fun registrarSaidaAsync(emailUsuario: String, equipeId: String, motivoSaida: String) {
+        scope.launch {
+            registrarSaida(emailUsuario, equipeId, motivoSaida)
         }
+    }
 
+    private suspend fun registrarSaida(emailUsuario: String, equipeId: String, motivoSaida: String) {
+        if (emailUsuario.isEmpty() || equipeId.isEmpty()) return
         try {
-            Log.d(TAG, "registrarSaida: $emailUsuario / $equipeId / $motivoSaida")
-
             val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-            if (!equipeDoc.exists()) {
-                Log.w(TAG, "Equipe não existe mais, ignorando")
-                return
-            }
+            if (!equipeDoc.exists()) return
 
             val nomeEquipe = equipeDoc.getString("nome") ?: "Equipe"
             val descricaoEquipe = equipeDoc.getString("descricao") ?: ""
@@ -182,13 +108,8 @@ object HistoricoEquipeHelper {
             }
 
             val agora = Timestamp.now()
-            val entrouEmTimestamp = if (entrouEmMillis > 0) {
-                Timestamp(entrouEmMillis / 1000, 0)
-            } else {
-                agora
-            }
+            val entrouEmTimestamp = if (entrouEmMillis > 0) Timestamp(entrouEmMillis / 1000, 0) else agora
 
-            // ✅ Mantém os trabalhos antigos: NÃO apaga nada, só atualiza o doc pai
             val historicoDoc = hashMapOf<String, Any?>(
                 "equipeId" to equipeId,
                 "nomeEquipe" to nomeEquipe,
@@ -207,12 +128,7 @@ object HistoricoEquipeHelper {
                 .set(historicoDoc, SetOptions.merge())
                 .await()
 
-            Log.d(TAG, "Doc de saída gravado (status=inativo)")
-
-            // Copia trabalhos (não apaga os antigos — usa set por trabalhoId)
             copiarTrabalhos(emailUsuario, equipeId)
-
-            Log.d(TAG, "Histórico completo gravado")
 
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao registrar saída: ${e.message}", e)
@@ -220,39 +136,7 @@ object HistoricoEquipeHelper {
     }
 
     // ============================================================
-    // EXCLUSÃO EM MASSA (suspend — pra chamadas internas)
-    // ============================================================
-    private suspend fun registrarExclusaoParaTodos(equipeId: String) {
-        try {
-            val membrosSnap = db.collection("membros_equipe")
-                .whereEqualTo("equipeId", equipeId)
-                .get()
-                .await()
-
-            val emails = membrosSnap.documents.mapNotNull { it.getString("email") }
-
-            val equipeDoc = db.collection("equipes").document(equipeId).get().await()
-            val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
-
-            val todos = (emails + criadorEmail).distinct().filter { it.isNotEmpty() }
-
-            Log.d(TAG, "Gravando histórico de exclusão para ${todos.size} membros")
-
-            todos.forEach { email ->
-                registrarSaida(
-                    emailUsuario = email,
-                    equipeId = equipeId,
-                    motivoSaida = "equipe_excluida"
-                )
-            }
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Erro ao registrar exclusão pra todos: ${e.message}", e)
-        }
-    }
-
-    // ============================================================
-    // COPIAR TRABALHOS (interno)
+    // CÓPIA DOS TRABALHOS (Com regras de privacidade)
     // ============================================================
     private suspend fun copiarTrabalhos(emailUsuario: String, equipeId: String) {
         try {
@@ -261,23 +145,17 @@ object HistoricoEquipeHelper {
                 .get()
                 .await()
 
-            if (trabalhosSnap.isEmpty) {
-                Log.d(TAG, "Sem trabalhos na equipe")
-                return
-            }
+            if (trabalhosSnap.isEmpty) return
 
+            // Filtra os trabalhos do usuário
             val trabalhosDoUsuario = trabalhosSnap.documents.filter { doc ->
                 val responsavel = doc.getString("responsavelEmail") ?: ""
                 val criador = doc.getString("criadorEmail") ?: ""
-                responsavel == emailUsuario || criador == emailUsuario
+                val participante = doc.getString("participanteEmail") ?: ""
+                responsavel == emailUsuario || criador == emailUsuario || participante == emailUsuario
             }
 
-            if (trabalhosDoUsuario.isEmpty()) {
-                Log.d(TAG, "Usuário foi apenas membro, sem trabalhos")
-                return
-            }
-
-            Log.d(TAG, "Copiando ${trabalhosDoUsuario.size} trabalhos (de ${trabalhosSnap.size()} totais)")
+            if (trabalhosDoUsuario.isEmpty()) return
 
             val refHistorico = db.collection("historico_equipes")
                 .document(emailUsuario)
@@ -288,6 +166,7 @@ object HistoricoEquipeHelper {
             for (trabalhoDoc in trabalhosDoUsuario) {
                 val trabalhoId = trabalhoDoc.id
 
+                // Copia o doc do trabalho
                 val trabalhoData = hashMapOf<String, Any>(
                     "trabalhoId" to trabalhoId,
                     "titulo" to (trabalhoDoc.getString("titulo") ?: ""),
@@ -304,11 +183,12 @@ object HistoricoEquipeHelper {
 
                 refHistorico.document(trabalhoId).set(trabalhoData).await()
 
+                // ✅ Copia Comentários (todos)
                 copiarSubcolecao(emailUsuario, equipeId, trabalhoId, trabalhoDoc.reference, "comentarios")
+
+                // ✅ Copia Anexos (filtrando os privados)
                 copiarSubcolecao(emailUsuario, equipeId, trabalhoId, trabalhoDoc.reference, "anexos")
             }
-
-            Log.d(TAG, "Trabalhos copiados")
 
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao copiar trabalhos: ${e.message}", e)
@@ -334,23 +214,20 @@ object HistoricoEquipeHelper {
                 .document(trabalhoId)
                 .collection(subcolecao)
 
-            // ✅ NOVO: se for "anexos", filtra anexos privados de outros
+            // ✅ AQUI É A CORREÇÃO: Se for anexo, filtra os privados de terceiros
             val docsFiltrados = if (subcolecao == "anexos") {
                 snap.documents.filter { doc ->
-                    val privado = doc.getBoolean("privado") ?: false
+                    val isPrivado = doc.getBoolean("privado") ?: false
                     val enviadoPor = doc.getString("enviadoPor") ?: ""
 
-                    // Copia se: não é privado OU foi ele que enviou
-                    !privado || enviadoPor == emailUsuario
+                    // Regra: copia se NÃO for privado OU se quem enviou fui EU
+                    !isPrivado || enviadoPor == emailUsuario
                 }
             } else {
                 snap.documents
             }
 
-            if (docsFiltrados.isEmpty()) {
-                Log.d(TAG, "  $subcolecao: nenhum doc pra copiar (todos privados de terceiros)")
-                return
-            }
+            if (docsFiltrados.isEmpty()) return
 
             docsFiltrados.chunked(LIMITE_BATCH).forEach { chunk ->
                 val batch = db.batch()
@@ -361,8 +238,6 @@ object HistoricoEquipeHelper {
                 }
                 batch.commit().await()
             }
-
-            Log.d(TAG, "  $subcolecao copiados: ${docsFiltrados.size} (de ${snap.size()})")
 
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao copiar $subcolecao: ${e.message}")
@@ -379,7 +254,42 @@ object HistoricoEquipeHelper {
                 resultado[campo] = Timestamp(valor / 1000, 0)
             }
         }
-
         return resultado
+    }
+
+    // ============================================================
+    // EXCLUSÃO
+    // ============================================================
+    fun registrarExclusaoParaTodosAsync(equipeId: String) {
+        scope.launch {
+            registrarExclusaoParaTodos(equipeId)
+        }
+    }
+
+    private suspend fun registrarExclusaoParaTodos(equipeId: String) {
+        try {
+            val membrosSnap = db.collection("membros_equipe")
+                .whereEqualTo("equipeId", equipeId)
+                .get()
+                .await()
+
+            val emails = membrosSnap.documents.mapNotNull { it.getString("email") }
+
+            val equipeDoc = db.collection("equipes").document(equipeId).get().await()
+            val criadorEmail = equipeDoc.getString("criadorEmail") ?: ""
+
+            val todos = (emails + criadorEmail).distinct().filter { it.isNotEmpty() }
+
+            todos.forEach { email ->
+                registrarSaida(
+                    emailUsuario = email,
+                    equipeId = equipeId,
+                    motivoSaida = "equipe_excluida"
+                )
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Erro ao registrar exclusão pra todos: ${e.message}", e)
+        }
     }
 }

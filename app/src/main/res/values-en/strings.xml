@@ -711,6 +711,27 @@
     <string name="historico_trabalho_sem_comentarios">No comments on this task</string>
     <string name="historico_trabalho_sem_anexos">No attachments on this task</string>
 
+    <string name="convite_icone_desc">Invitation</string>
+    <string name="convite_titulo">Team Invitation</string>
+    <string name="convite_convidado_por">Invited by</string>
+    <string name="convite_convidado_por_placeholder">Invited by</string>
+    <string name="convite_label_equipe">TEAM</string>
+    <string name="convite_nome_equipe_placeholder">Team Name</string>
+    <string name="convite_label_descricao">DESCRIPTION</string>
+    <string name="convite_descricao_placeholder">Team description</string>
+    <string name="convite_btn_aceitar">ACCEPT INVITATION</string>
+    <string name="convite_btn_recusar">DECLINE</string>
+    <string name="convite_btn_depois">Later</string>
+
+    <string name="convite_item_btn_aceitar">Accept Invitation</string>
+    <string name="convite_item_btn_recusar">Decline</string>
+
+    <string name="buscar_equipes_item_nome_placeholder">Team Name</string>
+    <string name="buscar_equipes_item_descricao_placeholder">Description</string>
+    <string name="buscar_equipes_criado_por_placeholder">Created by…</string>
+    <string name="buscar_equipes_btn_pedir_entrar">REQUEST TO JOIN</string>
+    <string name="minhas_equipes_qtd_trabalhos_placeholder">0 tasks</string>
+
     <!-- ===== ENTREGAR TRABALHO ===== -->
     <string name="entregar_nao_membro">You are not a member of any team</string>
     <string name="entregar_equipe_fallback">Team</string>

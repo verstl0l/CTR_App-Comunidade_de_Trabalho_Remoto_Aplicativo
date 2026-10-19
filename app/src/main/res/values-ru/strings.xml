@@ -823,6 +823,27 @@
     <string name="historico_trabalho_sem_comentarios">Нет комментариев к этой задаче</string>
     <string name="historico_trabalho_sem_anexos">Нет вложений к этой задаче</string>
 
+    <string name="convite_icone_desc">Приглашение</string>
+    <string name="convite_titulo">Приглашение в команду</string>
+    <string name="convite_convidado_por">Приглашение от</string>
+    <string name="convite_convidado_por_placeholder">Приглашение от</string>
+    <string name="convite_label_equipe">КОМАНДА</string>
+    <string name="convite_nome_equipe_placeholder">Название команды</string>
+    <string name="convite_label_descricao">ОПИСАНИЕ</string>
+    <string name="convite_descricao_placeholder">Описание команды</string>
+    <string name="convite_btn_aceitar">ПРИНЯТЬ ПРИГЛАШЕНИЕ</string>
+    <string name="convite_btn_recusar">ОТКЛОНИТЬ</string>
+    <string name="convite_btn_depois">Позже</string>
+
+    <string name="convite_item_btn_aceitar">Принять приглашение</string>
+    <string name="convite_item_btn_recusar">Отклонить</string>
+
+    <string name="buscar_equipes_item_nome_placeholder">Название команды</string>
+    <string name="buscar_equipes_item_descricao_placeholder">Описание</string>
+    <string name="buscar_equipes_criado_por_placeholder">Создал…</string>
+    <string name="buscar_equipes_btn_pedir_entrar">ЗАПРОСИТЬ ВСТУПЛЕНИЕ</string>
+    <string name="minhas_equipes_qtd_trabalhos_placeholder">0 задач</string>
+
     <!-- ===== PRODUTOS / DASHBOARD EQUIPE ===== -->
     <string name="produtos_logo_fallback">КМ</string>
     <string name="produtos_equipe_fallback">Команда</string>

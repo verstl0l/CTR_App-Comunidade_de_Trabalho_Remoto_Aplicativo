@@ -40,7 +40,7 @@
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:layout_gravity="center"
-                    android:contentDescription="Convite"
+                    android:contentDescription="@string/convite_icone_desc"
                     android:src="@drawable/ic_notification_convite"
                     app:tint="@color/accent" />
 
@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:text="Convite de Equipe"
+                android:text="@string/convite_titulo"
                 android:textColor="@color/text_primary"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Convidado por"
+                android:text="@string/convite_convidado_por_placeholder"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
@@ -87,7 +87,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="EQUIPE"
+                        android:text="@string/convite_label_equipe"
                         android:textColor="@color/text_secondary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -97,7 +97,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="Nome da Equipe"
+                        android:text="@string/convite_nome_equipe_placeholder"
                         android:textColor="@color/text_primary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -112,7 +112,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="DESCRICAO"
+                        android:text="@string/convite_label_descricao"
                         android:textColor="@color/text_secondary"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -122,7 +122,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="Descricao da equipe"
+                        android:text="@string/convite_descricao_placeholder"
                         android:textColor="@color/text_tertiary"
                         android:textSize="14sp" />
 
@@ -137,7 +137,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"
                 android:backgroundTint="@color/accent"
-                android:text="ACEITAR CONVITE"
+                android:text="@string/convite_btn_aceitar"
                 android:textColor="@color/accent_dark"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -149,7 +149,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@color/bg_surface"
-                android:text="RECUSAR"
+                android:text="@string/convite_btn_recusar"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold"
@@ -163,7 +163,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Depois"
+                android:text="@string/convite_btn_depois"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 

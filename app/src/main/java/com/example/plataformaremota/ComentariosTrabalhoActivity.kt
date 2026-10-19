@@ -1,11 +1,13 @@
 package com.example.plataformaremota
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -67,6 +69,17 @@ class ComentariosTrabalhoActivity : BaseActivity() {
 
         val edtNovo = findViewById<EditText>(R.id.edtNovoComentario)
         val btnEnviar = findViewById<Button>(R.id.btnEnviarComentario)
+
+        //  Botão para ir aos Anexos
+        val btnIrParaAnexos = findViewById<ImageButton>(R.id.btnIrParaAnexos)
+        btnIrParaAnexos.setOnClickListener {
+            // Certifique-se de que as variáveis trabalhoId e tituloTrabalho existem nessa tela
+            val intent = Intent(this, AnexosTrabalhoActivity::class.java)
+            intent.putExtra("trabalhoId", trabalhoId)
+            intent.putExtra("tituloTrabalho", tituloTrabalho)
+            startActivity(intent)
+            finish()
+        }
 
         btnEnviar.setOnClickListener {
             val texto = edtNovo.text.toString().trim()

@@ -18,7 +18,7 @@
             android:id="@+id/txtNomeMinhaEquipe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nome da Equipe"
+            android:text="@string/buscar_equipes_item_nome_placeholder"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -30,7 +30,7 @@
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="Descrição"
+            android:text="@string/buscar_equipes_item_descricao_placeholder"
             android:textColor="#9E9E9E"
             android:textSize="14sp" />
 
@@ -45,7 +45,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Criador"
+                android:text="@string/minhas_equipes_papel_criador"
                 android:textColor="#F5E6D0"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -54,7 +54,7 @@
                 android:id="@+id/txtTrabalhosMinhaEquipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0 trabalhos"
+                android:text="@string/minhas_equipes_qtd_trabalhos_placeholder"
                 android:textColor="#9E9E9E"
                 android:textSize="12sp" />
 

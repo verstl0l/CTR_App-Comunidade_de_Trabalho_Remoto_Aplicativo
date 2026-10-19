@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -82,6 +83,16 @@ class AnexosTrabalhoActivity : BaseActivity() {
         txtTitulo.text = tituloTrabalho
 
         val btnAdicionar = findViewById<Button>(R.id.btnAdicionarAnexo)
+
+        //   Botão para ir aos Comentários
+        val btnIrParaComentarios = findViewById<ImageButton>(R.id.btnIrParaComentarios)
+        btnIrParaComentarios.setOnClickListener {
+            val intent = Intent(this, ComentariosTrabalhoActivity::class.java)
+            intent.putExtra("trabalhoId", trabalhoId)
+            intent.putExtra("tituloTrabalho", tituloTrabalho)
+            startActivity(intent)
+            finish()
+        }
 
         lifecycleScope.launch {
             try {
