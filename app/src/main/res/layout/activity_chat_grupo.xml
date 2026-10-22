@@ -6,7 +6,7 @@
     android:background="@color/bg_primary"
     android:fitsSystemWindows="true">
 
-    <!-- Header -->
+    <!-- Cabeçalho -->
     <LinearLayout
         android:id="@+id/headerChatGrupo"
         android:layout_width="match_parent"
@@ -23,6 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_voltar"
             android:text="←"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
@@ -40,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Grupo"
+                android:text="@string/grupo_padrao"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -65,6 +66,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_opcoes"
             android:text="⋮"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
@@ -75,12 +77,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_grupos"
             android:text="👥"
             android:textSize="20sp" />
 
     </LinearLayout>
 
-    <!-- Lista de mensagens — AGORA É RECYCLERVIEW -->
+    <!-- Lista de mensagens -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerMensagensGrupo"
         android:layout_width="match_parent"
@@ -117,7 +120,7 @@
                 android:id="@+id/txtRespondendoAGrupo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Respondendo a..."
+                android:text="@string/chat_respondendo_a_placeholder"
                 android:textColor="@color/accent"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -129,7 +132,7 @@
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Mensagem"
+                android:text="@string/chat_placeholder_mensagem"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
@@ -142,13 +145,14 @@
             android:layout_height="wrap_content"
             android:minWidth="0dp"
             android:padding="8dp"
+            android:contentDescription="@string/acessibilidade_cancelar_resposta"
             android:text="✕"
             android:textColor="@color/text_secondary"
             android:textSize="18sp" />
 
     </LinearLayout>
 
-    <!-- Input -->
+    <!-- Entrada de texto -->
     <LinearLayout
         android:id="@+id/containerInputGrupo"
         android:layout_width="match_parent"
@@ -165,6 +169,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_foto"
             android:text="📷"
             android:textSize="20sp" />
 
@@ -174,6 +179,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_video"
             android:text="🎥"
             android:textSize="20sp" />
 
@@ -183,6 +189,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_arquivo"
             android:text="📎"
             android:textSize="20sp" />
 
@@ -208,6 +215,7 @@
             android:layout_marginStart="4dp"
             android:backgroundTint="@color/accent"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_mensagem"
             android:text="➤"
             android:textColor="@color/accent_dark"
             android:textSize="18sp" />

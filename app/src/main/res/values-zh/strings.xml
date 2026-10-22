@@ -907,6 +907,47 @@
     <string name="buscar_equipes_btn_pedir_entrar">申请加入</string>
     <string name="minhas_equipes_qtd_trabalhos_placeholder">0 个任务</string>
 
+    <string name="aceitar_convite_invalido">邀请无效</string>
+    <string name="aceitar_convite_nao_encontrado">未找到邀请</string>
+    <string name="aceitar_convite_convidado_por">%1$s 邀请</string>
+    <string name="aceitar_convite_bem_vindo">欢迎加入 %1$s！</string>
+    <string name="aceitar_convite_recusado">邀请已拒绝</string>
+    <string name="aceitar_convite_notif_titulo">邀请已接受</string>
+    <string name="aceitar_convite_notif_msg">%1$s 接受加入 %2$s</string>
+    <string name="convidar_trabalho_usuario_selecionado">已选择：%1$s</string>
+
+    <string name="item_conversa_icone_grupo">👥</string>
+
+    <string name="chat_respondendo_a_placeholder">回复…</string>
+
+    <!-- ===== PARTICIPANTES ===== -->
+    <string name="participantes_filtrar_ativos">筛选进行中</string>
+    <string name="participantes_quem_esta_na_tarefa">还有谁在这个任务中</string>
+    <string name="participantes_tarefa_titulo_placeholder">任务标题</string>
+    <string name="participantes_prazo_placeholder">截止：1月1日</string>
+    <string name="participantes_botao_iniciar">开始</string>
+    <string name="participantes_botao_concluir">完成</string>
+    <string name="participantes_botao_reabrir">重新打开</string>
+    <string name="participantes_sem_tarefas">没有分配的任务</string>
+    <string name="participantes_sem_tarefas_subtitulo">当您被分配任务时，它会显示在这里</string>
+
+    <!-- ===== ACESSIBILIDADE ===== -->
+    <string name="acessibilidade_seletor_idioma">选择语言</string>
+    <string name="acessibilidade_voltar">返回</string>
+    <string name="acessibilidade_perfil">查看资料</string>
+    <string name="acessibilidade_grupos">查看小组</string>
+    <string name="acessibilidade_opcoes">更多选项</string>
+    <string name="acessibilidade_enviar_foto">发送照片</string>
+    <string name="acessibilidade_enviar_video">发送视频</string>
+    <string name="acessibilidade_enviar_arquivo">发送文件</string>
+    <string name="acessibilidade_enviar_mensagem">发送消息</string>
+    <string name="acessibilidade_cancelar_resposta">取消回复</string>
+    <string name="acessibilidade_ir_comentarios">前往评论</string>
+    <string name="acessibilidade_ir_anexos">前往附件</string>
+    <string name="acessibilidade_notificacao">通知</string>
+    <string name="acessibilidade_configuracoes">团队设置</string>
+    <string name="acessibilidade_camera_perfil">更改头像</string>
+
     <!-- ===== 对话项 ===== -->
     <string name="item_conversa_icone_usuario">👤</string>
     <string name="item_conversa_ultima_msg_placeholder">最后一条消息</string>

@@ -908,6 +908,47 @@
     <string name="buscar_equipes_btn_pedir_entrar">DEMANDER À REJOINDRE</string>
     <string name="minhas_equipes_qtd_trabalhos_placeholder">0 tâches</string>
 
+    <string name="aceitar_convite_invalido">Invitation invalide</string>
+    <string name="aceitar_convite_nao_encontrado">Invitation introuvable</string>
+    <string name="aceitar_convite_convidado_por">Invité par %1$s</string>
+    <string name="aceitar_convite_bem_vindo">Bienvenue dans %1$s !</string>
+    <string name="aceitar_convite_recusado">Invitation refusée</string>
+    <string name="aceitar_convite_notif_titulo">Invitation acceptée</string>
+    <string name="aceitar_convite_notif_msg">%1$s a accepté de rejoindre %2$s</string>
+    <string name="convidar_trabalho_usuario_selecionado">Sélectionné : %1$s</string>
+
+    <string name="item_conversa_icone_grupo">👥</string>
+
+    <string name="chat_respondendo_a_placeholder">En réponse à…</string>
+
+    <!-- ===== PARTICIPANTES ===== -->
+    <string name="participantes_filtrar_ativos">Filtrer les actifs</string>
+    <string name="participantes_quem_esta_na_tarefa">Qui d\'autre est sur la tâche</string>
+    <string name="participantes_tarefa_titulo_placeholder">Titre de la tâche</string>
+    <string name="participantes_prazo_placeholder">Échéance : 01 Jan</string>
+    <string name="participantes_botao_iniciar">DÉMARRER</string>
+    <string name="participantes_botao_concluir">TERMINER</string>
+    <string name="participantes_botao_reabrir">ROUVRIR</string>
+    <string name="participantes_sem_tarefas">Aucune tâche assignée</string>
+    <string name="participantes_sem_tarefas_subtitulo">Lorsque vous serez assigné à une tâche, elle apparaîtra ici</string>
+
+    <!-- ===== ACESSIBILIDADE ===== -->
+    <string name="acessibilidade_seletor_idioma">Sélectionner la langue</string>
+    <string name="acessibilidade_voltar">Retour</string>
+    <string name="acessibilidade_perfil">Voir le profil</string>
+    <string name="acessibilidade_grupos">Voir les groupes</string>
+    <string name="acessibilidade_opcoes">Plus d\'options</string>
+    <string name="acessibilidade_enviar_foto">Envoyer une photo</string>
+    <string name="acessibilidade_enviar_video">Envoyer une vidéo</string>
+    <string name="acessibilidade_enviar_arquivo">Envoyer un fichier</string>
+    <string name="acessibilidade_enviar_mensagem">Envoyer un message</string>
+    <string name="acessibilidade_cancelar_resposta">Annuler la réponse</string>
+    <string name="acessibilidade_ir_comentarios">Aller aux commentaires</string>
+    <string name="acessibilidade_ir_anexos">Aller aux pièces jointes</string>
+    <string name="acessibilidade_notificacao">Notification</string>
+    <string name="acessibilidade_configuracoes">Paramètres de l\'équipe</string>
+    <string name="acessibilidade_camera_perfil">Changer la photo de profil</string>
+
     <string name="chat_hint_digite">Écrivez…</string>
     <string name="chat_placeholder_conversa">Conversation</string>
     <string name="chat_placeholder_mensagem">Message</string>

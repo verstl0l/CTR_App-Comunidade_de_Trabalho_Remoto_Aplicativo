@@ -6,9 +6,9 @@
     android:background="@color/bg_primary"
     android:fitsSystemWindows="true">
 
-    <!-- Header -->
+    <!-- Cabeçalho -->
     <LinearLayout
-        android:id="@+id/headerChatEquipe"
+        android:id="@+id/headerChat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/bg_surface_light"
@@ -18,11 +18,12 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/btnVoltarChatEquipe"
+            android:id="@+id/btnVoltarChat"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_voltar"
             android:text="←"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
@@ -35,22 +36,18 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txtNomeEquipeChat"
+                android:id="@+id/txtNomeOutro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Equipe"
+                android:text="@string/chat_placeholder_usuario"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/txtDigitandoEquipe"
+                android:id="@+id/txtDigitando"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
                 android:text=""
                 android:textColor="@color/accent"
                 android:textSize="12sp"
@@ -60,36 +57,37 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btnVerGrupos"
+            android:id="@+id/btnVerPerfil"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
-            android:text="👥"
+            android:contentDescription="@string/acessibilidade_perfil"
+            android:text="👤"
             android:textSize="20sp" />
 
     </LinearLayout>
 
-    <!-- Lista de mensagens — AGORA É RECYCLERVIEW -->
+    <!-- Lista de mensagens -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerMensagensEquipe"
+        android:id="@+id/recyclerMensagens"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/containerRespondendoEquipe"
-        app:layout_constraintTop_toBottomOf="@+id/headerChatEquipe" />
+        app:layout_constraintBottom_toTopOf="@+id/containerRespondendo"
+        app:layout_constraintTop_toBottomOf="@+id/headerChat" />
 
     <!-- Barra "Respondendo a..." -->
     <LinearLayout
-        android:id="@+id/containerRespondendoEquipe"
+        android:id="@+id/containerRespondendo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/bg_surface_hover"
         android:orientation="horizontal"
         android:padding="8dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/containerInputEquipe">
+        app:layout_constraintBottom_toTopOf="@+id/containerInput">
 
         <View
             android:layout_width="4dp"
@@ -104,43 +102,44 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txtRespondendoAEquipe"
+                android:id="@+id/txtRespondendoA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Respondendo a..."
+                android:text="@string/chat_respondendo_a_placeholder"
                 android:textColor="@color/accent"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/txtTextoRespondendoEquipe"
+                android:id="@+id/txtTextoRespondendo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Mensagem"
+                android:text="@string/chat_placeholder_mensagem"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
         </LinearLayout>
 
         <Button
-            android:id="@+id/btnCancelarRespostaEquipe"
+            android:id="@+id/btnCancelarResposta"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
             android:padding="8dp"
+            android:contentDescription="@string/acessibilidade_cancelar_resposta"
             android:text="✕"
             android:textColor="@color/text_secondary"
             android:textSize="18sp" />
 
     </LinearLayout>
 
-    <!-- Input -->
+    <!-- Entrada de texto -->
     <LinearLayout
-        android:id="@+id/containerInputEquipe"
+        android:id="@+id/containerInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/bg_surface_light"
@@ -150,34 +149,37 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
-            android:id="@+id/btnEnviarFotoEquipe"
+            android:id="@+id/btnEnviarFoto"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_foto"
             android:text="📷"
             android:textSize="20sp" />
 
         <Button
-            android:id="@+id/btnEnviarVideoEquipe"
+            android:id="@+id/btnEnviarVideo"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_video"
             android:text="🎥"
             android:textSize="20sp" />
 
         <Button
-            android:id="@+id/btnEnviarArquivoEquipe"
+            android:id="@+id/btnEnviarArquivo"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_arquivo"
             android:text="📎"
             android:textSize="20sp" />
 
         <EditText
-            android:id="@+id/edtMensagemEquipe"
+            android:id="@+id/edtMensagem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -192,12 +194,13 @@
             android:scrollHorizontally="false" />
 
         <Button
-            android:id="@+id/btnEnviarMensagemEquipe"
+            android:id="@+id/btnEnviar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:backgroundTint="@color/accent"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_mensagem"
             android:text="➤"
             android:textColor="@color/accent_dark"
             android:textSize="18sp" />

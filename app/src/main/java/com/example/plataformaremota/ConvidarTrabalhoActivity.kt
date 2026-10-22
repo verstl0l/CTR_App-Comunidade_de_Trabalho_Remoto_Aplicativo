@@ -42,14 +42,11 @@ class ConvidarTrabalhoActivity : BaseActivity() {
 
         btnVoltar.setOnClickListener { finish() }
 
-        //  Clicar no campo abre lista de usuários disponíveis
+        // ✅ CORREÇÃO: Agora abre a lista de usuários disponíveis (que exclui quem já foi convidado)
         edtEmail.isFocusable = false
         edtEmail.isClickable = true
         edtEmail.setOnClickListener {
-            SeletorUsuarioHelper.abrir(this, emailRemetente) { email, nome ->
-                edtEmail.setText(email)
-                Toast.makeText(this, "Selecionado: $nome", Toast.LENGTH_SHORT).show()
-            }
+            mostrarUsuariosDisponiveis()
         }
 
         btnEnviar.setOnClickListener {
@@ -87,12 +84,7 @@ class ConvidarTrabalhoActivity : BaseActivity() {
 
                     db.collection("convites_trabalho").add(convite).await()
 
-                    Toast.makeText(
-                        this@ConvidarTrabalhoActivity,
-                        getString(R.string.convidar_trabalho_enviado, emailConvidado),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                    Toast.makeText(this@ConvidarTrabalhoActivity, getString(R.string.convidar_trabalho_enviado, emailConvidado), Toast.LENGTH_SHORT).show()
                     finish()
 
                 } catch (e: Exception) {
@@ -107,9 +99,6 @@ class ConvidarTrabalhoActivity : BaseActivity() {
         configurarBottomNavigation(null)
     }
 
-    // ============================================================
-    // ✅ MOSTRA LISTA DE USUÁRIOS DISPONÍVEIS
-    // ============================================================
     private fun mostrarUsuariosDisponiveis() {
         lifecycleScope.launch {
             try {
@@ -137,11 +126,7 @@ class ConvidarTrabalhoActivity : BaseActivity() {
                     .sortedBy { it.second.lowercase() }
 
                 if (disponiveis.isEmpty()) {
-                    Toast.makeText(
-                        this@ConvidarTrabalhoActivity,
-                        getString(R.string.convidar_trabalho_sem_disponiveis),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@ConvidarTrabalhoActivity, getString(R.string.convidar_trabalho_sem_disponiveis), Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
@@ -155,7 +140,7 @@ class ConvidarTrabalhoActivity : BaseActivity() {
                         edtEmail.setText(emailEscolhido)
                         Toast.makeText(
                             this@ConvidarTrabalhoActivity,
-                            getString(R.string.gerenciar_selecionado, nomeEscolhido),
+                            getString(R.string.convidar_trabalho_usuario_selecionado, nomeEscolhido),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -164,18 +149,12 @@ class ConvidarTrabalhoActivity : BaseActivity() {
 
             } catch (e: Exception) {
                 Log.e("CONVITE_TRABALHO", "Erro lista: ${e.message}")
-
                 val mensagem = if (e.message?.contains("PERMISSION_DENIED") == true) {
                     getString(R.string.convidar_trabalho_erro_permissao)
                 } else {
                     getString(R.string.gerenciar_erro_usuarios, e.message ?: "")
                 }
-
-                Toast.makeText(
-                    this@ConvidarTrabalhoActivity,
-                    mensagem,
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@ConvidarTrabalhoActivity, mensagem, Toast.LENGTH_LONG).show()
             }
         }
     }

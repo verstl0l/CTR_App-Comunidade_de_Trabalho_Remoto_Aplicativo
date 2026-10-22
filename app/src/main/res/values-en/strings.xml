@@ -723,6 +723,47 @@
     <string name="convite_btn_recusar">DECLINE</string>
     <string name="convite_btn_depois">Later</string>
 
+    <string name="aceitar_convite_invalido">Invalid invitation</string>
+    <string name="aceitar_convite_nao_encontrado">Invitation not found</string>
+    <string name="aceitar_convite_convidado_por">Invited by %1$s</string>
+    <string name="aceitar_convite_bem_vindo">Welcome to %1$s!</string>
+    <string name="aceitar_convite_recusado">Invitation declined</string>
+    <string name="aceitar_convite_notif_titulo">Invitation accepted</string>
+    <string name="aceitar_convite_notif_msg">%1$s accepted the invitation to %2$s</string>
+    <string name="convidar_trabalho_usuario_selecionado">Selected: %1$s</string>
+
+    <string name="item_conversa_icone_grupo">👥</string>
+
+    <string name="chat_respondendo_a_placeholder">Replying to…</string>
+
+    <!-- ===== PARTICIPANTES ===== -->
+    <string name="participantes_filtrar_ativos">Filter active</string>
+    <string name="participantes_quem_esta_na_tarefa">Who else is on the task</string>
+    <string name="participantes_tarefa_titulo_placeholder">Task title</string>
+    <string name="participantes_prazo_placeholder">Due: Jan 01</string>
+    <string name="participantes_botao_iniciar">START</string>
+    <string name="participantes_botao_concluir">COMPLETE</string>
+    <string name="participantes_botao_reabrir">REOPEN</string>
+    <string name="participantes_sem_tarefas">No tasks assigned</string>
+    <string name="participantes_sem_tarefas_subtitulo">When you are assigned a task, it appears here</string>
+
+    <!-- ===== ACESSIBILIDADE ===== -->
+    <string name="acessibilidade_seletor_idioma">Select language</string>
+    <string name="acessibilidade_voltar">Back</string>
+    <string name="acessibilidade_perfil">View profile</string>
+    <string name="acessibilidade_grupos">View groups</string>
+    <string name="acessibilidade_opcoes">More options</string>
+    <string name="acessibilidade_enviar_foto">Send photo</string>
+    <string name="acessibilidade_enviar_video">Send video</string>
+    <string name="acessibilidade_enviar_arquivo">Send file</string>
+    <string name="acessibilidade_enviar_mensagem">Send message</string>
+    <string name="acessibilidade_cancelar_resposta">Cancel reply</string>
+    <string name="acessibilidade_ir_comentarios">Go to comments</string>
+    <string name="acessibilidade_ir_anexos">Go to attachments</string>
+    <string name="acessibilidade_notificacao">Notification</string>
+    <string name="acessibilidade_configuracoes">Team settings</string>
+    <string name="acessibilidade_camera_perfil">Change profile picture</string>
+
     <string name="convite_item_btn_aceitar">Accept Invitation</string>
     <string name="convite_item_btn_recusar">Decline</string>
 

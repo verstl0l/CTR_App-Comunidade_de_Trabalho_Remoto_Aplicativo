@@ -11,16 +11,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-/**
- * Tela dedicada para aceitar ou recusar um convite de equipe.
- *
- * Recebe via Intent:
- *   - conviteId: ID do documento em convites_equipe
- *   - equipeId: ID da equipe
- *   - nomeEquipe: nome da equipe (opcional, para exibir rapido)
- *   - descricaoEquipe: descricao (opcional)
- *   - nomeRemetente: quem convidou (opcional)
- */
 class AceitarConviteActivity : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -41,19 +31,25 @@ class AceitarConviteActivity : BaseActivity() {
         db = FirebaseFirestore.getInstance()
         emailUsuario = auth.currentUser?.email ?: ""
 
-        conviteId = intent.getStringExtra("conviteId") ?: ""
-        equipeId = intent.getStringExtra("equipeId") ?: ""
-        nomeEquipe = intent.getStringExtra("nomeEquipe") ?: "Equipe"
-        descricaoEquipe = intent.getStringExtra("descricaoEquipe") ?: "Sem descricao"
-        nomeRemetente = intent.getStringExtra("nomeRemetente") ?: "Usuario"
-
-        if (conviteId.isEmpty() || equipeId.isEmpty()) {
-            Toast.makeText(this, "Convite invalido", Toast.LENGTH_SHORT).show()
+        // ✅ CORREÇÃO 1: valida sessão antes de qualquer coisa
+        if (emailUsuario.isEmpty()) {
+            Toast.makeText(this, getString(R.string.chat_sessao_expirada), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        // Bind das views
+        conviteId = intent.getStringExtra("conviteId") ?: ""
+        equipeId = intent.getStringExtra("equipeId") ?: ""
+        nomeEquipe = intent.getStringExtra("nomeEquipe") ?: getString(R.string.geral_equipe)
+        descricaoEquipe = intent.getStringExtra("descricaoEquipe") ?: getString(R.string.geral_sem_descricao)
+        nomeRemetente = intent.getStringExtra("nomeRemetente") ?: getString(R.string.geral_usuario)
+
+        if (conviteId.isEmpty() || equipeId.isEmpty()) {
+            Toast.makeText(this, getString(R.string.aceitar_convite_invalido), Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
         val btnVoltar = findViewById<Button>(R.id.btnVoltarAceitarConvite)
         val txtQuemConvidou = findViewById<TextView>(R.id.txtQuemConvidou)
         val txtNomeEquipe = findViewById<TextView>(R.id.txtNomeEquipeConvite)
@@ -62,61 +58,61 @@ class AceitarConviteActivity : BaseActivity() {
         val btnRecusar = findViewById<Button>(R.id.btnRecusarConvite)
         val btnDepois = findViewById<Button>(R.id.btnDepoisConvite)
 
-        // Preenche dados iniciais
-        txtQuemConvidou.text = "Convidado por $nomeRemetente"
+        txtQuemConvidou.text = getString(R.string.aceitar_convite_convidado_por, nomeRemetente)
         txtNomeEquipe.text = nomeEquipe
         txtDescricao.text = descricaoEquipe
 
-        // Recarrega os dados direto do Firestore (mais confiavel)
         lifecycleScope.launch {
             try {
                 val doc = db.collection("convites_equipe").document(conviteId).get().await()
                 if (!doc.exists()) {
                     Toast.makeText(
                         this@AceitarConviteActivity,
-                        "Convite nao encontrado",
+                        getString(R.string.aceitar_convite_nao_encontrado),
                         Toast.LENGTH_SHORT
                     ).show()
                     finish()
                     return@launch
                 }
 
-                // Atualiza com os dados reais
                 nomeEquipe = doc.getString("nomeEquipe") ?: nomeEquipe
                 descricaoEquipe = doc.getString("descricaoEquipe") ?: descricaoEquipe
                 nomeRemetente = doc.getString("nomeRemetente") ?: nomeRemetente
                 equipeId = doc.getString("equipeId") ?: equipeId
 
-                txtQuemConvidou.text = "Convidado por $nomeRemetente"
+                // Só sobrescreve o nome se vier preenchido (evita "Convidado por " vazio)
+                if (nomeRemetente.isNotBlank()) {
+                    txtQuemConvidou.text =
+                        getString(R.string.aceitar_convite_convidado_por, nomeRemetente)
+                }
                 txtNomeEquipe.text = nomeEquipe
                 txtDescricao.text = descricaoEquipe
             } catch (e: Exception) {
-                Log.e(TAG, "Erro ao carregar convite: ${e.message}")
+                Log.e(TAG, "Erro ao carregar convite", e)
             }
         }
 
-        // Listeners
         btnVoltar.setOnClickListener { finish() }
         btnDepois.setOnClickListener { finish() }
         btnAceitar.setOnClickListener { aceitarConvite() }
         btnRecusar.setOnClickListener { recusarConvite() }
     }
 
-    // ============================================================
-    // ACEITAR
-    // ============================================================
     private fun aceitarConvite() {
+        // ✅ CORREÇÃO 3: valida equipeId antes de aceitar (evita equipe fantasma)
+        if (equipeId.isBlank()) {
+            Toast.makeText(this, getString(R.string.aceitar_convite_invalido), Toast.LENGTH_SHORT).show()
+            return
+        }
+
         lifecycleScope.launch {
             try {
-                // 1. Atualiza status do convite
                 db.collection("convites_equipe").document(conviteId)
                     .update("status", "aceito").await()
 
-                // 2. Busca nome do usuario para o registro de membro
                 val userDoc = db.collection("usuarios").document(emailUsuario).get().await()
-                val nomeUsuario = userDoc.getString("nome") ?: "Usuario"
+                val nomeUsuario = userDoc.getString("nome") ?: getString(R.string.geral_usuario)
 
-                // 3. Verifica se ja e membro (evita duplicata)
                 val jaMembro = db.collection("membros_equipe")
                     .whereEqualTo("equipeId", equipeId)
                     .whereEqualTo("email", emailUsuario)
@@ -132,11 +128,9 @@ class AceitarConviteActivity : BaseActivity() {
                         "funcao" to "membro",
                         "entrouEm" to System.currentTimeMillis()
                     )
-                    // ID determinístico
                     val membroId = "${emailUsuario}_${equipeId}"
                     db.collection("membros_equipe").document(membroId).set(membro).await()
 
-                    // ✅ NOVO: registra entrada no histórico (só se criou o membro agora)
                     HistoricoEquipeHelper.registrarEntradaAsync(
                         emailUsuario = emailUsuario,
                         equipeId = equipeId
@@ -145,13 +139,11 @@ class AceitarConviteActivity : BaseActivity() {
 
                 Toast.makeText(
                     this@AceitarConviteActivity,
-                    "Bem-vindo a $nomeEquipe!",
+                    getString(R.string.aceitar_convite_bem_vindo, nomeEquipe),
                     Toast.LENGTH_SHORT
                 ).show()
 
-                // 4. Notifica o dono que o convite foi aceito
                 notificarDonoConviteAceito()
-
                 finish()
 
             } catch (e: Exception) {
@@ -164,23 +156,17 @@ class AceitarConviteActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // RECUSAR
-    // ============================================================
     private fun recusarConvite() {
         lifecycleScope.launch {
             try {
                 db.collection("convites_equipe").document(conviteId)
                     .update("status", "recusado").await()
-
                 Toast.makeText(
                     this@AceitarConviteActivity,
-                    "Convite recusado",
+                    getString(R.string.aceitar_convite_recusado),
                     Toast.LENGTH_SHORT
                 ).show()
-
                 finish()
-
             } catch (e: Exception) {
                 Toast.makeText(
                     this@AceitarConviteActivity,
@@ -191,32 +177,28 @@ class AceitarConviteActivity : BaseActivity() {
         }
     }
 
-    // ============================================================
-    // NOTIFICAR O DONO
-    // ============================================================
     private fun notificarDonoConviteAceito() {
         lifecycleScope.launch {
             try {
                 val conviteDoc = db.collection("convites_equipe").document(conviteId).get().await()
                 val emailRemetente = conviteDoc.getString("emailRemetente") ?: ""
-
                 if (emailRemetente.isEmpty()) return@launch
 
                 val userDoc = db.collection("usuarios").document(emailUsuario).get().await()
-                val nomeUsuario = userDoc.getString("nome") ?: "Usuario"
+                val nomeUsuario = userDoc.getString("nome") ?: getString(R.string.geral_usuario)
 
                 NotificacaoHelper.criar(
                     destinatario = emailRemetente,
                     tipo = "convite_aceito",
-                    titulo = "Convite aceito",
-                    mensagem = "$nomeUsuario aceitou entrar em $nomeEquipe",
+                    titulo = getString(R.string.aceitar_convite_notif_titulo),
+                    mensagem = getString(R.string.aceitar_convite_notif_msg, nomeUsuario, nomeEquipe),
                     referenciaId = equipeId,
                     referenciaTipo = "equipe",
                     remetente = emailUsuario,
                     nomeRemetente = nomeUsuario
                 )
             } catch (e: Exception) {
-                Log.e(TAG, "Erro ao notificar: ${e.message}")
+                Log.e(TAG, "Erro ao notificar", e)
             }
         }
     }

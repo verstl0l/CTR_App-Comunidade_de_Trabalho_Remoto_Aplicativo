@@ -20,7 +20,7 @@
             android:padding="20dp"
             android:paddingBottom="20dp">
 
-            <!-- Header -->
+            <!-- Cabeçalho -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -80,7 +80,7 @@
                     android:src="@android:drawable/ic_menu_manage"
                     android:clickable="true"
                     android:focusable="true"
-                    android:contentDescription="@string/produtos_config_desc"
+                    android:contentDescription="@string/acessibilidade_configuracoes"
                     app:tint="#9E9E9E" />
 
             </LinearLayout>

@@ -6,7 +6,7 @@
     android:background="@color/bg_primary"
     android:fitsSystemWindows="true">
 
-    <!-- Header -->
+    <!-- Cabeçalho -->
     <LinearLayout
         android:id="@+id/headerChat"
         android:layout_width="match_parent"
@@ -23,6 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_voltar"
             android:text="←"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
@@ -38,7 +39,7 @@
                 android:id="@+id/txtNomeOutro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Usuário"
+                android:text="@string/chat_placeholder_usuario"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -61,12 +62,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_perfil"
             android:text="👤"
             android:textSize="20sp" />
 
     </LinearLayout>
 
-    <!-- Lista de mensagens — AGORA É RECYCLERVIEW -->
+    <!-- Lista de mensagens -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerMensagens"
         android:layout_width="match_parent"
@@ -103,7 +105,7 @@
                 android:id="@+id/txtRespondendoA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Respondendo a..."
+                android:text="@string/chat_respondendo_a_placeholder"
                 android:textColor="@color/accent"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -115,7 +117,7 @@
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Mensagem"
+                android:text="@string/chat_placeholder_mensagem"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
@@ -128,13 +130,14 @@
             android:layout_height="wrap_content"
             android:minWidth="0dp"
             android:padding="8dp"
+            android:contentDescription="@string/acessibilidade_cancelar_resposta"
             android:text="✕"
             android:textColor="@color/text_secondary"
             android:textSize="18sp" />
 
     </LinearLayout>
 
-    <!-- Input -->
+    <!-- Entrada de texto -->
     <LinearLayout
         android:id="@+id/containerInput"
         android:layout_width="match_parent"
@@ -151,6 +154,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_foto"
             android:text="📷"
             android:textSize="20sp" />
 
@@ -160,6 +164,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_video"
             android:text="🎥"
             android:textSize="20sp" />
 
@@ -169,6 +174,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_arquivo"
             android:text="📎"
             android:textSize="20sp" />
 
@@ -194,6 +200,7 @@
             android:layout_marginStart="4dp"
             android:backgroundTint="@color/accent"
             android:minWidth="0dp"
+            android:contentDescription="@string/acessibilidade_enviar_mensagem"
             android:text="➤"
             android:textColor="@color/accent_dark"
             android:textSize="18sp" />

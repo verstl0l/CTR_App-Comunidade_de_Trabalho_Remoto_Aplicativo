@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Nome"
+            android:text="@string/chat_placeholder_usuario"
             android:textColor="@color/text_primary"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -54,7 +54,7 @@
             android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Nenhuma mensagem"
+            android:text="@string/chat_hub_sem_mensagem"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 

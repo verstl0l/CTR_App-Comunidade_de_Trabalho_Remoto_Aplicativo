@@ -844,6 +844,47 @@
     <string name="buscar_equipes_btn_pedir_entrar">ЗАПРОСИТЬ ВСТУПЛЕНИЕ</string>
     <string name="minhas_equipes_qtd_trabalhos_placeholder">0 задач</string>
 
+    <string name="aceitar_convite_invalido">Неверное приглашение</string>
+    <string name="aceitar_convite_nao_encontrado">Приглашение не найдено</string>
+    <string name="aceitar_convite_convidado_por">Приглашение от %1$s</string>
+    <string name="aceitar_convite_bem_vindo">Добро пожаловать в %1$s!</string>
+    <string name="aceitar_convite_recusado">Приглашение отклонено</string>
+    <string name="aceitar_convite_notif_titulo">Приглашение принято</string>
+    <string name="aceitar_convite_notif_msg">%1$s принял приглашение в %2$s</string>
+    <string name="convidar_trabalho_usuario_selecionado">Выбрано: %1$s</string>
+
+    <string name="item_conversa_icone_grupo">👥</string>
+
+    <string name="chat_respondendo_a_placeholder">Ответ на…</string>
+
+    <!-- ===== PARTICIPANTES ===== -->
+    <string name="participantes_filtrar_ativos">Фильтр активных</string>
+    <string name="participantes_quem_esta_na_tarefa">Кто ещё на задаче</string>
+    <string name="participantes_tarefa_titulo_placeholder">Название задачи</string>
+    <string name="participantes_prazo_placeholder">Срок: 01 янв</string>
+    <string name="participantes_botao_iniciar">НАЧАТЬ</string>
+    <string name="participantes_botao_concluir">ЗАВЕРШИТЬ</string>
+    <string name="participantes_botao_reabrir">ПЕРЕОТКРЫТЬ</string>
+    <string name="participantes_sem_tarefas">Задачи не назначены</string>
+    <string name="participantes_sem_tarefas_subtitulo">Когда вам назначат задачу, она появится здесь</string>
+
+    <!-- ===== ACESSIBILIDADE ===== -->
+    <string name="acessibilidade_seletor_idioma">Выбрать язык</string>
+    <string name="acessibilidade_voltar">Назад</string>
+    <string name="acessibilidade_perfil">Посмотреть профиль</string>
+    <string name="acessibilidade_grupos">Посмотреть группы</string>
+    <string name="acessibilidade_opcoes">Дополнительно</string>
+    <string name="acessibilidade_enviar_foto">Отправить фото</string>
+    <string name="acessibilidade_enviar_video">Отправить видео</string>
+    <string name="acessibilidade_enviar_arquivo">Отправить файл</string>
+    <string name="acessibilidade_enviar_mensagem">Отправить сообщение</string>
+    <string name="acessibilidade_cancelar_resposta">Отменить ответ</string>
+    <string name="acessibilidade_ir_comentarios">Перейти к комментариям</string>
+    <string name="acessibilidade_ir_anexos">Перейти к вложениям</string>
+    <string name="acessibilidade_notificacao">Уведомление</string>
+    <string name="acessibilidade_configuracoes">Настройки команды</string>
+    <string name="acessibilidade_camera_perfil">Изменить фото профиля</string>
+
     <!-- ===== PRODUTOS / DASHBOARD EQUIPE ===== -->
     <string name="produtos_logo_fallback">КМ</string>
     <string name="produtos_equipe_fallback">Команда</string>

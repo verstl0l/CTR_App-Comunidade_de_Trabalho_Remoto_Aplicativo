@@ -885,6 +885,48 @@
     <string name="buscar_equipes_btn_pedir_entrar">PEDIR PARA ENTRAR</string>
     <string name="minhas_equipes_qtd_trabalhos_placeholder">0 trabalhos</string>
 
+    <!-- ===== CONVITE / ACEITAR ===== -->
+    <string name="aceitar_convite_invalido">Convite inválido</string>
+    <string name="aceitar_convite_nao_encontrado">Convite não encontrado</string>
+    <string name="aceitar_convite_convidado_por">Convidado por %1$s</string>
+    <string name="aceitar_convite_bem_vindo">Bem-vindo à %1$s!</string>
+    <string name="aceitar_convite_recusado">Convite recusado</string>
+    <string name="aceitar_convite_notif_titulo">Convite aceito</string>
+    <string name="aceitar_convite_notif_msg">%1$s aceitou entrar em %2$s</string>
+    <string name="convidar_trabalho_usuario_selecionado">Selecionado: %1$s</string>
+
+    <string name="item_conversa_icone_grupo">👥</string>
+
+    <string name="chat_respondendo_a_placeholder">Respondendo a…</string>
+
+    <!-- ===== PARTICIPANTES ===== -->
+    <string name="participantes_filtrar_ativos">Filtrar ativos</string>
+    <string name="participantes_quem_esta_na_tarefa">Quem mais está na tarefa</string>
+    <string name="participantes_tarefa_titulo_placeholder">Título da tarefa</string>
+    <string name="participantes_prazo_placeholder">Entrega: 01 Jan</string>
+    <string name="participantes_botao_iniciar">INICIAR</string>
+    <string name="participantes_botao_concluir">CONCLUIR</string>
+    <string name="participantes_botao_reabrir">REABRIR</string>
+    <string name="participantes_sem_tarefas">Nenhuma tarefa atribuída</string>
+    <string name="participantes_sem_tarefas_subtitulo">Quando você for atribuído a uma tarefa, ela aparece aqui</string>
+
+    <!-- ===== ACESSIBILIDADE ===== -->
+    <string name="acessibilidade_seletor_idioma">Selecionar idioma</string>
+    <string name="acessibilidade_voltar">Voltar</string>
+    <string name="acessibilidade_perfil">Ver perfil</string>
+    <string name="acessibilidade_grupos">Ver grupos</string>
+    <string name="acessibilidade_opcoes">Mais opções</string>
+    <string name="acessibilidade_enviar_foto">Enviar foto</string>
+    <string name="acessibilidade_enviar_video">Enviar vídeo</string>
+    <string name="acessibilidade_enviar_arquivo">Enviar arquivo</string>
+    <string name="acessibilidade_enviar_mensagem">Enviar mensagem</string>
+    <string name="acessibilidade_cancelar_resposta">Cancelar resposta</string>
+    <string name="acessibilidade_ir_comentarios">Ir para comentários</string>
+    <string name="acessibilidade_ir_anexos">Ir para anexos</string>
+    <string name="acessibilidade_notificacao">Notificação</string>
+    <string name="acessibilidade_configuracoes">Configurações da equipe</string>
+    <string name="acessibilidade_camera_perfil">Alterar foto de perfil</string>
+
     <!-- ===== CHAT HUB ===== -->
     <string name="chat_hub_titulo">Chat da Equipe</string>
     <string name="chat_hub_secao_geral">GERAL</string>

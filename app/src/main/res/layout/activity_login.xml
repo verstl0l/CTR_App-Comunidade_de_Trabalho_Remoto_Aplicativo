@@ -8,13 +8,14 @@
     android:padding="24dp"
     tools:context=".LoginActivity">
 
-    <!-- ✅ Seletor de idioma no canto superior direito -->
+    <!-- Seletor de idioma no canto superior direito -->
     <Button
         android:id="@+id/btnSeletorIdioma"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="0dp"
+        android:contentDescription="@string/acessibilidade_seletor_idioma"
         android:text="🌐"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"

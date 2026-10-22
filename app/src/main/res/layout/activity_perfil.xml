@@ -81,6 +81,7 @@
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:layout_gravity="bottom|end"
+                    android:contentDescription="@string/acessibilidade_camera_perfil"
                     app:cardBackgroundColor="@color/accent"
                     app:cardCornerRadius="18dp"
                     app:cardElevation="4dp">
@@ -277,7 +278,6 @@
                 app:strokeColor="@color/accent"
                 app:strokeWidth="1dp" />
 
-            <!-- Botão Configurações (substitui o antigo btnSair) -->
             <Button
                 android:id="@+id/btnConfiguracoesPerfil"
                 android:layout_width="match_parent"
